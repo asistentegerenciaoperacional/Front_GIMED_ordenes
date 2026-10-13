@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-07T17:12:54.720Z",
+  "resetFile": "data/database.json",
+  "source": "shared/seed.ts",
+  "collections": 28,
+  "productLines": 7,
+  "productLots": 8,
+  "lotsWithoutNumber": 4,
+  "everyProductHasLot": true,
+  "productRowsHaveNoBatchEstimate": true,
+  "seedValidated": true,
+  "savedFileValidated": true,
+  "previousSha256": "0587db3bc59f2bfe08909dfbb33c9fdf3f84273545671264555709178327e17e",
+  "savedSha256": "bf642321c0834bde950e47db44c2e05bfe3c4ac1f5df5f1ab7d15d51bc80ba11"
+}

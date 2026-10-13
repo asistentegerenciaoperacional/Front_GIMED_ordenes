@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-09T16:18:07.297546+00:00",
+  "passed": true,
+  "unitTests": 104,
+  "generalBrowserChecks": 537,
+  "filterBrowserChecks": 52,
+  "portableChecks": 17,
+  "referenceComparisons": 34,
+  "javascriptErrors": [],
+  "persistenceCollections": 28,
+  "userDataReset": false,
+  "userDataHashBefore": "e48b8e9bb7e118cdd4531fa748299907d61907de54c8186c218361608532eba7",
+  "userDataHashAfter": "e48b8e9bb7e118cdd4531fa748299907d61907de54c8186c218361608532eba7",
+  "benchmarkSourcesMatch": true,
+  "builtAssetsMatchArchive": [
+    "/app/dist/favicon.svg",
+    "/app/dist/index.html",
+    "/app/dist/assets/index-1OIH-r07.js",
+    "/app/dist/assets/index-D--RGzQo.css"
+  ],
+  "archiveSha256": "4fd049a969590cc799eeb10f613fac86c1ae3b852afb27022e99537ac2cafedc",
+  "browserMeasurements": [
+    {
+      "lotCount": 6000,
+      "orders": 1500,
+      "viewport": "1440x1000",
+      "cpuRate": 1,
+      "load": {
+        "firstResultsMs": 132.39999985694885,
+        "stateDurationMs": 47.5,
+        "responseBytes": 5360126,
+        "modelPreparationMs": 23,
+        "modelStart": 80.09999990463257
+      },
+      "medianMs": 31.799999952316284,
+      "p95Ms": 32.299999952316284,
+      "maxMs": 35.09999990463257
+    },
+    {
+      "lotCount": 6000,
+      "orders": 1500,
+      "viewport": "375x812",
+      "cpuRate": 4,
+      "medianMs": 61.200000047683716,
+      "p95Ms": 82.39999985694885,
+      "maxMs": 104.89999985694885
+    },
+    {
+      "lotCount": 60000,
+      "orders": 15000,
+      "viewport": "1440x1000",
+      "cpuRate": 1,
+      "load": {
+        "firstResultsMs": 894.2999999523163,
+        "stateDurationMs": 475.59999990463257,
+        "responseBytes": 53474829,
+        "modelPreparationMs": 249.5,
+        "modelStart": 567.2999999523163
+      },
+      "medianMs": 30.899999856948853,
+      "p95Ms": 31.59999990463257,
+      "maxMs": 31.90000009536743
+    }
+  ],
+  "designSystem": "design-system/MASTER.md",
+  "evidence": [
+    "domain-tests.tap",
+    "browser-report.json",
+    "restart-report.json",
+    "order-filters-browser-report.json",
+    "order-filter-benchmark.json",
+    "portable-report.json"
+  ],
+  "limitations": [
+    "Medición de navegador con API sintética en memoria; excluye disco y validación completa de JsonStore en los volúmenes grandes.",
+    "Carga inicial: una observación por volumen con recursos ya visitados.",
+    "CPU móvil 4x simulada en escritorio; portable probado en una extracción del mismo equipo."
+  ]
+}

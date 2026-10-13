@@ -1,0 +1,128 @@
+- generic [ref=f1e3]:
+  - link "Saltar al contenido" [ref=f1e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - complementary [ref=f1e5]:
+    - generic [ref=f1e11]:
+      - strong [ref=f1e12]: GIMED
+      - generic [ref=f1e13]: Gestión de compras
+    - generic [ref=f1e14]: OPERACIÓN
+    - navigation "Navegación principal" [ref=f1e15]:
+      - link "Órdenes de compra" [ref=f1e16] [cursor=pointer]:
+        - /url: "#/ordenes"
+      - link "Abastecimiento" [ref=f1e20] [cursor=pointer]:
+        - /url: "#/abastecimiento"
+      - link "Facturas" [active] [ref=f1e31] [cursor=pointer]:
+        - /url: "#/facturas"
+      - link "Catálogos" [ref=f1e34] [cursor=pointer]:
+        - /url: "#/catalogos"
+      - link "Proveedores" [ref=f1e39] [cursor=pointer]:
+        - /url: "#/proveedores"
+      - link "Códigos de barras" [ref=f1e44] [cursor=pointer]:
+        - /url: "#/codigos"
+      - link "Documentos" [ref=f1e46] [cursor=pointer]:
+        - /url: "#/documentos"
+      - link "Correos" [ref=f1e49] [cursor=pointer]:
+        - /url: "#/correos"
+    - navigation "Configuración" [ref=f1e54]:
+      - link "Configuración" [ref=f1e55] [cursor=pointer]:
+        - /url: "#/configuracion"
+    - generic [ref=f1e59]:
+      - generic [ref=f1e63]:
+        - strong [ref=f1e64]: Prototipo local
+        - generic [ref=f1e65]: Documentos y correos simulados. Datos guardados en este equipo.
+      - generic [ref=f1e66]:
+        - generic [ref=f1e67]: GI
+        - generic [ref=f1e68]:
+          - strong [ref=f1e69]: Espacio de GIMED
+          - text: Datos de demostración
+  - generic [ref=f1e70]:
+    - banner [ref=f1e71]:
+      - generic [ref=f1e73]:
+        - generic [ref=f1e74]: Compras
+        - strong [ref=f1e77]: Facturas
+      - generic [ref=f1e78]:
+        - status [ref=f1e79]: Guardado local
+        - generic [ref=f1e81]: Demostración
+        - generic "Espacio GIMED" [ref=f1e84]: GI
+    - main [ref=f1e85]:
+      - generic [ref=f1e386]:
+        - generic [ref=f1e387]:
+          - heading "Facturas" [level=1] [ref=f1e388]
+          - paragraph [ref=f1e389]: Registra facturas y vincula recepciones del mismo proveedor.
+        - button "Agregar factura" [ref=f1e390] [cursor=pointer]
+      - generic [ref=f1e392]:
+        - generic [ref=f1e393]:
+          - textbox "Buscar facturas" [ref=f1e398]:
+            - /placeholder: Buscar factura, orden, lote o proveedor…
+          - generic [ref=f1e399]:
+            - checkbox "Solo sin lotes o recepciones" [ref=f1e400]
+            - text: Solo sin lotes o recepciones
+        - table [ref=f1e402]:
+          - rowgroup [ref=f1e403]:
+            - row [ref=f1e404]:
+              - columnheader "Número de factura" [ref=f1e405]
+              - columnheader "Proveedor" [ref=f1e406]
+              - columnheader "Registro" [ref=f1e407]
+              - columnheader "Recepciones" [ref=f1e408]
+              - columnheader "Documentos" [ref=f1e409]
+              - columnheader "Detalle" [ref=f1e410]
+          - rowgroup [ref=f1e412]:
+            - row [ref=f1e413]:
+              - cell [ref=f1e414]:
+                - link "AUR-00128" [ref=f1e415] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000096"
+              - cell "Aurora" [ref=f1e416]
+              - cell "01 de oct de 2026" [ref=f1e417]
+              - cell "4" [ref=f1e418]
+              - cell [ref=f1e419]:
+                - link "Previsualizar documento de AUR-00128" [ref=f1e420] [cursor=pointer]:
+                  - /url: /api/documents/0000000000000000000000ab/content
+                  - text: 1 archivos
+              - cell [ref=f1e423]:
+                - link "Ver factura AUR-00128" [ref=f1e424] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000096"
+            - row [ref=f1e427]:
+              - cell [ref=f1e428]:
+                - link "ENV-00412" [ref=f1e429] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000097"
+              - cell "Envases del Norte" [ref=f1e430]
+              - cell "01 de oct de 2026" [ref=f1e431]
+              - cell "2" [ref=f1e432]
+              - cell [ref=f1e433]:
+                - link "Agregar documento a ENV-00412" [ref=f1e434] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000097"
+                  - text: Sin archivo
+              - cell [ref=f1e437]:
+                - link "Ver factura ENV-00412" [ref=f1e438] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000097"
+            - row [ref=f1e441]:
+              - cell [ref=f1e442]:
+                - link "AND-00001" [ref=f1e443] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000098"
+              - cell "Andina" [ref=f1e444]
+              - cell "01 de oct de 2026" [ref=f1e445]
+              - cell "0" [ref=f1e446]
+              - cell [ref=f1e447]:
+                - link "Agregar documento a AND-00001" [ref=f1e448] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000098"
+                  - text: Sin archivo
+              - cell [ref=f1e451]:
+                - link "Ver factura AND-00001" [ref=f1e452] [cursor=pointer]:
+                  - /url: "#/facturas/000000000000000000000098"
+            - row [ref=f1e455]:
+              - cell [ref=f1e456]:
+                - link "QA-0001" [ref=f1e457] [cursor=pointer]:
+                  - /url: "#/facturas/c89eedae76e88e7aa739c0d5"
+              - cell "Aurora" [ref=f1e458]
+              - cell "05 de oct de 2026" [ref=f1e459]
+              - cell "1" [ref=f1e460]
+              - cell [ref=f1e461]:
+                - link "Previsualizar documento de QA-0001" [ref=f1e462] [cursor=pointer]:
+                  - /url: /api/documents/defccf1c63dc23fee33eef78/content
+                  - text: 1 archivos
+              - cell [ref=f1e465]:
+                - link "Ver factura QA-0001" [ref=f1e466] [cursor=pointer]:
+                  - /url: "#/facturas/c89eedae76e88e7aa739c0d5"
+        - generic [ref=f1e469]:
+          - generic [ref=f1e470]: 4 facturas
+          - generic [ref=f1e471]: La numeración es única por proveedor.

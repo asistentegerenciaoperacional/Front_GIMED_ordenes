@@ -1,0 +1,297 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - link "Saltar al contenido" [ref=f3e4] [cursor=pointer]:
+        - /url: "#main-content"
+      - complementary [ref=f3e5]:
+        - generic [ref=f3e11]:
+          - strong [ref=f3e12]: GIMED
+          - generic [ref=f3e13]: Gestión de compras
+        - generic [ref=f3e14]: OPERACIÓN
+        - navigation "Navegación principal" [ref=f3e15]:
+          - link "Órdenes de compra" [ref=f3e16] [cursor=pointer]:
+            - /url: "#/ordenes"
+          - link "Abastecimiento" [ref=f3e20] [cursor=pointer]:
+            - /url: "#/abastecimiento"
+          - link "Facturas" [ref=f3e31] [cursor=pointer]:
+            - /url: "#/facturas"
+          - link "Catálogos" [ref=f3e34] [cursor=pointer]:
+            - /url: "#/catalogos"
+          - link "Proveedores" [ref=f3e39] [cursor=pointer]:
+            - /url: "#/proveedores"
+          - link "Códigos de barras" [ref=f3e44] [cursor=pointer]:
+            - /url: "#/codigos"
+          - link "Documentos" [ref=f3e46] [cursor=pointer]:
+            - /url: "#/documentos"
+          - link "Correos" [ref=f3e49] [cursor=pointer]:
+            - /url: "#/correos"
+        - navigation "Configuración" [ref=f3e54]:
+          - link "Configuración" [ref=f3e55] [cursor=pointer]:
+            - /url: "#/configuracion"
+        - generic [ref=f3e59]:
+          - generic [ref=f3e63]:
+            - strong [ref=f3e64]: Prototipo local
+            - generic [ref=f3e65]: Documentos y correos simulados. Datos guardados en este equipo.
+          - generic [ref=f3e66]:
+            - generic [ref=f3e67]: GI
+            - generic [ref=f3e68]:
+              - strong [ref=f3e69]: Espacio de GIMED
+              - text: Datos de demostración
+      - generic [ref=f3e70]:
+        - banner [ref=f3e71]:
+          - generic [ref=f3e73]:
+            - generic [ref=f3e74]: Compras
+            - strong [ref=f3e77]: Órdenes de compra
+          - generic [ref=f3e78]:
+            - status [ref=f3e79]: Guardado local
+            - generic [ref=f3e81]: Demostración
+            - generic "Espacio GIMED" [ref=f3e84]: GI
+        - main [ref=f3e85]:
+          - generic [ref=f3e314]:
+            - generic [ref=f3e315]:
+              - heading "Órdenes de compra" [level=1] [ref=f3e316]
+              - paragraph [ref=f3e317]: Emite órdenes, registra entregas y consulta su seguimiento.
+            - button "Nueva orden" [ref=f3e318] [cursor=pointer]
+          - generic [ref=f3e323]:
+            - text: El cierre de cada renglón es manual. El margen vigente de seguimiento es
+            - strong [ref=f3e324]: ±10 %
+            - text: .
+            - link "Ver configuración" [ref=f3e325] [cursor=pointer]:
+              - /url: "#/configuracion"
+          - generic [ref=f3e326]:
+            - button "Sin autorización 3 Pendientes de firma" [ref=f3e327] [cursor=pointer]:
+              - generic [ref=f3e328]: Sin autorización
+              - generic [ref=f3e333]: "3"
+              - text: Pendientes de firma
+            - button "En seguimiento 3 Órdenes autorizadas" [ref=f3e334] [cursor=pointer]:
+              - generic [ref=f3e335]: En seguimiento
+              - generic [ref=f3e341]: "3"
+              - text: Órdenes autorizadas
+            - button "Parcialmente anuladas 1 Con renglones anulados" [ref=f3e342] [cursor=pointer]:
+              - generic [ref=f3e343]: Parcialmente anuladas
+              - generic [ref=f3e348]: "1"
+              - text: Con renglones anulados
+            - button "Cerradas 3 Seguimiento finalizado" [ref=f3e349] [cursor=pointer]:
+              - generic [ref=f3e350]: Cerradas
+              - generic [ref=f3e355]: "3"
+              - text: Seguimiento finalizado
+          - generic [ref=f3e356]:
+            - tablist "Vistas de órdenes" [ref=f3e357]:
+              - tab "No autorizadas 3" [ref=f3e358] [cursor=pointer]:
+                - text: No autorizadas
+                - generic [ref=f3e359]: "3"
+              - tab "Seguimiento 7" [selected] [ref=f3e360] [cursor=pointer]:
+                - text: Seguimiento
+                - generic [ref=f3e361]: "7"
+              - tab "Anuladas 3" [ref=f3e362] [cursor=pointer]:
+                - text: Anuladas
+                - generic [ref=f3e363]: "3"
+            - generic [ref=f3e364]:
+              - textbox "Buscar órdenes" [ref=f3e369]:
+                - /placeholder: Buscar por número, producto, código o proveedor…
+              - generic [ref=f3e370]:
+                - combobox "Filtrar tipo de orden" [ref=f3e371]:
+                  - option "Todos los tipos" [selected]
+                  - option "Producto"
+                  - option "Material"
+                  - option "Otros"
+                - combobox "Filtrar estado de seguimiento" [ref=f3e372]:
+                  - option "Todos los estados" [selected]
+                  - option "Autorizada"
+                  - option "Parcialmente anulada"
+                  - option "Cerrada"
+            - table [ref=f3e374]:
+              - rowgroup [ref=f3e375]:
+                - row [ref=f3e376]:
+                  - columnheader "Orden / tipo" [ref=f3e377]
+                  - columnheader "Proveedor" [ref=f3e378]
+                  - columnheader "Productos y conceptos" [ref=f3e379]
+                  - columnheader "Entrega solicitada" [ref=f3e380]
+                  - columnheader "Estado" [ref=f3e381]
+                  - columnheader "Total" [ref=f3e382]
+                  - columnheader "Detalle" [ref=f3e383]
+              - rowgroup [ref=f3e385]:
+                - row [ref=f3e386]:
+                  - cell "OC 1606 Material" [ref=f3e387]:
+                    - link "OC 1606" [ref=f3e388] [cursor=pointer]:
+                      - /url: "#/ordenes/3aa2c92d32e5be0ef2aff9df"
+                    - generic [ref=f3e389]: Material
+                  - cell "Envases del Norte NIT 900123403" [ref=f3e391]:
+                    - strong [ref=f3e392]: Envases del Norte
+                    - generic [ref=f3e393]: NIT 900123403
+                  - cell "Envase ámbar 250 ml 1 renglón · 19.800 unidades solicitadas" [ref=f3e394]:
+                    - strong [ref=f3e395]: Envase ámbar 250 ml
+                    - generic [ref=f3e396]: 1 renglón · 19.800 unidades solicitadas
+                  - cell "31 de oct de 2026" [ref=f3e397]
+                  - cell "Autorizada" [ref=f3e398]
+                  - cell "$ 8.910.000,00" [ref=f3e400]
+                  - cell [ref=f3e401]:
+                    - link "Ver orden 1606" [ref=f3e402] [cursor=pointer]:
+                      - /url: "#/ordenes/3aa2c92d32e5be0ef2aff9df"
+                - row [ref=f3e405]:
+                  - cell "OC 2805 Producto" [ref=f3e406]:
+                    - link "OC 2805" [ref=f3e407] [cursor=pointer]:
+                      - /url: "#/ordenes/852c875e6e1f1f9b0dc1dfce"
+                    - generic [ref=f3e408]: Producto
+                  - cell "Aurora NIT 900123401" [ref=f3e410]:
+                    - strong [ref=f3e411]: Aurora
+                    - generic [ref=f3e412]: NIT 900123401
+                  - cell "Crema corporal · 250 ml 1 renglón · 5.000 unidades solicitadas" [ref=f3e413]:
+                    - strong [ref=f3e414]: Crema corporal · 250 ml
+                    - generic [ref=f3e415]: 1 renglón · 5.000 unidades solicitadas
+                  - cell "20 de oct de 2026" [ref=f3e416]
+                  - cell "Cerrada" [ref=f3e417]
+                  - cell "$ 15.502.500,00" [ref=f3e419]
+                  - cell [ref=f3e420]:
+                    - link "Ver orden 2805" [ref=f3e421] [cursor=pointer]:
+                      - /url: "#/ordenes/852c875e6e1f1f9b0dc1dfce"
+                - row [ref=f3e424]:
+                  - cell "OC 2804 Producto" [ref=f3e425]:
+                    - link "OC 2804" [ref=f3e426] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000067"
+                    - generic [ref=f3e427]: Producto
+                  - cell "Aurora NIT 900123401" [ref=f3e429]:
+                    - strong [ref=f3e430]: Aurora
+                    - generic [ref=f3e431]: NIT 900123401
+                  - cell "Crema corporal · 250 ml 1 renglón · 12.000 unidades solicitadas" [ref=f3e432]:
+                    - strong [ref=f3e433]: Crema corporal · 250 ml
+                    - generic [ref=f3e434]: 1 renglón · 12.000 unidades solicitadas
+                  - cell "09 de oct de 2026" [ref=f3e435]
+                  - cell "Cerrada" [ref=f3e436]
+                  - cell "$ 38.400.000,00" [ref=f3e438]
+                  - cell [ref=f3e439]:
+                    - link "Ver orden 2804" [ref=f3e440] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000067"
+                - row [ref=f3e443]:
+                  - cell "OC 2803 Producto" [ref=f3e444]:
+                    - link "OC 2803" [ref=f3e445] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000066"
+                    - generic [ref=f3e446]: Producto
+                  - cell "Aurora NIT 900123401" [ref=f3e448]:
+                    - strong [ref=f3e449]: Aurora
+                    - generic [ref=f3e450]: NIT 900123401
+                  - cell "Crema corporal · 250 ml 2 renglones · 8.000 unidades solicitadas" [ref=f3e451]:
+                    - strong [ref=f3e452]: Crema corporal · 250 ml
+                    - generic [ref=f3e453]: 2 renglones · 8.000 unidades solicitadas
+                  - cell "22 de oct de 2026" [ref=f3e454]
+                  - cell "Parcialmente anulada" [ref=f3e455]
+                  - cell "$ 23.350.000,00" [ref=f3e457]
+                  - cell [ref=f3e458]:
+                    - link "Ver orden 2803" [ref=f3e459] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000066"
+                - row [ref=f3e462]:
+                  - cell "OC 2801 Producto" [ref=f3e463]:
+                    - link "OC 2801" [ref=f3e464] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000064"
+                    - generic [ref=f3e465]: Producto
+                  - cell "Aurora NIT 900123401" [ref=f3e467]:
+                    - strong [ref=f3e468]: Aurora
+                    - generic [ref=f3e469]: NIT 900123401
+                  - cell "Crema corporal · 250 ml 2 renglones · 20.000 unidades solicitadas" [ref=f3e470]:
+                    - strong [ref=f3e471]: Crema corporal · 250 ml
+                    - generic [ref=f3e472]: 2 renglones · 20.000 unidades solicitadas
+                  - cell "15 de oct de 2026" [ref=f3e473]
+                  - cell "Autorizada" [ref=f3e474]
+                  - cell "$ 58.000.000,00" [ref=f3e476]
+                  - cell [ref=f3e477]:
+                    - link "Ver orden 2801" [ref=f3e478] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000064"
+                - row [ref=f3e481]:
+                  - cell "OC 2750 Producto" [ref=f3e482]:
+                    - link "OC 2750" [ref=f3e483] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000068"
+                    - generic [ref=f3e484]: Producto
+                  - cell "Aurora NIT 900123401" [ref=f3e486]:
+                    - strong [ref=f3e487]: Aurora
+                    - generic [ref=f3e488]: NIT 900123401
+                  - cell "Crema corporal · 250 ml 1 renglón · 10.000 unidades solicitadas" [ref=f3e489]:
+                    - strong [ref=f3e490]: Crema corporal · 250 ml
+                    - generic [ref=f3e491]: 1 renglón · 10.000 unidades solicitadas
+                  - cell "20 de ago de 2025" [ref=f3e492]
+                  - cell "Cerrada" [ref=f3e493]
+                  - cell "$ 32.000.000,00" [ref=f3e495]
+                  - cell [ref=f3e496]:
+                    - link "Ver orden 2750" [ref=f3e497] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000068"
+                - row [ref=f3e500]:
+                  - cell "OC 1601 Material" [ref=f3e501]:
+                    - link "OC 1601" [ref=f3e502] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000078"
+                    - generic [ref=f3e503]: Material
+                  - cell "Envases del Norte NIT 900123403" [ref=f3e505]:
+                    - strong [ref=f3e506]: Envases del Norte
+                    - generic [ref=f3e507]: NIT 900123403
+                  - cell "Envase ámbar 250 ml 2 renglones · 26.400 unidades solicitadas" [ref=f3e508]:
+                    - strong [ref=f3e509]: Envase ámbar 250 ml
+                    - generic [ref=f3e510]: 2 renglones · 26.400 unidades solicitadas
+                  - cell "12 de oct de 2026" [ref=f3e511]
+                  - cell "Autorizada" [ref=f3e512]
+                  - cell "$ 7.524.000,00" [ref=f3e514]
+                  - cell [ref=f3e515]:
+                    - link "Ver orden 1601" [ref=f3e516] [cursor=pointer]:
+                      - /url: "#/ordenes/000000000000000000000078"
+            - generic [ref=f3e519]:
+              - generic [ref=f3e520]: 7 órdenes en esta vista
+              - generic [ref=f3e521]: La autorización y los renglones determinan el estado de la orden.
+    - status [ref=f3e522]:
+      - generic [ref=f3e526]: Envío simulado confirmado
+      - button "Cerrar aviso" [ref=f3e527] [cursor=pointer]
+  - dialog [ref=f3e531]:
+    - generic [ref=f3e532]:
+      - generic [ref=f3e533]:
+        - heading "Nueva orden de compra" [level=2] [ref=f3e534]
+        - paragraph [ref=f3e535]: 1. Datos y renglones de la orden
+      - button "Cerrar Nueva orden de compra" [active] [ref=f3e536] [cursor=pointer]
+    - generic [ref=f3e540]:
+      - generic [ref=f3e541]:
+        - generic [ref=f3e542]:
+          - generic [ref=f3e543]:
+            - generic [ref=f3e544]: Tipo de orden
+            - combobox "Tipo de orden" [ref=f3e545]:
+              - option "Producto"
+              - option "Material"
+              - option "Otros" [selected]
+          - generic [ref=f3e546]:
+            - generic [ref=f3e547]: Número de orden
+            - textbox "Número de orden" [ref=f3e548]:
+              - /placeholder: Automático
+            - generic [ref=f3e549]: Déjalo vacío para asignar el consecutivo.
+          - generic [ref=f3e550]:
+            - generic [ref=f3e551]: Proveedor *
+            - combobox "Proveedor" [ref=f3e552]:
+              - option "Seleccionar…"
+              - option "Servicios Punto S.A.S." [selected]
+          - generic [ref=f3e553]:
+            - generic [ref=f3e554]: Fecha de elaboración
+            - textbox "Fecha de elaboración" [ref=f3e555]: 2026-10-05
+          - generic [ref=f3e556]:
+            - generic [ref=f3e557]: Entrega solicitada
+            - textbox "Entrega solicitada" [ref=f3e558]
+        - generic [ref=f3e559]:
+          - generic [ref=f3e560]:
+            - heading "Renglones de la orden" [level=3] [ref=f3e561]
+            - generic [ref=f3e562]: 1 de 7
+          - generic [ref=f3e563]:
+            - generic [ref=f3e564]:
+              - heading "Renglón 1" [level=3] [ref=f3e565]
+              - button "Eliminar renglón 1" [disabled] [ref=f3e566]
+            - generic [ref=f3e570]:
+              - generic [ref=f3e571]:
+                - generic [ref=f3e572]: Producto o concepto *
+                - combobox "Producto o concepto" [ref=f3e573]
+              - generic [ref=f3e574]:
+                - generic [ref=f3e575]: Cantidad solicitada *
+                - spinbutton "Cantidad solicitada" [ref=f3e576]: "1"
+              - generic [ref=f3e577]:
+                - generic [ref=f3e578]: Precio unitario *
+                - textbox "Precio unitario" [ref=f3e579]: "0.00"
+              - generic [ref=f3e580]:
+                - generic [ref=f3e581]: Entrega estimada
+                - textbox "Entrega estimada" [ref=f3e582]
+          - button "Agregar renglón" [ref=f3e583] [cursor=pointer]
+        - generic [ref=f3e585]:
+          - generic [ref=f3e586]: Total de la orden
+          - strong [ref=f3e587]: $ 0,00
+      - generic [ref=f3e588]:
+        - button "Cancelar" [ref=f3e589] [cursor=pointer]
+        - button "Revisar orden" [ref=f3e590] [cursor=pointer]

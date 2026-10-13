@@ -23,6 +23,20 @@ export type SupplyTableRow = ColumnRow<SupplyColumnKey> & {
   supplierName: string;
 };
 
+export function searchSupplyRows(
+  rows: SupplyTableRow[],
+  query: string,
+): SupplyTableRow[] {
+  const match = /^(?:(OCM|OC)\s*)?(\d*)$/.exec(query.trim().toUpperCase());
+  if (!match) return [];
+  const [, prefix, number] = match;
+  return rows.filter(
+    ({ po, mo }) =>
+      (prefix !== "OCM" && po.no_orden.includes(number)) ||
+      (prefix !== "OC" && mo.no_orden.includes(number)),
+  );
+}
+
 export function buildSupplyRows(db: Database): SupplyTableRow[] {
   const products = new Map(db.productos.map((row) => [row.id, row]));
   const materials = new Map(db.materiales.map((row) => [row.id, row]));

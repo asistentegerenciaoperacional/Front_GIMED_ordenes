@@ -34,16 +34,32 @@ export type InvoiceTableRow = ColumnRow<InvoiceColumnKey> & {
   provider: Database["proveedor"][number] | undefined;
   receiptCount: number;
   document: Database["documento"][number] | undefined;
+  searchText: string;
 };
+
+export function searchInvoiceRows(
+  rows: InvoiceTableRow[],
+  query: string,
+): InvoiceTableRow[] {
+  const normalized = normalizeInvoice(query);
+  return rows.filter((row) => row.searchText.includes(normalized));
+}
 
 export function buildInvoiceRows(
   db: Database,
-  receipts: readonly { invoice?: string | null }[],
+  receipts: readonly { invoice?: string | null; label?: string }[],
 ): InvoiceTableRow[] {
   const counts = new Map<string, number>();
+  const receiptLabels = new Map<string, string[]>();
   for (const receipt of receipts)
-    if (receipt.invoice)
+    if (receipt.invoice) {
       counts.set(receipt.invoice, (counts.get(receipt.invoice) ?? 0) + 1);
+      if (receipt.label) {
+        const labels = receiptLabels.get(receipt.invoice) ?? [];
+        labels.push(receipt.label);
+        receiptLabels.set(receipt.invoice, labels);
+      }
+    }
   const providers = new Map(db.proveedor.map((row) => [row.id, row]));
   const documents = new Map(
     db.documento
@@ -67,6 +83,14 @@ export function buildInvoiceRows(
       provider,
       receiptCount,
       document,
+      searchText: normalizeInvoice(
+        [
+          invoice.numero_factura,
+          provider?.nombre_corto,
+          provider?.nombre_largo,
+          ...(receiptLabels.get(invoice.id) ?? []),
+        ].join(" "),
+      ),
       cells: {
         numero: {
           sortValue: invoice.numero_factura,

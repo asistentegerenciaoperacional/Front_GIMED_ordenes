@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-08T21:49:29.176450+00:00",
+  "unitTests": 87,
+  "browserChecks": 537,
+  "liveErrorChecks": 43,
+  "javascriptErrors": [],
+  "expectedInterfaceRejections": 3,
+  "persistencePassed": true,
+  "collectionsRecovered": 28,
+  "testDataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\browser-19a75af5-173c-47e0-bac3-f3b98182fb35\\database.json",
+  "userDataReset": false,
+  "userDataHashBefore": "104451BCBC42D4D51ABB986CF8F9722E45A07B482CD70D61CD9935601127EDBF",
+  "userDataHashAfter": "104451BCBC42D4D51ABB986CF8F9722E45A07B482CD70D61CD9935601127EDBF",
+  "observedHashPreserved": true,
+  "evidence": [
+    "domain-tests.tap",
+    "browser-report.json",
+    "restart-report.json",
+    "live-errors-side-report.json",
+    "34-advertencia-reemplazo-375.png",
+    "34-advertencia-reemplazo-1440.png",
+    "35-revision-reemplazo-375.png",
+    "35-revision-reemplazo-1440.png",
+    "36-eliminar-lote-375.png",
+    "36-eliminar-lote-1440.png",
+    "portable-report.json",
+    "portable-ordenes.png"
+  ],
+  "deliveryVerifiedAt": "2026-10-08T21:50:22.003525+00:00",
+  "delivery": {
+    "portablePassed": true,
+    "portableChecks": 14,
+    "archiveSha256": "81b7a185a84492070170890fb30b6a6f8d559ffebda34382af4e0274f1e1eaf5",
+    "matchedSourceAndBuildFiles": 12,
+    "projectMarkdownFiles": 10,
+    "brokenLocalLinks": 0,
+    "missingVerificationEvidence": 0,
+    "userDataHashPreserved": true
+  }
+}

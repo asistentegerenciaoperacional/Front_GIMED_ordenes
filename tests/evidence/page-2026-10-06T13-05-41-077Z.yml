@@ -1,0 +1,188 @@
+- generic [ref=e3]:
+  - link "Saltar al contenido" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - complementary [ref=e5]:
+    - generic [ref=e11]:
+      - strong [ref=e12]: GIMED
+      - generic [ref=e13]: Gestión de compras
+    - generic [ref=e14]: OPERACIÓN
+    - navigation "Navegación principal" [ref=e15]:
+      - link "Órdenes de compra" [ref=e16] [cursor=pointer]:
+        - /url: /ordenes
+      - link "Abastecimiento" [ref=e20] [cursor=pointer]:
+        - /url: /abastecimiento
+      - link "Facturas" [ref=e31] [cursor=pointer]:
+        - /url: /facturas
+      - link "Catálogos" [ref=e34] [cursor=pointer]:
+        - /url: /catalogos
+      - link "Proveedores" [ref=e39] [cursor=pointer]:
+        - /url: /proveedores
+      - link "Códigos de barras" [ref=e44] [cursor=pointer]:
+        - /url: /codigos
+      - link "Documentos" [ref=e46] [cursor=pointer]:
+        - /url: /documentos
+      - link "Correos" [ref=e49] [cursor=pointer]:
+        - /url: /correos
+    - navigation "Configuración" [ref=e53]:
+      - link "Configuración" [ref=e54] [cursor=pointer]:
+        - /url: /configuracion
+    - generic [ref=e58]:
+      - generic [ref=e62]:
+        - strong [ref=e63]: Prototipo local
+        - generic [ref=e64]: Documentos y correos simulados. Datos guardados en este equipo.
+      - generic [ref=e65]:
+        - generic [ref=e66]: GI
+        - generic [ref=e67]:
+          - strong [ref=e68]: Espacio de GIMED
+          - text: Datos de demostración
+  - generic [ref=e69]:
+    - banner [ref=e70]:
+      - generic [ref=e72]:
+        - generic [ref=e73]: Compras
+        - strong [ref=e76]: Órdenes de compra
+      - generic [ref=e77]:
+        - status [ref=e78]: Guardado local
+        - generic [ref=e80]: Demostración
+        - generic "Espacio GIMED" [ref=e83]: GI
+    - main [ref=e84]:
+      - generic [ref=e85]:
+        - generic [ref=e86]:
+          - heading "Órdenes de compra" [level=1] [ref=e87]
+          - paragraph [ref=e88]: Emite órdenes, registra entregas y consulta su seguimiento.
+        - button "Nueva orden" [ref=e89] [cursor=pointer]
+      - generic [ref=e91]:
+        - tablist "Grupos de órdenes" [ref=e92]:
+          - tab "Productos" [selected] [ref=e93] [cursor=pointer]
+          - tab "Materiales" [ref=e94] [cursor=pointer]
+        - generic "Consecutivo de órdenes" [ref=e95]:
+          - generic [ref=e96]: Órdenes de productos
+          - generic [ref=e97]:
+            - text: "Último consecutivo:"
+            - strong [ref=e98]: "2804"
+          - generic [ref=e99]:
+            - text: "Próxima OC:"
+            - strong [ref=e100]: "2805"
+      - generic [ref=e104]:
+        - text: El cierre de cada producto es manual. El margen vigente de seguimiento es
+        - strong [ref=e105]: ±10 %
+        - text: .
+        - link "Ver configuración" [ref=e106] [cursor=pointer]:
+          - /url: /configuracion
+      - generic [ref=e107]:
+        - button "Sin autorización 1 Pendientes de firma" [ref=e108] [cursor=pointer]:
+          - generic [ref=e109]: Sin autorización
+          - generic [ref=e114]: "1"
+          - text: Pendientes de firma
+        - button "En seguimiento 1 Órdenes autorizadas" [ref=e115] [cursor=pointer]:
+          - generic [ref=e116]: En seguimiento
+          - generic [ref=e122]: "1"
+          - text: Órdenes autorizadas
+        - button "Parcialmente anuladas 1 Con anulaciones parciales" [ref=e123] [cursor=pointer]:
+          - generic [ref=e124]: Parcialmente anuladas
+          - generic [ref=e129]: "1"
+          - text: Con anulaciones parciales
+        - button "Cerradas 2 Seguimiento finalizado" [ref=e130] [cursor=pointer]:
+          - generic [ref=e131]: Cerradas
+          - generic [ref=e136]: "2"
+          - text: Seguimiento finalizado
+      - generic [ref=e137]:
+        - tablist "Vistas de órdenes" [ref=e138]:
+          - tab "No autorizadas 1" [ref=e139] [cursor=pointer]:
+            - text: No autorizadas
+            - generic [ref=e140]: "1"
+          - tab "Seguimiento 4" [selected] [ref=e141] [cursor=pointer]:
+            - text: Seguimiento
+            - generic [ref=e142]: "4"
+          - tab "Anuladas 0" [ref=e143] [cursor=pointer]:
+            - text: Anuladas
+            - generic [ref=e144]: "0"
+        - generic [ref=e145]:
+          - textbox "Buscar órdenes" [ref=e150]:
+            - /placeholder: Buscar por número, producto, código o proveedor…
+          - combobox "Filtrar estado de seguimiento" [ref=e152]:
+            - option "Todos los estados" [selected]
+            - option "Autorizada"
+            - option "Parcialmente anulada"
+            - option "Cerrada"
+        - table [ref=e154]:
+          - rowgroup [ref=e155]:
+            - row [ref=e156]:
+              - columnheader "Orden / tipo" [ref=e157]
+              - columnheader "Proveedor" [ref=e158]
+              - columnheader "Productos" [ref=e159]
+              - columnheader "Entrega solicitada" [ref=e160]
+              - columnheader "Estado" [ref=e161]
+              - columnheader "Total" [ref=e162]
+              - columnheader "Detalle" [ref=e163]
+          - rowgroup [ref=e165]:
+            - row [ref=e166]:
+              - cell "OC 2804 Producto" [ref=e167]:
+                - link "OC 2804" [ref=e168] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000067
+                - generic [ref=e169]: Producto
+              - cell "Aurora NIT 900123401" [ref=e171]:
+                - strong [ref=e172]: Aurora
+                - generic [ref=e173]: NIT 900123401
+              - cell "Crema corporal · 250 ml 1 producto · 12.000 unidades solicitadas" [ref=e174]:
+                - strong [ref=e175]: Crema corporal · 250 ml
+                - generic [ref=e176]: 1 producto · 12.000 unidades solicitadas
+              - cell "09 de oct de 2026" [ref=e177]
+              - cell "Cerrada" [ref=e178]
+              - cell "$ 38.400.000,00" [ref=e180]
+              - cell [ref=e181]:
+                - link "Ver orden 2804" [ref=e182] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000067
+            - row [ref=e185]:
+              - cell "OC 2803 Producto" [ref=e186]:
+                - link "OC 2803" [ref=e187] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000066
+                - generic [ref=e188]: Producto
+              - cell "Aurora NIT 900123401" [ref=e190]:
+                - strong [ref=e191]: Aurora
+                - generic [ref=e192]: NIT 900123401
+              - cell "Crema corporal · 250 ml 2 productos · 8.000 unidades solicitadas" [ref=e193]:
+                - strong [ref=e194]: Crema corporal · 250 ml
+                - generic [ref=e195]: 2 productos · 8.000 unidades solicitadas
+              - cell "22 de oct de 2026" [ref=e196]
+              - cell "Parcialmente anulada" [ref=e197]
+              - cell "$ 23.350.000,00" [ref=e199]
+              - cell [ref=e200]:
+                - link "Ver orden 2803" [ref=e201] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000066
+            - row [ref=e204]:
+              - cell "OC 2801 Producto" [ref=e205]:
+                - link "OC 2801" [ref=e206] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000064
+                - generic [ref=e207]: Producto
+              - cell "Aurora NIT 900123401" [ref=e209]:
+                - strong [ref=e210]: Aurora
+                - generic [ref=e211]: NIT 900123401
+              - cell "Crema corporal · 250 ml 2 productos · 20.000 unidades solicitadas" [ref=e212]:
+                - strong [ref=e213]: Crema corporal · 250 ml
+                - generic [ref=e214]: 2 productos · 20.000 unidades solicitadas
+              - cell "15 de oct de 2026" [ref=e215]
+              - cell "Autorizada" [ref=e216]
+              - cell "$ 58.000.000,00" [ref=e218]
+              - cell [ref=e219]:
+                - link "Ver orden 2801" [ref=e220] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000064
+            - row [ref=e223]:
+              - cell "OC 2750 Producto" [ref=e224]:
+                - link "OC 2750" [ref=e225] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000068
+                - generic [ref=e226]: Producto
+              - cell "Aurora NIT 900123401" [ref=e228]:
+                - strong [ref=e229]: Aurora
+                - generic [ref=e230]: NIT 900123401
+              - cell "Crema corporal · 250 ml 1 producto · 10.000 unidades solicitadas" [ref=e231]:
+                - strong [ref=e232]: Crema corporal · 250 ml
+                - generic [ref=e233]: 1 producto · 10.000 unidades solicitadas
+              - cell "20 de ago de 2025" [ref=e234]
+              - cell "Cerrada" [ref=e235]
+              - cell "$ 32.000.000,00" [ref=e237]
+              - cell [ref=e238]:
+                - link "Ver orden 2750" [ref=e239] [cursor=pointer]:
+                  - /url: /ordenes/000000000000000000000068
+        - generic [ref=e242]:
+          - generic [ref=e243]: 4 órdenes en esta vista
+          - generic [ref=e244]: La autorización y el estado de los productos, materiales o conceptos determinan el estado de la orden.

@@ -8,12 +8,12 @@ La [cobertura](COBERTURA.md) relaciona los resultados con los requisitos actuale
 
 | Comprobación                        | Resultado y evidencia                                                                                                                                                 |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tipos, relaciones, reglas y filtros | **122 pruebas correctas**, sin fallos. `tests/domain.test.ts`, `tests/documents.test.ts`, `tests/order-lifecycle.test.ts`, `tests/order-rules.test.ts`, `tests/product-lots.test.ts`, `tests/precision.test.ts`, `tests/interface.test.ts`, `tests/order-table.test.ts`, `tests/order-filters.test.ts`, `tests/invoice-table.test.ts`, `tests/supply-table.test.ts` y `tests/live-errors.test.ts`. [Resultado TAP](tests/evidence/domain-tests.tap). |
-| Recorrido automatizado de navegador | **560 comprobaciones correctas**, incluidas columnas de abastecimiento, desasignación de facturas y adjunto preparado durante su creación. `tests/browser-journey.js` y [reporte de navegador](tests/evidence/browser-report.json). |
+| Tipos, relaciones, reglas y filtros | **126 pruebas correctas**, sin fallos. `tests/domain.test.ts`, `tests/documents.test.ts`, `tests/order-lifecycle.test.ts`, `tests/order-rules.test.ts`, `tests/product-lots.test.ts`, `tests/precision.test.ts`, `tests/interface.test.ts`, `tests/order-table.test.ts`, `tests/order-filters.test.ts`, `tests/invoice-table.test.ts`, `tests/supply-table.test.ts` y `tests/live-errors.test.ts`. [Resultado TAP](tests/evidence/domain-tests.tap). |
+| Recorrido automatizado de navegador | **598 comprobaciones correctas**, incluidas búsquedas combinadas con filtros de facturas y vínculos, columnas de abastecimiento, desasignación de facturas y adjunto preparado durante su creación. `tests/browser-journey.js` y [reporte de navegador](tests/evidence/browser-report.json). |
 | Filtros personalizados y rendimiento visual | **52 comprobaciones correctas**, 17 variantes y 153 cambios medidos en tres escenarios. [Reporte de filtros](tests/evidence/order-filters-browser-report.json), [benchmark](tests/evidence/order-filter-benchmark.json) e [informe](RENDIMIENTO.md). |
 | Corrección de errores en formularios aislados | **43 comprobaciones correctas**, sin errores JavaScript ni registros guardados. [Reporte adicional](tests/evidence/live-errors-side-report.json). |
 | Reinicio del servicio               | Las **28 colecciones** recuperadas coinciden íntegramente con el archivo guardado. `scripts/verify-persistence.mjs` y `tests/evidence/restart-report.json`.           |
-| Compilación                         | TypeScript y Vite completan `npm run build`. Vite conserva un aviso de tamaño: el bloque JavaScript principal mide 504,61 kB minificado (144,11 kB gzip), frente al umbral de 500 kB. |
+| Compilación                         | TypeScript y Vite completan `npm run build`. Vite conserva un aviso de tamaño: el bloque JavaScript principal mide 506,38 kB minificado (144,52 kB gzip), frente al umbral de 500 kB. |
 | Portable Windows x64 | **17 comprobaciones correctas** el 13 de octubre. [Reporte del paquete](tests/evidence/portable-report.json) y [SHA-256](../GIMED-Prototipo-Windows-x64.sha256.txt). |
 | Tamaños de pantalla                 | 375, 708, 768, 815, 1024 y 1440 px: ancho de documento igual al ancho disponible; las tablas usan su propio desplazamiento horizontal. |
 | Impresión                           | Siete posiciones, total, firmas y controles ocultos al imprimir. `tests/evidence/orden-producto.pdf`: una página A4 horizontal en la muestra revisada.                |
@@ -25,6 +25,10 @@ Las pruebas de servicio abarcan R01–R13, reserva simultánea de consecutivos, 
 El recorrido de navegador crea órdenes de producto, material y otros con sus renglones y lotes iniciales de producto, edita antes de autorizar, autoriza, completa el lote y registra recepción, crea y selecciona una factura desde el lote, guarda documentos, simula correo, consulta vínculos entre órdenes, modifica la tolerancia, recorre etapas de códigos y consulta un código antiguo. Comprueba también búsqueda sin coincidencia exacta, campos inválidos, estados vacíos, pestañas con teclado y navegación móvil.
 
 En **Facturas** se verificó el registro sin recepciones, la consulta del detalle y la asociación posterior de una recepción existente del mismo proveedor. Se comprobó el guardado de la asociación y la conservación íntegra de los lotes de producto y material. Los formularios de registro y asociación se revisaron a 375, 708 y 1440 px; sus acciones y contenido permanecen dentro del área disponible. Las capturas de ambos formularios y del detalle se inspeccionaron visualmente.
+
+## Búsquedas de facturas y vínculos
+
+Se comprobó la búsqueda normalizada por factura, proveedor y orden, lote o producto asociado. En vínculos se consultaron números con y sin prefijos OC/OCM, con variantes de espacios y mayúsculas, comprobando que cada prefijo distingue su grupo. Ambas barras se combinan con filtros de columna y ordenamiento, recuperan la consulta desde la URL y conservan el foco al escribir. Limpiar búsqueda conserva filtros y ordenamiento; limpiar filtros conserva búsqueda y ordenamiento. Los estados sin coincidencias mantienen barras y cabeceras. Las capturas a 375 y 1440 px se inspeccionaron visualmente; los datos guardados de usuario conservaron su SHA-256.
 
 ## Abastecimiento, desasignación y adjunto de factura
 
@@ -42,7 +46,7 @@ La factura AUR-00128 abrió con sus asociaciones marcadas y sin cambios pendient
 
 ## Filtros de columnas de Facturas
 
-Las ocho pruebas de `tests/invoice-table.test.ts` verifican texto normalizado con ceros y signos, consulta del proveedor por nombres y NIT, intervalos por día de Bogotá, cantidades enteras con cero, selección múltiple, combinación de columnas, ordenamiento y recuperación de URL. La presencia documental corresponde al propietario factura; las condiciones y el ordenamiento ajenos a las columnas disponibles se descartan al leer una URL.
+Las diez pruebas de `tests/invoice-table.test.ts` verifican texto normalizado con ceros y signos, consulta del proveedor por nombres y NIT, intervalos por día de Bogotá, cantidades enteras con cero, selección múltiple, combinación de columnas, ordenamiento y recuperación de URL. La presencia documental corresponde al propietario factura; las condiciones y el ordenamiento ajenos a las columnas disponibles se descartan al leer una URL.
 
 El recorrido de navegador comprobó los cinco menús, la combinación de proveedor y recepciones, la consulta de cero recepciones, los intervalos y su error enfocado, el ordenamiento de texto, fecha y cantidad, y la recarga de una URL filtrada. Documentos muestra exactamente **Con documento** y **Sin documento**, y sus resultados coinciden con el archivo de cada factura. Pulsar el texto del valor alterna la casilla manteniendo el menú abierto. El estado vacío conserva las cabeceras y permite quitar el filtro para recuperar el listado completo.
 
@@ -129,7 +133,7 @@ Los destinatarios y los documentos resueltos para liberar el lote MAT-26-041 inc
 
 ## Paquete portable
 
-El **13 de octubre de 2026** se generó [GIMED-Prototipo-Windows-x64.zip](../GIMED-Prototipo-Windows-x64.zip) en la raíz del proyecto, con Node.js **v24.17.0**, 72 paquetes de ejecución y datos ficticios iniciales. El ejecutable incluido coincide con el SHA-256 de la distribución oficial. El tamaño del ZIP es aproximadamente **40,2 MB**. La [suma SHA-256](../GIMED-Prototipo-Windows-x64.sha256.txt) del archivo es `82911547e51dc836665fca1fa2fe907dc1d727fec62ece0caa59a799edd0ea72`.
+El **13 de octubre de 2026** se generó [GIMED-Prototipo-Windows-x64.zip](../GIMED-Prototipo-Windows-x64.zip) en la raíz del proyecto, con Node.js **v24.17.0**, 72 paquetes de ejecución y datos ficticios iniciales. El ejecutable incluido coincide con el SHA-256 de la distribución oficial. El tamaño del ZIP es aproximadamente **40,2 MB**. La [suma SHA-256](../GIMED-Prototipo-Windows-x64.sha256.txt) del archivo es `b70484cd758fe5f445bd7b48b8bd7c6863d89f43f663f687dfc9b0d4a503b736`.
 
 Pasaron **17 comprobaciones** mediante `npm run test:portable`. El archivo se extrajo fuera de `prototipo`, en una ruta con espacios y acentos, y se ejecutó **Iniciar.cmd** con un PATH sin Node ni npm. Se comprobó el servicio, las 28 colecciones, los archivos de la interfaz, la carga en Chrome, las 17 variantes y ayuda de los 13 filtros con Escape y foco, la reutilización de la instancia existente, el guardado de una modificación, el cierre con Enter y la recuperación íntegra después de reiniciar. El archivo de datos del proyecto conservó su contenido.
 
@@ -169,6 +173,8 @@ Los archivos están en `tests/evidence`:
 | `49-drawer-redimensionado-375.png`, `50-factura-lotes-precargados.png` | Drawer flotante tras reducir la ventana y selección inicial de la factura |
 | `51-abastecimiento-columnas-375.png`, `51-abastecimiento-columnas-1440.png` | Menús de columnas de vínculos entre órdenes |
 | `52-factura-adjunto-placeholder.png`, `53-factura-desasignacion.png` | Adjunto preparado en la creación y desasignación persistida de un lote |
+| `54-facturas-busqueda-375.png`, `54-facturas-busqueda-1440.png` | Búsqueda de facturas combinada con ordenamiento |
+| `55-vinculos-busqueda-375.png`, `55-vinculos-busqueda-1440.png` | Búsqueda por OC y filtros de columna en vínculos |
 
 Para repetir la revisión automatizada ejecuta `npm test`, `npm run test:browser`, `npm run test:filters` y `npm run benchmark:filters`. Los reportes y las capturas se actualizan con cada ejecución; el archivo de datos de usuario permanece separado.
 

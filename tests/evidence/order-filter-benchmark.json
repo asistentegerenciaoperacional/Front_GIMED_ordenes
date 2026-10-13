@@ -1,0 +1,1291 @@
+{
+  "generatedAt": "2026-10-09T15:48:53.782Z",
+  "fixtureDay": "2026-10-09",
+  "environment": {
+    "node": "v24.17.0",
+    "cpu": "Intel(R) Core(TM) i5-14500",
+    "platform": "win32",
+    "osRelease": "10.0.26200"
+  },
+  "sourceSha256": {
+    "src/order-read-model.ts": "028c5720df8fd16a25f42f58b35cfa3d006eebd087fd0835ed033a10bf808a53",
+    "src/order-filters.ts": "04f9630a5c16cb3a47a395603bbb9dc941de7e4b707e86f48f68cee8cf7f3561",
+    "scripts/benchmark-order-filters.ts": "15c6dcb4d1810de53908fa5772853c297cacb9bc8354f76c9ef548f31093dcd9",
+    "tests/fixtures/order-performance.ts": "835e6164bbd8fc8f3663c184c350cf917641b54f17e292ac8e40b0cf6da2f32f"
+  },
+  "methodology": {
+    "implementation": "Actual buildOrderReadModel/filterCustomOrders, including production calendarDay normalization, totals and search text.",
+    "reference": "Independent predicates on grouped raw records; no production summary, date conversion or predicate reused. Group construction timed separately.",
+    "equivalence": "All 17 ordered ID arrays, both fixture sizes; includes the 13 filter families.",
+    "excluded": [
+      "HTTP",
+      "React/DOM",
+      "disk/database persistence",
+      "full JsonStore validation at production sizes"
+    ],
+    "fullIntegritySmallFixture": {
+      "passed": true,
+      "lotCount": 60
+    },
+    "dataPolicy": "Only generated in-memory fixtures; never opens data/database.json."
+  },
+  "browser": {
+    "status": "measured_separately",
+    "report": "order-filters-browser-report.json",
+    "date": "2026-10-09T16:12:25.477Z",
+    "note": "El benchmark de CPU conserva sus muestras originales. Las mediciones compiladas de navegador se completaron en un recorrido independiente y se documentan en RENDIMIENTO.md."
+  },
+  "scenarios": [
+    {
+      "lotCount": 6000,
+      "counts": {
+        "productos": 5,
+        "codigos_barras": 8,
+        "proveedor": 5,
+        "direccion_proveedor": 5,
+        "contacto": 5,
+        "categorias": 2,
+        "costos_maquila": 4,
+        "tipos_materiales": 6,
+        "materiales": 7,
+        "materiales_asociados": 7,
+        "producto_corrugado": 5,
+        "proveedores_favoritos": 8,
+        "orden_compra": 1500,
+        "orden_producto": 3000,
+        "lote_producto": 6000,
+        "orden_material": 1200,
+        "lote_material": 1,
+        "orden_otro": 300,
+        "abastecimiento_material": 1500,
+        "factura": 3,
+        "documento": 756,
+        "parametros_seguimiento": 1,
+        "consecutivo_orden": 2,
+        "contacto_interno": 5,
+        "destinatario_evento": 6,
+        "adjunto_evento": 3,
+        "correo_enviado": 1,
+        "correo_enviado_destinatario": 1
+      },
+      "bytes": 5360126,
+      "fixtureSha256": "50660744ed33e7ad2d87d9f906b02baabf70371c9a7128e7144818cecfd49f51",
+      "validation": {
+        "passed": true,
+        "rows": 14346,
+        "schemaKeysAndForeignKeys": true,
+        "invoiceProviderOwnership": true
+      },
+      "readModel": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 23.163,
+        "p95Ms": 25.38,
+        "minMs": 22.661,
+        "maxMs": 25.38
+      },
+      "snapshotClone": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 15.781,
+        "p95Ms": 18.025,
+        "minMs": 15.302,
+        "maxMs": 18.025
+      },
+      "jsonSerialize": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 7.163,
+        "p95Ms": 7.349,
+        "minMs": 6.894,
+        "maxMs": 7.349
+      },
+      "jsonParse": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 6.684,
+        "p95Ms": 9.709,
+        "minMs": 6.249,
+        "maxMs": 9.709
+      },
+      "referencePreparation": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 1.149,
+        "p95Ms": 1.191,
+        "minMs": 0.941,
+        "maxMs": 1.191
+      },
+      "documentMapIdentity": true,
+      "fixtureUnchanged": true,
+      "variants": [
+        {
+          "id": "documento_con",
+          "label": "Con documento de la orden",
+          "matches": 750,
+          "orderedIdsSha256": "3f0402cda6800ff3b4f988b6657c03a38fe24a35c69f785e4fc14b9cfb5d0e63",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.016,
+            "p95Ms": 0.029,
+            "minMs": 0.013,
+            "maxMs": 0.029
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 7.775,
+            "p95Ms": 7.933,
+            "minMs": 7.715,
+            "maxMs": 7.933
+          }
+        },
+        {
+          "id": "documento_sin",
+          "label": "Sin documento de la orden",
+          "matches": 750,
+          "orderedIdsSha256": "3af1bb548a3537b4b08fd86eb4d6e20dbe589fe1cd823cb2e30f060c0666f5ce",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.015,
+            "p95Ms": 0.017,
+            "minMs": 0.011,
+            "maxMs": 0.017
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 7.89,
+            "p95Ms": 8.194,
+            "minMs": 7.758,
+            "maxMs": 8.194
+          }
+        },
+        {
+          "id": "recepciones_sin_factura",
+          "label": "Recepciones sin factura",
+          "matches": 585,
+          "orderedIdsSha256": "0834bfe927f48420d7108ec36bcff4f5c7a354146d53aa53ad6b1820ac7184b3",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.017,
+            "p95Ms": 0.03,
+            "minMs": 0.013,
+            "maxMs": 0.03
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.799,
+            "p95Ms": 1.566,
+            "minMs": 0.682,
+            "maxMs": 1.566
+          }
+        },
+        {
+          "id": "entrega_vencida",
+          "label": "Entrega solicitada vencida",
+          "matches": 314,
+          "orderedIdsSha256": "195e4095850ae0606f47a30c37c888888b3471412e2319430c44b671a9246cfd",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.016,
+            "p95Ms": 0.026,
+            "minMs": 0.015,
+            "maxMs": 0.026
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 2.233,
+            "p95Ms": 2.235,
+            "minMs": 2.132,
+            "maxMs": 2.235
+          }
+        },
+        {
+          "id": "proximas_7",
+          "label": "Próximas entregas · 7 días",
+          "matches": 300,
+          "orderedIdsSha256": "eaf0dd6e75ad1512b730154a6c6cbd641812ac79d86a8b2cbf1b123e5e444074",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.023,
+            "p95Ms": 0.042,
+            "minMs": 0.017,
+            "maxMs": 0.042
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 3.466,
+            "p95Ms": 3.532,
+            "minMs": 3.386,
+            "maxMs": 3.532
+          }
+        },
+        {
+          "id": "proximas_15",
+          "label": "Próximas entregas · 15 días",
+          "matches": 600,
+          "orderedIdsSha256": "be605b2b1bf147198df97bf1ca6260613b23df609c0de15fe2d5186dde56510a",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.022,
+            "p95Ms": 0.024,
+            "minMs": 0.019,
+            "maxMs": 0.024
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 3.562,
+            "p95Ms": 3.875,
+            "minMs": 3.497,
+            "maxMs": 3.875
+          }
+        },
+        {
+          "id": "proximas_30",
+          "label": "Próximas entregas · 30 días",
+          "matches": 899,
+          "orderedIdsSha256": "acace3bc804a2b0bec84e5087a81f89b11e503d0b0c91715d672b641ae97b5f7",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.026,
+            "p95Ms": 0.07,
+            "minMs": 0.022,
+            "maxMs": 0.07
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 3.537,
+            "p95Ms": 4.152,
+            "minMs": 3.417,
+            "maxMs": 4.152
+          }
+        },
+        {
+          "id": "sin_recepciones",
+          "label": "Sin recepciones registradas",
+          "matches": 116,
+          "orderedIdsSha256": "ecea59a410e799f63f134c46b7147e0848ee8492e06a35798a338fa1d940be7d",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.013,
+            "p95Ms": 0.064,
+            "minMs": 0.012,
+            "maxMs": 0.064
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.528,
+            "p95Ms": 0.595,
+            "minMs": 0.485,
+            "maxMs": 0.595
+          }
+        },
+        {
+          "id": "batch_vencido",
+          "label": "Batch record vencido",
+          "matches": 994,
+          "orderedIdsSha256": "e6b52be1cb844cf0d660edf4d332c9540bb3f68240be062c768cef0bf478bcb0",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.019,
+            "p95Ms": 0.067,
+            "minMs": 0.017,
+            "maxMs": 0.067
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 2.244,
+            "p95Ms": 2.274,
+            "minMs": 2.155,
+            "maxMs": 2.274
+          }
+        },
+        {
+          "id": "recibido_sin_batch",
+          "label": "Producto recibido sin batch record",
+          "matches": 998,
+          "orderedIdsSha256": "7456ca3260c8b79447aad3fab971caa494f016956509e9ee14acca3cc268aa6b",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.014,
+            "p95Ms": 0.032,
+            "minMs": 0.014,
+            "maxMs": 0.032
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.518,
+            "p95Ms": 0.675,
+            "minMs": 0.5,
+            "maxMs": 0.675
+          }
+        },
+        {
+          "id": "inspeccion_pendiente",
+          "label": "Inspección pendiente",
+          "matches": 847,
+          "orderedIdsSha256": "a21d5f5f2c8956dc3fe92e8c350fd4bcbaa08589f73f00075166e55cbb88a687",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.014,
+            "p95Ms": 0.024,
+            "minMs": 0.014,
+            "maxMs": 0.024
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.538,
+            "p95Ms": 0.628,
+            "minMs": 0.537,
+            "maxMs": 0.628
+          }
+        },
+        {
+          "id": "recibidos_sin_inspeccion",
+          "label": "Recibidos sin inspección",
+          "matches": 1000,
+          "orderedIdsSha256": "fcd3f3d8a5f6df0d551ef45202996931890ad8f02425aedd187ba4fe843937a8",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.015,
+            "p95Ms": 0.031,
+            "minMs": 0.014,
+            "maxMs": 0.031
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.523,
+            "p95Ms": 0.619,
+            "minMs": 0.501,
+            "maxMs": 0.619
+          }
+        },
+        {
+          "id": "confirmacion_pendiente",
+          "label": "Confirmación pendiente",
+          "matches": 998,
+          "orderedIdsSha256": "7456ca3260c8b79447aad3fab971caa494f016956509e9ee14acca3cc268aa6b",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.016,
+            "p95Ms": 0.028,
+            "minMs": 0.014,
+            "maxMs": 0.028
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.518,
+            "p95Ms": 0.69,
+            "minMs": 0.498,
+            "maxMs": 0.69
+          }
+        },
+        {
+          "id": "seguimiento_por_cerrar",
+          "label": "Seguimiento por cerrar",
+          "matches": 486,
+          "orderedIdsSha256": "40b4fa635d265389e8843bd1b443701827543ab6be96f98949a2584f397f4d28",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.013,
+            "p95Ms": 0.027,
+            "minMs": 0.013,
+            "maxMs": 0.027
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.693,
+            "p95Ms": 1.016,
+            "minMs": 0.678,
+            "maxMs": 1.016
+          }
+        },
+        {
+          "id": "vinculos_con",
+          "label": "Con vínculos de abastecimiento",
+          "matches": 1400,
+          "orderedIdsSha256": "beb61d2e45a0706d86b1d53342f3df9a0d1f2cf243183fc16927b1cdcf684314",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.02,
+            "p95Ms": 0.196,
+            "minMs": 0.016,
+            "maxMs": 0.196
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.493,
+            "p95Ms": 0.591,
+            "minMs": 0.492,
+            "maxMs": 0.591
+          }
+        },
+        {
+          "id": "vinculos_sin",
+          "label": "Sin vínculos de abastecimiento",
+          "matches": 100,
+          "orderedIdsSha256": "67045552aa9938788abdd0fa48a091ae0d582041b0ede20e1f95fe91c0fe86dd",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.01,
+            "p95Ms": 0.01,
+            "minMs": 0.01,
+            "maxMs": 0.01
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 0.457,
+            "p95Ms": 0.462,
+            "minMs": 0.454,
+            "maxMs": 0.462
+          }
+        },
+        {
+          "id": "ocm_pendientes",
+          "label": "OCM vinculadas pendientes",
+          "matches": 809,
+          "orderedIdsSha256": "1f16c0ddd373bcffbd9f22ccef598c78190b419a1d64cbc17921baa928c6a8bd",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.015,
+            "p95Ms": 0.034,
+            "minMs": 0.014,
+            "maxMs": 0.034
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 7.018,
+            "p95Ms": 7.127,
+            "minMs": 7.002,
+            "maxMs": 7.127
+          }
+        }
+      ],
+      "families": [
+        {
+          "id": "documento",
+          "name": "Documento de la orden",
+          "relations": "orden → documento escaneado",
+          "naive": "O(N·D)",
+          "indexed": "O(N+D)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "documento_con",
+            "documento_sin"
+          ]
+        },
+        {
+          "id": "sin_factura",
+          "name": "Recepciones sin factura",
+          "relations": "orden → renglones → lotes; recepción material/otros",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "recepciones_sin_factura"
+          ]
+        },
+        {
+          "id": "entrega_vencida",
+          "name": "Entrega solicitada vencida",
+          "relations": "fecha de cabecera y renglón abierto",
+          "naive": "O(N·R)",
+          "indexed": "O(N+R)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "entrega_vencida"
+          ]
+        },
+        {
+          "id": "proximas",
+          "name": "Próximas entregas",
+          "relations": "fecha de cabecera",
+          "naive": "O(N)",
+          "indexed": "O(N)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "proximas_7",
+            "proximas_15",
+            "proximas_30"
+          ]
+        },
+        {
+          "id": "sin_recepciones",
+          "name": "Sin recepciones registradas",
+          "relations": "cantidades no nulas de renglones/lotes efectivos",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "sin_recepciones"
+          ]
+        },
+        {
+          "id": "batch_vencido",
+          "name": "Batch record vencido",
+          "relations": "lote: estimación y fecha real BR",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "batch_vencido"
+          ]
+        },
+        {
+          "id": "recibido_sin_batch",
+          "name": "Producto recibido sin batch record",
+          "relations": "mismo lote: recepción física y fecha BR",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "recibido_sin_batch"
+          ]
+        },
+        {
+          "id": "inspeccion",
+          "name": "Inspección pendiente",
+          "relations": "mismo lote: fecha BR y fecha inspección",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "inspeccion_pendiente"
+          ]
+        },
+        {
+          "id": "recibidos_sin_inspeccion",
+          "name": "Recibidos sin inspección",
+          "relations": "mismo lote: recepción física y fecha inspección",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "recibidos_sin_inspeccion"
+          ]
+        },
+        {
+          "id": "confirmacion",
+          "name": "Confirmación pendiente",
+          "relations": "mismo lote: recepción física y fecha confirmación",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "confirmacion_pendiente"
+          ]
+        },
+        {
+          "id": "por_cerrar",
+          "name": "Seguimiento por cerrar",
+          "relations": "renglón abierto y todos sus lotes efectivos",
+          "naive": "O(N·R+R·L)",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "seguimiento_por_cerrar"
+          ]
+        },
+        {
+          "id": "vinculos",
+          "name": "Vínculos de abastecimiento",
+          "relations": "relaciones existentes en ambas direcciones",
+          "naive": "O(N·(R+A))",
+          "indexed": "O(N+R+A)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "vinculos_con",
+            "vinculos_sin"
+          ]
+        },
+        {
+          "id": "ocm_pendientes",
+          "name": "OCM vinculadas pendientes",
+          "relations": "renglón producto → vínculo → renglón material",
+          "naive": "O(N·(R+A)+A·R)",
+          "indexed": "O(N+R+A)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "ocm_pendientes"
+          ]
+        }
+      ]
+    },
+    {
+      "lotCount": 60000,
+      "counts": {
+        "productos": 5,
+        "codigos_barras": 8,
+        "proveedor": 5,
+        "direccion_proveedor": 5,
+        "contacto": 5,
+        "categorias": 2,
+        "costos_maquila": 4,
+        "tipos_materiales": 6,
+        "materiales": 7,
+        "materiales_asociados": 7,
+        "producto_corrugado": 5,
+        "proveedores_favoritos": 8,
+        "orden_compra": 15000,
+        "orden_producto": 30000,
+        "lote_producto": 60000,
+        "orden_material": 12000,
+        "lote_material": 1,
+        "orden_otro": 3000,
+        "abastecimiento_material": 15000,
+        "factura": 3,
+        "documento": 7506,
+        "parametros_seguimiento": 1,
+        "consecutivo_orden": 2,
+        "contacto_interno": 5,
+        "destinatario_evento": 6,
+        "adjunto_evento": 3,
+        "correo_enviado": 1,
+        "correo_enviado_destinatario": 1
+      },
+      "bytes": 53474829,
+      "fixtureSha256": "eee36c0ad23bad9cbeeca5806ca14edfdb25ec26a3f5683986243b8658516f34",
+      "validation": {
+        "passed": true,
+        "rows": 142596,
+        "schemaKeysAndForeignKeys": true,
+        "invoiceProviderOwnership": true
+      },
+      "readModel": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 261.176,
+        "p95Ms": 299.203,
+        "minMs": 248.672,
+        "maxMs": 299.203
+      },
+      "snapshotClone": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 185.207,
+        "p95Ms": 248.582,
+        "minMs": 180.15,
+        "maxMs": 248.582
+      },
+      "jsonSerialize": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 79.664,
+        "p95Ms": 132.916,
+        "minMs": 76.171,
+        "maxMs": 132.916
+      },
+      "jsonParse": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 73.304,
+        "p95Ms": 86.943,
+        "minMs": 64.185,
+        "maxMs": 86.943
+      },
+      "referencePreparation": {
+        "samples": 7,
+        "warmups": 1,
+        "medianMs": 23.63,
+        "p95Ms": 32.97,
+        "minMs": 21.624,
+        "maxMs": 32.97
+      },
+      "documentMapIdentity": true,
+      "fixtureUnchanged": true,
+      "variants": [
+        {
+          "id": "documento_con",
+          "label": "Con documento de la orden",
+          "matches": 7500,
+          "orderedIdsSha256": "c9f4246800cc22c2abae17a367a54d5fe0cec6815893151c4da54988454b5d6a",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.121,
+            "p95Ms": 0.162,
+            "minMs": 0.1,
+            "maxMs": 0.162
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 1098.023,
+            "p95Ms": 1126.242,
+            "minMs": 1088.419,
+            "maxMs": 1126.242
+          }
+        },
+        {
+          "id": "documento_sin",
+          "label": "Sin documento de la orden",
+          "matches": 7500,
+          "orderedIdsSha256": "36281036f93dbbdd1efa0d19d3f54901760cbbc47ddf1184601975f38d7b11f8",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.119,
+            "p95Ms": 0.225,
+            "minMs": 0.106,
+            "maxMs": 0.225
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 1089.939,
+            "p95Ms": 1148.158,
+            "minMs": 1074.038,
+            "maxMs": 1148.158
+          }
+        },
+        {
+          "id": "recepciones_sin_factura",
+          "label": "Recepciones sin factura",
+          "matches": 5872,
+          "orderedIdsSha256": "bbd2ad0b516f2b0f59d20595705b39a6cd654e932b55f7c23e28cedd3e75fe2a",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.117,
+            "p95Ms": 0.154,
+            "minMs": 0.11,
+            "maxMs": 0.154
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 13.168,
+            "p95Ms": 13.319,
+            "minMs": 13.129,
+            "maxMs": 13.319
+          }
+        },
+        {
+          "id": "entrega_vencida",
+          "label": "Entrega solicitada vencida",
+          "matches": 3137,
+          "orderedIdsSha256": "22971706282a9f23deb488307e3c4d1ff22971db491e3296cc1496e124d69310",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.171,
+            "p95Ms": 0.181,
+            "minMs": 0.164,
+            "maxMs": 0.181
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 31.903,
+            "p95Ms": 31.998,
+            "minMs": 31.444,
+            "maxMs": 31.998
+          }
+        },
+        {
+          "id": "proximas_7",
+          "label": "Próximas entregas · 7 días",
+          "matches": 2999,
+          "orderedIdsSha256": "c336941e7b660d4e57d238ca889a1a2fe6b09a4b5e6b48fc48b6ca4156c2185c",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.19,
+            "p95Ms": 0.196,
+            "minMs": 0.184,
+            "maxMs": 0.196
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 46.633,
+            "p95Ms": 46.961,
+            "minMs": 45.477,
+            "maxMs": 46.961
+          }
+        },
+        {
+          "id": "proximas_15",
+          "label": "Próximas entregas · 15 días",
+          "matches": 5999,
+          "orderedIdsSha256": "5710da446f6da11163dab281d65cd04b9479853420f74cb4f4b52dad54fb803b",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.195,
+            "p95Ms": 0.443,
+            "minMs": 0.19,
+            "maxMs": 0.443
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 45.061,
+            "p95Ms": 45.556,
+            "minMs": 45.037,
+            "maxMs": 45.556
+          }
+        },
+        {
+          "id": "proximas_30",
+          "label": "Próximas entregas · 30 días",
+          "matches": 8999,
+          "orderedIdsSha256": "684f5a6029a51acc5a391bcf5f5e5203db1a14724a20f60288d840b4fdffe9eb",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.208,
+            "p95Ms": 0.22,
+            "minMs": 0.207,
+            "maxMs": 0.22
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 45.019,
+            "p95Ms": 51.187,
+            "minMs": 44.468,
+            "maxMs": 51.187
+          }
+        },
+        {
+          "id": "sin_recepciones",
+          "label": "Sin recepciones registradas",
+          "matches": 1155,
+          "orderedIdsSha256": "8f2bb451fa080d4b301da3fa564b75e2f7bd691d01bffdb2580473ddd76f6103",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.096,
+            "p95Ms": 0.116,
+            "minMs": 0.093,
+            "maxMs": 0.116
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 11.848,
+            "p95Ms": 12.352,
+            "minMs": 11.575,
+            "maxMs": 12.352
+          }
+        },
+        {
+          "id": "batch_vencido",
+          "label": "Batch record vencido",
+          "matches": 9944,
+          "orderedIdsSha256": "38b1d4da55490d9aa7e3a4281db15fa25a7a8adf0c1cacae0aedb31930bb3fa9",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.153,
+            "p95Ms": 0.159,
+            "minMs": 0.15,
+            "maxMs": 0.159
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 31.487,
+            "p95Ms": 39.392,
+            "minMs": 31.306,
+            "maxMs": 39.392
+          }
+        },
+        {
+          "id": "recibido_sin_batch",
+          "label": "Producto recibido sin batch record",
+          "matches": 9984,
+          "orderedIdsSha256": "17c261c05398aaaac00a1c7cd4fcbd2a34055033ddd6cd6b34d84d23e5bffa41",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.151,
+            "p95Ms": 0.174,
+            "minMs": 0.138,
+            "maxMs": 0.174
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 11.114,
+            "p95Ms": 13.463,
+            "minMs": 10.628,
+            "maxMs": 13.463
+          }
+        },
+        {
+          "id": "inspeccion_pendiente",
+          "label": "Inspección pendiente",
+          "matches": 8467,
+          "orderedIdsSha256": "dd49f4bf7634de6f9abb23f524ad0cab11ab5df45a5d8aa0ad77bbaaca60a1d9",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.141,
+            "p95Ms": 0.159,
+            "minMs": 0.131,
+            "maxMs": 0.159
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 13.52,
+            "p95Ms": 13.941,
+            "minMs": 12.869,
+            "maxMs": 13.941
+          }
+        },
+        {
+          "id": "recibidos_sin_inspeccion",
+          "label": "Recibidos sin inspección",
+          "matches": 9988,
+          "orderedIdsSha256": "707e9e74777dc37c7cd92e756c0dc2facdbbe92c416af28633a07427cc1516b5",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.129,
+            "p95Ms": 0.142,
+            "minMs": 0.126,
+            "maxMs": 0.142
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 11.831,
+            "p95Ms": 11.904,
+            "minMs": 11.59,
+            "maxMs": 11.904
+          }
+        },
+        {
+          "id": "confirmacion_pendiente",
+          "label": "Confirmación pendiente",
+          "matches": 9984,
+          "orderedIdsSha256": "17c261c05398aaaac00a1c7cd4fcbd2a34055033ddd6cd6b34d84d23e5bffa41",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.132,
+            "p95Ms": 0.142,
+            "minMs": 0.124,
+            "maxMs": 0.142
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 11.229,
+            "p95Ms": 11.418,
+            "minMs": 10.775,
+            "maxMs": 11.418
+          }
+        },
+        {
+          "id": "seguimiento_por_cerrar",
+          "label": "Seguimiento por cerrar",
+          "matches": 4842,
+          "orderedIdsSha256": "625ecf40056865dc67718ada37edb5f91a4b3f99ba4852de9f9f06fec3ebe5af",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.114,
+            "p95Ms": 0.122,
+            "minMs": 0.111,
+            "maxMs": 0.122
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 11.364,
+            "p95Ms": 11.884,
+            "minMs": 10.687,
+            "maxMs": 11.884
+          }
+        },
+        {
+          "id": "vinculos_con",
+          "label": "Con vínculos de abastecimiento",
+          "matches": 14000,
+          "orderedIdsSha256": "3dd598dc2460b5015ccda155caed7b716bd77fac5356b18cdcd9e8ba64654092",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.135,
+            "p95Ms": 0.144,
+            "minMs": 0.132,
+            "maxMs": 0.144
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 9.784,
+            "p95Ms": 10.164,
+            "minMs": 9.41,
+            "maxMs": 10.164
+          }
+        },
+        {
+          "id": "vinculos_sin",
+          "label": "Sin vínculos de abastecimiento",
+          "matches": 1000,
+          "orderedIdsSha256": "f7e3d5f20d3eb3deb4550b26e7e57f4e7ed82d467661e5ea5e98331379058b2f",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.097,
+            "p95Ms": 0.102,
+            "minMs": 0.097,
+            "maxMs": 0.102
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 8.908,
+            "p95Ms": 10.164,
+            "minMs": 8.823,
+            "maxMs": 10.164
+          }
+        },
+        {
+          "id": "ocm_pendientes",
+          "label": "OCM vinculadas pendientes",
+          "matches": 8105,
+          "orderedIdsSha256": "b4dff64fcf237cc2985a0b3fd46b97591146e2d1d19aa06042a685e7891e86a1",
+          "equivalent": true,
+          "selection": {
+            "samples": 11,
+            "warmups": 2,
+            "medianMs": 0.137,
+            "p95Ms": 0.142,
+            "minMs": 0.132,
+            "maxMs": 0.142
+          },
+          "reference": {
+            "samples": 3,
+            "warmups": 1,
+            "medianMs": 635.659,
+            "p95Ms": 652.707,
+            "minMs": 630.226,
+            "maxMs": 652.707
+          }
+        }
+      ],
+      "families": [
+        {
+          "id": "documento",
+          "name": "Documento de la orden",
+          "relations": "orden → documento escaneado",
+          "naive": "O(N·D)",
+          "indexed": "O(N+D)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "documento_con",
+            "documento_sin"
+          ]
+        },
+        {
+          "id": "sin_factura",
+          "name": "Recepciones sin factura",
+          "relations": "orden → renglones → lotes; recepción material/otros",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "recepciones_sin_factura"
+          ]
+        },
+        {
+          "id": "entrega_vencida",
+          "name": "Entrega solicitada vencida",
+          "relations": "fecha de cabecera y renglón abierto",
+          "naive": "O(N·R)",
+          "indexed": "O(N+R)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "entrega_vencida"
+          ]
+        },
+        {
+          "id": "proximas",
+          "name": "Próximas entregas",
+          "relations": "fecha de cabecera",
+          "naive": "O(N)",
+          "indexed": "O(N)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "proximas_7",
+            "proximas_15",
+            "proximas_30"
+          ]
+        },
+        {
+          "id": "sin_recepciones",
+          "name": "Sin recepciones registradas",
+          "relations": "cantidades no nulas de renglones/lotes efectivos",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "sin_recepciones"
+          ]
+        },
+        {
+          "id": "batch_vencido",
+          "name": "Batch record vencido",
+          "relations": "lote: estimación y fecha real BR",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "batch_vencido"
+          ]
+        },
+        {
+          "id": "recibido_sin_batch",
+          "name": "Producto recibido sin batch record",
+          "relations": "mismo lote: recepción física y fecha BR",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "recibido_sin_batch"
+          ]
+        },
+        {
+          "id": "inspeccion",
+          "name": "Inspección pendiente",
+          "relations": "mismo lote: fecha BR y fecha inspección",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "inspeccion_pendiente"
+          ]
+        },
+        {
+          "id": "recibidos_sin_inspeccion",
+          "name": "Recibidos sin inspección",
+          "relations": "mismo lote: recepción física y fecha inspección",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "recibidos_sin_inspeccion"
+          ]
+        },
+        {
+          "id": "confirmacion",
+          "name": "Confirmación pendiente",
+          "relations": "mismo lote: recepción física y fecha confirmación",
+          "naive": "O(N·(R+L))",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "confirmacion_pendiente"
+          ]
+        },
+        {
+          "id": "por_cerrar",
+          "name": "Seguimiento por cerrar",
+          "relations": "renglón abierto y todos sus lotes efectivos",
+          "naive": "O(N·R+R·L)",
+          "indexed": "O(N+R+L)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "seguimiento_por_cerrar"
+          ]
+        },
+        {
+          "id": "vinculos",
+          "name": "Vínculos de abastecimiento",
+          "relations": "relaciones existentes en ambas direcciones",
+          "naive": "O(N·(R+A))",
+          "indexed": "O(N+R+A)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "vinculos_con",
+            "vinculos_sin"
+          ]
+        },
+        {
+          "id": "ocm_pendientes",
+          "name": "OCM vinculadas pendientes",
+          "relations": "renglón producto → vínculo → renglón material",
+          "naive": "O(N·(R+A)+A·R)",
+          "indexed": "O(N+R+A)",
+          "selectionComplexity": "O(N)",
+          "variants": [
+            "ocm_pendientes"
+          ]
+        }
+      ]
+    }
+  ],
+  "checksum": 15999
+}

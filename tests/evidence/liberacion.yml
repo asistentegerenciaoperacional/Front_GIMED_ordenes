@@ -1,0 +1,225 @@
+- generic [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - generic [ref=f3e3]:
+      - link "Saltar al contenido" [ref=f3e4] [cursor=pointer]:
+        - /url: "#main-content"
+      - complementary [ref=f3e5]:
+        - generic [ref=f3e11]:
+          - strong [ref=f3e12]: GIMED
+          - generic [ref=f3e13]: Gestión de compras
+        - generic [ref=f3e14]: OPERACIÓN
+        - navigation "Navegación principal" [ref=f3e15]:
+          - link "Órdenes de compra" [ref=f3e16] [cursor=pointer]:
+            - /url: "#/ordenes"
+          - link "Abastecimiento" [ref=f3e20] [cursor=pointer]:
+            - /url: "#/abastecimiento"
+          - link "Facturas" [ref=f3e31] [cursor=pointer]:
+            - /url: "#/facturas"
+          - link "Catálogos" [ref=f3e34] [cursor=pointer]:
+            - /url: "#/catalogos"
+          - link "Proveedores" [ref=f3e39] [cursor=pointer]:
+            - /url: "#/proveedores"
+          - link "Códigos de barras" [ref=f3e44] [cursor=pointer]:
+            - /url: "#/codigos"
+          - link "Documentos" [ref=f3e46] [cursor=pointer]:
+            - /url: "#/documentos"
+          - link "Correos" [ref=f3e49] [cursor=pointer]:
+            - /url: "#/correos"
+        - navigation "Configuración" [ref=f3e54]:
+          - link "Configuración" [ref=f3e55] [cursor=pointer]:
+            - /url: "#/configuracion"
+        - generic [ref=f3e59]:
+          - generic [ref=f3e63]:
+            - strong [ref=f3e64]: Prototipo local
+            - generic [ref=f3e65]: Documentos y correos simulados. Datos guardados en este equipo.
+          - generic [ref=f3e66]:
+            - generic [ref=f3e67]: GI
+            - generic [ref=f3e68]:
+              - strong [ref=f3e69]: Espacio de GIMED
+              - text: Datos de demostración
+      - generic [ref=f3e70]:
+        - banner [ref=f3e71]:
+          - generic [ref=f3e73]:
+            - generic [ref=f3e74]: Compras
+            - strong [ref=f3e77]: Órdenes de compra
+          - generic [ref=f3e78]:
+            - status [ref=f3e79]: Guardado local
+            - generic [ref=f3e81]: Demostración
+            - generic "Espacio GIMED" [ref=f3e84]: GI
+        - main [ref=f3e85]:
+          - link "Volver a órdenes" [ref=f3e86] [cursor=pointer]:
+            - /url: "#/ordenes"
+          - generic [ref=f3e89]:
+            - generic [ref=f3e90]:
+              - heading "Orden de compra 1606" [level=1] [ref=f3e91]
+              - paragraph [ref=f3e92]: Envases del Norte S.A.S. · Material
+            - generic [ref=f3e93]:
+              - button "Editar" [ref=f3e94] [cursor=pointer]
+              - link "Imprimir" [ref=f3e98] [cursor=pointer]:
+                - /url: "#/ordenes/3aa2c92d32e5be0ef2aff9df/imprimir"
+              - button "Correo" [ref=f3e103] [cursor=pointer]
+          - generic [ref=f3e107]:
+            - generic [ref=f3e108]:
+              - generic [ref=f3e109]:
+                - generic [ref=f3e110]:
+                  - heading "Información de la orden" [level=2] [ref=f3e111]
+                  - generic [ref=f3e112]: Autorizada
+                - generic [ref=f3e114]:
+                  - generic [ref=f3e115]:
+                    - term [ref=f3e116]: Proveedor
+                    - definition [ref=f3e117]: Envases del Norte S.A.S.
+                  - generic [ref=f3e118]:
+                    - term [ref=f3e119]: NIT
+                    - definition [ref=f3e120]: 900123403-3
+                  - generic [ref=f3e121]:
+                    - term [ref=f3e122]: Elaboración
+                    - definition [ref=f3e123]: 05 de oct de 2026
+                  - generic [ref=f3e124]:
+                    - term [ref=f3e125]: Entrega solicitada
+                    - definition [ref=f3e126]: 31 de oct de 2026
+                  - generic [ref=f3e127]:
+                    - term [ref=f3e128]: Autorización
+                    - definition [ref=f3e129]: 05 de oct de 2026
+              - generic [ref=f3e130]:
+                - generic [ref=f3e131]:
+                  - generic [ref=f3e132]:
+                    - heading "Renglones y recepciones" [level=2] [ref=f3e133]
+                    - paragraph [ref=f3e134]: Las cantidades y los estados se registran por renglón.
+                  - generic [ref=f3e135]: 1 de 7
+                - article [ref=f3e137]:
+                  - generic [ref=f3e138]:
+                    - generic [ref=f3e139]:
+                      - generic [ref=f3e140]: Renglón 1
+                      - heading "Envase ámbar 250 ml" [level=3] [ref=f3e141]
+                      - text: Código MAIA 101
+                    - generic [ref=f3e142]:
+                      - generic [ref=f3e143]: En seguimiento
+                      - button "Cerrar" [ref=f3e144] [cursor=pointer]
+                      - button "Anular" [ref=f3e145] [cursor=pointer]
+                  - generic [ref=f3e146]:
+                    - generic [ref=f3e147]:
+                      - generic [ref=f3e148]: Cantidad solicitada
+                      - strong [ref=f3e149]: "19.800"
+                    - generic [ref=f3e150]:
+                      - generic [ref=f3e151]: Precio unitario
+                      - strong [ref=f3e152]: $ 450,00
+                    - generic [ref=f3e153]:
+                      - generic [ref=f3e154]: Cantidad recibida
+                      - strong [ref=f3e155]: "19.800"
+                    - generic [ref=f3e156]:
+                      - generic [ref=f3e157]: Entrega recibida
+                      - strong [ref=f3e158]: 25 de oct de 2026
+                  - generic [ref=f3e159]:
+                    - generic [ref=f3e160]:
+                      - generic [ref=f3e161]:
+                        - heading "Recepción del renglón" [level=3] [ref=f3e162]
+                        - paragraph [ref=f3e163]: Factura ENV-00412 · Bodega de materiales · Lote MAT-26-041
+                      - button "Registrar / editar" [ref=f3e164] [cursor=pointer]
+                    - generic [ref=f3e168]:
+                      - generic [ref=f3e169]:
+                        - generic [ref=f3e170]:
+                          - heading "Documentos (2)" [level=3] [ref=f3e171]:
+                            - text: Documentos
+                            - generic [ref=f3e172]: (2)
+                          - button "Placeholder" [ref=f3e173] [cursor=pointer]
+                        - paragraph [ref=f3e175]: Archivos de demostración para recorrer el proceso.
+                        - generic [ref=f3e181]:
+                          - strong [ref=f3e182]: Calidad-MAT-26-041-actualizada.html
+                          - generic [ref=f3e183]: Certificado de calidad · 05 de oct de 2026
+                          - generic [ref=f3e184]:
+                            - link "Ver" [ref=f3e185] [cursor=pointer]:
+                              - /url: /api/documents/0000000000000000000000ac/content
+                            - link "Descargar" [ref=f3e186] [cursor=pointer]:
+                              - /url: /api/documents/0000000000000000000000ac/content?download=1
+                            - link "Imprimir" [ref=f3e187] [cursor=pointer]:
+                              - /url: /api/documents/0000000000000000000000ac/content
+                            - button "Sustituir" [ref=f3e188] [cursor=pointer]
+                            - button "Eliminar Calidad-MAT-26-041-actualizada.html" [ref=f3e255] [cursor=pointer]: Eliminar
+                        - generic [ref=f3e195]:
+                          - strong [ref=f3e196]: Liberacion-MAT-26-041.html
+                          - generic [ref=f3e197]: Certificado de liberación · 01 de oct de 2026
+                          - generic [ref=f3e198]:
+                            - link "Ver" [ref=f3e199] [cursor=pointer]:
+                              - /url: /api/documents/0000000000000000000000ad/content
+                            - link "Descargar" [ref=f3e200] [cursor=pointer]:
+                              - /url: /api/documents/0000000000000000000000ad/content?download=1
+                            - link "Imprimir" [ref=f3e201] [cursor=pointer]:
+                              - /url: /api/documents/0000000000000000000000ad/content
+                            - button "Sustituir" [ref=f3e202] [cursor=pointer]
+                            - button "Eliminar Liberacion-MAT-26-041.html" [ref=f3e203] [cursor=pointer]: Eliminar
+                      - generic [ref=f3e204]:
+                        - button "Enviar calidad" [ref=f3e205] [cursor=pointer]
+                        - button "Enviar liberación" [ref=f3e209] [cursor=pointer]
+                - generic [ref=f3e213]:
+                  - generic [ref=f3e214]: Total de la orden
+                  - strong [ref=f3e215]: $ 8.910.000,00
+            - complementary [ref=f3e216]:
+              - generic [ref=f3e218]:
+                - generic [ref=f3e219]:
+                  - heading "Documentos" [level=3] [ref=f3e220]
+                  - button "Placeholder" [ref=f3e221] [cursor=pointer]
+                - paragraph [ref=f3e223]: Archivos de demostración para recorrer el proceso.
+                - generic [ref=f3e224]: Sin documentos adjuntos.
+              - generic [ref=f3e228]:
+                - heading "Órdenes de producto vinculadas" [level=3] [ref=f3e229]
+                - link "OC 2801 Aurora · Autorizada" [ref=f3e230] [cursor=pointer]:
+                  - /url: "#/ordenes/000000000000000000000064"
+                  - generic [ref=f3e231]:
+                    - strong [ref=f3e232]: OC 2801
+                    - generic [ref=f3e233]: Aurora · Autorizada
+                - link "OC 2802 Andina · No autorizada" [ref=f3e236] [cursor=pointer]:
+                  - /url: "#/ordenes/000000000000000000000065"
+                  - generic [ref=f3e237]:
+                    - strong [ref=f3e238]: OC 2802
+                    - generic [ref=f3e239]: Andina · No autorizada
+              - generic [ref=f3e242]: Los documentos y los envíos son simulados. Las órdenes, recepciones y relaciones se guardan localmente.
+    - status [ref=f3e256]:
+      - generic [ref=f3e260]: Placeholder sustituido
+      - button "Cerrar aviso" [ref=f3e261] [cursor=pointer]
+  - dialog [ref=f3e265]:
+    - generic [ref=f3e266]:
+      - generic [ref=f3e267]:
+        - heading "Preparar correo" [level=2] [ref=f3e268]
+        - paragraph [ref=f3e269]: Envío simulado · no se enviarán mensajes externos.
+      - button "Cerrar Preparar correo" [active] [ref=f3e270] [cursor=pointer]
+    - generic [ref=f3e274]:
+      - generic [ref=f3e275]:
+        - generic [ref=f3e276]:
+          - generic [ref=f3e277]:
+            - generic [ref=f3e278]: Proceso
+            - combobox "Proceso" [ref=f3e279]:
+              - option "Códigos nuevos"
+              - option "Orden de compra"
+              - option "Certificado de calidad"
+              - option "Certificado de liberación" [selected]
+          - generic [ref=f3e280]:
+            - generic [ref=f3e281]: Lote de material
+            - combobox "Lote de material" [ref=f3e282]:
+              - option "Materiales del contexto de la orden"
+              - option "MAT-26-041" [selected]
+          - generic [ref=f3e283]:
+            - generic [ref=f3e284]: Remitente de demostración
+            - paragraph [ref=f3e285]: zamira@gimed-demo.example
+        - generic [ref=f3e286]:
+          - heading "Destinatarios" [level=3] [ref=f3e287]
+          - button "Agregar" [ref=f3e288] [cursor=pointer]
+        - generic [ref=f3e290]:
+          - combobox "Tipo de destinatario 1" [ref=f3e291]:
+            - option "Para" [selected]
+            - option "CC"
+            - option "CCO"
+          - combobox "Dirección de destinatario 1" [ref=f3e292]: compras3@proveedor.example
+          - button "Quitar destinatario 1" [ref=f3e293] [cursor=pointer]
+        - generic [ref=f3e297]:
+          - generic [ref=f3e298]: Contenido del correo
+          - textbox "Contenido del correo" [ref=f3e299]: "Adjunto los certificados del lote de material para continuar el proceso. Destinos para concertar la entrega: Envase ámbar 250 ml → Laboratorios Aurora S.A.S. Dirección: Bodega principal, Calle demostración 21 # 10-20, Bogotá Contacto: Laura Mora · compras1@proveedor.example · 3000000000 Tapa dosificadora → Laboratorios Aurora S.A.S. Dirección: Bodega principal, Calle demostración 21 # 10-20, Bogotá Contacto: Laura Mora · compras1@proveedor.example · 3000000000 Envase ámbar 250 ml → Laboratorios Andina S.A.S. Dirección: Bodega principal, Calle demostración 22 # 10-20, Medellín Contacto: Daniel Ríos · compras2@proveedor.example · 3000000000"
+          - generic [ref=f3e300]: El cuerpo se usa en la simulación y no se conserva en el historial.
+        - generic [ref=f3e301]:
+          - heading "Adjuntos resueltos" [level=3] [ref=f3e302]
+          - generic [ref=f3e303]:
+            - link "Liberacion-MAT-26-041.html" [ref=f3e306] [cursor=pointer]:
+              - /url: /api/documents/0000000000000000000000ad/content
+            - generic [ref=f3e307]: Placeholder
+      - generic [ref=f3e308]:
+        - button "Cancelar" [ref=f3e309] [cursor=pointer]
+        - button "Simular envío" [ref=f3e310] [cursor=pointer]

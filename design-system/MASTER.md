@@ -77,7 +77,7 @@ La ayuda reutiliza el diálogo nativo con las 13 descripciones del catálogo tip
 
 ## Filtros y ordenamiento de facturas
 
-La tabla de Facturas empieza por sus cabeceras y reutiliza el menú de columnas de Órdenes. Número de factura y Proveedor tienen condiciones de texto; Registro usa fechas y Recepciones, números enteros. Ordenamiento, condiciones y selección múltiple comparten el menú de cada una de esas columnas. El número de factura conserva sus ceros y signos al filtrar; el proveedor admite nombres y NIT, y las fechas corresponden al día mostrado en Bogotá. El valor cero de Recepciones consulta las facturas sin asociaciones.
+La tabla de Facturas tiene una barra de búsqueda general sobre sus cabeceras y reutiliza el menú de columnas de Órdenes. La barra consulta número normalizado, proveedor y datos de las asociaciones: orden, lote o producto. Número de factura y Proveedor tienen condiciones de texto; Registro usa fechas y Recepciones, números enteros. Ordenamiento, condiciones y selección múltiple comparten el menú de cada una de esas columnas. El número de factura conserva sus ceros y signos al filtrar; el proveedor admite nombres y NIT, y las fechas corresponden al día mostrado en Bogotá. El valor cero de Recepciones consulta las facturas sin asociaciones.
 
 Documentos tiene un menú reducido con dos valores, **Con documento** y **Sin documento**, según el archivo propio de la factura. Los filtros de columnas se combinan, se guardan en la URL junto con el ordenamiento y pueden quitarse desde el menú o mediante **Limpiar filtros** en el pie. Se conservan las cabeceras y sus controles al mostrar un estado vacío.
 
@@ -85,7 +85,9 @@ Los menús mantienen la altura máxima, el desplazamiento interno, las acciones 
 
 ## Filtros de columnas en abastecimiento
 
-Vínculos entre órdenes reutiliza los menús de columna de Órdenes y Facturas: condiciones numéricas para Orden de producto y Orden de material; texto para Producto / maquilador y Material / proveedor; valores enumerados para Estado del material. Los valores de las órdenes muestran OC y OCM; cada columna se compara dentro de su propio grupo. Filtros y ordenamiento se combinan y se conservan en la URL. El contador y Limpiar filtros están en el pie.
+Vínculos entre órdenes incluye una barra de búsqueda por número de OC u OCM, admitiendo prefijos sin espacio y sin distinguir mayúsculas. OC consulta productos; OCM, materiales. Reutiliza los menús de columna de Órdenes y Facturas: condiciones numéricas para Orden de producto y Orden de material; texto para Producto / maquilador y Material / proveedor; valores enumerados para Estado del material. Los valores de las órdenes muestran OC y OCM; cada columna se compara dentro de su propio grupo. Búsqueda, filtros y ordenamiento se combinan y se conservan en la URL. El contador y Limpiar filtros están en el pie.
+
+En ambas tablas, Limpiar búsqueda retira únicamente el texto buscado y Limpiar filtros conserva búsqueda y ordenamiento. La barra usa los controles existentes, una etiqueta accesible y un botón de limpieza que se adapta al ancho disponible. Las opciones de cada columna consideran la búsqueda y los filtros de las otras columnas; las barras y cabeceras permanecen disponibles sin coincidencias.
 
 Los estados vacíos conservan las cabeceras para ajustar o quitar filtros. Los menús mantienen la altura limitada, el desplazamiento interno y la devolución del foco con Escape. Lotes y certificados conserva la búsqueda de su propio catálogo.
 

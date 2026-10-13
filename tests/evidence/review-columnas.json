@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-06T17:10:26.1886648Z",
+  "buildPassed": true,
+  "unitTestsPassed": 52,
+  "browserChecks": 158,
+  "browserErrors": [],
+  "browserReport": "browser-report.json",
+  "restartPassed": true,
+  "collectionsRestored": 28,
+  "restartReport": "restart-report.json",
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\browser-0e106c1d-12ae-4f3a-ac61-91e548a98ad4\\database.json",
+  "testingUsesSeparateDataFile": true,
+  "columnsWithFilterAndSort": 7,
+  "filterMenu": {
+    "maximumHeightPx": 400,
+    "maximumViewportHeightRatio": 0.6,
+    "internalScroll": true,
+    "fixedTitleAndActions": true
+  },
+  "screenshots": [
+    "24-filtros-columnas-combinados.png",
+    "25-filtro-total-375.png",
+    "25-filtro-total-1440.png"
+  ]
+}

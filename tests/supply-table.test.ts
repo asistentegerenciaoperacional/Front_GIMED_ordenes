@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { makeSeed } from "../shared/seed";
 import {
   buildSupplyRows,
+  searchSupplyRows,
   supplyColumns,
   type SupplyColumnKey,
 } from "../src/supply-table";
@@ -43,6 +44,46 @@ test("vínculos: filtros numéricos separados para OC y OCM, combinables sin per
     ),
   );
   assert.deepEqual(db, before);
+});
+
+test("vínculos: búsqueda por número y prefijo distingue OC y OCM sin modificar datos", () => {
+  const db = makeSeed();
+  const before = structuredClone(db);
+  const rows = buildSupplyRows(db);
+  for (const [query, expected] of [
+    ["2801", 3],
+    ["OC2801", 3],
+    ["  oc   2802  ", 1],
+    ["1601", 2],
+    ["ocm1601", 2],
+    ["  OCM   1602  ", 1],
+    ["OC 1601", 0],
+    ["OCM 2801", 0],
+    ["inexistente", 0],
+  ] as const)
+    assert.equal(searchSupplyRows(rows, query).length, expected, query);
+  assert.equal(searchSupplyRows(rows, "").length, rows.length);
+  assert.equal(searchSupplyRows(rows, "OCM").length, rows.length);
+  assert.deepEqual(db, before);
+});
+
+test("vínculos: la búsqueda se combina con columnas y ordenamiento sobre el mismo vínculo", () => {
+  const rows = buildSupplyRows(makeSeed());
+  const searched = searchSupplyRows(rows, "OC 2801");
+  const result = sortTableRows(
+    filterTableRows(searched, supplyColumns, {
+      material_orden: { selected: ["1601"] },
+    }),
+    supplyColumns,
+    { column: "material_orden", direction: "desc" },
+  );
+  assert.equal(result.length, 2);
+  assert.ok(
+    result.every(
+      (row) => row.po.no_orden === "2801" && row.mo.no_orden === "1601",
+    ),
+  );
+  assert.equal(columnOptions(searched, supplyColumns[0]).length, 1);
 });
 
 test("vínculos: texto de producto, material, maquilador y proveedor; estado y selección múltiple", () => {

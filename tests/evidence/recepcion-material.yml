@@ -1,0 +1,178 @@
+- generic [ref=f2e1]:
+  - generic [ref=f2e3]:
+    - link "Saltar al contenido" [ref=f2e4] [cursor=pointer]:
+      - /url: "#main-content"
+    - complementary [ref=f2e5]:
+      - generic [ref=f2e11]:
+        - strong [ref=f2e12]: GIMED
+        - generic [ref=f2e13]: Gestión de compras
+      - generic [ref=f2e14]: OPERACIÓN
+      - navigation "Navegación principal" [ref=f2e15]:
+        - link "Órdenes de compra" [ref=f2e16] [cursor=pointer]:
+          - /url: "#/ordenes"
+        - link "Abastecimiento" [ref=f2e20] [cursor=pointer]:
+          - /url: "#/abastecimiento"
+        - link "Facturas" [ref=f2e31] [cursor=pointer]:
+          - /url: "#/facturas"
+        - link "Catálogos" [ref=f2e34] [cursor=pointer]:
+          - /url: "#/catalogos"
+        - link "Proveedores" [ref=f2e39] [cursor=pointer]:
+          - /url: "#/proveedores"
+        - link "Códigos de barras" [ref=f2e44] [cursor=pointer]:
+          - /url: "#/codigos"
+        - link "Documentos" [ref=f2e46] [cursor=pointer]:
+          - /url: "#/documentos"
+        - link "Correos" [ref=f2e49] [cursor=pointer]:
+          - /url: "#/correos"
+      - navigation "Configuración" [ref=f2e54]:
+        - link "Configuración" [ref=f2e55] [cursor=pointer]:
+          - /url: "#/configuracion"
+      - generic [ref=f2e59]:
+        - generic [ref=f2e63]:
+          - strong [ref=f2e64]: Prototipo local
+          - generic [ref=f2e65]: Documentos y correos simulados. Datos guardados en este equipo.
+        - generic [ref=f2e66]:
+          - generic [ref=f2e67]: GI
+          - generic [ref=f2e68]:
+            - strong [ref=f2e69]: Espacio de GIMED
+            - text: Datos de demostración
+    - generic [ref=f2e70]:
+      - banner [ref=f2e71]:
+        - generic [ref=f2e73]:
+          - generic [ref=f2e74]: Compras
+          - strong [ref=f2e77]: Órdenes de compra
+        - generic [ref=f2e78]:
+          - status [ref=f2e79]: Guardado local
+          - generic [ref=f2e81]: Demostración
+          - generic "Espacio GIMED" [ref=f2e84]: GI
+      - main [ref=f2e85]:
+        - link "Volver a órdenes" [ref=f2e196] [cursor=pointer]:
+          - /url: "#/ordenes"
+        - generic [ref=f2e199]:
+          - generic [ref=f2e200]:
+            - heading "Orden de compra 1606" [level=1] [ref=f2e201]
+            - paragraph [ref=f2e202]: Envases del Norte S.A.S. · Material
+          - generic [ref=f2e203]:
+            - button "Editar" [ref=f2e204] [cursor=pointer]
+            - link "Imprimir" [ref=f2e208] [cursor=pointer]:
+              - /url: "#/ordenes/3aa2c92d32e5be0ef2aff9df/imprimir"
+            - button "Correo" [ref=f2e213] [cursor=pointer]
+        - generic [ref=f2e217]:
+          - generic [ref=f2e218]:
+            - generic [ref=f2e219]:
+              - generic [ref=f2e220]:
+                - heading "Información de la orden" [level=2] [ref=f2e221]
+                - generic [ref=f2e222]: Autorizada
+              - generic [ref=f2e224]:
+                - generic [ref=f2e225]:
+                  - term [ref=f2e226]: Proveedor
+                  - definition [ref=f2e227]: Envases del Norte S.A.S.
+                - generic [ref=f2e228]:
+                  - term [ref=f2e229]: NIT
+                  - definition [ref=f2e230]: 900123403-3
+                - generic [ref=f2e231]:
+                  - term [ref=f2e232]: Elaboración
+                  - definition [ref=f2e233]: 05 de oct de 2026
+                - generic [ref=f2e234]:
+                  - term [ref=f2e235]: Entrega solicitada
+                  - definition [ref=f2e236]: 31 de oct de 2026
+                - generic [ref=f2e237]:
+                  - term [ref=f2e238]: Autorización
+                  - definition [ref=f2e239]: 05 de oct de 2026
+            - generic [ref=f2e240]:
+              - generic [ref=f2e241]:
+                - generic [ref=f2e242]:
+                  - heading "Renglones y recepciones" [level=2] [ref=f2e243]
+                  - paragraph [ref=f2e244]: Las cantidades y los estados se registran por renglón.
+                - generic [ref=f2e245]: 1 de 7
+              - article [ref=f2e247]:
+                - generic [ref=f2e248]:
+                  - generic [ref=f2e249]:
+                    - generic [ref=f2e250]: Renglón 1
+                    - heading "Envase ámbar 250 ml" [level=3] [ref=f2e251]
+                    - text: Código MAIA 101
+                  - generic [ref=f2e252]:
+                    - generic [ref=f2e253]: En seguimiento
+                    - button "Cerrar" [ref=f2e254] [cursor=pointer]
+                    - button "Anular" [ref=f2e255] [cursor=pointer]
+                - generic [ref=f2e256]:
+                  - generic [ref=f2e257]:
+                    - generic [ref=f2e258]: Cantidad solicitada
+                    - strong [ref=f2e259]: "19.800"
+                  - generic [ref=f2e260]:
+                    - generic [ref=f2e261]: Precio unitario
+                    - strong [ref=f2e262]: $ 450,00
+                  - generic [ref=f2e263]:
+                    - generic [ref=f2e264]: Cantidad recibida
+                    - strong [ref=f2e265]: "0"
+                  - generic [ref=f2e266]:
+                    - generic [ref=f2e267]: Entrega recibida
+                    - strong [ref=f2e268]: Sin fecha
+                - generic [ref=f2e270]:
+                  - generic [ref=f2e271]:
+                    - heading "Recepción del renglón" [level=3] [ref=f2e272]
+                    - paragraph [ref=f2e273]: Sin factura · Sin ubicación
+                  - button "Registrar / editar" [ref=f2e274] [cursor=pointer]
+              - generic [ref=f2e278]:
+                - generic [ref=f2e279]: Total de la orden
+                - strong [ref=f2e280]: $ 8.910.000,00
+          - complementary [ref=f2e281]:
+            - generic [ref=f2e283]:
+              - generic [ref=f2e284]:
+                - heading "Documentos" [level=3] [ref=f2e285]
+                - button "Placeholder" [ref=f2e286] [cursor=pointer]
+              - paragraph [ref=f2e288]: Archivos de demostración para recorrer el proceso.
+              - generic [ref=f2e289]: Sin documentos adjuntos.
+            - generic [ref=f2e293]:
+              - heading "Órdenes de producto vinculadas" [level=3] [ref=f2e294]
+              - link "OC 2801 Aurora · Autorizada" [ref=f2e295] [cursor=pointer]:
+                - /url: "#/ordenes/000000000000000000000064"
+                - generic [ref=f2e296]:
+                  - strong [ref=f2e297]: OC 2801
+                  - generic [ref=f2e298]: Aurora · Autorizada
+              - link "OC 2802 Andina · No autorizada" [ref=f2e301] [cursor=pointer]:
+                - /url: "#/ordenes/000000000000000000000065"
+                - generic [ref=f2e302]:
+                  - strong [ref=f2e303]: OC 2802
+                  - generic [ref=f2e304]: Andina · No autorizada
+            - generic [ref=f2e307]: Los documentos y los envíos son simulados. Las órdenes, recepciones y relaciones se guardan localmente.
+  - dialog [ref=f2e311]:
+    - generic [ref=f2e312]:
+      - generic [ref=f2e313]:
+        - heading "Recepción del renglón" [level=2] [ref=f2e314]
+        - paragraph [ref=f2e315]: Este renglón conserva una sola recepción.
+      - button "Cerrar Recepción del renglón" [active] [ref=f2e316] [cursor=pointer]
+    - generic [ref=f2e320]:
+      - generic [ref=f2e321]:
+        - generic [ref=f2e322]:
+          - generic [ref=f2e323]:
+            - generic [ref=f2e324]: Cantidad recibida (facturada)
+            - spinbutton "Cantidad recibida (facturada)" [ref=f2e325]
+          - generic [ref=f2e326]:
+            - generic [ref=f2e327]: Ubicación de recepción
+            - textbox "Ubicación de recepción" [ref=f2e328]
+          - generic [ref=f2e329]:
+            - generic [ref=f2e330]: Entrega estimada
+            - textbox "Entrega estimada" [ref=f2e331]: 2026-10-31
+          - generic [ref=f2e332]:
+            - generic [ref=f2e333]: Entrega recibida
+            - textbox "Entrega recibida" [ref=f2e334]
+          - generic [ref=f2e335]:
+            - generic [ref=f2e336]: Identidad del lote de material
+            - combobox [ref=f2e337]:
+              - option "Sin lote" [selected]
+              - option "MAT-26-041"
+            - button "Agregar identidad de lote" [ref=f2e338] [cursor=pointer]
+        - generic [ref=f2e340]:
+          - generic [ref=f2e341]: Factura (opcional)
+          - generic [ref=f2e342]:
+            - textbox "Buscar número de factura" [ref=f2e343]:
+              - /placeholder: Buscar o agregar factura…
+            - button "Agregar factura" [ref=f2e344] [cursor=pointer]
+            - combobox "Seleccionar factura del proveedor" [ref=f2e346]:
+              - option "Sin factura asociada" [selected]
+              - option "ENV-00412"
+        - generic [ref=f2e347]: Varios renglones pueden compartir el número de lote; cada uno conserva sus propias cantidades y fechas.
+      - generic [ref=f2e350]:
+        - button "Cancelar" [ref=f2e351] [cursor=pointer]
+        - button "Guardar recepción" [ref=f2e352] [cursor=pointer]

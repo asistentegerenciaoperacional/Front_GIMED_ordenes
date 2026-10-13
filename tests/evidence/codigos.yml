@@ -1,0 +1,161 @@
+- generic [ref=f5e308]:
+  - link "Saltar al contenido" [ref=f5e309] [cursor=pointer]:
+    - /url: "#main-content"
+  - complementary [ref=f5e310]:
+    - generic [ref=f5e316]:
+      - strong [ref=f5e317]: GIMED
+      - generic [ref=f5e318]: Gestión de compras
+    - generic [ref=f5e319]: OPERACIÓN
+    - navigation "Navegación principal" [ref=f5e320]:
+      - link "Órdenes de compra" [ref=f5e321] [cursor=pointer]:
+        - /url: "#/ordenes"
+      - link "Abastecimiento" [ref=f5e325] [cursor=pointer]:
+        - /url: "#/abastecimiento"
+      - link "Facturas" [ref=f5e336] [cursor=pointer]:
+        - /url: "#/facturas"
+      - link "Catálogos" [ref=f5e339] [cursor=pointer]:
+        - /url: "#/catalogos"
+      - link "Proveedores" [ref=f5e344] [cursor=pointer]:
+        - /url: "#/proveedores"
+      - link "Códigos de barras" [active] [ref=f5e349] [cursor=pointer]:
+        - /url: "#/codigos"
+      - link "Documentos" [ref=f5e351] [cursor=pointer]:
+        - /url: "#/documentos"
+      - link "Correos" [ref=f5e354] [cursor=pointer]:
+        - /url: "#/correos"
+    - navigation "Configuración" [ref=f5e359]:
+      - link "Configuración" [ref=f5e360] [cursor=pointer]:
+        - /url: "#/configuracion"
+    - generic [ref=f5e364]:
+      - generic [ref=f5e368]:
+        - strong [ref=f5e369]: Prototipo local
+        - generic [ref=f5e370]: Documentos y correos simulados. Datos guardados en este equipo.
+      - generic [ref=f5e371]:
+        - generic [ref=f5e372]: GI
+        - generic [ref=f5e373]:
+          - strong [ref=f5e374]: Espacio de GIMED
+          - text: Datos de demostración
+  - generic [ref=f5e375]:
+    - banner [ref=f5e376]:
+      - generic [ref=f5e378]:
+        - generic [ref=f5e379]: Compras
+        - strong [ref=f5e382]: Códigos de barras
+      - generic [ref=f5e383]:
+        - status [ref=f5e384]: Guardado local
+        - generic [ref=f5e386]: Demostración
+        - generic "Espacio GIMED" [ref=f5e389]: GI
+    - main [ref=f5e390]:
+      - generic [ref=f5e391]:
+        - generic [ref=f5e392]:
+          - heading "Códigos de barras" [level=1] [ref=f5e393]
+          - paragraph [ref=f5e394]: Registra códigos GS1, confirma su disponibilidad y asígnalos al producto.
+        - generic [ref=f5e395]:
+          - button "Avisar códigos nuevos" [ref=f5e396] [cursor=pointer]
+          - button "Registrar código" [ref=f5e400] [cursor=pointer]
+      - generic [ref=f5e402]:
+        - generic [ref=f5e403]:
+          - generic [ref=f5e404]: "01"
+          - text: Creado en GS1
+        - generic [ref=f5e407]:
+          - generic [ref=f5e408]: "02"
+          - text: Verificado en sistema
+        - generic [ref=f5e411]:
+          - generic [ref=f5e412]: "03"
+          - text: Asignado al producto
+      - generic [ref=f5e413]:
+        - generic [ref=f5e414]:
+          - textbox "Buscar códigos de barras" [ref=f5e419]:
+            - /placeholder: Buscar código o producto…
+          - combobox "Filtrar estado de código" [ref=f5e420]:
+            - option "Todos los estados" [selected]
+            - option "Creado en GS1"
+            - option "Verificado en sistema"
+            - option "Asignado"
+            - option "Inactivo"
+        - table [ref=f5e422]:
+          - rowgroup [ref=f5e423]:
+            - row [ref=f5e424]:
+              - columnheader "Código" [ref=f5e425]
+              - columnheader "Producto" [ref=f5e426]
+              - columnheader "Estado GS1 / sistema" [ref=f5e427]
+              - columnheader "Creación" [ref=f5e428]
+              - columnheader "Historial y acciones" [ref=f5e429]
+          - rowgroup [ref=f5e430]:
+            - row [ref=f5e431]:
+              - cell [ref=f5e432]:
+                - strong [ref=f5e433]: "770100000006"
+              - cell "Sin producto asignado" [ref=f5e434]
+              - cell "Verificado en sistema" [ref=f5e435]
+              - cell "01 de oct de 2026" [ref=f5e437]
+              - cell [ref=f5e438]:
+                - generic [ref=f5e439]:
+                  - button "Asignar producto" [ref=f5e440] [cursor=pointer]
+                  - link "Ver órdenes" [ref=f5e441] [cursor=pointer]:
+                    - /url: "#/ordenes?q=770100000006"
+            - row [ref=f5e442]:
+              - cell [ref=f5e443]:
+                - strong [ref=f5e444]: "770100000005"
+              - cell "Sin producto asignado" [ref=f5e445]
+              - cell "Creado en GS1" [ref=f5e446]
+              - cell "30 de sept de 2026" [ref=f5e448]
+              - cell [ref=f5e449]:
+                - generic [ref=f5e450]:
+                  - button "Confirmar disponibilidad" [ref=f5e451] [cursor=pointer]
+                  - link "Ver órdenes" [ref=f5e452] [cursor=pointer]:
+                    - /url: "#/ordenes?q=770100000005"
+            - row [ref=f5e453]:
+              - cell [ref=f5e454]:
+                - strong [ref=f5e455]: "770100000001"
+              - cell "Crema corporal · 250 ml" [ref=f5e456]
+              - cell "Asignado" [ref=f5e457]
+              - cell "10 de ene de 2026" [ref=f5e459]
+              - cell [ref=f5e460]:
+                - generic [ref=f5e461]:
+                  - button "Marcar inactivo" [ref=f5e462] [cursor=pointer]
+                  - link "Ver órdenes" [ref=f5e463] [cursor=pointer]:
+                    - /url: "#/ordenes?q=770100000001"
+            - row [ref=f5e464]:
+              - cell [ref=f5e465]:
+                - strong [ref=f5e466]: "770100000002"
+              - cell "Gel de limpieza · 100 ml" [ref=f5e467]
+              - cell "Asignado" [ref=f5e468]
+              - cell "10 de ene de 2026" [ref=f5e470]
+              - cell [ref=f5e471]:
+                - generic [ref=f5e472]:
+                  - button "Marcar inactivo" [ref=f5e473] [cursor=pointer]
+                  - link "Ver órdenes" [ref=f5e474] [cursor=pointer]:
+                    - /url: "#/ordenes?q=770100000002"
+            - row [ref=f5e475]:
+              - cell [ref=f5e476]:
+                - strong [ref=f5e477]: "770100000003"
+              - cell "Loción hidratante · 250 ml" [ref=f5e478]
+              - cell "Asignado" [ref=f5e479]
+              - cell "10 de ene de 2026" [ref=f5e481]
+              - cell [ref=f5e482]:
+                - generic [ref=f5e483]:
+                  - button "Marcar inactivo" [ref=f5e484] [cursor=pointer]
+                  - link "Ver órdenes" [ref=f5e485] [cursor=pointer]:
+                    - /url: "#/ordenes?q=770100000003"
+            - row [ref=f5e486]:
+              - cell [ref=f5e487]:
+                - strong [ref=f5e488]: "770100000004"
+              - cell "Bálsamo suave · 50 g" [ref=f5e489]
+              - cell "Asignado" [ref=f5e490]
+              - cell "10 de ene de 2026" [ref=f5e492]
+              - cell [ref=f5e493]:
+                - generic [ref=f5e494]:
+                  - button "Marcar inactivo" [ref=f5e495] [cursor=pointer]
+                  - link "Ver órdenes" [ref=f5e496] [cursor=pointer]:
+                    - /url: "#/ordenes?q=770100000004"
+            - row [ref=f5e497]:
+              - cell [ref=f5e498]:
+                - strong [ref=f5e499]: "770999999999"
+              - cell "Crema corporal · 250 ml" [ref=f5e500]
+              - cell "Inactivo" [ref=f5e501]
+              - cell "10 de ene de 2025" [ref=f5e503]
+              - cell [ref=f5e504]:
+                - link "Ver órdenes" [ref=f5e506] [cursor=pointer]:
+                  - /url: "#/ordenes?q=770999999999"
+        - generic [ref=f5e507]:
+          - generic [ref=f5e508]: 7 códigos
+          - generic [ref=f5e509]: La selección para nuevas órdenes usa el código activo más reciente.

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { makeSeed, sid } from "../shared/seed";
 import {
   buildInvoiceRows,
+  searchInvoiceRows,
   invoiceColumns,
   invoiceDocumentOptions,
   type InvoiceColumnKey,
@@ -59,6 +60,64 @@ function fixture() {
 }
 const numbers = (rows: ReturnType<typeof buildInvoiceRows>) =>
   rows.map((row) => row.invoice.numero_factura);
+
+test("facturas: búsqueda normalizada por número, proveedor y datos de lotes asociados", () => {
+  const { db, receipts } = fixture();
+  const before = structuredClone(db);
+  const rows = buildInvoiceRows(
+    db,
+    receipts.map((receipt) => ({
+      ...receipt,
+      label:
+        receipt.invoice === sid(900)
+          ? "OC 2801 · PRO-26-018 · Crema corporal · Aurora"
+          : "OCM 1601 · MAT-26-001 · Envase ámbar · Envases del Norte",
+    })),
+  );
+  for (const query of [
+    "\u200B aur-00128 \u200B",
+    "oc 2801",
+    "pro-26-018",
+    "Crema corporal",
+  ])
+    assert.deepEqual(
+      numbers(searchInvoiceRows(rows, query)),
+      ["AUR-00128"],
+      query,
+    );
+  assert.deepEqual(numbers(searchInvoiceRows(rows, "AUR-128")), ["AUR-128"]);
+  assert.deepEqual(
+    numbers(searchInvoiceRows(rows, "  laboratorios aurora  ")),
+    ["AUR-00128", "AUR-128"],
+  );
+  assert.deepEqual(numbers(searchInvoiceRows(rows, "ocm 1601")), ["ENV-00412"]);
+  assert.equal(searchInvoiceRows(rows, "").length, rows.length);
+  assert.equal(searchInvoiceRows(rows, "factura inexistente").length, 0);
+  assert.deepEqual(db, before);
+});
+
+test("facturas: búsqueda y filtros comparten resultados, conservando ordenamiento numérico", () => {
+  const { rows } = fixture();
+  const searched = searchInvoiceRows(rows, "Aurora");
+  assert.deepEqual(
+    numbers(
+      filterTableRows(searched, invoiceColumns, {
+        recepciones: { operator: "equals", value: "0" },
+      }),
+    ),
+    ["AUR-128"],
+  );
+  assert.deepEqual(
+    numbers(
+      sortTableRows(searched, invoiceColumns, {
+        column: "recepciones",
+        direction: "desc",
+      }),
+    ),
+    ["AUR-00128", "AUR-128"],
+  );
+  assert.equal(columnOptions(searched, column("proveedor")).length, 1);
+});
 
 test("facturas: columnas basadas en proveedor, día visible, recepciones y documento propio", () => {
   const { db, receipts, rows } = fixture();

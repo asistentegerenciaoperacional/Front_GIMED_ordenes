@@ -1,0 +1,2 @@
+[   21220ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://127.0.0.1:3002/api/commands:0
+[   38053ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unprocessable Entity) @ http://127.0.0.1:3002/api/commands:0

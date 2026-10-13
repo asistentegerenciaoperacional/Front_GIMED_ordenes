@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-06T21:07:04.5478228Z",
+  "buildPassed": true,
+  "unitChecks": 58,
+  "browserChecks": 319,
+  "browserErrors": [],
+  "expectedHttpRejections": [
+    {
+      "url": "http://127.0.0.1:3002/api/commands",
+      "status": 422
+    },
+    {
+      "url": "http://127.0.0.1:3002/api/commands",
+      "status": 422
+    }
+  ],
+  "browserReport": "browser-report.json",
+  "restartPassed": true,
+  "collectionsRestored": 28,
+  "restartReport": "restart-report.json",
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\browser-9d5fe5d0-4e0b-4251-ba69-c5ca57fee4e1\\database.json",
+  "testingUsesSeparateDataFile": true,
+  "userDataSha256": "56A222B6DD70F684393D8D479530EE280BB9376E514241320895A74DF806CEFC",
+  "userDataUnchangedDuringVerification": true,
+  "screenshots": [
+    "28-productos-activos-fecha-obligatoria.png",
+    "29-seguimiento-sin-autorizacion.png"
+  ]
+}

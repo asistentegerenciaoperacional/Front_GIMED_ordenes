@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-06T15:21:00.797Z",
+  "buildPassed": true,
+  "browserChecks": 120,
+  "browserErrors": [],
+  "browserReport": "browser-report.json",
+  "restartPassed": true,
+  "collectionsRestored": 28,
+  "restartReport": "restart-report.json",
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\browser-f3b43a1e-d385-4989-9734-cb9e7271f6d2\\database.json",
+  "screenshots": [
+    "18-sticker-individual-corrugado.png",
+    "19-revision-productos-movil.png",
+    "21-tooltip-corrugado.png",
+    "22-tooltip-sticker-porcentaje.png",
+    "23-tooltip-cinta.png"
+  ],
+  "testingUsesSeparateDataFile": true,
+  "mainDataSha256AtStart": "0D485D2C109864B34C928B580CDADE9F29AAE39AAC37094620F228E34B156FC6",
+  "mainDataSha256AtEnd": "25FC375D3CCB9B687C7BDA22B9E9CFDBEF553916A0E9D2B8AB6CE6B5F597AE5E"
+}

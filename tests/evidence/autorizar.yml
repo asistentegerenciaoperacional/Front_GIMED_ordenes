@@ -1,0 +1,160 @@
+- generic [ref=e3]:
+  - link "Saltar al contenido" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - complementary [ref=e5]:
+    - generic [ref=e11]:
+      - strong [ref=e12]: GIMED
+      - generic [ref=e13]: Gestión de compras
+    - generic [ref=e14]: OPERACIÓN
+    - navigation "Navegación principal" [ref=e15]:
+      - link "Órdenes de compra" [ref=e16] [cursor=pointer]:
+        - /url: "#/ordenes"
+      - link "Abastecimiento" [ref=e20] [cursor=pointer]:
+        - /url: "#/abastecimiento"
+      - link "Facturas" [ref=e31] [cursor=pointer]:
+        - /url: "#/facturas"
+      - link "Catálogos" [ref=e34] [cursor=pointer]:
+        - /url: "#/catalogos"
+      - link "Proveedores" [ref=e39] [cursor=pointer]:
+        - /url: "#/proveedores"
+      - link "Códigos de barras" [ref=e44] [cursor=pointer]:
+        - /url: "#/codigos"
+      - link "Documentos" [ref=e46] [cursor=pointer]:
+        - /url: "#/documentos"
+      - link "Correos" [ref=e49] [cursor=pointer]:
+        - /url: "#/correos"
+    - navigation "Configuración" [ref=e53]:
+      - link "Configuración" [ref=e54] [cursor=pointer]:
+        - /url: "#/configuracion"
+    - generic [ref=e58]:
+      - generic [ref=e62]:
+        - strong [ref=e63]: Prototipo local
+        - generic [ref=e64]: Documentos y correos simulados. Datos guardados en este equipo.
+      - generic [ref=e65]:
+        - generic [ref=e66]: GI
+        - generic [ref=e67]:
+          - strong [ref=e68]: Espacio de GIMED
+          - text: Datos de demostración
+  - generic [ref=e69]:
+    - banner [ref=e70]:
+      - generic [ref=e72]:
+        - generic [ref=e73]: Compras
+        - strong [ref=e76]: Órdenes de compra
+      - generic [ref=e77]:
+        - status [ref=e78]: Guardado local
+        - generic [ref=e80]: Demostración
+        - generic "Espacio GIMED" [ref=e83]: GI
+    - main [ref=e84]:
+      - link "Volver a órdenes" [ref=e379] [cursor=pointer]:
+        - /url: "#/ordenes"
+      - generic [ref=e382]:
+        - generic [ref=e383]:
+          - heading "Orden de compra 2805" [level=1] [ref=e384]
+          - paragraph [ref=e385]: Laboratorios Aurora S.A.S. · Producto
+        - generic [ref=e386]:
+          - button "Editar" [ref=e387] [cursor=pointer]
+          - link "Imprimir" [ref=e391] [cursor=pointer]:
+            - /url: "#/ordenes/852c875e6e1f1f9b0dc1dfce/imprimir"
+          - button "Correo" [ref=e396] [cursor=pointer]
+          - button "Autorizar" [ref=e400] [cursor=pointer]
+      - generic [ref=e405]:
+        - generic [ref=e406]:
+          - generic [ref=e407]:
+            - generic [ref=e408]:
+              - heading "Información de la orden" [level=2] [ref=e409]
+              - generic [ref=e410]: No autorizada
+            - generic [ref=e412]:
+              - generic [ref=e413]:
+                - term [ref=e414]: Proveedor
+                - definition [ref=e415]: Laboratorios Aurora S.A.S.
+              - generic [ref=e416]:
+                - term [ref=e417]: NIT
+                - definition [ref=e418]: 900123401-1
+              - generic [ref=e419]:
+                - term [ref=e420]: Elaboración
+                - definition [ref=e421]: 05 de oct de 2026
+              - generic [ref=e422]:
+                - term [ref=e423]: Entrega solicitada
+                - definition [ref=e424]: 20 de oct de 2026
+              - generic [ref=e425]:
+                - term [ref=e426]: Autorización
+                - definition [ref=e427]: Pendiente de firma
+          - generic [ref=e428]:
+            - generic [ref=e429]:
+              - generic [ref=e430]:
+                - heading "Renglones y recepciones" [level=2] [ref=e431]
+                - paragraph [ref=e432]: Las cantidades y los estados se registran por renglón.
+              - generic [ref=e433]: 1 de 7
+            - generic [ref=e434]:
+              - generic [ref=e435]: Autoriza la cabecera para registrar lotes o recepciones.
+              - article [ref=e439]:
+                - generic [ref=e440]:
+                  - generic [ref=e441]:
+                    - generic [ref=e442]: Renglón 1
+                    - heading "Crema corporal · 250 ml" [level=3] [ref=e443]
+                    - text: Código 770100000001
+                  - generic [ref=e444]:
+                    - generic [ref=e445]: En seguimiento
+                    - button "Cerrar" [ref=e446] [cursor=pointer]
+                    - button "Anular" [ref=e447] [cursor=pointer]
+                - generic [ref=e448]:
+                  - generic [ref=e449]:
+                    - generic [ref=e450]: Cantidad solicitada
+                    - strong [ref=e451]: "5.000"
+                  - generic [ref=e452]:
+                    - generic [ref=e453]: Precio unitario
+                    - strong [ref=e454]: $ 3.100,50
+                  - generic [ref=e455]:
+                    - generic [ref=e456]: Recibido en lotes cerrados
+                    - strong [ref=e457]: "0"
+                  - generic [ref=e458]:
+                    - generic [ref=e459]: Desviación / margen
+                    - strong [ref=e460]: "-100.0 % / ±10 %"
+                - generic [ref=e461]:
+                  - generic [ref=e462]:
+                    - generic [ref=e463]: "Corrugado: 220"
+                    - generic [ref=e464]: "Sticker: 10.999 · provisional"
+                    - generic [ref=e465]: "Batch record estimado: 12 de oct de 2026"
+                  - generic [ref=e466]:
+                    - heading "Lotes de producto (0)" [level=3] [ref=e467]
+                    - button "Registrar lote" [disabled] [ref=e468]
+                  - paragraph [ref=e470]: No hay lotes registrados. La fila se crea al guardar sus datos.
+                  - generic [ref=e471]:
+                    - text: Materiales vinculados
+                    - generic [ref=e472]:
+                      - link "OC 1605 · Envase ámbar 250 ml" [ref=e473] [cursor=pointer]:
+                        - /url: "#/ordenes/58d0f26443d29b6e55467e76"
+                      - link "OC 1605 · Tapa dosificadora" [ref=e474] [cursor=pointer]:
+                        - /url: "#/ordenes/58d0f26443d29b6e55467e76"
+            - generic [ref=e475]:
+              - generic [ref=e476]: Total de la orden
+              - strong [ref=e477]: $ 15.502.500,00
+        - complementary [ref=e478]:
+          - generic [ref=e480]:
+            - generic [ref=e481]:
+              - heading "Documentos" [level=3] [ref=e482]
+              - button "Placeholder" [ref=e483] [cursor=pointer]
+            - paragraph [ref=e485]: Archivos de demostración para recorrer el proceso.
+            - generic [ref=e486]: Sin documentos adjuntos.
+          - generic [ref=e490]:
+            - heading "Órdenes de material vinculadas" [level=3] [ref=e491]
+            - link "OC 1605 Envases del Norte · No autorizada" [ref=e492] [cursor=pointer]:
+              - /url: "#/ordenes/58d0f26443d29b6e55467e76"
+              - generic [ref=e493]:
+                - strong [ref=e494]: OC 1605
+                - generic [ref=e495]: Envases del Norte · No autorizada
+          - generic [ref=e498]: Los documentos y los envíos son simulados. Las órdenes, recepciones y relaciones se guardan localmente.
+      - dialog [ref=e502]:
+        - generic [ref=e503]:
+          - generic [ref=e504]:
+            - heading "Autorizar orden 2805" [level=2] [ref=e505]
+            - paragraph [ref=e506]: La autorización corresponde a toda la cabecera.
+          - button "Cerrar Autorizar orden 2805" [active] [ref=e507] [cursor=pointer]
+        - generic [ref=e511]:
+          - generic [ref=e512]: Esta acción es irreversible. La orden no podrá volver a no autorizada.
+          - generic [ref=e515]:
+            - checkbox "Confirmo que la orden física tiene todas las firmas necesarias." [ref=e516]
+            - text: Confirmo que la orden física tiene todas las firmas necesarias.
+        - generic [ref=e517]:
+          - button "Cancelar" [ref=e518] [cursor=pointer]
+          - button "Confirmar autorización" [disabled] [ref=e519]

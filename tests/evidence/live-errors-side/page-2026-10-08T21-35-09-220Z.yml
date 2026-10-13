@@ -1,0 +1,73 @@
+- dialog [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Nueva orden de compra" [level=2] [ref=e4]
+      - paragraph [ref=e5]: 1. Datos y productos de la orden
+    - button "Cerrar Nueva orden de compra" [active] [ref=e6] [cursor=pointer]
+  - generic [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]: Tipo de orden
+          - combobox "Tipo de orden" [ref=e16]:
+            - option "Producto" [selected]
+            - option "Material"
+            - option "Otros"
+        - generic [ref=e17]:
+          - generic [ref=e18]: Número de orden
+          - textbox "Número de orden" [ref=e20]: "2805"
+        - generic [ref=e21]:
+          - generic [ref=e22]: Proveedor *
+          - combobox "Proveedor" [ref=e24]:
+            - option "Seleccionar…"
+            - option "Laboratorios Aurora S.A.S." [selected]
+            - option "Laboratorios Andina S.A.S."
+        - generic [ref=e25]:
+          - generic [ref=e26]: Fecha de elaboración
+          - generic [ref=e29]:
+            - textbox "Fecha de elaboración" [ref=e30]:
+              - /placeholder: dd/mm/aaaa
+              - text: 08/10/2026
+            - textbox [aria-hidden]: 2026-10-08
+            - 'button "Abrir calendario: Fecha de elaboración" [ref=e31] [cursor=pointer]'
+        - generic [ref=e34]:
+          - generic [ref=e35]: Entrega solicitada *
+          - generic [ref=e38]:
+            - textbox "Entrega solicitada" [ref=e39]:
+              - /placeholder: dd/mm/aaaa
+            - textbox [aria-hidden]
+            - 'button "Abrir calendario: Entrega solicitada" [ref=e40] [cursor=pointer]'
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "Productos de la orden" [level=3] [ref=e45]
+          - generic [ref=e46]: 1 de 7
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - heading "Producto 1" [level=3] [ref=e49]
+            - button "Eliminar producto 1" [disabled] [ref=e50]
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: Producto *
+              - combobox "Producto" [ref=e58]:
+                - option "Seleccionar…"
+                - option "Crema corporal · 250 ml" [selected]
+                - option "Gel de limpieza · 100 ml"
+            - generic [ref=e59]:
+              - generic [ref=e60]: Cantidad solicitada *
+              - spinbutton "Cantidad solicitada" [ref=e62]: "12000"
+            - generic [ref=e63]:
+              - generic [ref=e64]: Precio unitario *
+              - textbox "Precio unitario" [ref=e66]: "3200"
+            - generic [ref=e67]:
+              - generic [ref=e68]: Código de barras
+              - generic [ref=e69]: "770100000001"
+            - generic [ref=e71]:
+              - generic [ref=e72]: Total del producto
+              - status "Total del producto 1" [ref=e73]: $ 38.400.000,00
+        - button "Agregar producto" [ref=e74] [cursor=pointer]
+      - generic [ref=e76]:
+        - generic [ref=e77]: Total de la orden
+        - strong [ref=e78]: $ 38.400.000,00
+    - generic [ref=e79]:
+      - button "Cancelar" [ref=e80] [cursor=pointer]
+      - button "Revisar orden" [ref=e81] [cursor=pointer]

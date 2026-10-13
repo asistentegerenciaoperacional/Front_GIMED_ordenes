@@ -994,11 +994,56 @@ async (page) => {
     const clear = page.getByRole('button', {name: /^Limpiar filtros/});
     if (await clear.count()) await clear.click();
   };
-  check(await page.getByRole('textbox', {name: 'Buscar facturas', exact: true}).count() === 0 &&
+  const invoiceSearch = page.getByRole('searchbox', {name: 'Buscar facturas', exact: true});
+  check(await invoiceSearch.isVisible() &&
     await page.getByRole('checkbox', {name: 'Solo sin lotes o recepciones', exact: true}).count() === 0,
-    'Facturas concentra los filtros en las cabeceras de columna');
+    'Facturas combina la búsqueda general con los filtros de columna');
   check(await page.locator('.invoice-table thead .column-filter-button').count() === 5,
     'Cada columna de datos de Facturas dispone de filtro');
+  const unfilteredInvoiceCount = await invoiceRows().count();
+  for (const [query, number] of [['\u200B cli-0001 \u200B','CLI-0001'],['pro-26-018','AUR-00128'],['ocm 1601','ENV-00412']]) {
+    await invoiceSearch.fill(query);
+    check(await invoiceRows().count()===1 && await invoiceRows().locator('td:first-child a').textContent()===number,
+      'Búsqueda de facturas por '+query+' recupera su factura');
+    check(await invoiceSearch.evaluate(el=>el===document.activeElement), 'La búsqueda de facturas conserva el foco al escribir');
+  }
+  await invoiceSearch.fill('Crema corporal');
+  check(await invoiceRows().count()>0 && await page.getByRole('link',{name:'AUR-00128',exact:true}).isVisible(),
+    'Facturas encuentra el producto de sus lotes asociados');
+  await invoiceSearch.fill('Aurora');
+  check(await invoiceRows().count()>0 && (await invoiceRows().locator('td:nth-child(2)').allTextContents()).every(value=>value==='Aurora'),
+    'Facturas busca por proveedor');
+  const combinedInvoiceFilter=await invoiceMenu('Recepciones');
+  await combinedInvoiceFilter.getByRole('combobox',{name:'Condición',exact:true}).selectOption('greater');
+  await combinedInvoiceFilter.getByRole('textbox',{name:'Valor del filtro',exact:true}).fill('0');
+  await combinedInvoiceFilter.getByRole('button',{name:'Aplicar',exact:true}).click();
+  check(await invoiceRows().count()>0 && (await invoiceRows().locator('td:nth-child(4)').allTextContents()).every(value=>Number(value)>0),
+    'La búsqueda de facturas se combina con una condición numérica');
+  await (await invoiceMenu('Número de factura')).getByRole('button',{name:'De Z a A',exact:true}).click();
+  const invoiceSearchUrl=page.url(), invoiceSearchCount=await invoiceRows().count();
+  await page.reload();
+  await page.locator('.invoice-table').waitFor();
+  check(page.url()===invoiceSearchUrl && await invoiceSearch.inputValue()==='Aurora' && await invoiceRows().count()===invoiceSearchCount &&
+    await page.getByRole('columnheader',{name:/Número de factura/}).getAttribute('aria-sort')==='descending',
+    'La URL recupera búsqueda, filtros y ordenamiento de facturas');
+  await clearInvoiceFilters();
+  check(await invoiceSearch.inputValue()==='Aurora' && new URL(page.url()).searchParams.has('ordenar'),
+    'Limpiar filtros de factura conserva la búsqueda y el ordenamiento');
+  for (const width of [375,1440]) {
+    await page.setViewportSize({width,height:900});
+    const bounds=await invoiceSearch.boundingBox();
+    check(bounds.x>=0 && bounds.x+bounds.width<=width && await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),
+      'Barra de búsqueda de facturas contenida a '+width+' px');
+    await shot('54-facturas-busqueda-'+width);
+  }
+  await page.getByRole('button',{name:'Limpiar búsqueda',exact:true}).click();
+  check(!new URL(page.url()).searchParams.has('q') && new URL(page.url()).searchParams.has('ordenar') && await invoiceRows().count()===unfilteredInvoiceCount,
+    'Limpiar búsqueda de factura conserva el ordenamiento y recupera los resultados');
+  await (await invoiceMenu('Número de factura')).getByRole('button',{name:'Quitar ordenamiento',exact:true}).click();
+  await invoiceSearch.fill('FACTURA-INEXISTENTE-BUSQUEDA');
+  check(await invoiceRows().count()===0 && await invoiceSearch.isVisible() && await page.locator('.invoice-table thead .column-filter-button').count()===5,
+    'La búsqueda de facturas sin coincidencias conserva la barra y los menús');
+  await page.getByRole('button',{name:'Limpiar búsqueda',exact:true}).click();
   let invoiceFilter = await invoiceMenu('Número de factura');
   await invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}).selectOption('contains');
   await invoiceFilter.getByRole('textbox', {name: 'Valor del filtro', exact: true}).fill("\u200B cli-0001 \u200B");
@@ -1144,13 +1189,47 @@ async (page) => {
     await menu.getByRole('textbox',{name:'Valor del filtro',exact:true}).fill(value);
     await menu.getByRole('button',{name:'Aplicar',exact:true}).click();
   };
-  check(await page.getByRole('searchbox',{name:'Buscar órdenes de producto o material',exact:true}).count()===0 &&
+  const supplySearch=page.getByRole('searchbox',{name:'Buscar órdenes de producto o material',exact:true});
+  check(await supplySearch.isVisible() &&
     await page.locator('.supply-table thead .column-filter-button').count()===5,
-    'Vínculos concentra los filtros en sus cinco columnas');
+    'Vínculos combina búsqueda de órdenes y filtros de sus cinco columnas');
   const allSupplyRows=await supplyRows().count();
   check(allSupplyRows>0 && await supplyRows().locator('td:first-child a').allTextContents().then((labels) => labels.every((label) => /^OC \d+$/.test(label.trim()))) &&
     await supplyRows().locator('td:nth-child(3) a').allTextContents().then((labels) => labels.every((label) => /^OCM \d+$/.test(label.trim()))),
     'Abastecimiento distingue OC de producto y OCM de material');
+  for (const [query,expected] of [['2801',3],['OC 2801',3],['OC2802',1],['1601',2],['ocm1601',2],['  OCM   1602  ',1],['OCM',allSupplyRows],['OC 1601',0]]) {
+    await supplySearch.fill(query);
+    check(await supplyRows().count()===expected, 'La búsqueda de vínculos por '+query+' distingue el grupo de órdenes');
+    check(await supplySearch.evaluate(el=>el===document.activeElement), 'La búsqueda de vínculos conserva el foco al escribir');
+  }
+  check(await supplySearch.isVisible() && await page.locator('.supply-table thead .column-filter-button').count()===5,
+    'La búsqueda de vínculos sin coincidencias conserva barra y cabeceras');
+  await supplySearch.fill('OC 2801');
+  await supplyCondition('Orden de material','equals','1601');
+  check(await supplyRows().count()===2,'La búsqueda de OC se combina con el filtro de OCM en el mismo vínculo');
+  await (await supplyMenu('Orden de material')).getByRole('button',{name:'De mayor a menor',exact:true}).click();
+  const supplySearchUrl=page.url();
+  await page.reload();
+  await page.locator('.supply-table').waitFor();
+  check(page.url()===supplySearchUrl && await supplySearch.inputValue()==='OC 2801' && await supplyRows().count()===2 &&
+    await page.getByRole('columnheader',{name:/Orden de material/}).getAttribute('aria-sort')==='descending',
+    'La URL recupera búsqueda, filtros y ordenamiento de vínculos');
+  await page.getByRole('button',{name:'Limpiar búsqueda',exact:true}).click();
+  check(new URL(page.url()).searchParams.has('filtros') && new URL(page.url()).searchParams.has('ordenar') && await supplyRows().count()===2,
+    'Limpiar búsqueda de vínculos conserva filtros y ordenamiento');
+  await supplySearch.fill('OC 2801');
+  await clearSupply();
+  check(await supplySearch.inputValue()==='OC 2801' && await supplyRows().count()===3 && new URL(page.url()).searchParams.has('ordenar'),
+    'Limpiar filtros de vínculos conserva búsqueda y ordenamiento');
+  for (const width of [375,1440]) {
+    await page.setViewportSize({width,height:900});
+    const bounds=await supplySearch.boundingBox();
+    check(bounds.x>=0 && bounds.x+bounds.width<=width && await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),
+      'Barra de búsqueda de vínculos contenida a '+width+' px');
+    await shot('55-vinculos-busqueda-'+width);
+  }
+  await page.getByRole('button',{name:'Limpiar búsqueda',exact:true}).click();
+  await (await supplyMenu('Orden de material')).getByRole('button',{name:'Quitar ordenamiento',exact:true}).click();
   for (const [column,value,expected] of [['Orden de producto','2801',3],['Orden de producto','2802',1],['Orden de material','1601',2],['Orden de material','1602',1]]) {
     await supplyCondition(column,'equals',value);
     check(await supplyRows().count()===expected,'Filtro '+column+' por '+value+' conserva sus vínculos');

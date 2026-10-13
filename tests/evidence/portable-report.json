@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-13T16:15:49.840Z",
+  "passed": true,
+  "platform": "Windows x64",
+  "runtime": "v24.17.0",
+  "archive": "GIMED-Prototipo-Windows-x64.zip",
+  "archiveSha256": "b70484cd758fe5f445bd7b48b8bd7c6863d89f43f663f687dfc9b0d4a503b736",
+  "archiveSizeBytes": 42135441,
+  "packages": 72,
+  "checks": [
+    "Node incluido coincide con el SHA-256 oficial",
+    "ZIP sin estado de usuario: primera ejecución con semilla ficticia",
+    "Runtime incluido ejecutado con PATH sin Node ni npm",
+    "Iniciar.cmd arranca las 28 colecciones desde una ruta con espacios y acentos",
+    "Datos escritos dentro del paquete extraído",
+    "Interfaz compilada disponible desde el servicio portable",
+    "JavaScript y estilos servidos sin Vite ni acceso a Internet",
+    "Segundo doble clic reutiliza la instancia existente",
+    "Una sola instancia conserva la propiedad del archivo de datos",
+    "Navegador carga la aplicación y los datos del paquete autónomo",
+    "Portable incluye las 17 variantes y aplica el filtro personalizado",
+    "Ayuda de los trece filtros disponible en el paquete autónomo",
+    "Escape cierra la ayuda del portable y devuelve el foco",
+    "Operación de negocio y guardado local correctos",
+    "Enter detiene el servicio y libera la instancia",
+    "Reinicio del lanzador recupera íntegramente el estado guardado",
+    "El archivo de datos del proyecto permanece intacto"
+  ],
+  "browser": "Chrome · Captura portable-ordenes.png",
+  "limitations": "Comprobado en una extracción aislada del mismo equipo; no en otro PC físico."
+}

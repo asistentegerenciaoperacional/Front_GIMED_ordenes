@@ -1,0 +1,42 @@
+{
+  "date": "2026-10-06T17:28:50.3168377Z",
+  "buildPassed": true,
+  "browserChecks": 182,
+  "browserErrors": [],
+  "browserReport": "browser-report.json",
+  "restartPassed": true,
+  "collectionsRestored": 28,
+  "restartReport": "restart-report.json",
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\browser-c52d8c25-f71c-4185-b771-8c98ef7976ea\\database.json",
+  "testingUsesSeparateDataFile": true,
+  "testedWidths": [
+    375,
+    1440
+  ],
+  "regressionChecks": [
+    "Clic en el texto desmarca el valor sin cerrar el menú a 1440 px",
+    "Segundo clic en el texto marca el valor una sola vez a 1440 px",
+    "Clic en el espacio left de la fila alterna la casilla sin cerrar a 1440 px",
+    "Clic en el espacio right de la fila alterna la casilla sin cerrar a 1440 px",
+    "Mantener pulsada la fila conserva el menú hasta completar el clic a 1440 px",
+    "Soltar el clic alterna la casilla una sola vez a 1440 px",
+    "Clic directo en la casilla no duplica la selección a 1440 px",
+    "Espacio alterna la casilla con teclado y conserva el menú a 1440 px",
+    "Clic en el texto Seleccionar todos desmarca todos los valores a 1440 px",
+    "Clic en el espacio de Seleccionar todos marca todos los valores a 1440 px",
+    "Salir con Tab sigue cerrando el menú después de seleccionar valores a 1440 px",
+    "Cambios de selección se conservan como borrador hasta aplicar a 1440 px",
+    "Clic en el texto desmarca el valor sin cerrar el menú a 375 px",
+    "Segundo clic en el texto marca el valor una sola vez a 375 px",
+    "Clic en el espacio left de la fila alterna la casilla sin cerrar a 375 px",
+    "Clic en el espacio right de la fila alterna la casilla sin cerrar a 375 px",
+    "Mantener pulsada la fila conserva el menú hasta completar el clic a 375 px",
+    "Soltar el clic alterna la casilla una sola vez a 375 px",
+    "Clic directo en la casilla no duplica la selección a 375 px",
+    "Espacio alterna la casilla con teclado y conserva el menú a 375 px",
+    "Clic en el texto Seleccionar todos desmarca todos los valores a 375 px",
+    "Clic en el espacio de Seleccionar todos marca todos los valores a 375 px",
+    "Salir con Tab sigue cerrando el menú después de seleccionar valores a 375 px",
+    "Cambios de selección se conservan como borrador hasta aplicar a 375 px"
+  ]
+}

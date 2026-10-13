@@ -41,6 +41,7 @@ import { CatalogTable } from "./catalogs";
 import { entityValidation } from "./live-validation";
 import {
   buildSupplyRows,
+  searchSupplyRows,
   supplyColumns,
   type SupplyColumnKey,
 } from "./supply-table";
@@ -57,6 +58,7 @@ import {
 } from "./order-table";
 import {
   buildInvoiceRows,
+  searchInvoiceRows,
   invoiceColumns,
   invoiceDocumentOptions,
   type InvoiceColumnKey,
@@ -76,6 +78,8 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
     null,
   );
   const all = useMemo(() => buildSupplyRows(db), [db]);
+  const query = params.get("q") ?? "";
+  const searched = useMemo(() => searchSupplyRows(all, query), [all, query]);
   const stateKey = params.toString();
   const tableState = useMemo(
     () => readColumnState(new URLSearchParams(stateKey), supplyColumns),
@@ -84,17 +88,17 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
   const links = useMemo(
     () =>
       sortTableRows(
-        filterTableRows(all, supplyColumns, tableState.filters),
+        filterTableRows(searched, supplyColumns, tableState.filters),
         supplyColumns,
         tableState.sort,
       ),
-    [all, tableState],
+    [searched, tableState],
   );
   const openedOptions = useMemo(() => {
     const column = supplyColumns.find((column) => column.key === openedColumn);
     if (!column) return [];
     const options = columnOptions(
-      filterTableRows(all, supplyColumns, tableState.filters, column.key),
+      filterTableRows(searched, supplyColumns, tableState.filters, column.key),
       column,
     );
     const available = new Map(
@@ -110,10 +114,17 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
           },
         );
     return options;
-  }, [all, openedColumn, tableState]);
+  }, [all, searched, openedColumn, tableState]);
+  const search = (value: string) => {
+    const next = new URLSearchParams(params);
+    value ? next.set("q", value) : next.delete("q");
+    replaceRoute(`abastecimiento${next.size ? `?${next}` : ""}`);
+  };
   const saveTable = (state: TableState<SupplyColumnKey>) => {
-    const next = new URLSearchParams(tableParams(state));
-    for (const [key, value] of [...next]) if (!value) next.delete(key);
+    const next = new URLSearchParams(params);
+    Object.entries(tableParams(state)).forEach(([key, value]) =>
+      value ? next.set(key, value) : next.delete(key),
+    );
     replaceRoute(`abastecimiento${next.size ? `?${next}` : ""}`);
   };
   const filterCount = supplyColumns.filter((column) =>
@@ -145,6 +156,28 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
         <CatalogTable entity="lote_material" />
       ) : (
         <section className="panel">
+          <div
+            className="toolbar"
+            role="search"
+            aria-label="Búsqueda de órdenes en abastecimiento"
+          >
+            <div className="search">
+              <Search size={16} aria-hidden="true" />
+              <input
+                className="control"
+                type="search"
+                aria-label="Buscar órdenes de producto o material"
+                placeholder="Buscar por OC de producto u OCM de material…"
+                value={query}
+                onChange={(event) => search(event.target.value)}
+              />
+            </div>
+            {query && (
+              <Button variant="link" onClick={() => search("")}>
+                Limpiar búsqueda
+              </Button>
+            )}
+          </div>
           <div className="table-scroll">
             <table className="data-table catalog-table supply-table">
               <thead>
@@ -230,7 +263,7 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
                             ? "Sin vínculos coincidentes"
                             : "Sin vínculos entre órdenes"
                         }
-                        description="Ajusta los filtros de columna para consultar los vínculos disponibles."
+                        description="Ajusta la búsqueda o los filtros de columna para consultar los vínculos disponibles."
                       />
                     </td>
                   </tr>
@@ -274,6 +307,8 @@ export function InvoicesPage({
   );
   const rs = useMemo(() => receipts(db), [db]);
   const all = useMemo(() => buildInvoiceRows(db, rs), [db, rs]);
+  const query = params.get("q") ?? "";
+  const searched = useMemo(() => searchInvoiceRows(all, query), [all, query]);
   const stateKey = params.toString();
   const tableState = useMemo(
     () => readColumnState(new URLSearchParams(stateKey), invoiceColumns),
@@ -282,18 +317,18 @@ export function InvoicesPage({
   const rows = useMemo(
     () =>
       sortTableRows(
-        filterTableRows(all, invoiceColumns, tableState.filters),
+        filterTableRows(searched, invoiceColumns, tableState.filters),
         invoiceColumns,
         tableState.sort,
       ),
-    [all, tableState],
+    [searched, tableState],
   );
   const openedOptions = useMemo(() => {
     const column = invoiceColumns.find((column) => column.key === openedColumn);
     if (!column) return [];
     if (column.selectionOnly) return invoiceDocumentOptions;
     const options = columnOptions(
-      filterTableRows(all, invoiceColumns, tableState.filters, column.key),
+      filterTableRows(searched, invoiceColumns, tableState.filters, column.key),
       column,
     );
     const available = new Map(
@@ -309,7 +344,7 @@ export function InvoicesPage({
           },
         );
     return options;
-  }, [all, openedColumn, tableState]);
+  }, [all, searched, openedColumn, tableState]);
   const filterCount = invoiceColumns.filter((column) =>
     hasFilter(tableState.filters[column.key]),
   ).length;
@@ -318,7 +353,11 @@ export function InvoicesPage({
     Object.entries(tableParams(state)).forEach(([key, value]) =>
       value ? next.set(key, value) : next.delete(key),
     );
-    next.delete("q");
+    replaceRoute(`facturas${next.size ? `?${next}` : ""}`);
+  };
+  const search = (value: string) => {
+    const next = new URLSearchParams(params);
+    value ? next.set("q", value) : next.delete("q");
     replaceRoute(`facturas${next.size ? `?${next}` : ""}`);
   };
   const invoice = id ? db.factura.find((f) => f.id === id) : null;
@@ -413,6 +452,28 @@ export function InvoicesPage({
         }
       />
       <section className="panel">
+        <div
+          className="toolbar"
+          role="search"
+          aria-label="Búsqueda de facturas"
+        >
+          <div className="search">
+            <Search size={16} aria-hidden="true" />
+            <input
+              className="control"
+              type="search"
+              aria-label="Buscar facturas"
+              placeholder="Buscar factura, orden, lote o proveedor…"
+              value={query}
+              onChange={(event) => search(event.target.value)}
+            />
+          </div>
+          {query && (
+            <Button variant="link" onClick={() => search("")}>
+              Limpiar búsqueda
+            </Button>
+          )}
+        </div>
         <div className="table-scroll">
           <table className="data-table catalog-table invoice-table">
             <thead>
@@ -501,7 +562,7 @@ export function InvoicesPage({
                       }
                       description={
                         all.length
-                          ? "Ajusta o quita los filtros de columna para consultar otras facturas."
+                          ? "Ajusta la búsqueda o los filtros de columna para consultar otras facturas."
                           : "Agrega una factura para comenzar."
                       }
                     />
