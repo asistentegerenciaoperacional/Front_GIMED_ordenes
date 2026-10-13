@@ -2473,3 +2473,11 @@ textarea.control {
     scroll-behavior: auto !important;
   }
 }
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}

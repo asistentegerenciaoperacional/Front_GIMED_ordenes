@@ -172,11 +172,23 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
                 onChange={(event) => search(event.target.value)}
               />
             </div>
-            {query && (
-              <Button variant="link" onClick={() => search("")}>
-                Limpiar búsqueda
-              </Button>
-            )}
+            <div className="filter-actions">
+              {query && (
+                <Button variant="link" onClick={() => search("")}>
+                  Limpiar búsqueda
+                </Button>
+              )}
+              {filterCount > 0 && (
+                <Button
+                  variant="link"
+                  onClick={() =>
+                    saveTable({ filters: {}, sort: tableState.sort })
+                  }
+                >
+                  Limpiar filtros ({filterCount})
+                </Button>
+              )}
+            </div>
           </div>
           <div className="table-scroll">
             <table className="data-table catalog-table supply-table">
@@ -275,16 +287,6 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
             <div role="status" aria-live="polite">
               {links.length} {links.length === 1 ? "vínculo" : "vínculos"}
             </div>
-            {filterCount > 0 && (
-              <Button
-                variant="link"
-                onClick={() =>
-                  saveTable({ filters: {}, sort: tableState.sort })
-                }
-              >
-                Limpiar filtros ({filterCount})
-              </Button>
-            )}
           </div>
         </section>
       )}
@@ -468,11 +470,23 @@ export function InvoicesPage({
               onChange={(event) => search(event.target.value)}
             />
           </div>
-          {query && (
-            <Button variant="link" onClick={() => search("")}>
-              Limpiar búsqueda
-            </Button>
-          )}
+          <div className="filter-actions">
+            {query && (
+              <Button variant="link" onClick={() => search("")}>
+                Limpiar búsqueda
+              </Button>
+            )}
+            {filterCount > 0 && (
+              <Button
+                variant="link"
+                onClick={() =>
+                  saveTable({ filters: {}, sort: tableState.sort })
+                }
+              >
+                Limpiar filtros ({filterCount})
+              </Button>
+            )}
+          </div>
         </div>
         <div className="table-scroll">
           <table className="data-table catalog-table invoice-table">
@@ -574,14 +588,6 @@ export function InvoicesPage({
         </div>
         <div className="table-footer">
           <span>{rows.length} facturas</span>
-          {filterCount > 0 && (
-            <Button
-              variant="link"
-              onClick={() => saveTable({ filters: {}, sort: tableState.sort })}
-            >
-              Limpiar filtros ({filterCount})
-            </Button>
-          )}
         </div>
       </section>
       {create && (
