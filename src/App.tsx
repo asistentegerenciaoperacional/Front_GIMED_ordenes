@@ -1,0 +1,456 @@
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  ClipboardList,
+  Boxes,
+  ReceiptText,
+  Package,
+  Building2,
+  Barcode,
+  FolderOpen,
+  Mail,
+  Settings2,
+  ChevronRight,
+  Menu,
+  FlaskConical,
+  CheckCircle2,
+  X,
+  ArrowUpRight,
+  RefreshCw,
+} from "lucide-react";
+import type { Database } from "../shared/models";
+import { AppContext, ApiError, request, Button, Loading, Empty } from "./ui";
+import {
+  currentRoute,
+  normalizeRoute,
+  orderListReturnAfterNavigation,
+  routeEvent,
+  type OrderListReturn,
+  type ScrollPosition,
+} from "./routing";
+import { NavigationDrawer, PIN_NAVIGATION_QUERY } from "./navigation-drawer";
+import { OrdersPage, OrderDetail, PrintOrder } from "./orders";
+import { CatalogPage } from "./catalogs";
+import {
+  SupplyPage,
+  InvoicesPage,
+  CodesPage,
+  EmailsPage,
+  SettingsPage,
+  DocumentsPage,
+} from "./flows";
+import type { Row } from "../shared/schema";
+const navigation = [
+  { id: "ordenes", label: "Órdenes de compra", icon: ClipboardList },
+  { id: "abastecimiento", label: "Abastecimiento", icon: Boxes },
+  { id: "facturas", label: "Facturas", icon: ReceiptText },
+  { id: "catalogos", label: "Catálogos", icon: Package },
+  { id: "proveedores", label: "Proveedores", icon: Building2 },
+  { id: "codigos", label: "Códigos de barras", icon: Barcode },
+  { id: "documentos", label: "Documentos", icon: FolderOpen },
+  { id: "correos", label: "Correos", icon: Mail },
+];
+export function App() {
+  const [db, setDb] = useState<Database | null>(null),
+    [loadError, setLoadError] = useState(""),
+    [route, setRoute] = useState(currentRoute),
+    [navOpen, setNavOpen] = useState(false),
+    [navPinned, setNavPinned] = useState(false),
+    [saving, setSaving] = useState(0);
+  const menuRef = useRef<HTMLButtonElement>(null);
+  const [canPinNavigation, setCanPinNavigation] = useState(
+    () => window.matchMedia(PIN_NAVIGATION_QUERY).matches,
+  );
+  useLayoutEffect(() => {
+    const media = window.matchMedia(PIN_NAVIGATION_QUERY);
+    const update = () => {
+      setCanPinNavigation(media.matches);
+      if (!media.matches && navPinned) {
+        setNavPinned(false);
+        setNavOpen(true);
+      }
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [navPinned]);
+  const pendingScrollRestore = useRef<ScrollPosition | null>(null);
+  const orderListReturn = useRef<OrderListReturn | null>(null);
+  const navigationFocus = useRef<"menu" | "content" | null>(null);
+  const closeNavigation = useCallback(() => {
+    navigationFocus.current = "menu";
+    setNavOpen(false);
+  }, []);
+  const changeNavigationPinned = useCallback(
+    (pinned: boolean) => {
+      if (pinned && !canPinNavigation) return;
+      setNavPinned(pinned);
+      setNavOpen(!pinned);
+    },
+    [canPinNavigation],
+  );
+  useLayoutEffect(() => {
+    if (navOpen || !navigationFocus.current) return;
+    const target =
+      navigationFocus.current === "menu"
+        ? menuRef.current
+        : document.getElementById("main-content");
+    navigationFocus.current = null;
+    target?.focus({ preventScroll: true });
+  }, [navOpen, route]);
+  useLayoutEffect(() => {
+    const position = pendingScrollRestore.current;
+    if (position === null) return;
+    pendingScrollRestore.current = null;
+    if (position.tableLeft !== null)
+      document
+        .querySelector(".orders-table")
+        ?.closest(".table-scroll")
+        ?.scrollTo({
+          left: position.tableLeft,
+          behavior: "instant",
+        });
+    window.scrollTo({ top: position.top, behavior: "instant" });
+  }, [route]);
+  const [toast, setToast] = useState<{
+    message: string;
+    error: boolean;
+  } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousRoute = useRef(route);
+  const intentionalNavigation = useRef(false);
+  const notify = useCallback((message: string, error = false) => {
+    setToast({ message, error });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(null), 7000);
+  }, []);
+  const load = useCallback(async () => {
+    try {
+      setDb(await request("state"));
+      setLoadError("");
+    } catch (e) {
+      setLoadError((e as Error).message);
+    }
+  }, []);
+  useEffect(() => {
+    void load();
+    window.history.replaceState(null, "", `/${previousRoute.current}`);
+    const changed = () => {
+      if (
+        !intentionalNavigation.current &&
+        document.querySelector('dialog[open][data-dirty="true"]') &&
+        !window.confirm("Hay cambios sin guardar. ¿Salir del formulario?")
+      ) {
+        window.history.replaceState(null, "", `/${previousRoute.current}`);
+        return;
+      }
+      intentionalNavigation.current = false;
+      const next = currentRoute();
+      const table = document
+        .querySelector(".orders-table")
+        ?.closest(".table-scroll");
+      orderListReturn.current = orderListReturnAfterNavigation(
+        orderListReturn.current,
+        previousRoute.current,
+        next,
+        {
+          top: Math.round(window.scrollY),
+          tableLeft: table ? Math.round(table.scrollLeft) : null,
+        },
+      );
+      const fromDrawer = document
+        .getElementById("app-navigation")
+        ?.matches(":modal");
+      if (fromDrawer) navigationFocus.current = "content";
+      previousRoute.current = next;
+      window.history.replaceState(null, "", `/${next}`);
+      setRoute(next);
+      setNavOpen(false);
+    };
+    const clicked = (e: MouseEvent) => {
+      if (
+        e.defaultPrevented ||
+        e.button !== 0 ||
+        e.ctrlKey ||
+        e.metaKey ||
+        e.shiftKey ||
+        e.altKey
+      )
+        return;
+      const link = (e.target as Element).closest<HTMLAnchorElement>("a[href]");
+      if (!link || link.target || link.hasAttribute("download")) return;
+      const href = link.getAttribute("href")!;
+      if (
+        !href.startsWith("/") ||
+        href.startsWith("//") ||
+        href.startsWith("/api/")
+      )
+        return;
+      e.preventDefault();
+      if (
+        document.querySelector('dialog[open][data-dirty="true"]') &&
+        !window.confirm("Hay cambios sin guardar. ¿Salir del formulario?")
+      )
+        return;
+      const next = normalizeRoute(href);
+      const restoreValue = link.dataset.restoreScroll;
+      const restoreScroll =
+        restoreValue && /^\d+$/.test(restoreValue)
+          ? Number(restoreValue)
+          : null;
+      const restoreTableValue = link.dataset.restoreTableScroll;
+      const restoreTableScroll =
+        restoreTableValue && /^\d+$/.test(restoreTableValue)
+          ? Number(restoreTableValue)
+          : null;
+      const navigationPanel = document.getElementById("app-navigation");
+      if (navigationPanel?.contains(link)) {
+        if (
+          next === previousRoute.current &&
+          !navigationPanel.matches(":modal")
+        )
+          document
+            .getElementById("main-content")
+            ?.focus({ preventScroll: true });
+        else navigationFocus.current = "content";
+      }
+      if (next !== previousRoute.current) {
+        if (restoreScroll !== null)
+          pendingScrollRestore.current = {
+            top: restoreScroll,
+            tableLeft: restoreTableScroll,
+          };
+        window.history.pushState(null, "", `/${next}`);
+      }
+      intentionalNavigation.current = true;
+      changed();
+      if (restoreScroll === null)
+        window.scrollTo({ top: 0, behavior: "instant" });
+    };
+    window.addEventListener("hashchange", changed);
+    window.addEventListener("popstate", changed);
+    window.addEventListener(routeEvent, changed);
+    document.addEventListener("click", clicked);
+    return () => {
+      window.removeEventListener("hashchange", changed);
+      window.removeEventListener("popstate", changed);
+      window.removeEventListener(routeEvent, changed);
+      document.removeEventListener("click", clicked);
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    };
+  }, [load]);
+  const navigate = useCallback((path: string) => {
+    const next = normalizeRoute(path);
+    intentionalNavigation.current = true;
+    if (next !== previousRoute.current)
+      window.history.pushState(null, "", `/${next}`);
+    window.dispatchEvent(new Event(routeEvent));
+    setNavOpen(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, []);
+  const run = useCallback(
+    async (name: string, payload: Row, message?: string) => {
+      setSaving((n) => n + 1);
+      try {
+        const { result } = await request("commands", { name, payload });
+        setDb(await request("state"));
+        if (message) notify(message);
+        return result;
+      } catch (error) {
+        if (
+          error instanceof ApiError &&
+          (error.code === "CONSECUTIVE_CHANGED" ||
+            (["createOrder", "editOrder"].includes(name) &&
+              Object.keys(error.fields).some((field) =>
+                /^lines\.\d+\.id_producto$/.test(field),
+              )))
+        )
+          await load();
+        throw error;
+      } finally {
+        setSaving((n) => n - 1);
+      }
+    },
+    [notify, load],
+  );
+  const url = new URL(`http://local/${route}`),
+    parts = url.pathname.slice(1).split("/"),
+    page = parts[0],
+    id = parts[1],
+    print = page === "ordenes" && parts[2] === "imprimir";
+  const title =
+    page === "configuracion"
+      ? "Configuración"
+      : (navigation.find((n) => n.id === page)?.label ?? "Órdenes de compra");
+  if (!db)
+    return (
+      <div style={{ maxWidth: 600, margin: "12vh auto", padding: 24 }}>
+        {loadError ? (
+          <Empty
+            title="Servicio local no disponible"
+            description={loadError}
+            action={
+              <Button
+                icon={RefreshCw}
+                variant="primary"
+                onClick={() => void load()}
+              >
+                Reintentar
+              </Button>
+            }
+          />
+        ) : (
+          <Loading />
+        )}
+      </div>
+    );
+  let content;
+  if (page === "ordenes")
+    content =
+      id && !["productos", "materiales"].includes(id) ? (
+        print ? (
+          <PrintOrder id={id} />
+        ) : (
+          <OrderDetail key={id} id={id} listReturn={orderListReturn.current} />
+        )
+      ) : (
+        <OrdersPage
+          group={id === "materiales" ? "materiales" : "productos"}
+          params={url.searchParams}
+        />
+      );
+  else if (page === "abastecimiento")
+    content = <SupplyPage params={url.searchParams} />;
+  else if (page === "facturas")
+    content = (
+      <InvoicesPage key={id ?? "list"} id={id} params={url.searchParams} />
+    );
+  else if (page === "catalogos" || page === "proveedores")
+    content = <CatalogPage key={page} group={page} params={url.searchParams} />;
+  else if (page === "codigos") content = <CodesPage />;
+  else if (page === "documentos") content = <DocumentsPage />;
+  else if (page === "correos") content = <EmailsPage />;
+  else if (page === "configuracion") content = <SettingsPage />;
+  else
+    content = (
+      <Empty
+        title="Página no encontrada"
+        action={
+          <Button onClick={() => navigate("ordenes")}>Ir a órdenes</Button>
+        }
+      />
+    );
+  return (
+    <AppContext.Provider value={{ db, run, navigate, notify }}>
+      {print ? (
+        content
+      ) : (
+        <div className={`shell${navPinned ? " nav-pinned" : ""}`}>
+          <a
+            className="skip-link"
+            href="#main-content"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("main-content")?.focus();
+            }}
+          >
+            Saltar al contenido
+          </a>
+          <NavigationDrawer
+            open={navOpen}
+            pinned={navPinned}
+            canPin={canPinNavigation}
+            onClose={closeNavigation}
+            onPinnedChange={changeNavigationPinned}
+          >
+            <span className="nav-label">OPERACIÓN</span>
+            <nav className="nav" aria-label="Navegación principal">
+              {navigation.map((n) => (
+                <a
+                  key={n.id}
+                  href={`/${n.id}`}
+                  className={page === n.id ? "active" : ""}
+                  aria-current={page === n.id ? "page" : undefined}
+                >
+                  <n.icon size={18} aria-hidden="true" />
+                  <span className="nav-text">{n.label}</span>
+                </a>
+              ))}
+            </nav>
+            <div className="nav-divider" />
+            <nav className="nav" aria-label="Configuración">
+              <a
+                href="/configuracion"
+                className={page === "configuracion" ? "active" : ""}
+                aria-current={page === "configuracion" ? "page" : undefined}
+              >
+                <Settings2 size={18} aria-hidden="true" />
+                <span className="nav-text">Configuración</span>
+              </a>
+            </nav>
+          </NavigationDrawer>
+          <div className="main-area" inert={navOpen && !navPinned}>
+            <header className="topbar">
+              <div className="inline">
+                {!navPinned && (
+                  <Button
+                    ref={menuRef}
+                    className="menu-btn icon-btn"
+                    icon={Menu}
+                    aria-label="Abrir navegación"
+                    aria-haspopup="dialog"
+                    aria-expanded={navOpen}
+                    aria-controls="app-navigation"
+                    onClick={() => setNavOpen(!navOpen)}
+                  />
+                )}
+                <div className="breadcrumbs">
+                  <span>Compras</span>
+                  <ChevronRight size={12} aria-hidden="true" />
+                  <strong>{title}</strong>
+                </div>
+              </div>
+              <div className="topbar-right">
+                <span className="saved-status" role="status">
+                  <span className="status-dot" />
+                  {saving ? "Guardando…" : "Guardado local"}
+                </span>
+                <span className="demo-pill">
+                  <FlaskConical size={12} aria-hidden="true" />
+                  Demostración
+                </span>
+                <span className="avatar" aria-label="Espacio GIMED">
+                  GI
+                </span>
+              </div>
+            </header>
+            <main id="main-content" className="content" tabIndex={-1}>
+              {content}
+            </main>
+          </div>
+        </div>
+      )}
+      {toast && (
+        <div
+          className={`toast ${toast.error ? "error" : ""}`}
+          role={toast.error ? "alert" : "status"}
+        >
+          <CheckCircle2 size={18} aria-hidden="true" />
+          <span>{toast.message}</span>
+          <Button
+            variant="ghost"
+            className="icon-btn"
+            icon={X}
+            aria-label="Cerrar aviso"
+            onClick={() => setToast(null)}
+          />
+        </div>
+      )}
+    </AppContext.Provider>
+  );
+}

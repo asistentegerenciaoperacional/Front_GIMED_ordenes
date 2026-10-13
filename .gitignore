@@ -1,0 +1,11 @@
+node_modules/
+.npm-cache/
+dist/
+data/database.json
+data/*.tmp
+.playwright-cli/
+.playwright/
+tests/.tmp/
+tests/evidence/qa-database.json
+.portable-build/
+.portable-cache/

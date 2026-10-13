@@ -1,0 +1,124 @@
+.print-view {
+  max-width: 1100px;
+  margin: 36px auto;
+  padding: 32px;
+  background: #fff;
+  color: #111827;
+}
+.print-toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+.print-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 2px solid #334155;
+  padding-bottom: 20px;
+  margin-bottom: 16px;
+}
+.print-brand {
+  font-size: 28px;
+  letter-spacing: 2px;
+  color: #2455b2;
+}
+.print-brand small {
+  display: block;
+  letter-spacing: 0;
+  font-size: 11px;
+  color: #334155;
+}
+.print-header h1 {
+  font-size: 23px;
+  color: #1e3a5f;
+}
+.print-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 20px 0;
+  font-size: 12px;
+}
+.print-meta strong {
+  margin-right: 16px;
+}
+.print-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 11px;
+}
+.print-table td,
+.print-table th {
+  border: 1px solid #475569;
+  padding: 10px;
+  height: 38px;
+}
+.print-table th {
+  background: #e2e8f0;
+  text-align: center;
+}
+.print-total {
+  font-size: 14px;
+  margin: 20px 0;
+  text-align: right;
+}
+.print-signatures {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 70px;
+  font-size: 11px;
+}
+.print-signatures span {
+  padding-top: 9px;
+  border-top: 1px solid #334155;
+  min-width: 160px;
+}
+.print-note {
+  font-size: 10px;
+  margin-top: 28px;
+  color: #64748b;
+}
+@page {
+  size: A4 landscape;
+  margin: 14mm;
+}
+@media print {
+  body {
+    background: #fff !important;
+  }
+  .print-view {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+  }
+  .print-toolbar,
+  .toast {
+    display: none !important;
+  }
+  .print-table {
+    font-size: 10px;
+  }
+  .print-table td,
+  .print-table th {
+    padding: 7px;
+  }
+  .print-header h1 {
+    font-size: 20px;
+  }
+  .print-signatures {
+    margin-top: 50px;
+  }
+  .print-view a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .print-note {
+    color: #334155;
+  }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

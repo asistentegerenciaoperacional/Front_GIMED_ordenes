@@ -1,0 +1,1164 @@
+{
+  "enums": {
+    "tipo_orden": [
+      "producto",
+      "material",
+      "otro"
+    ],
+    "grupo_consecutivo": [
+      "producto",
+      "material"
+    ],
+    "estado_autorizacion": [
+      "no_autorizada",
+      "autorizada"
+    ],
+    "estado_renglon_orden": [
+      "en_seguimiento",
+      "anulada",
+      "cerrada"
+    ],
+    "estado_lote": [
+      "en_seguimiento",
+      "cerrado",
+      "anulado"
+    ],
+    "estado_batch_record": [
+      "pendiente",
+      "recibido",
+      "validado",
+      "rechazado"
+    ],
+    "estado_inspeccion": [
+      "pendiente",
+      "aprobada",
+      "rechazada"
+    ],
+    "estado_codigo": [
+      "creado_gs1",
+      "verificado_sistema",
+      "asignado",
+      "inactivo"
+    ],
+    "tipo_entidad_documento": [
+      "factura",
+      "lote_material",
+      "orden_compra"
+    ],
+    "tipo_documento": [
+      "factura_fisica",
+      "certificado_calidad",
+      "certificado_liberacion",
+      "orden_compra_escaneada",
+      "plantilla_certificado_liberacion"
+    ],
+    "tipo_evento_correo": [
+      "codigos_barras_nuevos",
+      "envio_orden_compra",
+      "envio_certificado_calidad",
+      "envio_certificado_liberacion"
+    ],
+    "tipo_contacto": [
+      "interno",
+      "proveedor"
+    ],
+    "tipo_destinatario_correo": [
+      "para",
+      "cc",
+      "cco"
+    ],
+    "tipo_adjunto_correo": [
+      "orden_compra_escaneada",
+      "certificado_calidad",
+      "certificado_liberacion"
+    ]
+  },
+  "tables": {
+    "productos": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "nombre_producto": {
+          "type": "varchar",
+          "required": true
+        },
+        "id_maquilador": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_categoria": {
+          "type": "object_id",
+          "required": true
+        },
+        "unidades_lote": {
+          "type": "integer",
+          "required": true
+        },
+        "activo": {
+          "type": "boolean",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "codigos_barras": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "codigo": {
+          "type": "varchar",
+          "required": true
+        },
+        "id_producto": {
+          "type": "object_id",
+          "required": false
+        },
+        "estado": {
+          "type": "estado_codigo",
+          "required": true,
+          "default": "creado_gs1"
+        },
+        "fecha_creacion": {
+          "type": "datetime",
+          "required": false
+        },
+        "fecha_act": {
+          "type": "datetime",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "codigo"
+        ]
+      ]
+    },
+    "proveedor": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "nombre_largo": {
+          "type": "varchar",
+          "required": false
+        },
+        "nombre_corto": {
+          "type": "varchar",
+          "required": false
+        },
+        "nit": {
+          "type": "varchar",
+          "required": false
+        },
+        "digito_verf": {
+          "type": "varchar",
+          "required": false
+        },
+        "Es_maquila": {
+          "type": "boolean",
+          "required": false
+        },
+        "Es_materiales": {
+          "type": "boolean",
+          "required": false
+        },
+        "activo": {
+          "type": "boolean",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "direccion_proveedor": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_proveedor": {
+          "type": "object_id",
+          "required": true
+        },
+        "nombre_dir": {
+          "type": "varchar",
+          "required": false
+        },
+        "ciudad": {
+          "type": "varchar",
+          "required": false
+        },
+        "linea_1": {
+          "type": "varchar",
+          "required": false
+        },
+        "linea_2": {
+          "type": "varchar",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "contacto": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_proveedor": {
+          "type": "object_id",
+          "required": true
+        },
+        "nombre": {
+          "type": "varchar",
+          "required": false
+        },
+        "celular": {
+          "type": "varchar",
+          "required": false
+        },
+        "cargo_area": {
+          "type": "varchar",
+          "required": false
+        },
+        "correo": {
+          "type": "varchar",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "categorias": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "nombre_categoria": {
+          "type": "varchar",
+          "required": false
+        },
+        "iva": {
+          "type": "integer",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "costos_maquila": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_producto": {
+          "type": "object_id",
+          "required": true
+        },
+        "costo": {
+          "type": "integer",
+          "required": false
+        },
+        "fecha_inicio": {
+          "type": "datetime",
+          "required": false
+        },
+        "fecha_fin": {
+          "type": "datetime",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "tipos_materiales": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "tipo_material": {
+          "type": "varchar",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "tipo_material"
+        ]
+      ]
+    },
+    "materiales": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "codigo_material": {
+          "type": "integer",
+          "required": false
+        },
+        "id_tipo_material": {
+          "type": "object_id",
+          "required": true
+        },
+        "nombre_material": {
+          "type": "varchar",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "codigo_material"
+        ]
+      ]
+    },
+    "materiales_asociados": {
+      "fields": {
+        "id_material": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_producto": {
+          "type": "object_id",
+          "required": true
+        }
+      },
+      "pk": [
+        "id_material",
+        "id_producto"
+      ],
+      "unique": []
+    },
+    "producto_corrugado": {
+      "fields": {
+        "id_material": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_producto": {
+          "type": "object_id",
+          "required": true
+        },
+        "unidades_por_corrugado": {
+          "type": "integer",
+          "required": true
+        }
+      },
+      "pk": [
+        "id_producto"
+      ],
+      "unique": []
+    },
+    "proveedores_favoritos": {
+      "fields": {
+        "id_material": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_proveedor": {
+          "type": "object_id",
+          "required": true
+        }
+      },
+      "pk": [
+        "id_material",
+        "id_proveedor"
+      ],
+      "unique": []
+    },
+    "orden_compra": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "tipo_orden": {
+          "type": "tipo_orden",
+          "required": true
+        },
+        "no_orden": {
+          "type": "varchar",
+          "required": true
+        },
+        "id_proveedor": {
+          "type": "object_id",
+          "required": true
+        },
+        "fecha_elaboracion": {
+          "type": "datetime",
+          "required": false
+        },
+        "fecha_solicitada_entrega": {
+          "type": "datetime",
+          "required": false
+        },
+        "estado_autorizacion": {
+          "type": "estado_autorizacion",
+          "required": true,
+          "default": "no_autorizada"
+        },
+        "fecha_autorizacion": {
+          "type": "datetime",
+          "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "orden_producto": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_orden_compra": {
+          "type": "object_id",
+          "required": true
+        },
+        "posicion": {
+          "type": "integer",
+          "required": true
+        },
+        "id_codigo_barras": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_producto": {
+          "type": "object_id",
+          "required": true
+        },
+        "cantidad_solicitada": {
+          "type": "integer",
+          "required": true
+        },
+        "precio_unitario": {
+          "type": "decimal(14,2)",
+          "required": true
+        },
+        "ref_corrugado": {
+          "type": "object_id",
+          "required": true
+        },
+        "cantidad_corrugado": {
+          "type": "integer",
+          "required": true
+        },
+        "estado": {
+          "type": "estado_renglon_orden",
+          "required": true,
+          "default": "en_seguimiento"
+        },
+        "cantidad_sticker": {
+          "type": "integer",
+          "required": false,
+          "prototype": true
+        },
+        "cantidad_cinta": {
+          "type": "integer",
+          "required": false,
+          "prototype": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id_orden_compra",
+          "posicion"
+        ]
+      ]
+    },
+    "lote_producto": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_orden_producto": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_factura": {
+          "type": "object_id",
+          "required": false
+        },
+        "numero_lote": {
+          "type": "varchar",
+          "required": false
+        },
+        "cantidad_recibida": {
+          "type": "integer",
+          "required": false
+        },
+        "fecha_estimada_batch_record": {
+          "type": "datetime",
+          "required": false
+        },
+        "fecha_entrega_batch_record": {
+          "type": "datetime",
+          "required": false
+        },
+        "estado_batch_record": {
+          "type": "estado_batch_record",
+          "required": true,
+          "default": "pendiente"
+        },
+        "fecha_inspeccion": {
+          "type": "datetime",
+          "required": false
+        },
+        "estado_inspeccion": {
+          "type": "estado_inspeccion",
+          "required": true,
+          "default": "pendiente"
+        },
+        "fecha_recepcion": {
+          "type": "datetime",
+          "required": false
+        },
+        "fecha_confirmacion": {
+          "type": "datetime",
+          "required": false
+        },
+        "ubicacion": {
+          "type": "varchar",
+          "required": false
+        },
+        "estado": {
+          "type": "estado_lote",
+          "required": true,
+          "default": "en_seguimiento"
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "orden_material": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_orden_compra": {
+          "type": "object_id",
+          "required": true
+        },
+        "posicion": {
+          "type": "integer",
+          "required": true
+        },
+        "id_material": {
+          "type": "object_id",
+          "required": true
+        },
+        "cantidad_solicitada": {
+          "type": "integer",
+          "required": true
+        },
+        "cantidad_recibida": {
+          "type": "integer",
+          "required": false
+        },
+        "precio_unitario": {
+          "type": "decimal(14,2)",
+          "required": true
+        },
+        "fecha_estimada_entrega": {
+          "type": "datetime",
+          "required": false
+        },
+        "fecha_entrega": {
+          "type": "datetime",
+          "required": false
+        },
+        "id_lote_material": {
+          "type": "object_id",
+          "required": false
+        },
+        "id_factura": {
+          "type": "object_id",
+          "required": false
+        },
+        "ubicacion": {
+          "type": "varchar",
+          "required": false
+        },
+        "estado": {
+          "type": "estado_renglon_orden",
+          "required": true,
+          "default": "en_seguimiento"
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id_orden_compra",
+          "posicion"
+        ]
+      ]
+    },
+    "lote_material": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "numero_lote": {
+          "type": "varchar",
+          "required": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "numero_lote"
+        ]
+      ]
+    },
+    "orden_otro": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_orden_compra": {
+          "type": "object_id",
+          "required": true
+        },
+        "posicion": {
+          "type": "integer",
+          "required": true
+        },
+        "producto": {
+          "type": "varchar",
+          "required": true
+        },
+        "cantidad_solicitada": {
+          "type": "integer",
+          "required": true
+        },
+        "cantidad_recibida": {
+          "type": "integer",
+          "required": false
+        },
+        "precio_unitario": {
+          "type": "decimal(14,2)",
+          "required": true
+        },
+        "fecha_estimada_entrega": {
+          "type": "datetime",
+          "required": false
+        },
+        "fecha_entrega": {
+          "type": "datetime",
+          "required": false
+        },
+        "id_factura": {
+          "type": "object_id",
+          "required": false
+        },
+        "ubicacion": {
+          "type": "varchar",
+          "required": false
+        },
+        "estado": {
+          "type": "estado_renglon_orden",
+          "required": true,
+          "default": "en_seguimiento"
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id_orden_compra",
+          "posicion"
+        ]
+      ]
+    },
+    "abastecimiento_material": {
+      "fields": {
+        "id_orden_producto": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_orden_material": {
+          "type": "object_id",
+          "required": true
+        }
+      },
+      "pk": [
+        "id_orden_producto",
+        "id_orden_material"
+      ],
+      "unique": []
+    },
+    "factura": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_proveedor": {
+          "type": "object_id",
+          "required": true
+        },
+        "numero_factura": {
+          "type": "varchar",
+          "required": true
+        },
+        "fecha_registro": {
+          "type": "datetime",
+          "required": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id_proveedor",
+          "numero_factura"
+        ]
+      ]
+    },
+    "documento": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "tipo_entidad": {
+          "type": "tipo_entidad_documento",
+          "required": false
+        },
+        "id_entidad": {
+          "type": "object_id",
+          "required": false
+        },
+        "tipo_documento": {
+          "type": "tipo_documento",
+          "required": true
+        },
+        "clave_almacenamiento": {
+          "type": "varchar",
+          "required": true
+        },
+        "nombre_archivo": {
+          "type": "varchar",
+          "required": true
+        },
+        "tipo_mime": {
+          "type": "varchar",
+          "required": false
+        },
+        "fecha_carga": {
+          "type": "datetime",
+          "required": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "clave_almacenamiento"
+        ],
+        [
+          "tipo_entidad",
+          "id_entidad",
+          "tipo_documento"
+        ]
+      ]
+    },
+    "parametros_seguimiento": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "margen_tolerancia_pct": {
+          "type": "float(5,2)",
+          "required": true,
+          "default": 10
+        },
+        "fecha_inicio": {
+          "type": "datetime",
+          "required": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "fecha_inicio"
+        ]
+      ]
+    },
+    "consecutivo_orden": {
+      "fields": {
+        "grupo": {
+          "type": "grupo_consecutivo",
+          "required": true
+        },
+        "ultimo_numero": {
+          "type": "integer",
+          "required": true
+        }
+      },
+      "pk": [
+        "grupo"
+      ],
+      "unique": []
+    },
+    "contacto_interno": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "nombre": {
+          "type": "varchar",
+          "required": true
+        },
+        "correo": {
+          "type": "varchar",
+          "required": true
+        },
+        "cargo_area": {
+          "type": "varchar",
+          "required": false
+        },
+        "activo": {
+          "type": "boolean",
+          "required": true,
+          "default": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "destinatario_evento": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "tipo_evento": {
+          "type": "tipo_evento_correo",
+          "required": true
+        },
+        "tipo_contacto": {
+          "type": "tipo_contacto",
+          "required": true
+        },
+        "cargo_area": {
+          "type": "varchar",
+          "required": true
+        },
+        "tipo_destinatario": {
+          "type": "tipo_destinatario_correo",
+          "required": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": [
+        [
+          "tipo_evento",
+          "tipo_contacto",
+          "cargo_area"
+        ]
+      ]
+    },
+    "adjunto_evento": {
+      "fields": {
+        "tipo_evento": {
+          "type": "tipo_evento_correo",
+          "required": true
+        },
+        "tipo_adjunto": {
+          "type": "tipo_adjunto_correo",
+          "required": true
+        }
+      },
+      "pk": [
+        "tipo_evento",
+        "tipo_adjunto"
+      ],
+      "unique": []
+    },
+    "correo_enviado": {
+      "fields": {
+        "id_correo": {
+          "type": "varchar",
+          "required": true
+        },
+        "remitente": {
+          "type": "varchar",
+          "required": true
+        },
+        "tipo_evento": {
+          "type": "tipo_evento_correo",
+          "required": true
+        },
+        "fecha_envio": {
+          "type": "datetime",
+          "required": true
+        }
+      },
+      "pk": [
+        "id_correo",
+        "remitente"
+      ],
+      "unique": []
+    },
+    "correo_enviado_destinatario": {
+      "fields": {
+        "id_correo": {
+          "type": "varchar",
+          "required": true
+        },
+        "remitente": {
+          "type": "varchar",
+          "required": true
+        },
+        "destinatario": {
+          "type": "varchar",
+          "required": true
+        },
+        "tipo_destinatario": {
+          "type": "tipo_destinatario_correo",
+          "required": true
+        }
+      },
+      "pk": [
+        "id_correo",
+        "remitente",
+        "destinatario"
+      ],
+      "unique": []
+    }
+  },
+  "refs": [
+    {
+      "table": "costos_maquila",
+      "field": "id_producto",
+      "target": "productos",
+      "targetField": "id"
+    },
+    {
+      "table": "codigos_barras",
+      "field": "id_producto",
+      "target": "productos",
+      "targetField": "id"
+    },
+    {
+      "table": "productos",
+      "field": "id_maquilador",
+      "target": "proveedor",
+      "targetField": "id"
+    },
+    {
+      "table": "productos",
+      "field": "id_categoria",
+      "target": "categorias",
+      "targetField": "id"
+    },
+    {
+      "table": "materiales_asociados",
+      "field": "id_material",
+      "target": "materiales",
+      "targetField": "id"
+    },
+    {
+      "table": "materiales_asociados",
+      "field": "id_producto",
+      "target": "productos",
+      "targetField": "id"
+    },
+    {
+      "table": "producto_corrugado",
+      "field": "id_material",
+      "target": "materiales",
+      "targetField": "id"
+    },
+    {
+      "table": "producto_corrugado",
+      "field": "id_producto",
+      "target": "productos",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_material",
+      "field": "id_material",
+      "target": "materiales",
+      "targetField": "id"
+    },
+    {
+      "table": "materiales",
+      "field": "id_tipo_material",
+      "target": "tipos_materiales",
+      "targetField": "id"
+    },
+    {
+      "table": "contacto",
+      "field": "id_proveedor",
+      "target": "proveedor",
+      "targetField": "id"
+    },
+    {
+      "table": "direccion_proveedor",
+      "field": "id_proveedor",
+      "target": "proveedor",
+      "targetField": "id"
+    },
+    {
+      "table": "proveedores_favoritos",
+      "field": "id_proveedor",
+      "target": "proveedor",
+      "targetField": "id"
+    },
+    {
+      "table": "proveedores_favoritos",
+      "field": "id_material",
+      "target": "materiales",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_producto",
+      "field": "ref_corrugado",
+      "target": "materiales",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_compra",
+      "field": "id_proveedor",
+      "target": "proveedor",
+      "targetField": "id"
+    },
+    {
+      "table": "factura",
+      "field": "id_proveedor",
+      "target": "proveedor",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_producto",
+      "field": "id_orden_compra",
+      "target": "orden_compra",
+      "targetField": "id"
+    },
+    {
+      "table": "lote_producto",
+      "field": "id_orden_producto",
+      "target": "orden_producto",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_material",
+      "field": "id_orden_compra",
+      "target": "orden_compra",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_otro",
+      "field": "id_orden_compra",
+      "target": "orden_compra",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_material",
+      "field": "id_lote_material",
+      "target": "lote_material",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_producto",
+      "field": "id_producto",
+      "target": "productos",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_producto",
+      "field": "id_codigo_barras",
+      "target": "codigos_barras",
+      "targetField": "id"
+    },
+    {
+      "table": "abastecimiento_material",
+      "field": "id_orden_producto",
+      "target": "orden_producto",
+      "targetField": "id"
+    },
+    {
+      "table": "abastecimiento_material",
+      "field": "id_orden_material",
+      "target": "orden_material",
+      "targetField": "id"
+    },
+    {
+      "table": "lote_producto",
+      "field": "id_factura",
+      "target": "factura",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_material",
+      "field": "id_factura",
+      "target": "factura",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_otro",
+      "field": "id_factura",
+      "target": "factura",
+      "targetField": "id"
+    }
+  ]
+}

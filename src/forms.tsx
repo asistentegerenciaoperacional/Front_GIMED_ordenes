@@ -1,0 +1,2617 @@
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Plus,
+  Trash2,
+  Paperclip,
+  FileText,
+  Download,
+  Printer,
+  RefreshCw,
+  Send,
+  Info,
+  Check,
+  ArrowLeft,
+  ChevronRight,
+} from "lucide-react";
+import {
+  meta,
+  blankRow,
+  primaryKey,
+  labels,
+  titles,
+  schemas,
+  orderDeliverySchema,
+  dateSchema,
+  normalizeInvoice,
+  currentCost,
+  latestBarcode,
+  recommendations,
+  increasedQuantity,
+  decimal,
+  orderLines,
+  orderItemLabel,
+  orderReference,
+  nextOrderNumber,
+  totalLines,
+  isInitialProductLot,
+  productLotNeedsNumber,
+  materialKind,
+  validEmail,
+  type Entity,
+  type Row,
+} from "../shared/schema";
+import {
+  entityValidation,
+  validEntityField,
+  validPrice,
+} from "./live-validation";
+import {
+  useApp,
+  ApiError,
+  request,
+  Dialog,
+  ConfirmationDialog,
+  Button,
+  Field,
+  DateInput,
+  ErrorNotice,
+  useErrors,
+  text,
+  displayField,
+  recordName,
+  today,
+  isoDate,
+  shortDate,
+  money,
+  count,
+  Badge,
+  Empty,
+} from "./ui";
+
+export function CatalogForm({
+  entity,
+  record,
+  onClose,
+}: {
+  entity: Entity;
+  record?: Row;
+  onClose: () => void;
+}) {
+  const { db, run } = useApp();
+  const [values, setValues] = useState<Row>(() => ({
+    ...blankRow(entity),
+    ...record,
+  }));
+  const [busy, setBusy] = useState(false);
+  const { error, catchError } = useErrors(
+    entityValidation(entity, values, db, record),
+  );
+  const [dirty, setDirty] = useState(false);
+  const update = (field: string, value: any) => {
+    setValues({ ...values, [field]: value });
+    setDirty(true);
+  };
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const row: Row = { ...values };
+      for (const [field, spec] of Object.entries(meta.tables[entity].fields)) {
+        if (field === "id") continue;
+        const raw = row[field];
+        if (raw === "" || raw === undefined) {
+          row[field] = spec.required ? "" : null;
+          continue;
+        }
+        if (spec.type === "integer" || spec.type === "float(5,2)") {
+          if (
+            field === "codigo_material" &&
+            !/^\d{3}$/.test(
+              typeof raw === "number"
+                ? String(raw).padStart(3, "0")
+                : String(raw),
+            )
+          )
+            throw new ApiError({
+              message: "El código MAIA debe tener tres dígitos.",
+              fields: {
+                codigo_material: "Introduce exactamente tres dígitos.",
+              },
+            });
+          row[field] = Number(raw);
+        }
+        if (
+          spec.type === "datetime" &&
+          typeof raw === "string" &&
+          raw.length === 10
+        )
+          row[field] = isoDate(raw);
+      }
+      if (!row.id && Object.hasOwn(row, "id")) delete row.id;
+      const checked = {
+        ...blankRow(entity),
+        ...row,
+        ...(!row.id && Object.hasOwn(blankRow(entity), "id")
+          ? { id: "000000000000000000000001" }
+          : {}),
+      };
+      const parsed = schemas[entity].safeParse(checked);
+      if (!parsed.success)
+        throw new ApiError({
+          message: "Revisa los campos indicados.",
+          fields: Object.fromEntries(
+            parsed.error.issues.map((e) => [e.path.join("."), e.message]),
+          ),
+        });
+      await run(
+        "saveEntity",
+        {
+          entity,
+          row,
+          key: record
+            ? Object.fromEntries(
+                meta.tables[entity].pk.map((k) => [k, record[k]]),
+              )
+            : undefined,
+        },
+        "Registro guardado",
+      );
+      onClose();
+    } catch (e) {
+      catchError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Dialog
+      title={`${record ? "Editar" : "Agregar"} · ${titles[entity]}`}
+      subtitle="Los cambios se guardan en los archivos locales del prototipo."
+      onClose={onClose}
+      dirty={dirty}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className="dialog-body">
+          <ErrorNotice error={error} />
+          <div className="form-grid">
+            {Object.entries(meta.tables[entity].fields)
+              .filter(([name]) => name !== "id")
+              .map(([field, spec]) => {
+                const id = `field-${field}`,
+                  ref = meta.refs.find(
+                    (r) => r.table === entity && r.field === field,
+                  ),
+                  value = values[field];
+                let control;
+                if (ref)
+                  control = (
+                    <select
+                      id={id}
+                      value={value ?? ""}
+                      onChange={(e) => update(field, e.target.value || null)}
+                    >
+                      <option value="">Seleccionar…</option>
+                      {(db[ref.target] as Row[]).map((r) => (
+                        <option
+                          key={primaryKey(ref.target, r)}
+                          value={r[ref.targetField]}
+                        >
+                          {recordName(db, ref.target, r)}
+                        </option>
+                      ))}
+                    </select>
+                  );
+                else if (spec.type === "boolean")
+                  control = (
+                    <select
+                      id={id}
+                      value={value === null ? "" : String(value)}
+                      onChange={(e) =>
+                        update(
+                          field,
+                          e.target.value === ""
+                            ? null
+                            : e.target.value === "true",
+                        )
+                      }
+                    >
+                      <option value="">Sin informar</option>
+                      <option value="true">Sí</option>
+                      <option value="false">No</option>
+                    </select>
+                  );
+                else if (meta.enums[spec.type])
+                  control = (
+                    <select
+                      id={id}
+                      value={value ?? ""}
+                      onChange={(e) => update(field, e.target.value || null)}
+                    >
+                      <option value="">Seleccionar…</option>
+                      {meta.enums[spec.type].map((v) => (
+                        <option key={v} value={v}>
+                          {text(v)}
+                        </option>
+                      ))}
+                    </select>
+                  );
+                else if (spec.type === "datetime")
+                  control = (
+                    <DateInput
+                      id={id}
+                      value={value ? String(value).slice(0, 10) : ""}
+                      onChange={(value) => update(field, value)}
+                    />
+                  );
+                else
+                  control = (
+                    <input
+                      id={id}
+                      type={
+                        spec.type === "integer" && field !== "codigo_material"
+                          ? "number"
+                          : spec.type.startsWith("float")
+                            ? "number"
+                            : field === "correo"
+                              ? "email"
+                              : "text"
+                      }
+                      step={
+                        spec.type.startsWith("float")
+                          ? "0.01"
+                          : spec.type === "integer"
+                            ? "1"
+                            : undefined
+                      }
+                      autoComplete={
+                        field === "correo"
+                          ? "email"
+                          : field === "celular"
+                            ? "tel"
+                            : "off"
+                      }
+                      inputMode={
+                        field === "codigo_material" ? "numeric" : undefined
+                      }
+                      value={
+                        value === null
+                          ? ""
+                          : field === "codigo_material" &&
+                              typeof value === "number"
+                            ? String(value).padStart(3, "0")
+                            : value
+                      }
+                      onChange={(e) => update(field, e.target.value)}
+                    />
+                  );
+                return (
+                  <Field
+                    key={field}
+                    id={id}
+                    label={labels[field] ?? text(field)}
+                    required={spec.required}
+                    error={error?.fields[field]}
+                  >
+                    {control}
+                  </Field>
+                );
+              })}
+          </div>
+          {entity === "materiales_asociados" && (
+            <div className="notice subtle">
+              <Info size={16} aria-hidden="true" />
+              Un producto puede tener sticker o cinta, pero no ambos.
+            </div>
+          )}
+        </div>
+        <div className="dialog-footer">
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" disabled={busy}>
+            {busy ? "Guardando…" : "Guardar registro"}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
+
+export function Documents({
+  owner,
+  ownerId,
+  compact = false,
+  showList = true,
+  renderAddTrigger,
+  documents,
+  draft,
+  onDraftSave,
+}: {
+  owner: "factura" | "orden_compra" | "lote_material" | null;
+  ownerId: string | null;
+  compact?: boolean;
+  showList?: boolean;
+  renderAddTrigger?: (open: () => void) => ReactNode;
+  documents?: readonly Row[];
+  draft?: { tipo_documento: string; nombre_archivo: string };
+  onDraftSave?: (draft: {
+    tipo_documento: string;
+    nombre_archivo: string;
+  }) => void;
+}) {
+  const { db, run, notify } = useApp();
+  const [editing, setEditing] = useState<Row | null | undefined>();
+  const docs =
+    documents ??
+    db.documento.filter(
+      (d) => d.tipo_entidad === owner && d.id_entidad === ownerId,
+    );
+  const types =
+    owner === "factura"
+      ? ["factura_fisica"]
+      : owner === "orden_compra"
+        ? ["orden_compra_escaneada"]
+        : owner === "lote_material"
+          ? ["certificado_calidad", "certificado_liberacion"]
+          : ["plantilla_certificado_liberacion"];
+  const availableTypes = types.filter(
+    (type) => !docs.some((doc) => doc.tipo_documento === type),
+  );
+  const [name, setName] = useState(""),
+    [kind, setKind] = useState(types[0]),
+    [busy, setBusy] = useState(false);
+  const { error, catchError } = useErrors(
+    entityValidation(
+      "documento",
+      {
+        nombre_archivo: name,
+        tipo_documento: kind,
+        tipo_entidad: owner,
+        id_entidad: ownerId,
+      },
+      db,
+      editing ?? undefined,
+    ),
+  );
+  function edit(doc?: Row) {
+    const nextKind = doc?.tipo_documento ?? availableTypes[0];
+    if (!nextKind) {
+      notify("Ya existe el documento. Usa Reemplazar para corregirlo.", true);
+      return;
+    }
+    setEditing(doc ?? null);
+    setName(
+      doc?.nombre_archivo ??
+        draft?.nombre_archivo ??
+        `${text(nextKind).replaceAll(" ", "-")}.html`,
+    );
+    setKind(nextKind);
+  }
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const parsedName = schemas.documento.shape.nombre_archivo.safeParse(
+        name.trim(),
+      );
+      if (!name.trim() || !parsedName.success)
+        throw new ApiError({
+          message: "Revisa el nombre del archivo.",
+          fields: { nombre_archivo: "Indica un nombre de archivo válido." },
+        });
+      if (onDraftSave) {
+        onDraftSave({ tipo_documento: kind, nombre_archivo: name.trim() });
+        setEditing(undefined);
+        return;
+      }
+      await run(
+        "saveDocument",
+        {
+          id: editing?.id,
+          tipo_entidad: owner,
+          id_entidad: ownerId,
+          tipo_documento: kind,
+          nombre_archivo: name,
+        },
+        editing ? "Placeholder reemplazado" : "Placeholder agregado",
+      );
+      setEditing(undefined);
+    } catch (e) {
+      catchError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <>
+      {showList && (
+        <div className={compact ? "" : "panel-body"}>
+          <div className="spread">
+            <h3>
+              Documentos{" "}
+              {docs.length > 0 && (
+                <span className="muted">({docs.length})</span>
+              )}
+            </h3>
+            {availableTypes.length > 0 &&
+              (renderAddTrigger ? (
+                renderAddTrigger(() => edit())
+              ) : (
+                <Button icon={Plus} className="small" onClick={() => edit()}>
+                  Agregar
+                </Button>
+              ))}
+          </div>
+          {docs.length === 0 ? (
+            <div className="notice subtle" style={{ marginTop: 14 }}>
+              <Paperclip size={16} aria-hidden="true" />
+              Sin documentos adjuntos.
+            </div>
+          ) : (
+            docs.map((d) => (
+              <div className="doc-item" key={d.id}>
+                <span className="doc-icon">
+                  <FileText size={17} aria-hidden="true" />
+                </span>
+                <div className="doc-item-body">
+                  <strong>{d.nombre_archivo}</strong>
+                  <small>
+                    {text(d.tipo_documento)} · {shortDate(d.fecha_carga)}
+                  </small>
+                  <div className="doc-actions">
+                    <a
+                      href={`/api/documents/${d.id}/content`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Ver
+                    </a>
+                    <a href={`/api/documents/${d.id}/content?download=1`}>
+                      Descargar
+                    </a>
+                    <a
+                      href={`/api/documents/${d.id}/content`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Imprimir
+                    </a>
+                    <Button variant="link" onClick={() => edit(d)}>
+                      Reemplazar
+                    </Button>
+                    <Button
+                      variant="link"
+                      aria-label={`Eliminar ${d.nombre_archivo}`}
+                      onClick={() => {
+                        if (window.confirm("¿Eliminar este placeholder?"))
+                          void run(
+                            "deleteDocument",
+                            { id: d.id },
+                            "Placeholder eliminado",
+                          ).catch((e) => notify(e.message, true));
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+      {!showList &&
+        availableTypes.length > 0 &&
+        renderAddTrigger?.(() => edit())}
+      {editing !== undefined && (
+        <Dialog
+          title={editing ? "Reemplazar placeholder" : "Agregar placeholder"}
+          subtitle="El contenido será ficticio. Se conserva la relación con su propietario."
+          onClose={() => setEditing(undefined)}
+        >
+          <form onSubmit={save}>
+            <div className="dialog-body">
+              <ErrorNotice error={error} />
+              <Field
+                id="field-tipo_documento"
+                label="Clase de documento"
+                error={error?.fields.tipo_documento}
+              >
+                <select
+                  id="field-tipo_documento"
+                  value={kind}
+                  onChange={(e) => setKind(e.target.value)}
+                  disabled={!!editing}
+                >
+                  {types.map((t) => (
+                    <option
+                      key={t}
+                      value={t}
+                      disabled={!editing && !availableTypes.includes(t)}
+                    >
+                      {text(t)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field
+                id="field-nombre_archivo"
+                label="Nombre del archivo"
+                required
+                error={error?.fields.nombre_archivo}
+              >
+                <input
+                  id="field-nombre_archivo"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </Field>
+              <div className="notice subtle">
+                <Info size={16} aria-hidden="true" />
+                Cada clase admite un documento por propietario. Reemplazar
+                actualiza su registro vigente.
+              </div>
+            </div>
+            <div className="dialog-footer">
+              <Button onClick={() => setEditing(undefined)}>Cancelar</Button>
+              <Button type="submit" variant="primary" disabled={busy}>
+                {editing ? "Reemplazar placeholder" : "Guardar placeholder"}
+              </Button>
+            </div>
+          </form>
+        </Dialog>
+      )}
+    </>
+  );
+}
+
+export function receipts(db: ReturnType<typeof useApp>["db"]): Row[] {
+  const result: Row[] = [];
+  for (const table of [
+    "lote_producto",
+    "orden_material",
+    "orden_otro",
+  ] as Entity[])
+    for (const row of db[table] as Row[]) {
+      const line: Row =
+        table === "lote_producto"
+          ? db.orden_producto.find((l) => l.id === row.id_orden_producto)!
+          : row;
+      const o = db.orden_compra.find((o) => o.id === line.id_orden_compra)!;
+      if (o.estado_autorizacion !== "autorizada") continue;
+      const item =
+        table === "lote_producto"
+          ? db.productos.find((p) => p.id === line.id_producto)?.nombre_producto
+          : table === "orden_material"
+            ? db.materiales.find((m) => m.id === line.id_material)
+                ?.nombre_material
+            : line.producto;
+      const provider = db.proveedor.find((p) => p.id === o.id_proveedor)!;
+      const lotLabel =
+        table === "lote_producto"
+          ? (row.numero_lote ??
+            `Sin número de lote ${db.lote_producto.filter((lot) => lot.id_orden_producto === line.id).findIndex((lot) => lot.id === row.id) + 1} · Producto ${line.posicion}`)
+          : null;
+      result.push({
+        entity: table,
+        id: row.id,
+        provider: o.id_proveedor,
+        order: o.no_orden,
+        orderType: o.tipo_orden,
+        orderId: o.id,
+        lot:
+          lotLabel ??
+          row.numero_lote ??
+          db.lote_material.find((l) => l.id === row.id_lote_material)
+            ?.numero_lote ??
+          `Recepción del ${orderItemLabel(o.tipo_orden)}`,
+        item,
+        label: `${orderReference(o.tipo_orden, o.no_orden)} · ${lotLabel ?? text(orderItemLabel(o.tipo_orden)) + " " + line.posicion} · ${item} · ${provider.nombre_corto ?? provider.nombre_largo}`,
+        invoice: row.id_factura,
+      });
+    }
+  return result;
+}
+export function InvoiceForm({
+  provider,
+  onClose,
+  onSaved,
+  initialNumber = "",
+  invoice,
+}: {
+  provider?: string;
+  onClose: () => void;
+  onSaved?: (row: Row) => void;
+  initialNumber?: string;
+  invoice?: Row;
+}) {
+  const { db, run } = useApp();
+  const [supplier, setSupplier] = useState(
+    provider ?? invoice?.id_proveedor ?? "",
+  );
+  const [number, setNumber] = useState(
+    initialNumber || invoice?.numero_factura || "",
+  );
+  const [documentDraft, setDocumentDraft] = useState<{
+    tipo_documento: string;
+    nombre_archivo: string;
+  } | null>(null);
+  const [initialSelected] = useState<string[]>(() =>
+    invoice
+      ? receipts(db)
+          .filter((row) => row.invoice === invoice.id)
+          .map((row) => row.id)
+      : [],
+  );
+  const [selected, setSelected] = useState<string[]>(initialSelected);
+  const [query, setQuery] = useState("");
+  const [busy, setBusy] = useState(false);
+  const { error, catchError } = useErrors({
+    values: { id_proveedor: supplier, numero_factura: number, selected },
+    valid: (field) => {
+      if (field === "id_proveedor")
+        return db.proveedor.some((row) => row.id === supplier);
+      if (field === "numero_factura") {
+        const normalized = normalizeInvoice(number);
+        return (
+          Boolean(normalized) &&
+          !db.factura.some(
+            (row) =>
+              row.id !== invoice?.id &&
+              row.id_proveedor === supplier &&
+              row.numero_factura === normalized,
+          )
+        );
+      }
+      if (field === "id_factura")
+        return receipts(db)
+          .filter((row) => selected.includes(row.id))
+          .every((row) => row.provider === supplier);
+      return false;
+    },
+  });
+  const options = receipts(db).filter(
+    (r) =>
+      (!supplier || r.provider === supplier) &&
+      r.label.toLowerCase().includes(query.toLowerCase()),
+  );
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const chosen = receipts(db)
+        .filter((r) => selected.includes(r.id))
+        .map(({ entity, id }) => ({ entity, id }));
+      let row;
+      if (invoice) {
+        await run(
+          "assignInvoice",
+          {
+            id: invoice.id,
+            receipts: chosen,
+            unassign: receipts(db)
+              .filter(
+                (row) =>
+                  initialSelected.includes(row.id) &&
+                  !selected.includes(row.id),
+              )
+              .map(({ entity, id }) => ({ entity, id })),
+          },
+          "Asociaciones actualizadas",
+        );
+        row = invoice;
+      } else
+        row = (
+          await run(
+            "createInvoice",
+            {
+              id_proveedor: supplier,
+              numero_factura: number,
+              document: documentDraft,
+              receipts: chosen,
+            },
+            "Factura registrada",
+          )
+        ).row;
+      onSaved?.(row);
+      onClose();
+    } catch (e) {
+      catchError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Dialog
+      title={
+        invoice
+          ? `Asignar recepciones · ${invoice.numero_factura}`
+          : "Agregar factura"
+      }
+      subtitle="Una factura puede respaldar varios lotes del mismo proveedor."
+      onClose={onClose}
+      dirty={
+        (!invoice && !!number) ||
+        selected.length !== initialSelected.length ||
+        selected.some((id) => !initialSelected.includes(id)) ||
+        !!documentDraft
+      }
+    >
+      <form onSubmit={submit} noValidate>
+        <div className="dialog-body">
+          <ErrorNotice error={error} />
+          {error?.details.existingId && onSaved && (
+            <Button
+              onClick={() => {
+                const row = db.factura.find(
+                  (f) => f.id === error.details.existingId,
+                );
+                if (row) {
+                  onSaved(row);
+                  onClose();
+                }
+              }}
+            >
+              Seleccionar factura existente
+            </Button>
+          )}
+          <div className="form-grid">
+            <Field
+              id="field-id_proveedor"
+              label="Proveedor"
+              required
+              error={error?.fields.id_proveedor}
+            >
+              <select
+                id="field-id_proveedor"
+                value={supplier}
+                disabled={!!provider || !!invoice}
+                onChange={(e) => {
+                  setSupplier(e.target.value);
+                  setSelected([]);
+                }}
+              >
+                <option value="">Seleccionar o elegir el primer lote…</option>
+                {db.proveedor.map((p) => (
+                  <option value={p.id} key={p.id}>
+                    {p.nombre_largo ?? p.nombre_corto}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field
+              id="field-numero_factura"
+              label="Número de factura"
+              required
+              error={error?.fields.numero_factura}
+            >
+              <input
+                id="field-numero_factura"
+                value={number}
+                readOnly={!!invoice}
+                onChange={(e) => setNumber(e.target.value)}
+                autoComplete="off"
+              />
+            </Field>
+          </div>
+          {!invoice && (
+            <div className="invoice-draft-document">
+              <Documents
+                owner="factura"
+                ownerId={null}
+                showList={false}
+                draft={documentDraft ?? undefined}
+                onDraftSave={setDocumentDraft}
+                renderAddTrigger={(open) => (
+                  <Button icon={Paperclip} disabled={busy} onClick={open}>
+                    {documentDraft
+                      ? "Reemplazar documento"
+                      : "Adjuntar documento"}
+                  </Button>
+                )}
+              />
+              {documentDraft && (
+                <div className="inline">
+                  <span>{documentDraft.nombre_archivo}</span>
+                  <Button
+                    variant="link"
+                    disabled={busy}
+                    onClick={() => setDocumentDraft(null)}
+                  >
+                    Quitar documento
+                  </Button>
+                </div>
+              )}
+              {documentDraft && (
+                <small>Se adjuntará al guardar la factura.</small>
+              )}
+            </div>
+          )}
+          <h3>Recepciones opcionales</h3>
+          <input
+            className="control"
+            aria-label="Buscar orden o lote para la factura"
+            placeholder="Buscar por orden, lote, producto o proveedor…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="check-list">
+            {options.length ? (
+              options.map((r) => (
+                <label key={r.id}>
+                  <input
+                    type="checkbox"
+                    checked={selected.includes(r.id)}
+                    value={r.id}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        if (!supplier) setSupplier(r.provider);
+                        setSelected([...selected, r.id]);
+                      } else setSelected(selected.filter((id) => id !== r.id));
+                    }}
+                  />
+                  <span>
+                    {r.label}
+                    {r.invoice && (
+                      <small style={{ display: "block" }}>
+                        Factura actual:{" "}
+                        {
+                          db.factura.find((f) => f.id === r.invoice)
+                            ?.numero_factura
+                        }
+                      </small>
+                    )}
+                  </span>
+                </label>
+              ))
+            ) : (
+              <p style={{ padding: 12 }}>No hay recepciones coincidentes.</p>
+            )}
+          </div>
+          <p className="compact-note">
+            También puedes guardar la factura sin lotes ni documentos.
+          </p>
+        </div>
+        <div className="dialog-footer">
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" disabled={busy}>
+            {invoice ? "Guardar asociaciones" : "Guardar factura"}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
+export function InvoicePicker({
+  provider,
+  value,
+  onChange,
+  id = "field-id_factura",
+  ...inputProps
+}: {
+  provider: string;
+  value: string | null;
+  onChange: (id: string | null) => void;
+} & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
+  const { db } = useApp();
+  const chosen = db.factura.find((f) => f.id === value);
+  const [search, setSearch] = useState(chosen?.numero_factura ?? "");
+  const [create, setCreate] = useState(false);
+  const [document, setDocument] = useState(false);
+  useEffect(() => {
+    if (value)
+      setSearch(db.factura.find((f) => f.id === value)?.numero_factura ?? "");
+  }, [value, db.factura]);
+  const matches = db.factura.filter(
+    (f) =>
+      f.id_proveedor === provider &&
+      f.numero_factura.includes(normalizeInvoice(search)),
+  );
+  const doc = chosen
+    ? db.documento.find(
+        (d) => d.id_entidad === chosen.id && d.tipo_entidad === "factura",
+      )
+    : null;
+  return (
+    <>
+      <div className="invoice-picker">
+        <input
+          {...inputProps}
+          id={id}
+          aria-label="Buscar número de factura"
+          placeholder="Buscar o agregar factura…"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            onChange(null);
+          }}
+          autoComplete="off"
+        />
+        <Button className="small" icon={Plus} onClick={() => setCreate(true)}>
+          Agregar factura
+        </Button>
+        {chosen && (
+          <Button
+            className={`icon-btn ${doc ? "clip-blue" : "clip-gray"}`}
+            icon={Paperclip}
+            aria-label={
+              doc ? "Previsualizar factura" : "Adjuntar placeholder a factura"
+            }
+            onClick={() =>
+              doc
+                ? window.open(
+                    `/api/documents/${doc.id}/content`,
+                    "_blank",
+                    "noopener",
+                  )
+                : setDocument(true)
+            }
+          />
+        )}
+        <select
+          aria-label="Seleccionar factura del proveedor"
+          value={value ?? ""}
+          onChange={(e) => {
+            onChange(e.target.value || null);
+            if (!e.target.value) setSearch("");
+          }}
+        >
+          <option value="">Sin factura asociada</option>
+          {matches.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.numero_factura}
+            </option>
+          ))}
+        </select>
+      </div>
+      {create && (
+        <InvoiceForm
+          provider={provider}
+          initialNumber={search}
+          onClose={() => setCreate(false)}
+          onSaved={(f) => {
+            onChange(f.id);
+            setSearch(f.numero_factura);
+          }}
+        />
+      )}
+      {document && chosen && (
+        <Dialog
+          title={`Documentos · ${chosen.numero_factura}`}
+          onClose={() => setDocument(false)}
+        >
+          <Documents owner="factura" ownerId={chosen.id} />
+        </Dialog>
+      )}
+    </>
+  );
+}
+
+export function LotForm({
+  line,
+  record,
+  onClose,
+}: {
+  line: Row;
+  record?: Row;
+  onClose: () => void;
+}) {
+  const { db, run } = useApp();
+  const initial = {
+    ...blankRow("lote_producto"),
+    ...record,
+    id_orden_producto: line.id,
+    fecha_estimada_batch_record: record
+      ? record.fecha_estimada_batch_record
+      : (db.orden_compra.find((order) => order.id === line.id_orden_compra)
+          ?.fecha_solicitada_entrega ?? null),
+    id_factura: record?.id_factura ?? null,
+  };
+  const [row, setRow] = useState<Row>(initial);
+  const [dirty, setDirty] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const { error, catchError } = useErrors(
+    entityValidation("lote_producto", row, db, record),
+  );
+  const o = db.orden_compra.find((o) => o.id === line.id_orden_compra);
+  const update = (field: string, value: any) => {
+    setRow({ ...row, [field]: value });
+    setDirty(true);
+  };
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const payload = { ...row, id_orden_producto: line.id, id: record?.id };
+      delete payload.id;
+      if (record) payload.id = record.id;
+      await run("saveLot", { row: payload }, "Lote guardado");
+      onClose();
+    } catch (e) {
+      catchError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Dialog
+      title={
+        record
+          ? isInitialProductLot(record)
+            ? "Completar lote"
+            : `Editar lote · ${record.numero_lote ?? "Sin número de lote"}`
+          : "Agregar lote de producto"
+      }
+      subtitle={
+        db.productos.find((p) => p.id === line.id_producto)?.nombre_producto
+      }
+      onClose={onClose}
+      wide
+      dirty={dirty}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className="dialog-body">
+          <ErrorNotice error={error} />
+          <div className="form-grid three">
+            {Object.entries(meta.tables.lote_producto.fields)
+              .filter(
+                ([f]) => !["id", "id_orden_producto", "id_factura"].includes(f),
+              )
+              .map(([field, spec]) => {
+                const id = `field-${field}`;
+                const isDate = spec.type === "datetime";
+                const control = meta.enums[spec.type] ? (
+                  <select
+                    id={id}
+                    value={row[field] ?? ""}
+                    onChange={(e) => update(field, e.target.value)}
+                  >
+                    {meta.enums[spec.type].map((v) => (
+                      <option key={v} value={v}>
+                        {text(v)}
+                      </option>
+                    ))}
+                  </select>
+                ) : isDate ? (
+                  <DateInput
+                    id={id}
+                    value={row[field]?.slice(0, 10) ?? ""}
+                    onChange={(value) => update(field, isoDate(value))}
+                  />
+                ) : (
+                  <input
+                    id={id}
+                    type={spec.type === "integer" ? "number" : "text"}
+                    step={spec.type === "integer" ? 1 : undefined}
+                    value={row[field] === null ? "" : row[field]}
+                    onChange={(e) =>
+                      update(
+                        field,
+                        spec.type === "integer"
+                          ? e.target.value === ""
+                            ? null
+                            : Number(e.target.value)
+                          : e.target.value || null,
+                      )
+                    }
+                  />
+                );
+                return (
+                  <Field
+                    key={field}
+                    id={id}
+                    label={labels[field] ?? text(field)}
+                    required={
+                      spec.required ||
+                      (field === "numero_lote" && productLotNeedsNumber(row))
+                    }
+                    error={error?.fields[field]}
+                  >
+                    {control}
+                  </Field>
+                );
+              })}
+          </div>
+          {o && (
+            <Field
+              id="field-id_factura"
+              label="Factura (opcional)"
+              error={error?.fields.id_factura}
+            >
+              <InvoicePicker
+                provider={o.id_proveedor}
+                value={row.id_factura}
+                onChange={(v) => update("id_factura", v)}
+              />
+            </Field>
+          )}
+        </div>
+        <div className="dialog-footer">
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" disabled={busy || !line.id}>
+            {busy ? "Guardando…" : "Guardar lote"}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
+
+export function ReceiptForm({
+  entity,
+  line,
+  onClose,
+}: {
+  entity: "orden_material" | "orden_otro";
+  line: Row;
+  onClose: () => void;
+}) {
+  const { db, run } = useApp();
+  const [row, setRow] = useState<Row>({ ...line });
+  const [busy, setBusy] = useState(false);
+  const [lotCreate, setLotCreate] = useState(false);
+  const { error, catchError } = useErrors(
+    entityValidation(entity, row, db, line),
+  );
+  const order = db.orden_compra.find((o) => o.id === line.id_orden_compra)!;
+  const update = (key: string, value: any) => setRow({ ...row, [key]: value });
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await run(
+        "saveReceipt",
+        { entity, id: line.id, row },
+        "Recepción guardada",
+      );
+      onClose();
+    } catch (e) {
+      catchError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <Dialog
+      title={`Recepción del ${orderItemLabel(order.tipo_orden)}`}
+      subtitle={`Este ${orderItemLabel(order.tipo_orden)} conserva una sola recepción.`}
+      onClose={onClose}
+      dirty={JSON.stringify(row) !== JSON.stringify(line)}
+    >
+      <form onSubmit={submit}>
+        <div className="dialog-body">
+          <ErrorNotice error={error} />
+          <div className="form-grid">
+            <Field
+              id="field-cantidad_recibida"
+              label="Cantidad recibida (facturada)"
+              error={error?.fields.cantidad_recibida}
+            >
+              <input
+                id="field-cantidad_recibida"
+                type="number"
+                step="1"
+                value={row.cantidad_recibida ?? ""}
+                onChange={(e) =>
+                  update(
+                    "cantidad_recibida",
+                    e.target.value === "" ? null : Number(e.target.value),
+                  )
+                }
+              />
+            </Field>
+            <Field
+              id="field-ubicacion"
+              label="Ubicación de recepción"
+              error={error?.fields.ubicacion}
+            >
+              <input
+                id="field-ubicacion"
+                value={row.ubicacion ?? ""}
+                onChange={(e) => update("ubicacion", e.target.value || null)}
+              />
+            </Field>
+            {["fecha_estimada_entrega", "fecha_entrega"].map((f) => (
+              <Field
+                key={f}
+                id={`field-${f}`}
+                label={labels[f]}
+                error={error?.fields[f]}
+              >
+                <DateInput
+                  id={`field-${f}`}
+                  value={row[f]?.slice(0, 10) ?? ""}
+                  onChange={(value) => update(f, isoDate(value))}
+                />
+              </Field>
+            ))}
+            {entity === "orden_material" && (
+              <Field
+                id="field-id_lote_material"
+                label="Identidad del lote de material"
+                error={error?.fields.id_lote_material}
+              >
+                <select
+                  id="field-id_lote_material"
+                  value={row.id_lote_material ?? ""}
+                  onChange={(e) =>
+                    update("id_lote_material", e.target.value || null)
+                  }
+                >
+                  <option value="">Sin lote</option>
+                  {db.lote_material.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.numero_lote}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  className="small"
+                  icon={Plus}
+                  onClick={() => setLotCreate(true)}
+                >
+                  Agregar identidad de lote
+                </Button>
+              </Field>
+            )}
+          </div>
+          <Field
+            id="field-id_factura"
+            label="Factura (opcional)"
+            error={error?.fields.id_factura}
+          >
+            <InvoicePicker
+              provider={order.id_proveedor}
+              value={row.id_factura}
+              onChange={(id) => update("id_factura", id)}
+            />
+          </Field>
+          <div className="notice subtle">
+            <Info size={16} aria-hidden="true" />
+            {entity === "orden_material"
+              ? "Varios materiales de las órdenes pueden compartir el número de lote; cada uno conserva sus propias cantidades y fechas."
+              : "Este concepto conserva sus propias cantidades y fechas."}
+          </div>
+        </div>
+        <div className="dialog-footer">
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="primary" disabled={busy}>
+            Guardar recepción
+          </Button>
+        </div>
+      </form>
+      {lotCreate && (
+        <CatalogForm
+          entity="lote_material"
+          onClose={() => setLotCreate(false)}
+        />
+      )}
+    </Dialog>
+  );
+}
+
+export function OrderForm({
+  order,
+  onClose,
+  initialType = "producto",
+}: {
+  order?: Row;
+  onClose: () => void;
+  initialType?: string;
+}) {
+  const { db, run, navigate } = useApp();
+  const [type, setType] = useState(order?.tipo_orden ?? initialType);
+  const authorized = order?.estado_autorizacion === "autorizada";
+  const productsLocked = type === "producto" && authorized;
+  const suppliers = (t: string) =>
+    db.proveedor.filter((p) =>
+      t === "producto"
+        ? p.Es_maquila
+        : t === "material"
+          ? p.Es_materiales
+          : p.Es_maquila === false && p.Es_materiales === false,
+    );
+  const [supplier, setSupplier] = useState(
+    order?.id_proveedor ?? suppliers(initialType)[0]?.id ?? "",
+  );
+  const automaticNumber = nextOrderNumber(db, type);
+  const number = order?.no_orden ?? automaticNumber;
+  const replacement =
+    Boolean(order) && type === "producto" && supplier !== order?.id_proveedor;
+  const [pendingSupplier, setPendingSupplier] = useState<string | null>(null);
+  const [date, setDate] = useState(
+    order?.fecha_elaboracion?.slice(0, 10) ?? today(),
+  );
+  const [delivery, setDelivery] = useState(
+    order?.fecha_solicitada_entrega?.slice(0, 10) ?? "",
+  );
+  const fresh = (t: string, provider: string): Row => {
+    if (t === "producto") {
+      const p = db.productos.find(
+        (p) => p.id_maquilador === provider && p.activo,
+      );
+      return {
+        id_producto: p?.id ?? "",
+        cantidad_solicitada: p?.unidades_lote ?? 0,
+        precio_unitario: String(currentCost(db, p?.id ?? "")?.costo ?? 0),
+        ...recommendations(db, p?.id ?? "", p?.unidades_lote ?? 0),
+        cantidad_corrugado: null,
+        sticker_pct: 10,
+      };
+    }
+    if (t === "material") {
+      const favored = db.proveedores_favoritos.find(
+        (v) => v.id_proveedor === provider,
+      );
+      return {
+        id_material: favored?.id_material ?? db.materiales[0]?.id ?? "",
+        cantidad_solicitada: 0,
+        precio_unitario: "0.00",
+      };
+    }
+    return {
+      producto: "",
+      cantidad_solicitada: 1,
+      precio_unitario: "0.00",
+    };
+  };
+  const [lines, setLines] = useState<Row[]>(
+    order
+      ? orderLines(db, order.id).map((l) => ({ ...l, sticker_pct: 10 }))
+      : [fresh(initialType, suppliers(initialType)[0]?.id ?? "")],
+  );
+  const [stage, setStage] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const originalDraft = useRef<{
+    date: string;
+    delivery: string;
+    lines: Row[];
+    stage: number;
+    dirty: boolean;
+  } | null>(null);
+  const { error, catchError, setError } = useErrors({
+    values: {
+      tipo_orden: type,
+      id_proveedor: supplier,
+      no_orden: number,
+      fecha_elaboracion: date,
+      fecha_solicitada_entrega: delivery,
+      lines,
+    },
+    valid: (field) => {
+      if (field === "fecha_solicitada_entrega")
+        return orderDeliverySchema.safeParse(isoDate(delivery)).success;
+      if (field === "fecha_elaboracion")
+        return !date || dateSchema.safeParse(isoDate(date)).success;
+      if (field === "id_proveedor")
+        return suppliers(type).some((row) => row.id === supplier);
+      if (field === "no_orden") {
+        const candidate = number;
+        return (
+          (!candidate && Boolean(order)) ||
+          (/^\d+$/.test(candidate) &&
+            !db.orden_compra.some(
+              (row) =>
+                row.id !== order?.id &&
+                row.no_orden === candidate &&
+                (row.tipo_orden === "producto") === (type === "producto"),
+            ))
+        );
+      }
+      if (field === "lines") return lines.length >= 1 && lines.length <= 7;
+      const validLine = (line: Row, key: string) => {
+        if (key === "precio_unitario") return validPrice(line.precio_unitario);
+        if (key === "cantidad_solicitada")
+          return Number.isSafeInteger(line.cantidad_solicitada);
+        if (key === "producto") return Boolean(line.producto?.trim());
+        if (key === "id_material")
+          return db.materiales.some((row) => row.id === line.id_material);
+        if (key === "sticker_pct")
+          return (
+            Number.isFinite(line.sticker_pct) &&
+            line.sticker_pct >= 1 &&
+            line.sticker_pct <= 10
+          );
+        if (key === "id_producto") {
+          const original =
+            order &&
+            db.orden_producto.find(
+              (row) => row.id === line.id && row.id_orden_compra === order.id,
+            );
+          if (original?.id_producto === line.id_producto) return true;
+          return (
+            db.productos.some(
+              (row) =>
+                row.id === line.id_producto &&
+                row.activo === true &&
+                row.id_maquilador === supplier,
+            ) && Boolean(latestBarcode(db, line.id_producto))
+          );
+        }
+        const entity =
+          type === "producto"
+            ? "orden_producto"
+            : type === "material"
+              ? "orden_material"
+              : "orden_otro";
+        const original =
+          order && orderLines(db, order.id).find((row) => row.id === line.id);
+        return validEntityField(entity, key, line, db, original);
+      };
+      const lineField = field.match(/^lines\.(\d+)\.(.+)$/);
+      if (lineField) {
+        const line = lines[Number(lineField[1])];
+        return !line || validLine(line, lineField[2]);
+      }
+      return lines.length > 0 && lines.every((line) => validLine(line, field));
+    },
+  });
+  function update(i: number, field: string, value: any) {
+    setDirty(true);
+    setLines((old) =>
+      old.map((l, index) => (index !== i ? l : { ...l, [field]: value })),
+    );
+  }
+  function hasSticker(line: Row) {
+    return (
+      line.cantidad_sticker != null ||
+      db.materiales_asociados.some(
+        (a) =>
+          a.id_producto === line.id_producto &&
+          materialKind(db, a.id_material).includes("sticker"),
+      )
+    );
+  }
+  function changeStickerPercentage(i: number, raw: string) {
+    const percentage = raw === "" ? NaN : Number(raw);
+    setDirty(true);
+    setLines((old) =>
+      old.map((line, index) =>
+        index !== i
+          ? line
+          : {
+              ...line,
+              sticker_pct: percentage,
+              ...(Number.isFinite(percentage) &&
+              percentage >= 1 &&
+              percentage <= 10
+                ? {
+                    cantidad_sticker: increasedQuantity(
+                      BigInt(line.cantidad_solicitada) * 2n,
+                      percentage,
+                    ),
+                  }
+                : {}),
+            },
+      ),
+    );
+  }
+  function switchType(t: string) {
+    setType(t);
+    const provider = suppliers(t)[0]?.id ?? "";
+    setSupplier(provider);
+    setLines([fresh(t, provider)]);
+    setStage(1);
+    setDirty(true);
+  }
+  function changeSupplier(provider: string) {
+    if (order && type === "producto") {
+      if (provider === order.id_proveedor && originalDraft.current) {
+        const draft = originalDraft.current;
+        setSupplier(provider);
+        setDate(draft.date);
+        setDelivery(draft.delivery);
+        setLines(draft.lines);
+        setStage(draft.stage);
+        setDirty(draft.dirty);
+        originalDraft.current = null;
+        setError(null);
+      } else if (provider !== supplier) {
+        setPendingSupplier(provider);
+      }
+      return;
+    }
+    setSupplier(provider);
+    if (!order) setLines([fresh(type, provider)]);
+    setDirty(true);
+  }
+  function acceptSupplierChange() {
+    if (pendingSupplier === null) return;
+    originalDraft.current ??= structuredClone({
+      date,
+      delivery,
+      lines,
+      stage,
+      dirty,
+    });
+    setSupplier(pendingSupplier);
+    setDate(today());
+    setDelivery("");
+    setLines([fresh(type, pendingSupplier)]);
+    setStage(1);
+    setDirty(true);
+    setError(null);
+    setPendingSupplier(null);
+  }
+  function changeProduct(i: number, id: string) {
+    const p = db.productos.find((p) => p.id === id);
+    setLines((old) =>
+      old.map((l, index) =>
+        index !== i
+          ? l
+          : {
+              ...l,
+              id_producto: id,
+              cantidad_solicitada: p?.unidades_lote ?? 0,
+              precio_unitario: String(currentCost(db, id)?.costo ?? 0),
+              ...recommendations(db, id, p?.unidades_lote ?? 0),
+              cantidad_corrugado: null,
+              sticker_pct: 10,
+            },
+      ),
+    );
+    setDirty(true);
+  }
+  function review() {
+    try {
+      setError(null);
+      if (!supplier)
+        throw new ApiError({
+          message: "Selecciona un proveedor.",
+          fields: { id_proveedor: "Campo obligatorio." },
+        });
+      const issues: Row = {};
+      const deliveryCheck = orderDeliverySchema.safeParse(isoDate(delivery));
+      if (!deliveryCheck.success)
+        issues.fecha_solicitada_entrega = deliveryCheck.error.issues[0].message;
+      lines.forEach((l, i) => {
+        if (type === "producto" && !l.id_producto)
+          issues[`lines.${i}.id_producto`] = "Selecciona un producto.";
+        if (type === "producto" && !latestBarcode(db, l.id_producto) && !l.id)
+          issues[`lines.${i}.id_producto`] =
+            "El producto no tiene código activo.";
+        if (type === "producto" && l.id_producto) {
+          const original =
+            order &&
+            db.orden_producto.find(
+              (row) => row.id === l.id && row.id_orden_compra === order.id,
+            );
+          const product = db.productos.find((row) => row.id === l.id_producto);
+          if (
+            product?.activo !== true &&
+            original?.id_producto !== l.id_producto
+          )
+            issues[`lines.${i}.id_producto`] = "Selecciona un producto activo.";
+          if ((!original || replacement) && product?.id_maquilador !== supplier)
+            issues[`lines.${i}.id_producto`] =
+              "Selecciona un producto del proveedor de la orden.";
+        }
+        if (type === "material" && !l.id_material)
+          issues[`lines.${i}.id_material`] = "Selecciona un material.";
+        if (type === "otro" && !l.producto?.trim())
+          issues[`lines.${i}.producto`] = "Escribe el concepto.";
+        if (!Number.isSafeInteger(l.cantidad_solicitada))
+          issues[`lines.${i}.cantidad_solicitada`] =
+            "Introduce una cantidad entera.";
+        try {
+          decimal(l.precio_unitario);
+        } catch {
+          issues[`lines.${i}.precio_unitario`] =
+            "Introduce un precio con hasta dos decimales.";
+        }
+      });
+      if (Object.keys(issues).length)
+        throw new ApiError({
+          message: "Revisa los datos de la orden.",
+          fields: issues,
+        });
+      const final: Row[] = lines.map((l) =>
+        type === "producto"
+          ? {
+              ...l,
+              ...Object.fromEntries(
+                Object.entries(
+                  recommendations(
+                    db,
+                    l.id_producto,
+                    l.cantidad_solicitada,
+                    Number.isFinite(l.sticker_pct) &&
+                      l.sticker_pct >= 1 &&
+                      l.sticker_pct <= 10
+                      ? l.sticker_pct
+                      : 10,
+                  ),
+                ).map(([k, v]) => [k, l[k] ?? v]),
+              ),
+              precio_unitario: decimal(l.precio_unitario),
+            }
+          : { ...l, precio_unitario: decimal(l.precio_unitario) },
+      );
+      setLines(final);
+      setStage(2);
+    } catch (e) {
+      catchError(e);
+    }
+  }
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (stage === 1) {
+      review();
+      return;
+    }
+    setBusy(true);
+    try {
+      const orderIssues: Record<string, string> = {};
+      if (type === "producto")
+        lines.forEach((line, i) => {
+          if (
+            hasSticker(line) &&
+            (!Number.isFinite(line.sticker_pct) ||
+              line.sticker_pct < 1 ||
+              line.sticker_pct > 10)
+          )
+            orderIssues[`lines.${i}.sticker_pct`] =
+              "Introduce un porcentaje de 1 a 10.";
+        });
+      if (Object.keys(orderIssues).length)
+        throw new ApiError({
+          message: "Revisa los porcentajes de sticker.",
+          fields: orderIssues,
+        });
+      const result = await run(
+        order ? "editOrder" : "createOrder",
+        {
+          id: order?.id,
+          tipo_orden: type,
+          id_proveedor: supplier,
+          no_orden: order ? number : undefined,
+          confirm: replacement,
+          expected_no_orden: order ? undefined : automaticNumber,
+          fecha_elaboracion: isoDate(date),
+          fecha_solicitada_entrega: isoDate(delivery),
+          lines,
+        },
+        order ? "Orden actualizada" : "Orden creada",
+      );
+      onClose();
+      navigate(`ordenes/${result.orderId}`);
+    } catch (e) {
+      catchError(e);
+      if (
+        e instanceof ApiError &&
+        Object.keys(e.fields).some(
+          (field) =>
+            field === "fecha_solicitada_entrega" ||
+            /^lines\.\d+\.id_producto$/.test(field),
+        )
+      )
+        setStage(1);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const total = (items: Row[] = lines) => {
+    try {
+      return money(
+        totalLines(
+          items.map((l) => ({
+            ...l,
+            precio_unitario: decimal(l.precio_unitario),
+          })),
+        ),
+      );
+    } catch {
+      return "—";
+    }
+  };
+  return (
+    <Dialog
+      title={
+        order ? `Editar orden · ${order.no_orden}` : "Nueva orden de compra"
+      }
+      subtitle={
+        stage === 1
+          ? `1. Datos y ${orderItemLabel(type, true)} de la orden`
+          : `2. Revisión de ${orderReference(type, number)}: cantidades y total`
+      }
+      wide
+      onClose={onClose}
+      dirty={dirty}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className="dialog-body">
+          <ErrorNotice error={error} />
+          {replacement && (
+            <p className="notice" role="status">
+              Reemplazo pendiente: al guardar se eliminarán los datos anteriores
+              de cabecera, productos, lotes, documentos propios y vínculos de
+              abastecimiento de esta orden. Las OCM anteriores se conservarán.
+              Los datos guardados se conservan hasta confirmar el reemplazo.
+            </p>
+          )}
+          {error?.details.existingId && (
+            <Button
+              onClick={() => {
+                onClose();
+                navigate(`ordenes/${error.details.existingId}`);
+              }}
+            >
+              Abrir orden existente
+            </Button>
+          )}
+          {stage === 1 ? (
+            <>
+              <div className="form-grid three">
+                <Field id="field-tipo_orden" label="Tipo de orden">
+                  <select
+                    id="field-tipo_orden"
+                    value={type}
+                    disabled={!!order}
+                    onChange={(e) => switchType(e.target.value)}
+                  >
+                    {["producto", "material", "otro"].map((t) => (
+                      <option key={t} value={t}>
+                        {text(t)}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field
+                  id="field-no_orden"
+                  label="Número de orden"
+                  error={error?.fields.no_orden}
+                >
+                  <input
+                    id="field-no_orden"
+                    value={number}
+                    readOnly
+                    autoComplete="off"
+                  />
+                </Field>
+                <Field
+                  id="field-id_proveedor"
+                  label="Proveedor"
+                  required
+                  error={error?.fields.id_proveedor}
+                >
+                  <select
+                    id="field-id_proveedor"
+                    value={supplier}
+                    disabled={authorized}
+                    onChange={(e) => changeSupplier(e.target.value)}
+                  >
+                    <option value="">Seleccionar…</option>
+                    {suppliers(type).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nombre_largo ?? p.nombre_corto}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field
+                  id="field-fecha_elaboracion"
+                  label="Fecha de elaboración"
+                >
+                  <DateInput
+                    id="field-fecha_elaboracion"
+                    value={date}
+                    onChange={(value) => {
+                      setDate(value);
+                      setDirty(true);
+                    }}
+                  />
+                </Field>
+                <Field
+                  id="field-fecha_solicitada_entrega"
+                  label="Entrega solicitada"
+                  required
+                  error={error?.fields.fecha_solicitada_entrega}
+                >
+                  <DateInput
+                    id="field-fecha_solicitada_entrega"
+                    value={delivery}
+                    onChange={(value) => {
+                      setDelivery(value);
+                      setDirty(true);
+                    }}
+                  />
+                </Field>
+              </div>
+              <div>
+                {productsLocked && (
+                  <p className="notice subtle" id="order-products-locked">
+                    Los productos están bloqueados porque la orden está
+                    autorizada. Puedes ajustar cantidades, precios y materiales
+                    de empaque.
+                  </p>
+                )}
+                <div className="spread" style={{ marginBottom: 16 }}>
+                  <h3>{text(orderItemLabel(type, true))} de la orden</h3>
+                  <small>{lines.length} de 7</small>
+                </div>
+                {lines.map((l, i) => {
+                  const selectedProduct = db.productos.find(
+                    (p) => p.id === l.id_producto,
+                  );
+                  const original =
+                    order &&
+                    db.orden_producto.find(
+                      (row) =>
+                        row.id === l.id && row.id_orden_compra === order.id,
+                    );
+                  const barcode = l.id
+                    ? db.codigos_barras.find((c) => c.id === l.id_codigo_barras)
+                    : latestBarcode(db, l.id_producto);
+                  const key = (f: string) => `field-lines.${i}.${f}`;
+                  return (
+                    <div className="order-form-line" key={i}>
+                      <div className="line-title">
+                        <h3>
+                          {text(orderItemLabel(type))} {i + 1}
+                        </h3>
+                        <Button
+                          className="icon-btn"
+                          icon={Trash2}
+                          disabled={productsLocked || lines.length === 1}
+                          aria-describedby={
+                            productsLocked ? "order-products-locked" : undefined
+                          }
+                          aria-label={`Eliminar ${orderItemLabel(type)} ${i + 1}`}
+                          onClick={() => {
+                            setLines(lines.filter((_, n) => n !== i));
+                            setDirty(true);
+                          }}
+                        />
+                      </div>
+                      <div className="form-grid three">
+                        <Field
+                          id={key(
+                            type === "producto"
+                              ? "id_producto"
+                              : type === "material"
+                                ? "id_material"
+                                : "producto",
+                          )}
+                          label={
+                            type === "producto"
+                              ? "Producto"
+                              : type === "material"
+                                ? "Material"
+                                : "Producto o concepto"
+                          }
+                          required
+                          error={
+                            error?.fields[
+                              `lines.${i}.${type === "producto" ? "id_producto" : type === "material" ? "id_material" : "producto"}`
+                            ] ?? error?.fields.id_producto
+                          }
+                        >
+                          {type === "producto" ? (
+                            <select
+                              id={key("id_producto")}
+                              value={l.id_producto}
+                              disabled={productsLocked}
+                              aria-describedby={
+                                productsLocked
+                                  ? "order-products-locked"
+                                  : undefined
+                              }
+                              onChange={(e) => changeProduct(i, e.target.value)}
+                            >
+                              <option value="">Seleccionar…</option>
+                              {selectedProduct &&
+                                selectedProduct.activo !== true &&
+                                original?.id_producto ===
+                                  selectedProduct.id && (
+                                  <option value={selectedProduct.id} disabled>
+                                    {selectedProduct.nombre_producto} · Inactivo
+                                  </option>
+                                )}
+                              {db.productos
+                                .filter(
+                                  (p) =>
+                                    p.activo === true &&
+                                    (p.id_maquilador === supplier ||
+                                      p.id === original?.id_producto),
+                                )
+                                .map((p) => (
+                                  <option key={p.id} value={p.id}>
+                                    {p.nombre_producto}
+                                  </option>
+                                ))}
+                            </select>
+                          ) : type === "material" ? (
+                            <select
+                              id={key("id_material")}
+                              value={l.id_material}
+                              onChange={(e) =>
+                                update(i, "id_material", e.target.value)
+                              }
+                            >
+                              <option value="">Seleccionar…</option>
+                              {db.materiales.map((m) => (
+                                <option key={m.id} value={m.id}>
+                                  {recordName(db, "materiales", m)}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <>
+                              <input
+                                id={key("producto")}
+                                value={l.producto}
+                                list={`conceptos-anteriores-${i}`}
+                                onChange={(e) =>
+                                  update(i, "producto", e.target.value)
+                                }
+                              />
+                              <datalist id={`conceptos-anteriores-${i}`}>
+                                {[
+                                  ...new Set(
+                                    db.orden_otro.map((o) => o.producto),
+                                  ),
+                                ].map((p) => (
+                                  <option key={p} value={p} />
+                                ))}
+                              </datalist>
+                            </>
+                          )}
+                        </Field>
+                        <Field
+                          id={key("cantidad_solicitada")}
+                          label="Cantidad solicitada"
+                          required
+                          error={
+                            error?.fields[`lines.${i}.cantidad_solicitada`]
+                          }
+                        >
+                          <input
+                            id={key("cantidad_solicitada")}
+                            type="number"
+                            step="1"
+                            value={
+                              Number.isNaN(l.cantidad_solicitada)
+                                ? ""
+                                : l.cantidad_solicitada
+                            }
+                            onChange={(e) => {
+                              update(
+                                i,
+                                "cantidad_solicitada",
+                                e.target.value === ""
+                                  ? NaN
+                                  : Number(e.target.value),
+                              );
+                              if (type === "producto")
+                                setLines((old) =>
+                                  old.map((l, n) =>
+                                    n !== i
+                                      ? l
+                                      : {
+                                          ...l,
+                                          cantidad_corrugado: null,
+                                          cantidad_sticker: null,
+                                          cantidad_cinta: null,
+                                        },
+                                  ),
+                                );
+                            }}
+                          />
+                        </Field>
+                        <Field
+                          id={key("precio_unitario")}
+                          label="Precio unitario"
+                          required
+                          error={
+                            error?.fields[`lines.${i}.precio_unitario`] ??
+                            error?.fields.precio_unitario
+                          }
+                        >
+                          <input
+                            id={key("precio_unitario")}
+                            inputMode="decimal"
+                            value={l.precio_unitario}
+                            onChange={(e) =>
+                              update(i, "precio_unitario", e.target.value)
+                            }
+                          />
+                        </Field>
+                        {type === "producto" && (
+                          <div className="field">
+                            <span className="field-label">
+                              Código de barras
+                            </span>
+                            <div className="inline" style={{ minHeight: 36 }}>
+                              {barcode ? (
+                                <span className="mono">{barcode.codigo}</span>
+                              ) : (
+                                <Badge value="pendiente">
+                                  Sin código activo
+                                </Badge>
+                              )}
+                              {selectedProduct &&
+                                !currentCost(db, selectedProduct.id) && (
+                                  <Badge value="pendiente">
+                                    Sin costo registrado
+                                  </Badge>
+                                )}
+                            </div>
+                          </div>
+                        )}
+                        {type === "producto" && (
+                          <div className="field order-line-total">
+                            <span className="field-label">
+                              Total del producto
+                            </span>
+                            <output
+                              className="num"
+                              aria-label={`Total del producto ${i + 1}`}
+                              aria-live="polite"
+                            >
+                              {total([l])}
+                            </output>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <Button
+                  icon={Plus}
+                  disabled={productsLocked || lines.length === 7}
+                  aria-describedby={
+                    productsLocked ? "order-products-locked" : undefined
+                  }
+                  onClick={() => {
+                    setLines([...lines, fresh(type, supplier)]);
+                    setDirty(true);
+                  }}
+                >
+                  Agregar {orderItemLabel(type)}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <>
+              {type === "producto" && (
+                <>
+                  <h3>Cantidades recomendadas</h3>
+                  <div className="notice subtle">
+                    <Info size={16} aria-hidden="true" />
+                    Las sugerencias se redondean hacia arriba. Las cantidades
+                    finales son editables. Sticker y cinta son campos
+                    provisionales.
+                  </div>
+                  {lines.map((l, i) => {
+                    const box = db.producto_corrugado.find(
+                      (c) =>
+                        c.id_producto === l.id_producto &&
+                        c.id_material === l.ref_corrugado,
+                    );
+                    return (
+                      <div className="order-form-line" key={i}>
+                        <h3 style={{ marginBottom: 14 }}>
+                          {
+                            db.productos.find((p) => p.id === l.id_producto)
+                              ?.nombre_producto
+                          }
+                        </h3>
+                        <p className="order-line-basis">
+                          <span>
+                            Cantidad solicitada:{" "}
+                            <strong className="num">
+                              {count(l.cantidad_solicitada)} unidades
+                            </strong>
+                          </span>
+                          <span>
+                            Capacidad del corrugado:{" "}
+                            {box ? (
+                              <strong className="num">
+                                {count(box.unidades_por_corrugado)} unidades
+                              </strong>
+                            ) : (
+                              "Sin configuración para la referencia seleccionada"
+                            )}
+                          </span>
+                        </p>
+                        <div className="form-grid three">
+                          <Field
+                            id={`field-lines.${i}.ref_corrugado`}
+                            label="Referencia de corrugado"
+                          >
+                            <select
+                              id={`field-lines.${i}.ref_corrugado`}
+                              value={l.ref_corrugado ?? ""}
+                              onChange={(e) =>
+                                update(i, "ref_corrugado", e.target.value)
+                              }
+                            >
+                              <option value="">Seleccionar…</option>
+                              {db.materiales
+                                .filter((m) =>
+                                  /corrugad/.test(
+                                    db.tipos_materiales
+                                      .find((t) => t.id === m.id_tipo_material)
+                                      ?.tipo_material?.toLowerCase() ?? "",
+                                  ),
+                                )
+                                .map((m) => (
+                                  <option key={m.id} value={m.id}>
+                                    {m.nombre_material}
+                                  </option>
+                                ))}
+                            </select>
+                          </Field>
+                          <Field
+                            id={`field-lines.${i}.cantidad_corrugado`}
+                            label="Cantidad de corrugado"
+                            tooltip={
+                              box
+                                ? "Cantidad solicitada ÷ capacidad + 5 adicionales"
+                                : undefined
+                            }
+                            error={error?.fields.cantidad_corrugado}
+                          >
+                            <input
+                              id={`field-lines.${i}.cantidad_corrugado`}
+                              type="number"
+                              step="1"
+                              value={l.cantidad_corrugado ?? ""}
+                              onChange={(e) =>
+                                update(
+                                  i,
+                                  "cantidad_corrugado",
+                                  e.target.value === ""
+                                    ? null
+                                    : Number(e.target.value),
+                                )
+                              }
+                            />
+                          </Field>
+                          {hasSticker(l) && (
+                            <div
+                              className="sticker-fields"
+                              role="group"
+                              aria-label={`Sticker del producto ${i + 1}`}
+                            >
+                              <Field
+                                id={`field-lines.${i}.cantidad_sticker`}
+                                label="Cantidad de sticker"
+                                tooltip="Cantidad solicitada x 2 + % adicional"
+                              >
+                                <input
+                                  id={`field-lines.${i}.cantidad_sticker`}
+                                  aria-label="Cantidad de sticker · provisional"
+                                  type="number"
+                                  step="1"
+                                  value={l.cantidad_sticker ?? ""}
+                                  onChange={(e) =>
+                                    update(
+                                      i,
+                                      "cantidad_sticker",
+                                      e.target.value === ""
+                                        ? null
+                                        : Number(e.target.value),
+                                    )
+                                  }
+                                />
+                              </Field>
+                              <Field
+                                id={`field-lines.${i}.sticker_pct`}
+                                label="%"
+                                tooltip="Cantidad solicitada x 2 + % adicional"
+                                error={error?.fields[`lines.${i}.sticker_pct`]}
+                              >
+                                <input
+                                  aria-label="Adicional recomendado de sticker (%)"
+                                  type="number"
+                                  inputMode="decimal"
+                                  min="1"
+                                  max="10"
+                                  step="any"
+                                  value={
+                                    Number.isFinite(l.sticker_pct)
+                                      ? l.sticker_pct
+                                      : ""
+                                  }
+                                  onChange={(e) =>
+                                    changeStickerPercentage(i, e.target.value)
+                                  }
+                                />
+                              </Field>
+                            </div>
+                          )}
+                          {l.cantidad_cinta !== null && (
+                            <Field
+                              id={`field-lines.${i}.cantidad_cinta`}
+                              label="Cantidad de cinta · provisional"
+                              tooltip="Cantidad solicitada ÷ 4000"
+                            >
+                              <input
+                                id={`field-lines.${i}.cantidad_cinta`}
+                                type="number"
+                                step="1"
+                                value={l.cantidad_cinta ?? ""}
+                                onChange={(e) =>
+                                  update(
+                                    i,
+                                    "cantidad_cinta",
+                                    e.target.value === ""
+                                      ? null
+                                      : Number(e.target.value),
+                                  )
+                                }
+                              />
+                            </Field>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+              {type !== "producto" && (
+                <div className="notice subtle">
+                  <Check size={16} aria-hidden="true" />
+                  {lines.length === 1 ? "Se guardará" : "Se guardarán"}{" "}
+                  {lines.length} {orderItemLabel(type, lines.length !== 1)}. La
+                  orden se crea sin autorización.
+                </div>
+              )}
+              {order && !replacement && type === "producto" && (
+                <p className="compact-note">
+                  Los vínculos de abastecimiento existentes se conservan al
+                  editar.
+                </p>
+              )}
+            </>
+          )}
+          <div className="order-totals">
+            <span>Total de la orden</span>
+            <strong className="num">{total()}</strong>
+          </div>
+        </div>
+        <div className="dialog-footer">
+          {stage === 2 && (
+            <Button icon={ArrowLeft} onClick={() => setStage(1)}>
+              Volver
+            </Button>
+          )}
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button
+            type="submit"
+            variant="primary"
+            icon={stage === 1 ? ChevronRight : Check}
+            disabled={busy}
+          >
+            {busy
+              ? "Guardando…"
+              : stage === 1
+                ? "Revisar orden"
+                : replacement
+                  ? "Guardar reemplazo"
+                  : order
+                    ? "Guardar cambios"
+                    : "Crear orden"}
+          </Button>
+        </div>
+      </form>
+      {pendingSupplier !== null && (
+        <ConfirmationDialog
+          title="Cambiar proveedor y reemplazar la orden"
+          confirmLabel="Cambiar proveedor"
+          onClose={() => setPendingSupplier(null)}
+          onConfirm={acceptSupplierChange}
+        >
+          <p>
+            Al guardar con el nuevo proveedor se perderá toda la información
+            anterior de esta orden: datos de cabecera, productos, lotes,
+            documentos propios y vínculos de abastecimiento.
+          </p>
+          <p>
+            Las OCM anteriores y sus datos se conservarán. La orden mantendrá su
+            número y su identidad. Ahora se preparará un borrador nuevo; la
+            información guardada se reemplazará únicamente al confirmar
+            <strong> Guardar reemplazo</strong> en la revisión final.
+          </p>
+          <p>
+            Puedes cancelar o volver al proveedor original para recuperar el
+            borrador anterior.
+          </p>
+        </ConfirmationDialog>
+      )}
+    </Dialog>
+  );
+}
+
+export function MailForm({
+  context = {},
+  onClose,
+}: {
+  context?: Row;
+  onClose: () => void;
+}) {
+  const { db, run } = useApp();
+  const [event, setEvent] = useState(context.event ?? "envio_orden_compra");
+  const [orderId, setOrderId] = useState(context.orderId ?? "");
+  const [lotId, setLotId] = useState(context.loteMaterialId ?? "");
+  const [preview, setPreview] = useState<Row | null>(null);
+  const [recipients, setRecipients] = useState<Row[]>([]);
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [changed, setChanged] = useState(false);
+  const { error, catchError, setError } = useErrors({
+    values: { recipients },
+    valid: (field) =>
+      field === "recipients" &&
+      recipients.length > 0 &&
+      recipients.every(
+        (recipient) =>
+          validEmail(recipient.address) &&
+          ["para", "cc", "cco"].includes(recipient.type),
+      ) &&
+      new Set(recipients.map((recipient) => recipient.address.toLowerCase()))
+        .size === recipients.length,
+  });
+  useEffect(() => {
+    let active = true;
+    setPreview(null);
+    setError(null);
+    void request("mail-preview", {
+      ...context,
+      event,
+      orderId: orderId || undefined,
+      loteMaterialId: lotId || undefined,
+    })
+      .then((p) => {
+        if (active) {
+          setPreview(p);
+          setBody(p.body);
+          setRecipients(p.recipients);
+          setChanged(false);
+        }
+      })
+      .catch((e) => {
+        if (active) catchError(e);
+      });
+    return () => {
+      active = false;
+    };
+  }, [event, orderId, lotId]);
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await run(
+        "sendMail",
+        {
+          ...context,
+          event,
+          orderId: orderId || undefined,
+          loteMaterialId: lotId || undefined,
+          recipients,
+          body,
+        },
+        "Envío simulado confirmado",
+      );
+      onClose();
+    } catch (e) {
+      catchError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const manualContacts = [
+    ...db.contacto_interno.filter((c) => c.activo),
+    ...db.contacto,
+  ].filter((c) => c.correo && validEmail(c.correo));
+  return (
+    <Dialog
+      title="Preparar correo"
+      subtitle="Envío simulado · no se enviarán mensajes externos."
+      wide
+      onClose={onClose}
+      dirty={changed}
+    >
+      <form onSubmit={submit} noValidate>
+        <div className="dialog-body">
+          <ErrorNotice error={error} />
+          <div className="form-grid three">
+            <Field id="field-event" label="Proceso">
+              <select
+                id="field-event"
+                value={event}
+                onChange={(e) => setEvent(e.target.value)}
+              >
+                {meta.enums.tipo_evento_correo.map((t) => (
+                  <option key={t} value={t}>
+                    {text(t)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            {event === "envio_orden_compra" && (
+              <Field id="field-orderId" label="Orden">
+                <select
+                  id="field-orderId"
+                  value={orderId}
+                  onChange={(e) => setOrderId(e.target.value)}
+                >
+                  <option value="">Seleccionar…</option>
+                  {db.orden_compra.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {orderReference(o.tipo_orden, o.no_orden)} ·{" "}
+                      {text(o.tipo_orden)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+            {event.startsWith("envio_certificado") && (
+              <Field id="field-loteMaterialId" label="Lote de material">
+                <select
+                  id="field-loteMaterialId"
+                  value={lotId}
+                  onChange={(e) => setLotId(e.target.value)}
+                >
+                  <option value="">Materiales del contexto de la orden</option>
+                  {db.lote_material.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.numero_lote}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+            <div className="field">
+              <span className="field-label">Remitente de demostración</span>
+              <p style={{ paddingTop: 9, fontSize: 12 }}>
+                {preview?.remitente ?? "zamira@gimed-demo.example"}
+              </p>
+            </div>
+          </div>
+          <div className="spread">
+            <h3>Destinatarios</h3>
+            <Button
+              className="small"
+              icon={Plus}
+              onClick={() => {
+                setRecipients([...recipients, { address: "", type: "para" }]);
+                setChanged(true);
+              }}
+            >
+              Agregar
+            </Button>
+          </div>
+          {recipients.map((r, i) => (
+            <div className="recipient" key={i}>
+              <select
+                className="control"
+                aria-label={`Tipo de destinatario ${i + 1}`}
+                value={r.type}
+                onChange={(e) => {
+                  setRecipients(
+                    recipients.map((v, n) =>
+                      n === i ? { ...v, type: e.target.value } : v,
+                    ),
+                  );
+                  setChanged(true);
+                }}
+              >
+                {["para", "cc", "cco"].map((t) => (
+                  <option key={t} value={t}>
+                    {text(t)}
+                  </option>
+                ))}
+              </select>
+              <input
+                className="control"
+                type="email"
+                list="correo-directorio"
+                aria-label={`Dirección de destinatario ${i + 1}`}
+                autoComplete="email"
+                value={r.address}
+                placeholder="correo@ejemplo.com"
+                onChange={(e) => {
+                  setRecipients(
+                    recipients.map((v, n) =>
+                      n === i ? { ...v, address: e.target.value } : v,
+                    ),
+                  );
+                  setChanged(true);
+                }}
+              />
+              <Button
+                className="icon-btn"
+                icon={Trash2}
+                aria-label={`Quitar destinatario ${i + 1}`}
+                onClick={() => {
+                  setRecipients(recipients.filter((_, n) => n !== i));
+                  setChanged(true);
+                }}
+              />
+            </div>
+          ))}
+          <datalist id="correo-directorio">
+            {manualContacts.map((c) => (
+              <option key={c.id} value={c.correo!}>
+                {c.nombre}
+              </option>
+            ))}
+          </datalist>
+          {!recipients.length && (
+            <p className="compact-note">
+              Sin sugerencias. Puedes agregar cualquier dirección válida.
+            </p>
+          )}
+          <Field
+            id="field-body"
+            label="Contenido del correo"
+            hint="El cuerpo se usa en la simulación y no se conserva en el historial."
+          >
+            <textarea
+              id="field-body"
+              rows={7}
+              value={body}
+              onChange={(e) => {
+                setBody(e.target.value);
+                setChanged(true);
+              }}
+            />
+          </Field>
+          <div>
+            <h3>Adjuntos resueltos</h3>
+            {preview?.documents.length ? (
+              preview.documents.map((d: Row) => (
+                <div key={d.id} className="inline" style={{ marginTop: 8 }}>
+                  <Paperclip size={15} aria-hidden="true" />
+                  <a
+                    href={`/api/documents/${d.id}/content`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 12 }}
+                  >
+                    {d.nombre_archivo}
+                  </a>
+                  <Badge value="material">Placeholder</Badge>
+                </div>
+              ))
+            ) : (
+              <p className="compact-note" style={{ marginTop: 8 }}>
+                {event === "codigos_barras_nuevos"
+                  ? "Los códigos se incluyen en el cuerpo; no requieren archivos."
+                  : "Sin archivos disponibles."}
+              </p>
+            )}
+          </div>
+          {preview && preview.missing.length > 0 && (
+            <div className="notice warning">
+              <Info size={17} aria-hidden="true" />
+              <div>
+                <strong>
+                  Completa los documentos antes de simular el envío.
+                </strong>
+                <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+                  {preview.missing.map((s: string) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="dialog-footer">
+          <Button onClick={onClose}>Cancelar</Button>
+          <Button
+            type="submit"
+            icon={Send}
+            variant="primary"
+            disabled={busy || !preview}
+          >
+            {busy ? "Confirmando…" : "Simular envío"}
+          </Button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}

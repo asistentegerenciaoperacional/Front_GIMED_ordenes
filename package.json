@@ -1,0 +1,38 @@
+{
+  "name": "gimed-ordenes-prototipo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "tsc --noEmit && vite build",
+    "start": "tsx server/index.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "test:browser": "npm run build && node scripts/qa-session.mjs --check && node scripts/verify-persistence.mjs",
+    "test:filters": "npm run build && tsx scripts/verify-order-filters.ts",
+    "benchmark:filters": "tsx scripts/benchmark-order-filters.ts",
+    "qa": "node scripts/qa-session.mjs",
+    "models": "node scripts/model-from-dbml.mjs",
+    "package:portable": "npm run build && node scripts/package-portable.mjs",
+    "test:portable": "node scripts/verify-portable.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.3.0"
+  },
+  "devDependencies": {
+    "@playwright/cli": "latest",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "latest",
+    "prettier": "^3.9.9",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "vite": "latest"
+  }
+}

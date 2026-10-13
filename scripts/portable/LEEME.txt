@@ -1,0 +1,33 @@
+GIMED · Prototipo de órdenes de compra
+Windows 10/11 de 64 bits (x64)
+
+1. Extrae el ZIP completo a una carpeta donde puedas guardar archivos,
+   por ejemplo Documentos\GIMED-Prototipo. Usa los archivos ya extraídos.
+2. Haz doble clic en Iniciar.cmd.
+3. El navegador predeterminado se abrirá cuando la aplicación esté lista.
+   Si no se abre, copia la dirección que aparece en la ventana del servicio.
+
+La ventana de GIMED debe permanecer abierta mientras usas el prototipo.
+Para detenerlo, vuelve a esa ventana y pulsa Enter.
+Para usarlo de nuevo, ejecuta Iniciar.cmd.
+
+El paquete incluye Node.js y las dependencias que utiliza la aplicación.
+Puede funcionar sin conexión a Internet y sin instalar herramientas adicionales.
+Utiliza el navegador disponible en el equipo, como Microsoft Edge.
+
+DATOS
+El primer arranque crea datos ficticios de demostración.
+Los cambios se guardan en data\database.json y se recuperan al volver a iniciar.
+Conserva la carpeta data. Para hacer un respaldo, cierra la aplicación y copia
+esa carpeta. Para trasladar tus cambios, mueve toda la carpeta del prototipo.
+
+Los documentos son placeholders y los correos se simulan.
+La integración futura con Colompack está pendiente.
+
+Si ejecutas Iniciar.cmd otra vez mientras el prototipo está abierto,
+se reutiliza la instancia existente. Cada carpeta del prototipo conserva
+su propio archivo de datos.
+
+Los avisos y licencias de las dependencias se incluyen en sus carpetas.
+La licencia de Node.js está en runtime\LICENSE.txt.
+MANIFIESTO.json identifica las versiones incluidas en esta entrega.

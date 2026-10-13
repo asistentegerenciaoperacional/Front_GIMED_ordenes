@@ -1,0 +1,92 @@
+# Interfaz del prototipo GIMED
+
+Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
+
+Actualizado el 9 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+
+## Bases
+
+- Fondo: `#F6F8FC`; superficies: blanco; bordes: `#E2E8F0`.
+- Acción principal: `#2563EB`; interacción: `#1D4ED8`.
+- Texto principal: `#18253B`; texto secundario: `#526179`.
+- Tipografía del sistema: Segoe UI, system-ui, sans-serif. Identificadores técnicos usan monospace; cantidades usan cifras tabulares.
+- Separación habitual: 8, 12, 16, 20 y 24 px. Paneles con radio de 12 px.
+- Iconos Lucide en SVG, decorativos con `aria-hidden`; controles de solo icono tienen nombre accesible.
+
+## Organización
+
+Órdenes es la pantalla inicial. La navegación lateral agrupa los procesos y reserva Configuración al final. Se presenta como un drawer cerrado inicialmente en todos los tamaños de pantalla; el botón de menú lo abre sobre el contenido, con un fondo atenuado. Su icono de fijación cambia entre panel flotante y navegación permanente. El contenido usa título, acción principal, filtros y tabla. El detalle mantiene la información de la orden de compra, sus productos, materiales o conceptos y los documentos vinculados. Los diálogos separan captura y revisión antes del guardado.
+
+El drawer fijado ocupa una columna propia y permanece visible al navegar y desplazar la página. Al desfijarlo, la columna se libera y el panel permanece abierto de forma flotante, con todo el ancho disponible para el contenido. El cambio de ancho utiliza una transición de 180 ms, desactivada con movimiento reducido. La fijación está disponible desde 1024 px de ancho de ventana. Por debajo, el botón desaparece y el panel fijado pasa automáticamente a flotante, liberando su columna y enfocando el cierre. Ampliar la ventana conserva el modo flotante hasta una nueva fijación.
+
+La cabecera conserva el botón de fijar/desfijar en los anchos permitidos; el cierre aparece en el modo flotante. Los destinos tienen desplazamiento interno y las tablas tienen desplazamiento horizontal propio cuando no caben. Las columnas de formularios se reducen a una por debajo de 600 px.
+
+## Estados e interacción
+
+Autorizada y en seguimiento usan azul; pendientes, ámbar; cerrada/aprobada/validada, verde; anulada/rechazada/inactiva, rojo. Cada estado incluye texto.
+
+Los errores aparecen junto al campo y en un resumen con foco al validar. Los enlaces del resumen permiten llegar al control. Al corregir un dato se retira su error si ya es válido, se conservan los pendientes y el foco permanece en el control; editar un valor sin resolver su formato, duplicado o relación mantiene el aviso. Los diálogos nativos retienen el foco; las pestañas admiten flechas, Inicio y Fin. El drawer flotante bloquea la interacción y el desplazamiento del fondo. Tab y Shift+Tab recorren sus controles; Escape, el botón de cierre y el clic en el fondo lo cierran y devuelven el foco al botón de apertura. Seleccionar una sección cierra el drawer flotante y enfoca el contenido. En el modo fijado se puede pasar con Tab hacia el contenido, interactuar con la página y cambiar de sección conservando el panel. Cambiar de modo conserva el foco en el botón de fijación. Los cambios pendientes avisan al salir o cerrar el diálogo.
+
+El foco visible usa un contorno azul. Las transiciones breves respetan movimiento reducido. La impresión oculta controles y conserva siete posiciones, total y firmas en A4 horizontal.
+
+Las cantidades recomendadas son editables. Los textos de demostración distinguen documentos ficticios y correos simulados de las operaciones guardadas.
+
+Los renglones de OC y OCM distinguen su cabecera con fondo `#F6F8FC`, borde `#E2E8F0` y acento lateral de 3 px en `#2563EB`; conservan texto `#18253B` y secundario `#526179`. El código de barras y el código MAIA usan monospace de 16 px y peso 600. Bajo el nombre del producto, una misma fila de datos reúne código de barras, referencia de corrugado guardada en el renglón, cantidad de corrugado y sticker o cinta. Las cantidades usan cifras tabulares y los bloques se adaptan al ancho disponible.
+
+El componente de lotes usa una tabla a partir de 720 px de ancho disponible en su contenedor y tarjetas por debajo de ese ancho, también con navegación fijada. Cada tarjeta tiene 16 px de padding, 16 px entre secciones y tarjetas, y 12 px entre columnas; en contenedores de hasta 260 px pasa a una columna. Identificación, factura y ubicación preceden a recepción, batch record, inspección y confirmación, con un único indicador de cada estado. En tarjetas, la estimación y la recepción de batch record comparten una fila de dos columnas; cuando el contenedor no supera 260 px, conservan la adaptación a una columna. En escritorio la columna de acciones se ajusta al ancho de sus botones, que permanecen juntos, y las fechas combinan etiqueta y valor cuando caben para compactar la altura de las filas. Las cinco fechas permanecen visibles en `dd/mm/aaaa`, según el día de Bogotá; una fecha ausente se muestra como «Sin registrar». Se conservan el radio de 12 px, los iconos, los botones y los estados existentes.
+
+Cada OC u OCM admite una orden escaneada, cada factura un documento y cada lote de material un certificado de cada clase. «Agregar» aparece únicamente para clases disponibles; «Reemplazar» corrige el mismo registro vigente. El número de factura enlaza su documento cuando está disponible, con subrayado, foco visible y apertura en otra pestaña; sin documento permanece como texto.
+
+Órdenes separa Productos y Materiales en pestañas con rutas propias. `/ordenes` abre `/ordenes/productos`; Materiales usa `/ordenes/materiales` e incluye Otros con selector de tipo. Los indicadores y listas pertenecen al grupo seleccionado. El último consecutivo y el siguiente número se consultan en esta pantalla. El número siempre es de solo lectura al crear y editar. El proveedor queda deshabilitado después de autorizar para todos los tipos. Las referencias usan OC para producto y OCM para material y otros, conservando el número y los grupos de consecutivos.
+
+Los campos de fecha combinan escritura en formato `dd/mm/aaaa`, separadores automáticos tras dos dígitos de día y mes, validación de días existentes y un botón de calendario. La escritura parcial se conserva durante la edición; reemplazar día o mes mantiene los otros segmentos.
+
+La captura muestra el total de cada producto bajo su precio unitario. La revisión muestra la cantidad solicitada, la capacidad del corrugado seleccionado y un porcentaje de sticker independiente por producto, con cantidad final editable. La creación de producto, material y otros exige entrega solicitada. Batch record estimado se muestra exclusivamente dentro del lote de producto. Cada nuevo producto tiene un lote inicial con la entrega de cabecera y estados por defecto, sin número ni datos reales. El detalle usa «Sin número de lote», «Completar lote» para editar el mismo registro y «Agregar lote» para uno adicional. Cambiar la entrega antes de autorizar actualiza los lotes iniciales; después conserva sus fechas. Material y otros precargan su propia entrega estimada al crear el renglón y permiten ajustarla en la recepción. Los consecutivos se muestran junto a las pestañas sin repetir el nombre del grupo ni incluir el texto de ayuda del consecutivo automático en el formulario.
+
+Editar una orden autorizada bloquea los selectores de producto y las acciones de agregar o eliminar renglones. Un aviso explica el motivo y conserva disponibles cantidades, precios y materiales de empaque. Antes de autorizar se puede quitar el renglón junto con su lote inicial; sus órdenes de materiales se conservan para revisión.
+
+Cambiar proveedor en una OC de producto sin autorizar abre un diálogo inmediato con Cancelar enfocado inicialmente y una acción explícita «Cambiar proveedor». Explica la pérdida de cabecera, productos, lotes, documentos propios y vínculos al guardar, y la conservación de las OCM. Aceptar reinicia el borrador con entrega vacía obligatoria; volver al proveedor original restaura el anterior. La revisión mantiene un aviso «Reemplazo pendiente» y la acción «Guardar reemplazo». El borrador conserva los datos almacenados hasta ese guardado.
+
+Cada lote tiene una acción de eliminar con nombre accesible, deshabilitada sin autorización. Su diálogo explica los datos que se borrarán y la conservación de facturas y documentos; borrar el último añade la advertencia de anulación. Anular producto confirma la eliminación de todos sus lotes. Reabrir un producto anulado crea un lote inicial; si conserva lotes heredados, confirma su reemplazo. Agregar lote permanece deshabilitado en productos anulados y el estado vacío indica que deben reabrirse. Las confirmaciones reutilizan el diálogo nativo, cancelan con Escape y mantienen el error visible si falla el guardado.
+
+Cantidad de sticker y porcentaje comparten fila en escritorio y móvil. El porcentaje ocupa 64 px y ambos campos tienen 8 px de separación. Las fórmulas y límites se muestran en tooltips al pasar el cursor o enfocar el control, con descripciones enlazadas mediante `aria-describedby`. La ayuda se puede leer al mover el cursor sobre ella; Escape la cierra sin cerrar el diálogo. Los errores de validación permanecen visibles junto al campo. El posicionamiento de los tooltips respeta los límites de la ventana y los controles fijos del diálogo.
+
+Solo los productos activos del maquilador seleccionado aparecen como opciones para agregar a la orden. Un producto histórico desactivado mantiene su opción actual bloqueada al editar. Las acciones manuales de seguimiento, incluidos cerrar y anular, aparecen deshabilitadas mientras la cabecera no está autorizada, con una indicación del motivo. Estas comprobaciones visuales acompañan las validaciones del servicio.
+
+## Acciones de órdenes e impresión
+
+La columna de acciones del listado reúne los botones de imprimir, consultar o agregar la orden firmada y abrir el detalle, alineados horizontalmente. Los controles de solo icono identifican su acción y la OC u OCM correspondiente mediante su nombre accesible.
+
+Imprimir desde el listado o el detalle abre `/ordenes/{id}/imprimir` en la misma pestaña. **Volver a órdenes**, desde el detalle de una orden de cualquier tipo o la impresión de un listado, recupera el listado de origen; **Volver a la orden**, desde impresión, recupera el detalle. El regreso conserva la ruta y su desplazamiento vertical y, para el listado, pestaña, vista, búsqueda, filtros, ordenamiento y desplazamiento horizontal. La posición se captura al abrir el detalle o pulsar Imprimir y se restituye después de mostrar la vista de origen. Si desde una orden se navega a otra pestaña o vista de la aplicación, se descarta el origen guardado; regresar a Órdenes por la navegación abre la vista por defecto, sin filtros y con scroll en el inicio. Este comportamiento se ejecuta al navegar, sin observar continuamente el scroll.
+
+El botón de orden firmada usa azul cuando hay un adjunto y abre su previsualización. Cuando falta el documento, permanece habilitado y abre el mismo diálogo **Agregar placeholder** utilizado en el detalle de la orden, con **Clase de documento: Orden escaneada** precargada y **Nombre del archivo**. Guardar vincula el documento a la orden de la fila y actualiza el botón a azul para consultarlo.
+
+## Filtros y ordenamiento de órdenes
+
+Las siete columnas de datos son orden/tipo, proveedor, productos o materiales y conceptos, fecha de elaboración, entrega solicitada, estado y total. Cada cabecera tiene un botón de filtro con nombre accesible y estado de apertura. Su menú reúne orden ascendente/descendente, búsqueda y selección múltiple de valores, y condiciones según texto, número, importe o fecha. El filtro de estados está en su columna; se conserva la búsqueda general y el selector Material/Otros.
+
+Los valores seleccionados se combinan como alternativas dentro de una columna y los filtros de distintas columnas se aplican conjuntamente. Productos considera todos los renglones de la orden al filtrar. Importes y fechas se comparan conforme a los valores del listado. Búsqueda, filtros y ordenamiento se recuperan desde la URL.
+
+El menú ocupa como máximo 400 px y el 60 % de la altura disponible, con desplazamiento interno en el contenido central y cabecera/acciones visibles. Toda la fila de un valor, incluidos texto y espacios, alterna su checkbox una sola vez sin cerrar el menú. Aplicar confirma y Cancelar descarta el borrador; Escape cierra y devuelve el foco a la cabecera. Las cabeceras se mantienen cuando no hay coincidencias para poder retirar filtros. La tabla desplaza horizontalmente dentro de su contenedor cuando no cabe.
+
+El selector **Filtro personalizado** y su botón **Ayuda de filtros personalizados** se sitúan a la derecha de la búsqueda, con 8 px de separación. La selección es única; la lista agrupa las variantes con/sin y 7/15/30 días y empieza por **Sin filtro personalizado**. En móvil y con navegación fijada, la barra se distribuye en nuevas filas conforme al ancho disponible, conservando selector y ayuda juntos. Usa los controles, colores, bordes y tipografía existentes.
+
+La ayuda reutiliza el diálogo nativo con las 13 descripciones del catálogo tipado, identificación de filtros de producto y ejemplos. El contenido central desplaza con título y acción **Entendido** visibles. Tab y Shift+Tab permanecen dentro del diálogo; Escape, Entendido y el cierre devuelven el foco al botón que lo abrió. La consulta sigue disponible al cerrar.
+
+**Limpiar filtros** incluye la selección personalizada y las columnas, conservando búsqueda, vista y ordenamiento. El pie muestra cantidad de resultados, intervalo visible y controles **Anterior**, **Página X de Y** y **Siguiente**, deshabilitados en los extremos. Se presentan 50 órdenes por página después de filtrar y ordenar. El pie se adapta en varias filas al ancho disponible. Las opciones de columna representan todos los resultados de la consulta y los indicadores generales mantienen sus totales. URL y regreso desde detalle o impresión conservan filtro y página.
+
+## Filtros y ordenamiento de facturas
+
+La tabla de Facturas empieza por sus cabeceras y reutiliza el menú de columnas de Órdenes. Número de factura y Proveedor tienen condiciones de texto; Registro usa fechas y Recepciones, números enteros. Ordenamiento, condiciones y selección múltiple comparten el menú de cada una de esas columnas. El número de factura conserva sus ceros y signos al filtrar; el proveedor admite nombres y NIT, y las fechas corresponden al día mostrado en Bogotá. El valor cero de Recepciones consulta las facturas sin asociaciones.
+
+Documentos tiene un menú reducido con dos valores, **Con documento** y **Sin documento**, según el archivo propio de la factura. Los filtros de columnas se combinan, se guardan en la URL junto con el ordenamiento y pueden quitarse desde el menú o mediante **Limpiar filtros** en el pie. Se conservan las cabeceras y sus controles al mostrar un estado vacío.
+
+Los menús mantienen la altura máxima, el desplazamiento interno, las acciones visibles, la selección al pulsar toda la fila y el regreso del foco con Escape definidos para Órdenes. La tabla conserva su propio desplazamiento horizontal en pantallas estrechas. Los formularios de registro y asociación conservan la búsqueda de recepciones existentes.
+
+## Filtros de columnas en abastecimiento
+
+Vínculos entre órdenes reutiliza los menús de columna de Órdenes y Facturas: condiciones numéricas para Orden de producto y Orden de material; texto para Producto / maquilador y Material / proveedor; valores enumerados para Estado del material. Los valores de las órdenes muestran OC y OCM; cada columna se compara dentro de su propio grupo. Filtros y ordenamiento se combinan y se conservan en la URL. El contador y Limpiar filtros están en el pie.
+
+Los estados vacíos conservan las cabeceras para ajustar o quitar filtros. Los menús mantienen la altura limitada, el desplazamiento interno y la devolución del foco con Escape. Lotes y certificados conserva la búsqueda de su propio catálogo.
+
+En la asignación de una factura existente, las casillas reflejan las asociaciones iniciales. Desmarcar y guardar retira únicamente esa factura del lote o recepción; buscar conserva las selecciones ocultas. Al crear una factura, **Adjuntar documento** reutiliza el formulario de placeholder: clase Factura física y nombre de archivo. El documento se prepara en el borrador, con Reemplazar documento y Quitar documento, y se guarda conjuntamente al confirmar la factura.

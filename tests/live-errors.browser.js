@@ -1,0 +1,128 @@
+async (page) => {
+  page.setDefaultTimeout(5000);
+  const origin = new URL(page.url()).origin;
+  const checks = [];
+  const errors = [];
+  const check = (value, name) => { if (!value) throw new Error(name); checks.push(name); };
+  const field = (name) => page.locator('[data-field-path='+JSON.stringify(name)+']');
+  const corrected = async (control, name) => {
+    const id = await control.getAttribute('id');
+    await page.waitForFunction((id) => document.getElementById(id)?.getAttribute('aria-invalid') !== 'true', id);
+    check(await control.evaluate((element) => element === document.activeElement), name+' conserva el foco');
+    const description = await control.getAttribute('aria-describedby');
+    check(!description?.split(' ').some((id) => id.endsWith('-error')), name+' retira la descripción del error');
+  };
+  let fixtureCount = 0;
+  const visit = async (fixture, hasDialog = true) => {
+    // Each fixture gets a fresh tab so unsaved forms do not interrupt the next check.
+    if (fixtureCount++) page = await page.context().newPage();
+    page.on('pageerror', (error) => errors.push(error.message));
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.goto(origin+'/tests/live-errors.html?fixture='+fixture);
+    if (hasDialog) await page.locator('dialog[open]').waitFor();
+  };
+
+  await visit('order');
+  await field('lines.0.cantidad_solicitada').fill('1.5');
+  await field('lines.0.precio_unitario').fill('12.555');
+  await page.getByRole('button',{name:'Revisar orden',exact:true}).click();
+  await page.getByRole('alert').waitFor();
+  check(await page.getByRole('alert').getByRole('link').count()===3,'Orden muestra fecha, cantidad y precio inválidos');
+  await field('lines.0.cantidad_solicitada').fill('1.7');
+  check(await field('lines.0.cantidad_solicitada').getAttribute('aria-invalid')==='true','Otra cantidad decimal conserva el error');
+  await field('lines.0.cantidad_solicitada').fill('2');
+  await corrected(field('lines.0.cantidad_solicitada'),'Cantidad válida');
+  check(await page.getByRole('alert').getByRole('link').count()===2,'Resumen conserva únicamente fecha y precio pendientes');
+  await field('lines.0.precio_unitario').fill('abc');
+  check(await field('lines.0.precio_unitario').getAttribute('aria-invalid')==='true','Texto inválido conserva el error de precio');
+  await field('lines.0.precio_unitario').fill('3.50');
+  await corrected(field('lines.0.precio_unitario'),'Precio válido');
+  check(await page.getByRole('alert').getByRole('link').count()===1,'Resumen conserva únicamente la fecha pendiente');
+  await field('fecha_solicitada_entrega').fill('24/10/20');
+  check(await field('fecha_solicitada_entrega').getAttribute('aria-invalid')==='true','Una fecha parcial conserva el error');
+  await field('fecha_solicitada_entrega').fill('24/10/2026');
+  await corrected(field('fecha_solicitada_entrega'),'Fecha completa válida');
+  await page.getByRole('alert').waitFor({state:'hidden'});
+  check(true,'Corregir el último campo elimina el resumen sin enviar');
+
+  await page.getByRole('button',{name:'Revisar orden',exact:true}).click();
+  const percent=field('lines.0.sticker_pct');
+  await percent.fill('11');
+  await page.getByRole('button',{name:'Crear orden',exact:true}).click();
+  await page.getByRole('alert').waitFor();
+  await percent.fill('12');
+  check(await percent.getAttribute('aria-invalid')==='true','Porcentaje que sigue fuera de rango conserva el error');
+  await percent.fill('5');
+  await corrected(percent,'Porcentaje válido');
+  await page.getByRole('alert').waitFor({state:'hidden'});
+  check(true,'Corregir porcentaje elimina su resumen de revisión');
+  await visit('contact');
+  await page.getByRole('button',{name:'Guardar registro',exact:true}).click();
+  await page.getByRole('alert').waitFor();
+  await field('nombre').fill('  ');
+  check(await field('nombre').getAttribute('aria-invalid')==='true','Espacios no corrigen un nombre obligatorio');
+  await field('nombre').fill('Ana');
+  await corrected(field('nombre'),'Nombre del contacto');
+  await field('correo').fill('incorrecto');
+  check(await field('correo').getAttribute('aria-invalid')==='true','Un correo sin formato válido conserva el error');
+  await field('correo').fill('ana@example.com');
+  await corrected(field('correo'),'Correo válido');
+  await page.getByRole('alert').waitFor({state:'hidden'});
+  check(true,'Catálogo elimina el resumen al completar sus campos');
+
+  await visit('maia');
+  await field('id_tipo_material').selectOption('000000000000000000000028');
+  await field('codigo_material').fill('12');
+  await page.getByRole('button',{name:'Guardar registro',exact:true}).click();
+  await page.getByRole('alert').waitFor();
+  await field('codigo_material').fill('101');
+  check(await field('codigo_material').getAttribute('aria-invalid')==='true','MAIA con tres dígitos pero duplicado conserva el error');
+  await field('codigo_material').fill('901');
+  await corrected(field('codigo_material'),'MAIA válido y disponible');
+  await page.getByRole('alert').waitFor({state:'hidden'});
+
+  await visit('lot');
+  await field('cantidad_recibida').fill('1.5');
+  await page.getByRole('button',{name:'Guardar lote',exact:true}).click();
+  await page.getByRole('alert').waitFor();
+  await field('numero_lote').fill('CORRECCION-001');
+  await corrected(field('numero_lote'),'Número de lote');
+  check(await field('cantidad_recibida').getAttribute('aria-invalid')==='true','Corregir número de lote conserva la cantidad inválida');
+  await field('cantidad_recibida').fill('2');
+  await corrected(field('cantidad_recibida'),'Cantidad recibida del lote');
+  await page.getByRole('alert').waitFor({state:'hidden'});
+  await field('fecha_recepcion').fill('31/02/2026');
+  await field('ubicacion').focus();
+  check(await field('fecha_recepcion').getAttribute('aria-invalid')==='true','Fecha inexistente muestra el error del calendario');
+  await field('fecha_recepcion').fill('24/10/2026');
+  await corrected(field('fecha_recepcion'),'Fecha de recepción válida');
+
+  await visit('invoice');
+  await page.getByRole('button',{name:'Guardar factura',exact:true}).click();
+  await page.getByRole('alert').waitFor();
+  await field('id_proveedor').focus();
+  await field('id_proveedor').selectOption('000000000000000000000001');
+  await corrected(field('id_proveedor'),'Proveedor de factura');
+  await field('numero_factura').fill('aur-00128');
+  check(await field('numero_factura').getAttribute('aria-invalid')==='true','Factura duplicada tras normalizar conserva el error');
+  await field('numero_factura').fill('CORRECCION-FACTURA-001');
+  await corrected(field('numero_factura'),'Factura válida y disponible');
+  await page.getByRole('alert').waitFor({state:'hidden'});
+
+  await visit('filter', false);
+  await page.getByRole('button',{name:'Filtrar y ordenar Total',exact:true}).click();
+  const panel=page.locator('.column-filter-panel');
+  await panel.getByRole('combobox',{name:'Condición',exact:true}).selectOption('between');
+  await panel.getByRole('textbox',{name:'Desde',exact:true}).fill('10');
+  await panel.getByRole('textbox',{name:'Hasta',exact:true}).fill('1');
+  await panel.getByRole('button',{name:'Aplicar',exact:true}).click();
+  await panel.getByRole('alert').waitFor();
+  await panel.getByRole('textbox',{name:'Hasta',exact:true}).fill('2');
+  check(await panel.getByRole('alert').isVisible(),'Intervalo de filtro que sigue invertido conserva el error');
+  const end=panel.getByRole('textbox',{name:'Hasta',exact:true});
+  await end.fill('20');
+  await panel.getByRole('alert').waitFor({state:'hidden'});
+  check(await end.evaluate((element) => element === document.activeElement),'Intervalo corregido oculta el error y conserva el foco');
+  check(errors.length===0,'Sin errores JavaScript en las correcciones');
+  return { date:new Date().toISOString(), checks, errors, isolatedFixtures:true, savedRecords:0 };
+}
