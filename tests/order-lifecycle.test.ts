@@ -66,6 +66,79 @@ const replacement = (id: string, overrides: Row = {}): Row =>
   });
 const authorize = (store: JsonStore, id: string) =>
   execute(store, "authorizeOrder", { id, confirm: true });
+
+for (const entity of ["orden_material", "orden_otro"] as const) {
+  test(`reabrir ${entity} cerrado o anulado conserva recepción, factura, documentos y vínculos`, async (t) => {
+    const store = await fixture(t);
+    const db = store.snapshot();
+    const line = db[entity][0];
+    assert.ok(line);
+    if (db.orden_compra.find((order) => order.id === line.id_orden_compra)!.estado_autorizacion !== "autorizada")
+      await authorize(store, line.id_orden_compra);
+    for (const previous of ["cerrada", "anulada"]) {
+      await execute(store, "setLineState", {
+        entity,
+        id: line.id,
+        estado: previous,
+        confirm: true,
+      });
+      const expected = store.snapshot();
+      expected[entity].find((row) => row.id === line.id)!.estado =
+        "en_seguimiento";
+      await execute(store, "setLineState", {
+        entity,
+        id: line.id,
+        estado: "en_seguimiento",
+      });
+      assert.deepEqual(store.snapshot(), expected);
+      assert.deepEqual((await JsonStore.open(store.file)).snapshot(), expected);
+      // Repeating the request cannot create duplicate receptions or documents.
+      await execute(store, "setLineState", {
+        entity,
+        id: line.id,
+        estado: "en_seguimiento",
+      });
+      assert.deepEqual(store.snapshot(), expected);
+    }
+  });
+
+  test(`reabrir ${entity} requiere autorización y un rechazo conserva todos los datos`, async (t) => {
+    const store = await fixture(t);
+    const type = entity === "orden_material" ? "material" : "otro";
+    const db = store.snapshot();
+    const provider = db.orden_compra.find(
+      (order) => order.tipo_orden === type,
+    )!.id_proveedor;
+    const created = await execute(store, "createOrder", {
+      tipo_orden: type,
+      id_proveedor: provider,
+      fecha_solicitada_entrega: delivery,
+      lines: [
+        {
+          ...(type === "material"
+            ? { id_material: db.materiales[0].id }
+            : { producto: "Concepto de prueba" }),
+          cantidad_solicitada: 10,
+          precio_unitario: "2.50",
+        },
+      ],
+    });
+    const line = store
+      .snapshot()
+      [entity].find((row) => row.id_orden_compra === created.orderId)!;
+    await rejectedUnchanged(
+      store,
+      "setLineState",
+      {
+        entity,
+        id: line.id,
+        estado: "en_seguimiento",
+        confirm: true,
+      },
+      "AUTHORIZATION",
+    );
+  });
+}
 const lotFor = (store: JsonStore, lineId: string) =>
   store
     .snapshot()

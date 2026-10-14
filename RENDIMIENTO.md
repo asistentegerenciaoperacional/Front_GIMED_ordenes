@@ -236,3 +236,61 @@ Para reproducir desde prototipo:
 El servicio de esta prueba conserva su estado exclusivamente en memoria.
 El archivo del usuario mantuvo su SHA-256
 `e48b8e9bb7e118cdd4531fa748299907d61907de54c8186c218361608532eba7`.
+
+## Despliegue de lotes y documentos
+
+Medición del 14 de octubre de 2026, Windows, con Chrome 155 y Edge 155
+sin interfaz visible. El detalle usa estado React local por renglón y
+transiciones CSS de `grid-template-rows: 1fr ↔ 0fr` (180 ms) y opacidad
+(140 ms). No solicita datos, mide alturas ni ejecuta JavaScript por
+fotograma en producción. No se añade `will-change` permanente.
+
+Animar la altura **sí requiere layout** para mover los renglones siguientes;
+no es una animación exclusivamente del compositor. Al alternar un renglón,
+sus hermanos no vuelven a renderizarse en React. El panel mantiene sus nodos
+montados para conservar datos y controles: ocultarlo reduce su presencia
+visual, pero no elimina su costo de memoria. Por eso esta solución no debe
+interpretarse como virtualización de miles de lotes.
+
+El ensayo de navegador amplifica únicamente la respuesta de su servicio
+local aislado a **7 renglones y 280 lotes**, 40 por renglón, a 1440 × 900 px.
+Cuatro alternancias registran 64 intervalos entre fotogramas con
+`requestAnimationFrame`; las lecturas de altura pertenecen a la instrumentación
+de la prueba. CDP registra los tiempos acumulados durante esas alternancias.
+
+| Medición | Chrome 155 | Edge 155 |
+| --- | ---: | ---: |
+| Intervalo entre fotogramas, mediana | 16,7 ms | 16,7 ms |
+| Intervalo entre fotogramas, p95 | 16,8 ms | 16,8 ms |
+| Intervalo entre fotogramas, máximo | 16,9 ms | 16,8 ms |
+| Layout acumulado, cuatro alternancias | 6,20 ms | 6,07 ms |
+| Recalcular estilos, acumulado | 16,54 ms | 16,67 ms |
+| JavaScript, acumulado | 13,31 ms | 14,85 ms |
+
+Son muestras locales de una ejecución, sin limitación artificial de CPU;
+no garantizan 60 fps en otros equipos ni con cantidades ilimitadas de lotes.
+Se comprobó interpolación con alturas intermedias, altura final cero,
+reapertura completa y clics rápidos. Los reportes guardan los valores sin
+redondear: [Chrome](tests/evidence/order-detail/chrome-report.json) y
+[Edge](tests/evidence/order-detail/msedge-report.json).
+
+La animación de pistas está disponible en Chrome/Edge desde 107 y Safari
+16; Firefox también la implementa. Referencias primarias: [Chrome 107](https://developer.chrome.com/blog/chrome-107-beta),
+[WebKit Safari 16](https://webkit.org/blog/13152/webkit-features-in-safari-16-0/)
+y [MDN grid-template-rows](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/grid-template-rows).
+`inert` está disponible en los navegadores actuales y forma parte de Baseline
+desde abril de 2023 ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/inert)).
+Los paneles usan además `aria-hidden` y visibilidad diferida; al ocultarlos
+se retiran del teclado y del árbol accesible. Sin interpolación de Grid, el
+cambio de altura puede ser inmediato. La media query
+[prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion)
+desactiva las transiciones. Chrome y Edge se probaron; Firefox y Safari se
+revisaron mediante documentación y no se ejecutaron en este entorno Windows.
+
+Reproducción desde `prototipo`, siempre con una base temporal independiente:
+
+    npm run test:detail
+    node scripts/verify-order-detail.mjs msedge
+
+La segunda orden usa la compilación generada por la primera. El script no
+abre ni modifica `data/database.json` y elimina únicamente su directorio temporal.

@@ -2,7 +2,7 @@
 
 Aplicación interactiva en español basada en `Planeacion/requisitos.md`, las 28 tablas de `Planeacion/db.md` y las restricciones R01–R13. Permite recorrer los procesos con datos ficticios y conservar los cambios en este equipo. Los archivos son placeholders y los correos se simulan.
 
-Documentación actualizada el **9 de octubre de 2026**. Los cambios acordados están incorporados en los [requisitos vigentes](../Planeacion/requisitos.md) y en los apartados de esta guía. La [cobertura](COBERTURA.md) los relaciona con las pantallas actuales.
+Documentación actualizada el **14 de octubre de 2026**. Los cambios acordados están incorporados en los [requisitos vigentes](../Planeacion/requisitos.md) y en los apartados de esta guía. La [cobertura](COBERTURA.md) los relaciona con las pantallas actuales.
 
 ## Arranque
 
@@ -43,6 +43,27 @@ Las órdenes de producto se identifican como **OC** y las de materiales y otros 
 
 **Catálogos** organiza sus secciones en tres grupos principales, con el estilo de pestañas de Órdenes: **Productos** (Lista de productos, Categorías, Costos de maquila), **Materiales** (Lista de materiales, Tipos de material, Proveedores de material) y **Productos & materiales** (Materiales por producto, Corrugado por producto). Los botones de las secciones secundarias conservan su estilo actual.
 
+Los formularios que asignan un producto existente permiten escribir su nombre y muestran coincidencias con la lista nativa del navegador (`datalist`). En órdenes solo aparecen productos activos del proveedor de la orden, además del producto histórico que ya tenga ese renglón. Los formularios de relaciones del catálogo y la asignación GS1 consultan los productos disponibles; al asignar un código GS1, debajo del producto se muestra el proveedor asociado en un campo bloqueado.
+
+## Requisito de filtros por columna
+
+Cada tabla de datos indicada aquí debe ofrecer un botón de filtro en las cabeceras de sus columnas de datos. El menú compartido combina ordenamiento, selección de varios valores y condiciones adecuadas al tipo de columna; la búsqueda general se conserva y se combina con los filtros. Las columnas compuestas únicamente por acciones no llevan filtro.
+
+| Pantalla y tabla                             | Columnas con filtro y tipo                                                                                                                                                |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Órdenes de compra → Productos                | Orden/tipo (entero), proveedor (texto), productos (texto), fecha de elaboración (fecha), entrega solicitada (fecha), estado (enumeración) y total (importe).              |
+| Órdenes de compra → Materiales y Otros       | Orden/tipo (entero), proveedor (texto), materiales o conceptos (texto), fecha de elaboración (fecha), entrega solicitada (fecha), estado (enumeración) y total (importe). |
+| Facturas                                     | Número de factura y proveedor (texto), registro (fecha), recepciones (entero) y documentos (únicamente Con documento / Sin documento).                                    |
+| Abastecimiento → Vínculos entre órdenes      | Orden de producto y orden de material (entero), producto/maquilador y material/proveedor (texto), estado del material (enumeración).                                      |
+| Catálogos → Productos → Lista de productos   | Producto, maquilador, categoría, maquila/IVA y código activo (texto); unidades por lote (entero); activo (enumeración Sí/No).                                             |
+| Catálogos → Materiales → Lista de materiales | Código MAIA, material y tipo de material (texto). El código conserva sus ceros iniciales.                                                                                 |
+| Proveedores → Proveedores                    | Nombre completo, nombre resumido y NIT (texto); proveedor de maquila, proveedor de materiales y activo (enumeraciones Sí/No).                                             |
+| Proveedores → Direcciones de proveedor       | Proveedor, nombre de bodega, ciudad, dirección y complemento (texto).                                                                                                     |
+| Proveedores → Contactos de proveedor         | Proveedor, nombre, cargo o área, correo y celular (texto).                                                                                                                |
+| Códigos de barras                            | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). La explicación de los cuatro estados se abre desde el botón **(?)** junto a la búsqueda.   |
+
+La búsqueda y los filtros se pueden limpiar por separado. Al filtrar, se mantienen las cabeceras y controles para ajustar los criterios aunque la tabla no tenga coincidencias.
+
 En **Abastecimiento → Vínculos entre órdenes**, la barra busca por número de OC de producto u OCM de material, con o sin prefijo y espacio, sin distinguir mayúsculas. El prefijo distingue los grupos. Las cinco cabeceras reúnen filtro y ordenamiento: órdenes numéricas, producto/maquilador y material/proveedor como texto, y estado enumerado. Búsqueda y filtros se combinan sobre cada vínculo y se conservan en la URL junto con el ordenamiento. **Limpiar búsqueda** conserva filtros y ordenamiento; **Limpiar filtros** conserva búsqueda y ordenamiento. La tabla mantiene la barra y las cabeceras sin coincidencias, con contador en el pie.
 
 En **Facturas**, la barra busca por número de factura, proveedor y orden, lote o producto asociado, con la normalización de la factura. Se combina con los menús de columna y conserva la consulta en la URL. **Limpiar búsqueda** conserva filtros y ordenamiento; **Limpiar filtros** conserva búsqueda y ordenamiento. Ambos controles siguen disponibles en los estados sin coincidencias.
@@ -69,7 +90,9 @@ Todos los campos de fecha permiten digitar los números y agregan automáticamen
 
 Guardar un renglón de producto nuevo crea conjuntamente su **lote inicial**, con la fecha estimada de batch record tomada de la entrega solicitada de la cabecera y los estados por defecto. El número, la cantidad recibida, la factura, las fechas reales y la ubicación permanecen vacíos. El detalle muestra **Sin número de lote**. Después de autorizar, **Completar lote** modifica ese mismo registro y **Agregar lote** crea uno adicional; cada lote conserva su estimación independiente.
 
-La cabecera de cada renglón se distingue con fondo y acento azul según [MASTER.md](design-system/MASTER.md). El código de barras y el código MAIA usan monospace de 16 px. Bajo el nombre del producto se reúnen **Código de barras | Ref. corrugado | Cantidad de corrugado | Sticker o Cinta**; la referencia procede de la selección guardada en la orden y las cantidades corresponden a su empaque.
+La cabecera de cada renglón usa fondo y ribete según su estado, conforme a [MASTER.md](design-system/MASTER.md): azul en seguimiento, gris verdoso al cerrar y gris rosado al anular. El código de barras y el código MAIA conservan monospace de 16 px. En una OC, el código comparte la cabecera con **Cantidad solicitada | Precio unitario | Recibido en lotes cerrados | Desviación / margen**, con valores de 14 px y peso 600. La franja secundaria muestra **Ref. corrugado | Cantidad de corrugado | Sticker o Cinta**, con valores de 13 px y peso 550; la referencia procede de la selección guardada en la orden.
+
+Cada producto ofrece **Ocultar/Desplegar lotes** y cada material con lote asociado **Ocultar/Desplegar documentos**. Todos abren desplegados. Al ocultar, se conservan la cabecera, datos, resumen de lotes y **Agregar lote**, o el resumen de recepción y **Registrar / editar** en OCM. Los documentos y sus acciones se ocultan juntos. Sin lote de material asociado, el botón de documentos está deshabilitado. El estado es independiente por renglón; el contenido oculto queda fuera del teclado. La transición dura 180 ms y respeta movimiento reducido. [Rendimiento y compatibilidad](RENDIMIENTO.md#despliegue-de-lotes-y-documentos).
 
 El lote muestra **Fecha de recepción**, batch record **Estimado** y **Recibido**, **Fecha de inspección** y **Confirmación** en `dd/mm/aaaa`, con el día de Bogotá y **Sin registrar** para fechas vacías. Usa tabla cuando su contenedor dispone de al menos 720 px y tarjetas por debajo, con 16 px de padding, 16 px entre secciones y tarjetas y 12 px entre columnas. La distribución responde también al ancho restante con navegación fijada. En las tarjetas móviles, las fechas **Estimado** y **Recibido** de batch record aparecen lado a lado; en un contenedor de hasta 260 px conservan la adaptación a una columna. En escritorio los botones de edición y eliminación comparten una columna ajustada a su ancho, con fechas compactas para reducir la altura de las filas.
 
@@ -88,6 +111,8 @@ La autorización es necesaria para modificar lotes o agregar otros. Se puede gua
 Con la orden autorizada, **Eliminar lote** permite borrar cualquier lote con confirmación, incluidos recibidos, facturados, cerrados, anulados y sin número. Las facturas y sus documentos se conservan. Si quedan otros lotes, el producto mantiene su estado; si es el último, el diálogo advierte que el producto quedará anulado. Las cantidades y desviaciones se recalculan desde los lotes restantes.
 
 **Anular producto** pide confirmación y elimina todos sus lotes, conservando el renglón comercial y el abastecimiento. **Reabrir** un producto anulado crea un único lote inicial nuevo con la entrega actual y estados pendientes. Si conserva lotes de una versión anterior, pide confirmación antes de reemplazarlos. Repetir la reapertura no duplica lotes; reabrir un producto cerrado conserva sus lotes. Los productos anulados tienen **Agregar lote** bloqueado. El servicio también rechaza agregarlos hasta reabrir.
+
+**Reabrir** también aparece en materiales y conceptos cerrados o anulados de OCM autorizadas. Reutiliza la operación de cambio de estado y devuelve el renglón a seguimiento, conservando cantidades, fechas, ubicación, factura, lote, documentos y vínculos.
 
 La **entrega solicitada es obligatoria** en las órdenes de producto, material y otros. El formulario muestra el error junto al campo y detiene la revisión si está vacío; el servicio rechaza fechas vacías o inválidas, también al editar.
 
@@ -127,7 +152,9 @@ En una etapa anterior del **7 de octubre de 2026** se reinició el archivo de de
 - `server/integrity.ts`: relaciones y restricciones R01–R13.
 - `server/domain.ts`: operaciones de emisión, autorización, recepción, facturación y correo.
 - `server/store.ts`: cola de operaciones y guardado mediante archivo temporal y reemplazo.
-- `src/column-filter.tsx` y `src/order-table.ts`: menú y operaciones de filtro y ordenamiento compartidos por Órdenes, Facturas y Abastecimiento.
+- `src/column-filter.tsx` y `src/order-table.ts`: menú y operaciones de filtro y ordenamiento compartidos por Órdenes, Facturas, Abastecimiento, Catálogos, Proveedores y Códigos de barras.
+- `src/catalogs.tsx`: columnas filtrables de las listas de productos, materiales, proveedores, direcciones y contactos.
+- `src/flows.tsx`: filtros de columnas y diálogo modal de ayuda de estados para la tabla de códigos de barras.
 - `src/invoice-table.ts`: columnas de factura, proveedor, registro, cantidad de recepciones y presencia del documento propio.
 - `src/supply-table.ts`: vínculos de abastecimiento y columnas de órdenes, producto/maquilador, material/proveedor y estado.
 
@@ -178,13 +205,13 @@ La arquitectura y el stack de producción continúan pendientes. También perman
 
 ## Documentación relacionada
 
-| Documento | Contenido |
-| --- | --- |
-| [Requisitos](../Planeacion/requisitos.md) | Funciones, reglas y alcance acordados. |
-| [Restricciones](../Planeacion/restricciones-fuera-dbml.md) | R01–R13 y reglas de servicio. |
-| [Vocabulario](../CONTEXT.md) | Órdenes, OC/OCM, renglones y recepciones. |
-| [Filtros](../filtros.md) | Definiciones y ejemplos de los 13 filtros personalizados. |
-| [Rendimiento](RENDIMIENTO.md) | Mediciones, costos de consulta y evolución de arquitectura. |
-| [Cobertura](COBERTURA.md) | Correspondencia entre requisitos y pantallas. |
-| [Verificación](VERIFICACION.md) | Resultados, fechas, reportes y capturas. |
-| [Interfaz](design-system/MASTER.md) | Navegación, formularios, filtros y accesibilidad. |
+| Documento                                                  | Contenido                                                   |
+| ---------------------------------------------------------- | ----------------------------------------------------------- |
+| [Requisitos](../Planeacion/requisitos.md)                  | Funciones, reglas y alcance acordados.                      |
+| [Restricciones](../Planeacion/restricciones-fuera-dbml.md) | R01–R13 y reglas de servicio.                               |
+| [Vocabulario](../CONTEXT.md)                               | Órdenes, OC/OCM, renglones y recepciones.                   |
+| [Filtros](../filtros.md)                                   | Definiciones y ejemplos de los 13 filtros personalizados.   |
+| [Rendimiento](RENDIMIENTO.md)                              | Mediciones, costos de consulta y evolución de arquitectura. |
+| [Cobertura](COBERTURA.md)                                  | Correspondencia entre requisitos y pantallas.               |
+| [Verificación](VERIFICACION.md)                            | Resultados, fechas, reportes y capturas.                    |
+| [Interfaz](design-system/MASTER.md)                        | Navegación, formularios, filtros y accesibilidad.           |

@@ -672,6 +672,68 @@ export function Field({
   const className = `field ${error ? "invalid" : ""}`;
   return <div className={className}>{body}</div>;
 }
+export function ProductPicker({
+  products,
+  value,
+  onChange,
+  disabled = false,
+  placeholder = "Buscar producto…",
+  id,
+  name,
+  required,
+  ...inputProps
+}: {
+  products: readonly Row[];
+  value: string;
+  onChange: (id: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+  id?: string;
+  name?: string;
+  required?: boolean;
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  "data-field-path"?: string;
+}) {
+  const [query, setQuery] = useState("");
+  const selected = products.find((product) => product.id === value);
+  const listId = `${useId()}-products`;
+  return (
+    <>
+      <input
+        {...inputProps}
+        id={id}
+        name={name}
+        required={required}
+        type="text"
+        list={listId}
+        autoComplete="off"
+        placeholder={placeholder}
+        value={selected?.nombre_producto ?? query}
+        disabled={disabled}
+        onFocus={(event) => event.currentTarget.select()}
+        onChange={(event) => {
+          const next = event.target.value;
+          setQuery(next);
+          const match = products.find(
+            (product) =>
+              String(product.nombre_producto ?? "").toLocaleLowerCase(
+                "es-CO",
+              ) === next.trim().toLocaleLowerCase("es-CO"),
+          );
+          onChange(match ? String(match.id) : "");
+        }}
+      />
+      <datalist id={listId}>
+        {[...new Set(products.map((product) => product.nombre_producto))].map(
+          (name) => (
+            <option key={name} value={name} />
+          ),
+        )}
+      </datalist>
+    </>
+  );
+}
 export function useErrors(validation?: LiveValidation) {
   const latestValidation = useRef(validation);
   latestValidation.current = validation;

@@ -1,8 +1,8 @@
 # Verificación del prototipo
 
-Última verificación funcional y documentación del **13 de octubre de 2026**, con Node.js 24 y Google Chrome, utilizando Playwright CLI. El recorrido principal utiliza archivos de datos separados del estado de la aplicación; la revisión adicional de errores usa formularios aislados en memoria. La implementación conserva los datos existentes y no reinicia el archivo de demostración.
+Verificación general del **13 de octubre de 2026**, con Node.js 24 y Google Chrome, utilizando Playwright CLI. El recorrido principal utiliza archivos de datos separados del estado de la aplicación; la revisión adicional de errores usa formularios aislados en memoria. La implementación conserva los datos existentes y no reinicia el archivo de demostración.
 
-La [cobertura](COBERTURA.md) relaciona los resultados con los requisitos actuales.
+La [cobertura](COBERTURA.md) relaciona los resultados con los requisitos actuales. La revisión específica de renglones del **14 de octubre de 2026**, descrita al final, añade las pruebas de despliegue, presentación y reapertura OCM.
 
 ## Resultados
 
@@ -253,3 +253,37 @@ Evidencia del 8 de octubre: [live-errors-side-report.json](tests/evidence/live-e
 ## Regreso a la vista de origen
 
 La comprobación consolidada de regreso con Playwright verificó **Volver a órdenes** desde el detalle de productos, materiales y otros, y los botones de regreso de impresión, usando la misma pestaña. Conservó búsqueda, filtro, ordenamiento, vista y desplazamiento vertical; con navegación fijada recuperó también el desplazamiento horizontal de la tabla. El recorrido listado → detalle → impresión → detalle → listado conservó el origen. Los seis recorridos adicionales comprobaron, para cada tipo, el regreso y la excepción de salir a otra vista: al volver a Órdenes por la navegación se abrió la vista por defecto, sin filtros y con scroll en cero. La [prueba automatizada única de esta funcionalidad](tests/order-navigation.test.ts) cubre los tres tipos, la conservación durante impresión y el descarte al volver, salir o reabrir desde otra vista; pasó junto con las doce pruebas de filtros y ordenamiento. La posición se captura al abrir el detalle o pulsar Imprimir y se restaura después de mostrar el origen, sin observación continua del scroll. TypeScript completó la comprobación sin emitir archivos. Estas comprobaciones no modificaron los datos del prototipo ni los conteos del recorrido principal.
+
+## Revisión de renglones del 14 de octubre de 2026
+
+La compilación y **130 pruebas automatizadas** pasaron. Cuatro casos nuevos
+en `tests/order-lifecycle.test.ts` verifican la reapertura de materiales y
+conceptos cerrados o anulados, la persistencia íntegra de recepción, factura,
+lote, documentos y vínculos, la repetición sin duplicados y el rechazo sin
+autorización con estado y archivo intactos. La reapertura reutiliza
+`setLineState`; no se duplicó el servicio de producto.
+
+La prueba específica `tests/order-detail.browser.js` pasó **60 comprobaciones
+en Chrome 155 y 60 en Edge 155**. Comprueba a 375, 799 y 1440 px: intercambio
+de información y tipografía, código de barras conservado, despliegue inicial,
+estado independiente por renglón, resumen y acciones visibles al ocultar,
+altura cero, `inert` y `aria-hidden`, conservación del foco, apertura con Enter,
+ausencia de nuevas solicitudes y desbordamiento, y movimiento reducido.
+También verifica documentos y acciones ocultas de OCM, reapertura desde
+cerrado y anulado conservando datos, fondos y ribetes de los tres estados,
+contraste secundario mínimo 4,5:1 y alternancias rápidas. Las capturas del
+renglón oculto en escritorio y móvil se inspeccionaron visualmente.
+
+El ensayo de **7 renglones y 280 lotes** y sus límites están en
+[RENDIMIENTO.md](RENDIMIENTO.md#despliegue-de-lotes-y-documentos).
+Reportes: [Chrome](tests/evidence/order-detail/chrome-report.json) y
+[Edge](tests/evidence/order-detail/msedge-report.json).
+
+Se intentó también el recorrido general histórico. Su expectativa del orden
+de los destinos del drawer se actualizó al orden actual de la aplicación.
+Después se detuvo en un selector anterior de Producto que intenta usar
+`selectOption` sobre el actual campo de búsqueda con datalist. Ese recorrido
+no se contabiliza como aprobado en esta revisión; los resultados generales
+del 13 de octubre conservan su fecha y alcance. La revisión actual usa bases
+persistidas temporales y una respuesta amplificada solo en el navegador para
+el ensayo de rendimiento, sin modificar el archivo de datos del usuario.

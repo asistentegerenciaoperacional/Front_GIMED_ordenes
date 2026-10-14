@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   Info,
   ChevronRight,
+  CircleHelp,
   FileText,
   SlidersHorizontal,
 } from "lucide-react";
@@ -36,6 +37,7 @@ import {
   shortDate,
   count,
   money,
+  ProductPicker,
 } from "./ui";
 import { CatalogTable } from "./catalogs";
 import { entityValidation } from "./live-validation";
@@ -51,9 +53,14 @@ import {
   columnOptions,
   filterTableRows,
   hasFilter,
+  calendarDay,
   readColumnState,
   sortTableRows,
   tableParams,
+  type Column,
+  type ColumnCell,
+  type ColumnFilter,
+  type ColumnRow,
   type TableState,
 } from "./order-table";
 import {
@@ -600,16 +607,43 @@ export function InvoicesPage({
   );
 }
 
+const barcodeColumns: Column<string>[] = [
+  { key: "codigo", label: "Código", kind: "text" },
+  { key: "producto", label: "Producto", kind: "text" },
+  { key: "estado", label: "Estado GS1 / sistema", kind: "enum" },
+  { key: "creacion", label: "Creación", kind: "date" },
+];
+
+type BarcodeFilterRow = ColumnRow<string> & {
+  barcode: Row;
+  searchText: string;
+};
+
+function barcodeFilterCell(
+  value: string | null,
+  label: string,
+  key = value ?? "__sin_valor__",
+): ColumnCell {
+  return {
+    sortValue: value,
+    values: [{ key, label, value }],
+  };
+}
+
 export function CodesPage() {
   const { db, run, navigate } = useApp();
   const [query, setQuery] = useState(""),
-    [state, setState] = useState(""),
     [creating, setCreating] = useState(false),
     [code, setCode] = useState(""),
     [action, setAction] = useState<Row | null>(null),
     [product, setProduct] = useState(""),
     [busy, setBusy] = useState(false),
     [mail, setMail] = useState(false);
+  const [tableState, setTableState] = useState<TableState<string>>({
+    filters: {},
+  });
+  const [openedColumn, setOpenedColumn] = useState<string | null>(null);
+  const [statusHelpOpen, setStatusHelpOpen] = useState(false);
   const { error, catchError, setError } = useErrors({
     values: { codigo: code, id_producto: product },
     valid: (field) =>
@@ -618,21 +652,86 @@ export function CodesPage() {
         : field === "id_producto" &&
           db.productos.some((row) => row.id === product),
   });
-  const rows = db.codigos_barras
-    .filter(
-      (c) =>
-        (!state || c.estado === state) &&
-        [
-          c.codigo,
-          db.productos.find((p) => p.id === c.id_producto)?.nombre_producto,
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(query.toLowerCase()),
-    )
-    .sort((a, b) =>
-      (b.fecha_creacion ?? "").localeCompare(a.fecha_creacion ?? ""),
+  const allRows = useMemo<BarcodeFilterRow[]>(
+    () =>
+      db.codigos_barras.map((barcode) => {
+        const productName =
+          db.productos.find((row) => row.id === barcode.id_producto)
+            ?.nombre_producto ?? "Sin producto asignado";
+        const day = calendarDay(barcode.fecha_creacion);
+        const status = barcode.estado;
+        return {
+          barcode,
+          searchText: `${barcode.codigo} ${productName}`.toLocaleLowerCase(
+            "es-CO",
+          ),
+          cells: {
+            codigo: barcodeFilterCell(barcode.codigo, barcode.codigo),
+            producto: barcodeFilterCell(
+              productName,
+              productName,
+              barcode.id_producto ?? "sin_producto",
+            ),
+            estado: barcodeFilterCell(status, text(status)),
+            creacion: barcodeFilterCell(
+              day,
+              day ? shortDate(barcode.fecha_creacion) : "Sin fecha",
+            ),
+          },
+        };
+      }),
+    [db],
+  );
+  const searchedRows = useMemo(() => {
+    const normalized = query.toLocaleLowerCase("es-CO");
+    return allRows.filter((row) => row.searchText.includes(normalized));
+  }, [allRows, query]);
+  const rows = useMemo(() => {
+    const filtered = filterTableRows(
+      searchedRows,
+      barcodeColumns,
+      tableState.filters,
     );
+    const sorted = tableState.sort
+      ? sortTableRows(filtered, barcodeColumns, tableState.sort)
+      : [...filtered].sort((a, b) =>
+          (b.barcode.fecha_creacion ?? "").localeCompare(
+            a.barcode.fecha_creacion ?? "",
+          ),
+        );
+    return sorted.map((row) => row.barcode);
+  }, [searchedRows, tableState]);
+  const openedOptions = useMemo(() => {
+    const column = barcodeColumns.find((item) => item.key === openedColumn);
+    if (!column) return [];
+    const options = columnOptions(
+      filterTableRows(
+        searchedRows,
+        barcodeColumns,
+        tableState.filters,
+        column.key,
+      ),
+      column,
+    );
+    const available = new Map(
+      columnOptions(allRows, column).map((option) => [option.key, option]),
+    );
+    for (const key of tableState.filters[column.key]?.selected ?? [])
+      if (!options.some((option) => option.key === key))
+        options.push(
+          available.get(key) ?? {
+            key,
+            label: "Valor no disponible",
+            value: null,
+          },
+        );
+    return options;
+  }, [allRows, searchedRows, openedColumn, tableState]);
+  const filterCount = barcodeColumns.filter((column) =>
+    hasFilter(tableState.filters[column.key]),
+  ).length;
+  const clearFilters = () =>
+    setTableState((current) => ({ filters: {}, sort: current.sort }));
   async function create(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -714,36 +813,61 @@ export function CodesPage() {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <select
-            className="control filter-select"
-            aria-label="Filtrar estado de código"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-          >
-            <option value="">Todos los estados</option>
-            {["creado_gs1", "verificado_sistema", "asignado", "inactivo"].map(
-              (s) => (
-                <option key={s} value={s}>
-                  {text(s)}
-                </option>
-              ),
+          <div className="filter-actions">
+            {query && (
+              <Button variant="link" onClick={() => setQuery("")}>
+                Limpiar búsqueda
+              </Button>
             )}
-          </select>
+            {filterCount > 0 && (
+              <Button variant="link" onClick={clearFilters}>
+                Limpiar filtros ({filterCount})
+              </Button>
+            )}
+            <Button
+              icon={CircleHelp}
+              className="icon-btn"
+              aria-label="Ayuda sobre los estados de códigos de barras"
+              aria-haspopup="dialog"
+              aria-expanded={statusHelpOpen}
+              title="Ayuda sobre los estados"
+              onClick={() => setStatusHelpOpen(true)}
+            />
+          </div>
         </div>
-        {rows.length ? (
-          <div className="table-scroll">
-            <table className="data-table catalog-table">
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Producto</th>
-                  <th>Estado GS1 / sistema</th>
-                  <th>Creación</th>
-                  <th>Historial y acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((c) => (
+        <div className="table-scroll">
+          <table className="data-table catalog-table">
+            <thead>
+              <tr>
+                {barcodeColumns.map((column) => (
+                  <ColumnHeader
+                    key={column.key}
+                    column={column}
+                    options={openedColumn === column.key ? openedOptions : []}
+                    filter={tableState.filters[column.key]}
+                    sort={tableState.sort}
+                    open={openedColumn === column.key}
+                    onOpen={() => setOpenedColumn(column.key)}
+                    onClose={() => setOpenedColumn(null)}
+                    onFilter={(filter?: ColumnFilter) =>
+                      setTableState((current) => {
+                        const filters = { ...current.filters };
+                        if (filter) filters[column.key] = filter;
+                        else delete filters[column.key];
+                        return { ...current, filters };
+                      })
+                    }
+                    onSort={(sort) =>
+                      setTableState((current) => ({ ...current, sort }))
+                    }
+                  />
+                ))}
+                <th scope="col">Historial y acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length ? (
+                rows.map((c) => (
                   <tr key={c.id}>
                     <td className="mono">
                       <strong>{c.codigo}</strong>
@@ -801,13 +925,24 @@ export function CodesPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <Empty />
-        )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5}>
+                    <Empty
+                      title={
+                        allRows.length
+                          ? "Sin códigos coincidentes"
+                          : "Sin códigos registrados"
+                      }
+                      description="Ajusta la búsqueda o los filtros de columna para consultar los códigos disponibles."
+                    />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
         <div className="table-footer">
           <span>{rows.length} códigos</span>
           <span>
@@ -815,6 +950,49 @@ export function CodesPage() {
           </span>
         </div>
       </section>
+      {statusHelpOpen && (
+        <Dialog
+          title="Estados de los códigos de barras"
+          subtitle="Consulta qué significa cada etapa del ciclo del código."
+          onClose={() => setStatusHelpOpen(false)}
+        >
+          <div className="dialog-body custom-filter-help">
+            <dl>
+              <div className="filter-help-entry">
+                <dt>Creado en GS1</dt>
+                <dd>
+                  El código fue registrado en GS1 y está pendiente de confirmar
+                  su disponibilidad en el sistema.
+                </dd>
+              </div>
+              <div className="filter-help-entry">
+                <dt>Verificado en sistema</dt>
+                <dd>
+                  Se confirmó que el código está disponible; queda listo para
+                  asignarlo a un producto.
+                </dd>
+              </div>
+              <div className="filter-help-entry">
+                <dt>Asignado</dt>
+                <dd>
+                  El código está asociado a un producto y puede usarse en nuevas
+                  órdenes como su código activo.
+                </dd>
+              </div>
+              <div className="filter-help-entry">
+                <dt>Inactivo</dt>
+                <dd>
+                  El código fue retirado del uso y no se selecciona para nuevas
+                  órdenes.
+                </dd>
+              </div>
+            </dl>
+          </div>
+          <div className="dialog-footer">
+            <Button onClick={() => setStatusHelpOpen(false)}>Entendido</Button>
+          </div>
+        </Dialog>
+      )}
       {creating && (
         <Dialog
           title="Registrar código GS1"
@@ -866,20 +1044,37 @@ export function CodesPage() {
           <div className="dialog-body">
             <ErrorNotice error={error} />
             {action.next === "asignado" ? (
-              <Field id="field-id_producto" label="Producto" required>
-                <select
-                  id="field-id_producto"
-                  value={product}
-                  onChange={(e) => setProduct(e.target.value)}
-                >
-                  <option value="">Seleccionar…</option>
-                  {db.productos.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.nombre_producto}
-                    </option>
-                  ))}
-                </select>
-              </Field>
+              <>
+                <Field id="field-id_producto" label="Producto" required>
+                  <ProductPicker
+                    id="field-id_producto"
+                    value={product}
+                    products={db.productos}
+                    onChange={setProduct}
+                  />
+                </Field>
+                <Field id="field-proveedor_producto" label="Proveedor" required>
+                  <input
+                    id="field-proveedor_producto"
+                    value={
+                      db.proveedor.find(
+                        (provider) =>
+                          provider.id ===
+                          db.productos.find((p) => p.id === product)
+                            ?.id_maquilador,
+                      )?.nombre_largo ??
+                      db.proveedor.find(
+                        (provider) =>
+                          provider.id ===
+                          db.productos.find((p) => p.id === product)
+                            ?.id_maquilador,
+                      )?.nombre_corto ??
+                      ""
+                    }
+                    readOnly
+                  />
+                </Field>
+              </>
             ) : (
               <p>
                 {action.next === "inactivo"

@@ -10,6 +10,7 @@
     "test": "tsx --test tests/*.test.ts",
     "test:browser": "npm run build && node scripts/qa-session.mjs --check && node scripts/verify-persistence.mjs",
     "test:filters": "npm run build && tsx scripts/verify-order-filters.ts",
+    "test:detail": "npm run build && node scripts/verify-order-detail.mjs",
     "benchmark:filters": "tsx scripts/benchmark-order-filters.ts",
     "qa": "node scripts/qa-session.mjs",
     "models": "node scripts/model-from-dbml.mjs",

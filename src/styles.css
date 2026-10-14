@@ -1511,6 +1511,14 @@ textarea.control {
   background: #f6f8fc;
   border-left: 3px solid var(--primary);
 }
+.line-card[data-state="cerrada"] .line-card-head {
+  background: #f1f5f3;
+  border-left-color: #749486;
+}
+.line-card[data-state="anulada"] .line-card-head {
+  background: #f7f2f2;
+  border-left-color: #ad8585;
+}
 .line-card-head h3 {
   margin: 6px 0;
 }
@@ -1533,6 +1541,9 @@ textarea.control {
 }
 .line-metadata.single {
   grid-template-columns: minmax(0, 1fr);
+}
+.line-metadata.product {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 .line-metadata > div {
   min-width: 0;
@@ -1573,16 +1584,53 @@ textarea.control {
   padding: 15px 18px;
   border-top: 1px solid var(--border);
   background: #fff;
+  margin: 0;
 }
-.line-metrics small {
+.line-packaging {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.line-metrics dt {
   display: block;
   font-size: 10px;
+  color: var(--muted);
 }
-.line-metrics strong {
+.line-metrics dd {
   font-size: 13px;
   display: block;
-  margin-top: 4px;
+  margin: 4px 0 0;
   font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.line-disclosure-toggle svg {
+  transition: transform 180ms ease-out;
+}
+.line-disclosure-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.line-disclosure {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 180ms ease-out, opacity 140ms ease-out;
+}
+.line-disclosure[data-expanded="false"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.line-disclosure-inner {
+  min-height: 0;
+  overflow: hidden;
+  visibility: visible;
+  transition: visibility 0s;
+}
+.line-disclosure[data-expanded="false"] > .line-disclosure-inner {
+  visibility: hidden;
+  transition-delay: 180ms;
+}
+.line-document-content {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
 }
 .mini-label {
   font-size: 10px;
@@ -1657,10 +1705,21 @@ textarea.control {
   .line-card-actions {
     justify-content: flex-start;
   }
-  .line-metadata {
+  .line-metadata,
+  .line-metadata.product {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .line-metadata > div:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+@container order-line (max-width: 300px) {
+  .line-metadata,
+  .line-metadata.product {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .line-metadata > div + div {
     padding-left: 0;
     border-left: 0;
   }

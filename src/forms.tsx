@@ -66,6 +66,7 @@ import {
   count,
   Badge,
   Empty,
+  ProductPicker,
 } from "./ui";
 
 export function CatalogForm({
@@ -183,7 +184,15 @@ export function CatalogForm({
                   ),
                   value = values[field];
                 let control;
-                if (ref)
+                if (ref && ref.target === "productos")
+                  control = (
+                    <ProductPicker
+                      products={db.productos}
+                      value={String(value ?? "")}
+                      onChange={(id) => update(field, id || null)}
+                    />
+                  );
+                else if (ref)
                   control = (
                     <select
                       id={id}
@@ -1887,39 +1896,30 @@ export function OrderForm({
                           }
                         >
                           {type === "producto" ? (
-                            <select
+                            <ProductPicker
                               id={key("id_producto")}
-                              value={l.id_producto}
+                              products={[
+                                ...(selectedProduct &&
+                                selectedProduct.activo !== true &&
+                                original?.id_producto === selectedProduct.id
+                                  ? [selectedProduct]
+                                  : []),
+                                ...db.productos.filter(
+                                  (p) =>
+                                    p.activo === true &&
+                                    (p.id_maquilador === supplier ||
+                                      p.id === original?.id_producto),
+                                ),
+                              ]}
+                              value={String(l.id_producto ?? "")}
                               disabled={productsLocked}
                               aria-describedby={
                                 productsLocked
                                   ? "order-products-locked"
                                   : undefined
                               }
-                              onChange={(e) => changeProduct(i, e.target.value)}
-                            >
-                              <option value="">Seleccionar…</option>
-                              {selectedProduct &&
-                                selectedProduct.activo !== true &&
-                                original?.id_producto ===
-                                  selectedProduct.id && (
-                                  <option value={selectedProduct.id} disabled>
-                                    {selectedProduct.nombre_producto} · Inactivo
-                                  </option>
-                                )}
-                              {db.productos
-                                .filter(
-                                  (p) =>
-                                    p.activo === true &&
-                                    (p.id_maquilador === supplier ||
-                                      p.id === original?.id_producto),
-                                )
-                                .map((p) => (
-                                  <option key={p.id} value={p.id}>
-                                    {p.nombre_producto}
-                                  </option>
-                                ))}
-                            </select>
+                              onChange={(id) => changeProduct(i, id)}
+                            />
                           ) : type === "material" ? (
                             <select
                               id={key("id_material")}

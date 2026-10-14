@@ -69,6 +69,17 @@ const materialFilterColumns: Column<string>[] = [
   { key: "id_tipo_material", label: "Tipo de material", kind: "text" },
 ];
 
+const providerEntities: Entity[] = [
+  "proveedor",
+  "direccion_proveedor",
+  "contacto",
+];
+const providerBooleanFields = new Set([
+  "Es_maquila",
+  "Es_materiales",
+  "activo",
+]);
+
 const catalogCell = (
   value: string | number | boolean | null | undefined,
   label: string,
@@ -215,7 +226,15 @@ export function CatalogTable({ entity }: { entity: Entity }) {
       ? productFilterColumns
       : entity === "materiales"
         ? materialFilterColumns
-        : null;
+        : providerEntities.includes(entity)
+          ? fields.map(
+              (field): Column<string> => ({
+                key: field,
+                label: labels[field] ?? text(field),
+                kind: providerBooleanFields.has(field) ? "enum" : "text",
+              }),
+            )
+          : null;
   const catalogRows = useMemo(
     () => buildCatalogFilterRows(db, entity, fields),
     [db, entity, fields],

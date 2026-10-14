@@ -13,6 +13,7 @@ import {
   Send,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   CircleHelp,
   Package,
   FileCheck2,
@@ -73,6 +74,7 @@ import {
 } from "./order-filters";
 import { buildOrderReadModel, filterCustomOrders } from "./order-read-model";
 import { useBogotaDay } from "./use-bogota-day";
+import { OrderLineCard, LineDisclosure } from "./order-line-card";
 
 function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
   const { db } = useApp();
@@ -1047,459 +1049,528 @@ export function OrderDetail({
                 );
                 const delta =
                   o.tipo_orden === "producto" ? deviation(db, l) : null;
-                return (
-                  <article className="line-card" key={l.id}>
-                    <div className="line-card-head">
-                      <div>
-                        <span className="mini-label">
-                          {text(orderItemLabel(o.tipo_orden))} {l.posicion}
-                        </span>
-                        <h3>{name}</h3>
-                      </div>
-                      <div className="inline line-card-actions">
-                        <Badge value={l.estado} />
-                        {l.estado === "en_seguimiento" && (
-                          <>
-                            <Button
-                              className="small"
-                              disabled={!authorized}
-                              onClick={() => void changeState(l, "cerrada")}
-                            >
-                              Cerrar
-                            </Button>
-                            <Button
-                              className="small"
-                              variant="ghost"
-                              disabled={!authorized}
-                              onClick={() => void changeState(l, "anulada")}
-                            >
-                              Anular
-                            </Button>
-                          </>
-                        )}
-                        {(l.estado === "cerrada" ||
-                          (o.tipo_orden === "producto" &&
-                            l.estado === "anulada")) && (
-                          <Button
-                            className="small"
-                            disabled={!authorized}
-                            onClick={() =>
-                              void changeState(l, "en_seguimiento")
-                            }
-                          >
-                            Reabrir
-                          </Button>
-                        )}
-                      </div>
-                      {o.tipo_orden === "producto" ? (
-                        <dl className="line-metadata">
-                          <div>
-                            <dt>Código de barras</dt>
-                            <dd className="line-code">
-                              {db.codigos_barras.find(
-                                (code) => code.id === l.id_codigo_barras,
-                              )?.codigo ?? "Sin informar"}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Ref. corrugado</dt>
-                            <dd>
-                              {db.materiales.find(
-                                (material) => material.id === l.ref_corrugado,
-                              )?.nombre_material ??
-                                db.materiales
-                                  .find(
-                                    (material) =>
-                                      material.id === l.ref_corrugado,
-                                  )
-                                  ?.codigo_material?.toString()
-                                  .padStart(3, "0") ??
-                                "Sin informar"}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>Cantidad de corrugado</dt>
-                            <dd className="num">
-                              {count(l.cantidad_corrugado)}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt>
-                              {l.cantidad_cinta !== null
-                                ? "Cinta"
-                                : l.cantidad_sticker !== null
-                                  ? "Sticker"
-                                  : "Sticker / cinta"}
-                            </dt>
-                            <dd className="num">
-                              {l.cantidad_cinta !== null
-                                ? count(l.cantidad_cinta)
-                                : l.cantidad_sticker !== null
-                                  ? count(l.cantidad_sticker)
-                                  : "Sin registrar"}
-                            </dd>
-                          </div>
-                        </dl>
-                      ) : o.tipo_orden === "material" ? (
-                        <dl className="line-metadata single">
-                          <div>
-                            <dt>Código MAIA</dt>
-                            <dd className="line-code">
-                              {db.materiales
-                                .find(
-                                  (material) => material.id === l.id_material,
+                const summaryMetrics = (
+                  <>
+                    <div>
+                      <dt>Cantidad solicitada</dt>
+                      <dd className="num">{count(l.cantidad_solicitada)}</dd>
+                    </div>
+                    <div>
+                      <dt>Precio unitario</dt>
+                      <dd className="num">{money(l.precio_unitario)}</dd>
+                    </div>
+                    <div>
+                      <dt>
+                        {o.tipo_orden === "producto"
+                          ? "Recibido en lotes cerrados"
+                          : "Cantidad recibida"}
+                      </dt>
+                      <dd className="num">
+                        {count(
+                          o.tipo_orden === "producto"
+                            ? lots
+                                .filter((b) => b.estado === "cerrado")
+                                .reduce(
+                                  (n, b) => n + (b.cantidad_recibida ?? 0),
+                                  0,
                                 )
-                                ?.codigo_material?.toString()
-                                .padStart(3, "0") ?? "Sin informar"}
-                            </dd>
-                          </div>
-                        </dl>
-                      ) : (
-                        <p className="compact-note">Concepto sin catálogo</p>
-                      )}
+                            : (l.cantidad_recibida ?? 0),
+                        )}
+                      </dd>
                     </div>
-                    <div className="line-metrics">
-                      <div>
-                        <small>Cantidad solicitada</small>
-                        <strong className="num">
-                          {count(l.cantidad_solicitada)}
-                        </strong>
-                      </div>
-                      <div>
-                        <small>Precio unitario</small>
-                        <strong className="num">
-                          {money(l.precio_unitario)}
-                        </strong>
-                      </div>
-                      <div>
-                        <small>
-                          {o.tipo_orden === "producto"
-                            ? "Recibido en lotes cerrados"
-                            : "Cantidad recibida"}
-                        </small>
-                        <strong className="num">
-                          {count(
-                            o.tipo_orden === "producto"
-                              ? lots
-                                  .filter((b) => b.estado === "cerrado")
-                                  .reduce(
-                                    (n, b) => n + (b.cantidad_recibida ?? 0),
-                                    0,
-                                  )
-                              : (l.cantidad_recibida ?? 0),
-                          )}
-                        </strong>
-                      </div>
-                      <div>
-                        <small>
-                          {o.tipo_orden === "producto"
-                            ? "Desviación / margen"
-                            : "Entrega recibida"}
-                        </small>
-                        <strong>
-                          {o.tipo_orden === "producto"
-                            ? `${delta === null ? "No calculable" : delta.toFixed(1) + " %"} / ±${tolerance(db)} %`
-                            : shortDate(l.fecha_entrega)}
-                        </strong>
-                      </div>
+                    <div>
+                      <dt>
+                        {o.tipo_orden === "producto"
+                          ? "Desviación / margen"
+                          : "Entrega recibida"}
+                      </dt>
+                      <dd>
+                        {o.tipo_orden === "producto"
+                          ? `${delta === null ? "No calculable" : delta.toFixed(1) + " %"} / ±${tolerance(db)} %`
+                          : shortDate(l.fecha_entrega)}
+                      </dd>
                     </div>
-                    <div className="line-content">
-                      {o.tipo_orden === "producto" ? (
-                        <>
-                          <div className="spread">
-                            <h3>Lotes de producto ({lots.length})</h3>
-                            <Button
-                              icon={Plus}
-                              className="small"
-                              disabled={!authorized || l.estado === "anulada"}
-                              onClick={() => setLot({ line: l })}
-                            >
-                              Agregar lote
-                            </Button>
+                  </>
+                );
+                return (
+                  <OrderLineCard state={l.estado} key={l.id}>
+                    {({ expanded, contentId, toggle }) => (
+                      <>
+                        <div className="line-card-head">
+                          <div>
+                            <span className="mini-label">
+                              {text(orderItemLabel(o.tipo_orden))} {l.posicion}
+                            </span>
+                            <h3>{name}</h3>
                           </div>
-                          {lots.length ? (
-                            <div className="lot-list table-scroll">
-                              <table
-                                className="data-table product-lots-table"
-                                role="table"
-                                aria-label={"Lotes del producto " + l.posicion}
+                          <div className="inline line-card-actions">
+                            <Badge value={l.estado} />
+                            {l.estado === "en_seguimiento" && (
+                              <>
+                                <Button
+                                  className="small"
+                                  disabled={!authorized}
+                                  onClick={() => void changeState(l, "cerrada")}
+                                >
+                                  Cerrar
+                                </Button>
+                                <Button
+                                  className="small"
+                                  variant="ghost"
+                                  disabled={!authorized}
+                                  onClick={() => void changeState(l, "anulada")}
+                                >
+                                  Anular
+                                </Button>
+                              </>
+                            )}
+                            {(l.estado === "cerrada" ||
+                              l.estado === "anulada") && (
+                              <Button
+                                className="small"
+                                disabled={!authorized}
+                                onClick={() =>
+                                  void changeState(l, "en_seguimiento")
+                                }
                               >
-                                <thead role="rowgroup">
-                                  <tr role="row">
-                                    <th scope="col" role="columnheader">
-                                      Lote / factura
-                                    </th>
-                                    <th scope="col" role="columnheader">
-                                      Recibido
-                                    </th>
-                                    <th scope="col" role="columnheader">
-                                      Batch record
-                                    </th>
-                                    <th scope="col" role="columnheader">
-                                      Inspección
-                                    </th>
-                                    <th scope="col" role="columnheader">
-                                      Estado
-                                    </th>
-                                    <th scope="col" role="columnheader">
-                                      <span className="visually-hidden">
-                                        Acciones del lote
-                                      </span>
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody role="rowgroup">
-                                  {lots.map((b, lotIndex) => (
-                                    <tr key={b.id} role="row">
-                                      <td className="lot-identity" role="cell">
-                                        <strong>
-                                          {b.numero_lote ??
-                                            "Sin número de lote"}
-                                        </strong>
-                                        <small>
-                                          <InvoiceDocumentLink
-                                            invoiceId={b.id_factura}
-                                          />
-                                        </small>
-                                        <small>
-                                          {b.ubicacion ?? "Sin ubicación"}
-                                        </small>
-                                      </td>
-                                      <td
-                                        className="lot-section lot-section-received"
-                                        role="cell"
-                                      >
-                                        <span
-                                          className="lot-section-title"
-                                          aria-hidden="true"
-                                        >
-                                          Recibido
-                                        </span>
-                                        <strong className="num">
-                                          {b.cantidad_recibida === null
-                                            ? "Sin recepción"
-                                            : count(b.cantidad_recibida)}
-                                        </strong>
-                                        <LotDate
-                                          label="Fecha de recepción"
-                                          value={b.fecha_recepcion}
-                                        />
-                                      </td>
-                                      <td
-                                        className="lot-section lot-section-batch"
-                                        role="cell"
-                                      >
-                                        <span
-                                          className="lot-section-title"
-                                          aria-hidden="true"
-                                        >
-                                          Batch record
-                                        </span>
-                                        <Badge value={b.estado_batch_record} />
-                                        <div className="lot-batch-dates">
-                                          <LotDate
-                                            label="Estimado"
-                                            value={
-                                              b.fecha_estimada_batch_record
-                                            }
-                                          />
-                                          <LotDate
-                                            label="Recibido"
-                                            value={b.fecha_entrega_batch_record}
-                                          />
-                                        </div>
-                                      </td>
-                                      <td className="lot-section" role="cell">
-                                        <span
-                                          className="lot-section-title"
-                                          aria-hidden="true"
-                                        >
-                                          Inspección
-                                        </span>
-                                        <Badge value={b.estado_inspeccion} />
-                                        <LotDate
-                                          label="Fecha de inspección"
-                                          value={b.fecha_inspeccion}
-                                        />
-                                      </td>
-                                      <td className="lot-section" role="cell">
-                                        <span
-                                          className="lot-section-title"
-                                          aria-hidden="true"
-                                        >
-                                          Estado
-                                        </span>
-                                        <Badge value={b.estado} />
-                                        <LotDate
-                                          label="Confirmación"
-                                          value={b.fecha_confirmacion}
-                                        />
-                                      </td>
-                                      <td className="lot-actions" role="cell">
-                                        <div className="inline">
-                                          <Button
-                                            className="icon-btn"
-                                            icon={Pencil}
-                                            disabled={!authorized}
-                                            aria-label={
-                                              isInitialProductLot(b)
-                                                ? `Completar lote del producto ${l.posicion}`
-                                                : `Editar lote ${b.numero_lote ?? `sin número ${lotIndex + 1} del producto ${l.posicion}`}`
-                                            }
-                                            onClick={() =>
-                                              setLot({ line: l, record: b })
-                                            }
-                                          />
-                                          <Button
-                                            className="icon-btn"
-                                            icon={Trash2}
-                                            disabled={!authorized}
-                                            aria-label={`Eliminar lote ${b.numero_lote ?? `sin número ${lotIndex + 1}`} del producto ${l.posicion}`}
-                                            onClick={() => {
-                                              setActionError(undefined);
-                                              setPendingAction({
-                                                kind: "delete",
-                                                line: l,
-                                                record: b,
-                                              });
-                                            }}
-                                          />
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
+                                Reabrir
+                              </Button>
+                            )}
+                            {o.tipo_orden !== "otro" && (
+                              <Button
+                                className="small line-disclosure-toggle"
+                                icon={ChevronDown}
+                                aria-expanded={expanded}
+                                aria-controls={contentId}
+                                aria-label={`${expanded ? "Ocultar" : "Desplegar"} ${o.tipo_orden === "producto" ? "lotes" : "documentos"} del ${orderItemLabel(o.tipo_orden)} ${l.posicion}`}
+                                disabled={
+                                  o.tipo_orden === "material" &&
+                                  !l.id_lote_material
+                                }
+                                title={
+                                  o.tipo_orden === "material" &&
+                                  !l.id_lote_material
+                                    ? "Registra un lote de material para gestionar sus documentos"
+                                    : undefined
+                                }
+                                onClick={toggle}
+                              ></Button>
+                            )}
+                          </div>
+                          {o.tipo_orden === "producto" ? (
+                            <dl className="line-metadata product">
+                              <div>
+                                <dt>Código de barras</dt>
+                                <dd className="line-code">
+                                  {db.codigos_barras.find(
+                                    (code) => code.id === l.id_codigo_barras,
+                                  )?.codigo ?? "Sin informar"}
+                                </dd>
+                              </div>
+                              {summaryMetrics}
+                            </dl>
+                          ) : o.tipo_orden === "material" ? (
+                            <dl className="line-metadata single">
+                              <div>
+                                <dt>Código MAIA</dt>
+                                <dd className="line-code">
+                                  {db.materiales
+                                    .find(
+                                      (material) =>
+                                        material.id === l.id_material,
+                                    )
+                                    ?.codigo_material?.toString()
+                                    .padStart(3, "0") ?? "Sin informar"}
+                                </dd>
+                              </div>
+                            </dl>
                           ) : (
-                            <p
-                              className="compact-note"
-                              style={{ marginTop: 14 }}
-                            >
-                              {l.estado === "anulada"
-                                ? "Producto anulado. Reábrelo para registrar un lote."
-                                : "No se encontraron lotes para este producto."}
+                            <p className="compact-note">
+                              Concepto sin catálogo
                             </p>
                           )}
-                          {db.abastecimiento_material.some(
-                            (a) => a.id_orden_producto === l.id,
-                          ) && (
-                            <div style={{ marginTop: 16 }}>
-                              <small>Materiales vinculados</small>
-                              <div className="inline" style={{ marginTop: 7 }}>
-                                {db.abastecimiento_material
-                                  .filter((a) => a.id_orden_producto === l.id)
-                                  .map((a) => {
-                                    const m = db.orden_material.find(
-                                      (m) => m.id === a.id_orden_material,
-                                    )!;
-                                    const mo = db.orden_compra.find(
-                                      (o) => o.id === m.id_orden_compra,
-                                    )!;
-                                    return (
-                                      <LinkButton
-                                        key={m.id}
-                                        className="small"
-                                        href={`/ordenes/${mo.id}`}
-                                      >
-                                        {orderReference(
-                                          mo.tipo_orden,
-                                          mo.no_orden,
-                                        )}{" "}
-                                        ·{" "}
-                                        {
-                                          db.materiales.find(
-                                            (x) => x.id === m.id_material,
-                                          )?.nombre_material
-                                        }
-                                        {m.estado === "anulada"
-                                          ? " · Anulada"
-                                          : ""}
-                                      </LinkButton>
-                                    );
-                                  })}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <>
-                          <div className="spread">
+                        </div>
+                        {o.tipo_orden === "producto" ? (
+                          <dl className="line-metrics line-packaging">
                             <div>
-                              <h3>
-                                Recepción del {orderItemLabel(o.tipo_orden)}
-                              </h3>
-                              <p className="compact-note">
-                                {l.id_factura && "Factura "}
-                                <InvoiceDocumentLink
-                                  invoiceId={l.id_factura}
-                                />{" "}
-                                · {l.ubicacion ?? "Sin ubicación"}
-                                {l.id_lote_material
-                                  ? ` · Lote ${db.lote_material.find((b) => b.id === l.id_lote_material)?.numero_lote}`
-                                  : ""}
-                              </p>
+                              <dt>Ref. corrugado</dt>
+                              <dd>
+                                {db.materiales.find(
+                                  (material) => material.id === l.ref_corrugado,
+                                )?.nombre_material ??
+                                  db.materiales
+                                    .find(
+                                      (material) =>
+                                        material.id === l.ref_corrugado,
+                                    )
+                                    ?.codigo_material?.toString()
+                                    .padStart(3, "0") ??
+                                  "Sin informar"}
+                              </dd>
                             </div>
-                            <Button
-                              icon={Pencil}
-                              className="small"
-                              disabled={!authorized}
-                              onClick={() => setReceipt(l)}
-                            >
-                              Registrar / editar
-                            </Button>
-                          </div>
-                          {o.tipo_orden === "material" &&
-                            l.id_lote_material && (
-                              <div
-                                style={{
-                                  marginTop: 18,
-                                  borderTop: "1px solid var(--border)",
-                                  paddingTop: 16,
-                                }}
-                              >
-                                <Documents
-                                  owner="lote_material"
-                                  ownerId={l.id_lote_material}
-                                  compact
-                                />
-                                <div
-                                  className="inline"
-                                  style={{ marginTop: 12 }}
+                            <div>
+                              <dt>Cantidad de corrugado</dt>
+                              <dd className="num">
+                                {count(l.cantidad_corrugado)}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>
+                                {l.cantidad_cinta !== null
+                                  ? "Cinta"
+                                  : l.cantidad_sticker !== null
+                                    ? "Sticker"
+                                    : "Sticker / cinta"}
+                              </dt>
+                              <dd className="num">
+                                {l.cantidad_cinta !== null
+                                  ? count(l.cantidad_cinta)
+                                  : l.cantidad_sticker !== null
+                                    ? count(l.cantidad_sticker)
+                                    : "Sin registrar"}
+                              </dd>
+                            </div>
+                          </dl>
+                        ) : (
+                          <dl className="line-metrics">{summaryMetrics}</dl>
+                        )}
+                        <div className="line-content">
+                          {o.tipo_orden === "producto" ? (
+                            <>
+                              <div className="spread">
+                                <h3>Lotes de producto ({lots.length})</h3>
+                                <Button
+                                  icon={Plus}
+                                  className="small"
+                                  disabled={
+                                    !authorized || l.estado === "anulada"
+                                  }
+                                  onClick={() => setLot({ line: l })}
                                 >
-                                  <Button
-                                    className="small"
-                                    icon={Send}
-                                    onClick={() =>
-                                      setMail({
-                                        event: "envio_certificado_calidad",
-                                        orderId: id,
-                                        loteMaterialId: l.id_lote_material,
-                                      })
-                                    }
-                                  >
-                                    Enviar calidad
-                                  </Button>
-                                  <Button
-                                    className="small"
-                                    icon={Send}
-                                    onClick={() =>
-                                      setMail({
-                                        event: "envio_certificado_liberacion",
-                                        orderId: id,
-                                        loteMaterialId: l.id_lote_material,
-                                      })
-                                    }
-                                  >
-                                    Enviar liberación
-                                  </Button>
-                                </div>
+                                  Agregar lote
+                                </Button>
                               </div>
-                            )}
-                        </>
-                      )}
-                    </div>
-                  </article>
+                              <LineDisclosure
+                                expanded={expanded}
+                                contentId={contentId}
+                              >
+                                {lots.length ? (
+                                  <div className="lot-list table-scroll">
+                                    <table
+                                      className="data-table product-lots-table"
+                                      role="table"
+                                      aria-label={
+                                        "Lotes del producto " + l.posicion
+                                      }
+                                    >
+                                      <thead role="rowgroup">
+                                        <tr role="row">
+                                          <th scope="col" role="columnheader">
+                                            Lote / factura
+                                          </th>
+                                          <th scope="col" role="columnheader">
+                                            Recibido
+                                          </th>
+                                          <th scope="col" role="columnheader">
+                                            Batch record
+                                          </th>
+                                          <th scope="col" role="columnheader">
+                                            Inspección
+                                          </th>
+                                          <th scope="col" role="columnheader">
+                                            Estado
+                                          </th>
+                                          <th scope="col" role="columnheader">
+                                            <span className="visually-hidden">
+                                              Acciones del lote
+                                            </span>
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody role="rowgroup">
+                                        {lots.map((b, lotIndex) => (
+                                          <tr key={b.id} role="row">
+                                            <td
+                                              className="lot-identity"
+                                              role="cell"
+                                            >
+                                              <strong>
+                                                {b.numero_lote ??
+                                                  "Sin número de lote"}
+                                              </strong>
+                                              <small>
+                                                <InvoiceDocumentLink
+                                                  invoiceId={b.id_factura}
+                                                />
+                                              </small>
+                                              <small>
+                                                {b.ubicacion ?? "Sin ubicación"}
+                                              </small>
+                                            </td>
+                                            <td
+                                              className="lot-section lot-section-received"
+                                              role="cell"
+                                            >
+                                              <span
+                                                className="lot-section-title"
+                                                aria-hidden="true"
+                                              >
+                                                Recibido
+                                              </span>
+                                              <strong className="num">
+                                                {b.cantidad_recibida === null
+                                                  ? "Sin recepción"
+                                                  : count(b.cantidad_recibida)}
+                                              </strong>
+                                              <LotDate
+                                                label="Fecha de recepción"
+                                                value={b.fecha_recepcion}
+                                              />
+                                            </td>
+                                            <td
+                                              className="lot-section lot-section-batch"
+                                              role="cell"
+                                            >
+                                              <span
+                                                className="lot-section-title"
+                                                aria-hidden="true"
+                                              >
+                                                Batch record
+                                              </span>
+                                              <Badge
+                                                value={b.estado_batch_record}
+                                              />
+                                              <div className="lot-batch-dates">
+                                                <LotDate
+                                                  label="Estimado"
+                                                  value={
+                                                    b.fecha_estimada_batch_record
+                                                  }
+                                                />
+                                                <LotDate
+                                                  label="Recibido"
+                                                  value={
+                                                    b.fecha_entrega_batch_record
+                                                  }
+                                                />
+                                              </div>
+                                            </td>
+                                            <td
+                                              className="lot-section"
+                                              role="cell"
+                                            >
+                                              <span
+                                                className="lot-section-title"
+                                                aria-hidden="true"
+                                              >
+                                                Inspección
+                                              </span>
+                                              <Badge
+                                                value={b.estado_inspeccion}
+                                              />
+                                              <LotDate
+                                                label="Fecha de inspección"
+                                                value={b.fecha_inspeccion}
+                                              />
+                                            </td>
+                                            <td
+                                              className="lot-section"
+                                              role="cell"
+                                            >
+                                              <span
+                                                className="lot-section-title"
+                                                aria-hidden="true"
+                                              >
+                                                Estado
+                                              </span>
+                                              <Badge value={b.estado} />
+                                              <LotDate
+                                                label="Confirmación"
+                                                value={b.fecha_confirmacion}
+                                              />
+                                            </td>
+                                            <td
+                                              className="lot-actions"
+                                              role="cell"
+                                            >
+                                              <div className="inline">
+                                                <Button
+                                                  className="icon-btn"
+                                                  icon={Pencil}
+                                                  disabled={!authorized}
+                                                  aria-label={
+                                                    isInitialProductLot(b)
+                                                      ? `Completar lote del producto ${l.posicion}`
+                                                      : `Editar lote ${b.numero_lote ?? `sin número ${lotIndex + 1} del producto ${l.posicion}`}`
+                                                  }
+                                                  onClick={() =>
+                                                    setLot({
+                                                      line: l,
+                                                      record: b,
+                                                    })
+                                                  }
+                                                />
+                                                <Button
+                                                  className="icon-btn"
+                                                  icon={Trash2}
+                                                  disabled={!authorized}
+                                                  aria-label={`Eliminar lote ${b.numero_lote ?? `sin número ${lotIndex + 1}`} del producto ${l.posicion}`}
+                                                  onClick={() => {
+                                                    setActionError(undefined);
+                                                    setPendingAction({
+                                                      kind: "delete",
+                                                      line: l,
+                                                      record: b,
+                                                    });
+                                                  }}
+                                                />
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                ) : (
+                                  <p
+                                    className="compact-note"
+                                    style={{ marginTop: 14 }}
+                                  >
+                                    {l.estado === "anulada"
+                                      ? "Producto anulado. Reábrelo para registrar un lote."
+                                      : "No se encontraron lotes para este producto."}
+                                  </p>
+                                )}
+                                {db.abastecimiento_material.some(
+                                  (a) => a.id_orden_producto === l.id,
+                                ) && (
+                                  <div style={{ marginTop: 16 }}>
+                                    <small>Materiales vinculados</small>
+                                    <div
+                                      className="inline"
+                                      style={{ marginTop: 7 }}
+                                    >
+                                      {db.abastecimiento_material
+                                        .filter(
+                                          (a) => a.id_orden_producto === l.id,
+                                        )
+                                        .map((a) => {
+                                          const m = db.orden_material.find(
+                                            (m) => m.id === a.id_orden_material,
+                                          )!;
+                                          const mo = db.orden_compra.find(
+                                            (o) => o.id === m.id_orden_compra,
+                                          )!;
+                                          return (
+                                            <LinkButton
+                                              key={m.id}
+                                              className="small"
+                                              href={`/ordenes/${mo.id}`}
+                                            >
+                                              {orderReference(
+                                                mo.tipo_orden,
+                                                mo.no_orden,
+                                              )}{" "}
+                                              ·{" "}
+                                              {
+                                                db.materiales.find(
+                                                  (x) => x.id === m.id_material,
+                                                )?.nombre_material
+                                              }
+                                              {m.estado === "anulada"
+                                                ? " · Anulada"
+                                                : ""}
+                                            </LinkButton>
+                                          );
+                                        })}
+                                    </div>
+                                  </div>
+                                )}
+                              </LineDisclosure>
+                            </>
+                          ) : (
+                            <>
+                              <div className="spread">
+                                <div>
+                                  <h3>
+                                    Recepción del {orderItemLabel(o.tipo_orden)}
+                                  </h3>
+                                  <p className="compact-note">
+                                    {l.id_factura && "Factura "}
+                                    <InvoiceDocumentLink
+                                      invoiceId={l.id_factura}
+                                    />{" "}
+                                    · {l.ubicacion ?? "Sin ubicación"}
+                                    {l.id_lote_material
+                                      ? ` · Lote ${db.lote_material.find((b) => b.id === l.id_lote_material)?.numero_lote}`
+                                      : ""}
+                                  </p>
+                                </div>
+                                <Button
+                                  icon={Pencil}
+                                  className="small"
+                                  disabled={!authorized}
+                                  onClick={() => setReceipt(l)}
+                                >
+                                  Registrar / editar
+                                </Button>
+                              </div>
+                              {o.tipo_orden === "material" &&
+                                l.id_lote_material && (
+                                  <LineDisclosure
+                                    expanded={expanded}
+                                    contentId={contentId}
+                                  >
+                                    <div className="line-document-content">
+                                      <Documents
+                                        owner="lote_material"
+                                        ownerId={l.id_lote_material}
+                                        compact
+                                      />
+                                      <div
+                                        className="inline"
+                                        style={{ marginTop: 12 }}
+                                      >
+                                        <Button
+                                          className="small"
+                                          icon={Send}
+                                          onClick={() =>
+                                            setMail({
+                                              event:
+                                                "envio_certificado_calidad",
+                                              orderId: id,
+                                              loteMaterialId:
+                                                l.id_lote_material,
+                                            })
+                                          }
+                                        >
+                                          Enviar calidad
+                                        </Button>
+                                        <Button
+                                          className="small"
+                                          icon={Send}
+                                          onClick={() =>
+                                            setMail({
+                                              event:
+                                                "envio_certificado_liberacion",
+                                              orderId: id,
+                                              loteMaterialId:
+                                                l.id_lote_material,
+                                            })
+                                          }
+                                        >
+                                          Enviar liberación
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </LineDisclosure>
+                                )}
+                            </>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </OrderLineCard>
                 );
               })}
             </div>

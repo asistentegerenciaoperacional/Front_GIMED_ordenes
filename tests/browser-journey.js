@@ -98,7 +98,7 @@ async (page) => {
     .waitFor();
   const initial = await state();
   check(Object.keys(initial).length === 28, "Estado con 28 colecciones");
-  const drawerRoutes=['Órdenes de compra','Abastecimiento','Facturas','Catálogos','Proveedores','Códigos de barras','Documentos','Correos','Configuración'];
+  const drawerRoutes=['Órdenes de compra','Abastecimiento','Catálogos','Códigos de barras','Proveedores','Facturas','Documentos','Correos','Configuración'];
   for (const width of [375,768,1024,1440]) {
     await page.setViewportSize({width,height:900});
     const menuButton=page.getByRole('button',{name:'Abrir navegación',exact:true});
@@ -2022,7 +2022,7 @@ async (page) => {
     afterDelete.orden_producto.find((row) => row.id === replacementLines[0].id).estado === 'en_seguimiento' &&
     JSON.stringify(afterDelete.factura) === JSON.stringify(beforeDelete.factura) && JSON.stringify(afterDelete.documento) === JSON.stringify(beforeDelete.documento),
     'Eliminar lote cerrado, recibido y facturado conserva producto, facturas y documentos');
-  check(await page.locator('.line-metrics').innerText().then((text) => text.includes('-100.0 %')), 'Eliminar lote cerrado recalcula la desviación visible');
+  check(await page.locator('.line-metadata').innerText().then((text) => text.includes('-100.0 %')), 'Eliminar lote cerrado recalcula la desviación visible');
   await page.getByRole('button', { name: /^Eliminar lote / }).click();
   check((await dialog().innerText()).includes('último lote') && (await dialog().innerText()).includes('quedará anulado'), 'Borrar el último lote advierte que anulará el producto');
   await dialog().getByRole('button', { name: 'Eliminar lote', exact: true }).click();
@@ -2205,13 +2205,13 @@ async (page) => {
     row: { id_producto: sid(70), id_material: alternateCorrugado.id, unidades_por_corrugado: 48 } });
   await page.goto(origin + '/ordenes/' + detailOrder.orderId);
   const firstLine = page.locator('.line-card').first();
-  check((await firstLine.locator('.line-metadata').innerText()).includes('Caja corrugada · 24 unidades') &&
-    !(await firstLine.locator('.line-metadata').innerText()).includes('Caja recomendada posterior'),
+  check((await firstLine.locator('.line-packaging').innerText()).includes('Caja corrugada · 24 unidades') &&
+    !(await firstLine.locator('.line-packaging').innerText()).includes('Caja recomendada posterior'),
     'Ref. corrugado procede del renglón guardado después de cambiar la recomendación del catálogo');
   check(await firstLine.locator('.line-metadata dt').allTextContents().then((labels) =>
-    labels.join('|') === 'Código de barras|Ref. corrugado|Cantidad de corrugado|Sticker') &&
-    await page.locator('.line-card').nth(1).locator('.line-metadata dt').last().innerText() === 'Cinta',
-    'Código, referencia, cantidad de corrugado y sticker o cinta comparten la cabecera');
+    labels.join('|') === 'Código de barras|Cantidad solicitada|Precio unitario|Recibido en lotes cerrados|Desviación / margen') &&
+    await page.locator('.line-card').nth(1).locator('.line-packaging dt').last().innerText() === 'Cinta',
+    'Código y resumen comercial comparten la cabecera; corrugado y sticker o cinta ocupan la franja secundaria');
   const lotRow = firstLine.locator('.product-lots-table tbody tr').first();
   const expectedDates = ['29/10/2026', '05/11/2026', '30/10/2026', '31/10/2026', '01/11/2026'];
   check(await lotRow.locator('time').allTextContents().then((dates) => dates.join('|') === expectedDates.join('|')),
