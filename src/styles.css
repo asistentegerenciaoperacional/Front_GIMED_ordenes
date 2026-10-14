@@ -1987,6 +1987,7 @@ textarea.control {
   padding: 7px 9px;
 }
 .invoice-detail {
+  align-items: start;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 20px;
@@ -2047,6 +2048,7 @@ textarea.control {
 }
 .check-list label {
   display: flex;
+  cursor: pointer;
   gap: 9px;
   align-items: start;
   font-size: 12px;
@@ -2060,6 +2062,10 @@ textarea.control {
 .check-list input {
   margin-top: 4px;
   accent-color: var(--primary);
+}
+.check-list input[type="checkbox"] {
+  scroll-margin-block: 0;
+  cursor: pointer;
 }
 .visually-hidden {
   position: absolute;

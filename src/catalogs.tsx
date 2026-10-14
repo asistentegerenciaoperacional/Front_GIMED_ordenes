@@ -1,4 +1,4 @@
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import {
   Plus,
   Search,
@@ -28,12 +28,137 @@ import {
   Dialog,
   Badge,
   Empty,
+  Tabs,
   text,
   money,
   shortDate,
   recordName,
 } from "./ui";
 import { CatalogForm, Documents } from "./forms";
+import { ColumnHeader } from "./column-filter";
+import {
+  columnOptions,
+  filterTableRows,
+  hasFilter,
+  sortTableRows,
+  type Column,
+  type ColumnCell,
+  type ColumnFilter,
+  type ColumnRow,
+  type TableState,
+} from "./order-table";
+
+type CatalogFilterRow = ColumnRow<string> & {
+  record: Row;
+  searchText: string;
+};
+
+const productFilterColumns: Column<string>[] = [
+  { key: "nombre_producto", label: "Producto", kind: "text" },
+  { key: "id_maquilador", label: "Maquilador", kind: "text" },
+  { key: "unidades_lote", label: "Unidades por lote", kind: "integer" },
+  { key: "id_categoria", label: "Categoría", kind: "text" },
+  { key: "activo", label: "Activo", kind: "enum" },
+  { key: "maquila_iva", label: "Maquila / IVA", kind: "text" },
+  { key: "codigo_activo", label: "Código activo", kind: "text" },
+];
+
+const materialFilterColumns: Column<string>[] = [
+  { key: "codigo_material", label: "Código MAIA (3 dígitos)", kind: "text" },
+  { key: "nombre_material", label: "Material", kind: "text" },
+  { key: "id_tipo_material", label: "Tipo de material", kind: "text" },
+];
+
+const catalogCell = (
+  value: string | number | boolean | null | undefined,
+  label: string,
+  searchValues?: string[],
+  selectionKey?: string | number | null,
+): ColumnCell => {
+  const normalizedValue = value == null ? null : String(value);
+  const key = String(selectionKey ?? normalizedValue ?? "__sin_valor__");
+  return {
+    values: [
+      {
+        key,
+        label: normalizedValue === null ? "Sin valor" : label,
+        value: normalizedValue,
+      },
+    ],
+    sortValue: normalizedValue,
+    ...(searchValues ? { searchValues } : {}),
+  };
+};
+
+function buildCatalogFilterRows(
+  db: ReturnType<typeof useApp>["db"],
+  entity: Entity,
+  fields: string[],
+): CatalogFilterRow[] {
+  return (db[entity] as Row[]).map((record) => {
+    const visibleFields = fields.map((field) =>
+      displayField(db, entity, field, record[field]),
+    );
+    const historicalCodes =
+      entity === "productos"
+        ? db.codigos_barras
+            .filter((barcode) => barcode.id_producto === record.id)
+            .map((barcode) => barcode.codigo)
+        : [];
+    const searchText = [...visibleFields, ...historicalCodes]
+      .join(" ")
+      .toLowerCase();
+    const cells: Record<string, ColumnCell> = {};
+
+    if (entity === "productos") {
+      const hasAssociatedMaterials = db.materiales_asociados.some(
+        (association) => association.id_producto === record.id,
+      );
+      const iva =
+        db.categorias.find((category) => category.id === record.id_categoria)
+          ?.iva ?? null;
+      const maquilaIva = `${hasAssociatedMaterials ? "PARCIAL" : "FULL"} · IVA ${iva ?? "—"} %`;
+      const barcode = latestBarcode(db, record.id)?.codigo ?? null;
+      const active = record.activo == null ? null : Boolean(record.activo);
+      const activeLabel = active === null ? "Sin valor" : active ? "Sí" : "No";
+      cells.nombre_producto = catalogCell(
+        record.nombre_producto,
+        displayField(db, entity, "nombre_producto", record.nombre_producto),
+      );
+      cells.id_maquilador = catalogCell(
+        displayField(db, entity, "id_maquilador", record.id_maquilador),
+        displayField(db, entity, "id_maquilador", record.id_maquilador),
+        undefined,
+        record.id_maquilador,
+      );
+      cells.unidades_lote = catalogCell(
+        record.unidades_lote,
+        String(record.unidades_lote ?? ""),
+      );
+      cells.id_categoria = catalogCell(
+        displayField(db, entity, "id_categoria", record.id_categoria),
+        displayField(db, entity, "id_categoria", record.id_categoria),
+        undefined,
+        record.id_categoria,
+      );
+      cells.activo = catalogCell(active, activeLabel);
+      cells.maquila_iva = catalogCell(maquilaIva, maquilaIva);
+      cells.codigo_activo = catalogCell(barcode, barcode ?? "Sin código");
+    } else {
+      for (const field of fields) {
+        cells[field] = catalogCell(
+          displayField(db, entity, field, record[field]),
+          displayField(db, entity, field, record[field]),
+          undefined,
+          record[field],
+        );
+      }
+    }
+
+    return { record, searchText, cells };
+  });
+}
+
 export const catalogEntities: Entity[] = [
   "productos",
   "materiales",
@@ -61,7 +186,7 @@ const columns: Partial<Record<Entity, string[]>> = {
     "activo",
   ],
   materiales: ["codigo_material", "nombre_material", "id_tipo_material"],
-  contacto: ["nombre", "id_proveedor", "cargo_area", "correo", "celular"],
+  contacto: ["id_proveedor", "nombre", "cargo_area", "correo", "celular"],
   direccion_proveedor: [
     "id_proveedor",
     "nombre_dir",
@@ -78,22 +203,55 @@ export function CatalogTable({ entity }: { entity: Entity }) {
   const q = useDeferredValue(query.toLowerCase());
   const [editing, setEditing] = useState<Row | null | undefined>();
   const [details, setDetails] = useState<Row | null>(null);
+  const [tableState, setTableState] = useState<TableState<string>>({
+    filters: {},
+  });
+  const [openedColumn, setOpenedColumn] = useState<string | null>(null);
   const fields =
     columns[entity] ??
     Object.keys(meta.tables[entity].fields).filter((f) => f !== "id");
-  const rows = (db[entity] as Row[]).filter((r) =>
-    [
-      ...fields.map((f) => displayField(db, entity, f, r[f])),
-      ...(entity === "productos"
-        ? db.codigos_barras
-            .filter((c) => c.id_producto === r.id)
-            .map((c) => c.codigo)
-        : []),
-    ]
-      .join(" ")
-      .toLowerCase()
-      .includes(q),
+  const filterColumns =
+    entity === "productos"
+      ? productFilterColumns
+      : entity === "materiales"
+        ? materialFilterColumns
+        : null;
+  const catalogRows = useMemo(
+    () => buildCatalogFilterRows(db, entity, fields),
+    [db, entity, fields],
   );
+  const searchedCatalogRows = catalogRows.filter((row) =>
+    row.searchText.includes(q),
+  );
+  const visibleCatalogRows = filterColumns
+    ? sortTableRows(
+        filterTableRows(searchedCatalogRows, filterColumns, tableState.filters),
+        filterColumns,
+        tableState.sort,
+      )
+    : null;
+  const rows = visibleCatalogRows
+    ? visibleCatalogRows.map((row) => row.record)
+    : (db[entity] as Row[]).filter((record) =>
+        [
+          ...fields.map((field) =>
+            displayField(db, entity, field, record[field]),
+          ),
+          ...(entity === "productos"
+            ? db.codigos_barras
+                .filter((barcode) => barcode.id_producto === record.id)
+                .map((barcode) => barcode.codigo)
+            : []),
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(q),
+      );
+  const activeFilterCount = Object.values(tableState.filters).filter(
+    hasFilter,
+  ).length;
+  const clearFilters = () =>
+    setTableState((current) => ({ filters: {}, sort: current.sort }));
   return (
     <>
       <section className="panel">
@@ -125,104 +283,170 @@ export function CatalogTable({ entity }: { entity: Entity }) {
               }
             />
           </div>
+          <div className="filter-actions">
+            {query && (
+              <Button variant="link" onClick={() => setQuery("")}>
+                Limpiar búsqueda
+              </Button>
+            )}
+            {activeFilterCount > 0 && filterColumns && (
+              <Button variant="link" onClick={clearFilters}>
+                Limpiar filtros ({activeFilterCount})
+              </Button>
+            )}
+          </div>
         </div>
-        {rows.length ? (
+        {rows.length || filterColumns ? (
           <div className="table-scroll">
             <table className="data-table catalog-table">
               <thead>
                 <tr>
-                  {fields.map((f) => (
-                    <th scope="col" key={f}>
-                      {labels[f] ?? text(f)}
-                    </th>
-                  ))}
-                  {entity === "productos" && (
-                    <>
-                      <th scope="col">Maquila / IVA</th>
-                      <th scope="col">Código activo</th>
-                    </>
-                  )}
+                  {filterColumns
+                    ? filterColumns.map((column) => {
+                        const availableRows = filterTableRows(
+                          searchedCatalogRows,
+                          filterColumns,
+                          tableState.filters,
+                          column.key,
+                        );
+                        const options = columnOptions(availableRows, column);
+                        const optionMap = new Map(
+                          options.map((option) => [option.key, option]),
+                        );
+                        for (const option of columnOptions(
+                          catalogRows,
+                          column,
+                        )) {
+                          if (
+                            tableState.filters[column.key]?.selected?.includes(
+                              option.key,
+                            )
+                          )
+                            optionMap.set(option.key, option);
+                        }
+                        return (
+                          <ColumnHeader
+                            key={column.key}
+                            column={column}
+                            options={[...optionMap.values()]}
+                            filter={tableState.filters[column.key]}
+                            sort={tableState.sort}
+                            open={openedColumn === column.key}
+                            onOpen={() => setOpenedColumn(column.key)}
+                            onClose={() => setOpenedColumn(null)}
+                            onFilter={(filter?: ColumnFilter) =>
+                              setTableState((current) => {
+                                const filters = { ...current.filters };
+                                if (filter) filters[column.key] = filter;
+                                else delete filters[column.key];
+                                return { ...current, filters };
+                              })
+                            }
+                            onSort={(sort) =>
+                              setTableState((current) => ({
+                                ...current,
+                                sort,
+                              }))
+                            }
+                          />
+                        );
+                      })
+                    : fields.map((field) => (
+                        <th scope="col" key={field}>
+                          {labels[field] ?? text(field)}
+                        </th>
+                      ))}
                   <th scope="col">
                     <span className="visually-hidden">Acciones</span>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
-                  <tr key={primaryKey(entity, row)}>
-                    {fields.map((f) => (
-                      <td key={f}>
-                        {typeof row[f] === "boolean" ? (
-                          <Badge value={row[f] ? "cerrada" : "inactivo"}>
-                            {row[f] ? "Sí" : "No"}
-                          </Badge>
-                        ) : (
-                          displayField(db, entity, f, row[f])
-                        )}
-                      </td>
-                    ))}
-                    {entity === "productos" && (
-                      <>
-                        <td>
-                          <strong>
-                            {db.materiales_asociados.some(
-                              (a) => a.id_producto === row.id,
-                            )
-                              ? "PARCIAL"
-                              : "FULL"}
-                          </strong>
-                          <small>
-                            IVA{" "}
-                            {db.categorias.find(
-                              (c) => c.id === row.id_categoria,
-                            )?.iva ?? "—"}{" "}
-                            %
-                          </small>
+                {rows.length ? (
+                  rows.map((row) => (
+                    <tr key={primaryKey(entity, row)}>
+                      {fields.map((f) => (
+                        <td key={f}>
+                          {typeof row[f] === "boolean" ? (
+                            <Badge value={row[f] ? "cerrada" : "inactivo"}>
+                              {row[f] ? "Sí" : "No"}
+                            </Badge>
+                          ) : (
+                            displayField(db, entity, f, row[f])
+                          )}
                         </td>
-                        <td className="mono">
-                          {latestBarcode(db, row.id)?.codigo ?? "Sin código"}
-                        </td>
-                      </>
-                    )}
-                    <td>
-                      <div className="inline">
-                        <Button
-                          className="icon-btn"
-                          icon={Pencil}
-                          aria-label={`Editar ${recordName(db, entity, row)}`}
-                          onClick={() => setEditing(row)}
-                        />
-                        {["productos", "materiales", "lote_material"].includes(
-                          entity,
-                        ) && (
+                      ))}
+                      {entity === "productos" && (
+                        <>
+                          <td>
+                            <strong>
+                              {db.materiales_asociados.some(
+                                (a) => a.id_producto === row.id,
+                              )
+                                ? "PARCIAL"
+                                : "FULL"}
+                            </strong>
+                            <small>
+                              IVA{" "}
+                              {db.categorias.find(
+                                (c) => c.id === row.id_categoria,
+                              )?.iva ?? "—"}{" "}
+                              %
+                            </small>
+                          </td>
+                          <td className="mono">
+                            {latestBarcode(db, row.id)?.codigo ?? "Sin código"}
+                          </td>
+                        </>
+                      )}
+                      <td>
+                        <div className="inline">
                           <Button
                             className="icon-btn"
-                            icon={History}
-                            aria-label={`Consultar historial de ${recordName(db, entity, row)}`}
-                            onClick={() => setDetails(row)}
+                            icon={Pencil}
+                            aria-label={`Editar ${recordName(db, entity, row)}`}
+                            onClick={() => setEditing(row)}
                           />
-                        )}
-                        <Button
-                          className="icon-btn"
-                          icon={Trash2}
-                          aria-label={`Eliminar ${recordName(db, entity, row)}`}
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                "¿Eliminar este registro? Solo se eliminará si no deja referencias pendientes.",
+                          {[
+                            "productos",
+                            "materiales",
+                            "lote_material",
+                          ].includes(entity) && (
+                            <Button
+                              className="icon-btn"
+                              icon={History}
+                              aria-label={`Consultar historial de ${recordName(db, entity, row)}`}
+                              onClick={() => setDetails(row)}
+                            />
+                          )}
+                          <Button
+                            className="icon-btn"
+                            icon={Trash2}
+                            aria-label={`Eliminar ${recordName(db, entity, row)}`}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  "¿Eliminar este registro? Solo se eliminará si no deja referencias pendientes.",
+                                )
                               )
-                            )
-                              void run(
-                                "deleteEntity",
-                                { entity, key: row },
-                                "Registro eliminado",
-                              ).catch((e) => notify(e.message, true));
-                          }}
-                        />
-                      </div>
+                                void run(
+                                  "deleteEntity",
+                                  { entity, key: row },
+                                  "Registro eliminado",
+                                ).catch((e) => notify(e.message, true));
+                            }}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={(filterColumns?.length ?? fields.length) + 1}>
+                      <Empty />
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -471,14 +695,47 @@ export function CatalogPage({
   group?: string;
   params: URLSearchParams;
 }) {
-  const list: Entity[] =
-    group === "proveedores"
-      ? ["proveedor", "direccion_proveedor", "contacto"]
-      : catalogEntities;
+  type CatalogGroup = "productos" | "materiales" | "relacionados";
+  const catalogGroups: Record<CatalogGroup, Entity[]> = {
+    productos: ["productos", "costos_maquila", "categorias"],
+    materiales: ["materiales", "tipos_materiales", "proveedores_favoritos"],
+    relacionados: ["materiales_asociados", "producto_corrugado"],
+  };
+  const providerList: Entity[] = [
+    "proveedor",
+    "direccion_proveedor",
+    "contacto",
+  ];
   const initial = params.get("tab") as Entity;
-  const [entity, setEntity] = useState<Entity>(
-    list.includes(initial) ? initial : list[0],
+  const catalogEntityList: Entity[] = Object.values(catalogGroups).flat();
+  const [entity, setEntity] = useState<Entity>(() =>
+    group === "proveedores"
+      ? providerList.includes(initial)
+        ? initial
+        : providerList[0]
+      : catalogEntityList.includes(initial)
+        ? initial
+        : catalogGroups.productos[0],
   );
+  const parentFor = (selected: Entity): CatalogGroup =>
+    (Object.keys(catalogGroups) as CatalogGroup[]).find((parent) =>
+      catalogGroups[parent].includes(selected),
+    ) ?? "productos";
+  const [catalogGroup, setCatalogGroup] = useState<CatalogGroup>(() =>
+    parentFor(entity),
+  );
+  const childTabs: Entity[] =
+    group === "proveedores" ? providerList : [...catalogGroups[catalogGroup]];
+  const childLabel: Partial<Record<Entity, string>> = {
+    productos: "Lista de productos",
+    materiales: "Lista de materiales",
+    categorias: "Categorías",
+    costos_maquila: "Costos de maquila",
+    tipos_materiales: "Tipos de material",
+    proveedores_favoritos: "Proveedores de material",
+    materiales_asociados: "Materiales por producto",
+    producto_corrugado: "Corrugado por producto",
+  };
   return (
     <>
       <PageHeading
@@ -491,12 +748,34 @@ export function CatalogPage({
             : "Productos, materiales y sus condiciones de abastecimiento."
         }
       />
+      {group === "proveedores" ? null : (
+        <div className="order-group-tabs">
+          <Tabs
+            label="Grupos de catálogos"
+            items={[
+              { id: "productos", label: "Productos" },
+              { id: "materiales", label: "Materiales" },
+              { id: "relacionados", label: "Productos & materiales" },
+            ]}
+            value={catalogGroup}
+            onChange={(value) => {
+              const nextGroup = value as CatalogGroup;
+              setCatalogGroup(nextGroup);
+              setEntity(catalogGroups[nextGroup][0]);
+            }}
+          />
+        </div>
+      )}
       <div
         className="catalog-tabs"
         role="navigation"
-        aria-label="Apartados del catálogo"
+        aria-label={
+          group === "proveedores"
+            ? "Apartados de proveedores"
+            : `Catálogos de ${catalogGroup === "relacionados" ? "productos y materiales" : catalogGroup}`
+        }
       >
-        {list.map((e) => (
+        {childTabs.map((e) => (
           <button
             type="button"
             key={e}
@@ -504,7 +783,7 @@ export function CatalogPage({
             aria-current={entity === e ? "page" : undefined}
             onClick={() => setEntity(e)}
           >
-            {titles[e]}
+            {childLabel[e] ?? titles[e]}
           </button>
         ))}
       </div>

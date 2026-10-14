@@ -41,6 +41,8 @@ El **número de orden es siempre de solo lectura**, también al editar antes o d
 
 Las órdenes de producto se identifican como **OC** y las de materiales y otros como **OCM**. El prefijo se aplica en listados, consecutivos, revisión de órdenes, vínculos, catálogos, facturas, documentos y selección de órdenes para correo.
 
+**Catálogos** organiza sus secciones en tres grupos principales, con el estilo de pestañas de Órdenes: **Productos** (Lista de productos, Categorías, Costos de maquila), **Materiales** (Lista de materiales, Tipos de material, Proveedores de material) y **Productos & materiales** (Materiales por producto, Corrugado por producto). Los botones de las secciones secundarias conservan su estilo actual.
+
 En **Abastecimiento → Vínculos entre órdenes**, la barra busca por número de OC de producto u OCM de material, con o sin prefijo y espacio, sin distinguir mayúsculas. El prefijo distingue los grupos. Las cinco cabeceras reúnen filtro y ordenamiento: órdenes numéricas, producto/maquilador y material/proveedor como texto, y estado enumerado. Búsqueda y filtros se combinan sobre cada vínculo y se conservan en la URL junto con el ordenamiento. **Limpiar búsqueda** conserva filtros y ordenamiento; **Limpiar filtros** conserva búsqueda y ordenamiento. La tabla mantiene la barra y las cabeceras sin coincidencias, con contador en el pie.
 
 En **Facturas**, la barra busca por número de factura, proveedor y orden, lote o producto asociado, con la normalización de la factura. Se combina con los menús de columna y conserva la consulta en la URL. **Limpiar búsqueda** conserva filtros y ordenamiento; **Limpiar filtros** conserva búsqueda y ordenamiento. Ambos controles siguen disponibles en los estados sin coincidencias.

@@ -34,7 +34,7 @@ actuales. Los datos y documentos de ejemplo son ficticios.
 
 | Grupo | Colecciones |
 | --- | --- |
-| Catálogos | `productos`, `categorias`, `costos_maquila`, `tipos_materiales`, `materiales`, `materiales_asociados`, `producto_corrugado`, `proveedores_favoritos` |
+| Catálogos | **Productos** agrupa lista de productos, categorías y costos de maquila; **Materiales**, lista de materiales, tipos de material y proveedores de material; **Productos & materiales**, materiales por producto y corrugado por producto. Las pestañas principales usan el estilo de los grupos de Órdenes; las pestañas de cada sección mantienen sus botones actuales. |
 | Proveedores y directorio | `proveedor`, `direccion_proveedor`, `contacto` |
 | Códigos | `codigos_barras` |
 | Órdenes y seguimiento | `orden_compra`, `orden_producto`, `lote_producto`, `orden_material`, `lote_material`, `orden_otro`, `abastecimiento_material`, `consecutivo_orden` |

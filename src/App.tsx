@@ -22,6 +22,7 @@ import {
   X,
   ArrowUpRight,
   RefreshCw,
+  Truck,
 } from "lucide-react";
 import type { Database } from "../shared/models";
 import { AppContext, ApiError, request, Button, Loading, Empty } from "./ui";
@@ -48,10 +49,10 @@ import type { Row } from "../shared/schema";
 const navigation = [
   { id: "ordenes", label: "Órdenes de compra", icon: ClipboardList },
   { id: "abastecimiento", label: "Abastecimiento", icon: Boxes },
-  { id: "facturas", label: "Facturas", icon: ReceiptText },
   { id: "catalogos", label: "Catálogos", icon: Package },
-  { id: "proveedores", label: "Proveedores", icon: Building2 },
   { id: "codigos", label: "Códigos de barras", icon: Barcode },
+  { id: "proveedores", label: "Proveedores", icon: Truck },
+  { id: "facturas", label: "Facturas", icon: ReceiptText },
   { id: "documentos", label: "Documentos", icon: FolderOpen },
   { id: "correos", label: "Correos", icon: Mail },
 ];
