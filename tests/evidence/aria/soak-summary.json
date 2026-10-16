@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-16T19:10:22.277Z",
+  "passed": true,
+  "browser": "155.0.8059.80",
+  "cycles": 600,
+  "baselineHeapBytes": 13223152,
+  "afterHeapBytes": 17577548,
+  "finalWindow": {
+    "from": 510,
+    "to": 600,
+    "growthBytes": 22528,
+    "growthPercent": 0.12832796544805986
+  },
+  "detachedContainers": 0
+}

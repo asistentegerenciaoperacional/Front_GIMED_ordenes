@@ -1,11 +1,11 @@
 {
-  "date": "2026-10-13T16:15:49.840Z",
+  "date": "2026-10-16T18:54:32.459Z",
   "passed": true,
   "platform": "Windows x64",
   "runtime": "v24.17.0",
-  "archive": "GIMED-Prototipo-Windows-x64.zip",
-  "archiveSha256": "b70484cd758fe5f445bd7b48b8bd7c6863d89f43f663f687dfc9b0d4a503b736",
-  "archiveSizeBytes": 42135441,
+  "archive": "prototipo\\tests\\.tmp\\aria-portable.zip",
+  "archiveSha256": "4ab8b1c876bf974d2a60771f9b4ac84b4f5a1cd9b389b71001fa32de81c69e5c",
+  "archiveSizeBytes": 42261239,
   "packages": 72,
   "checks": [
     "Node incluido coincide con el SHA-256 oficial",
@@ -21,6 +21,7 @@
     "Portable incluye las 17 variantes y aplica el filtro personalizado",
     "Ayuda de los trece filtros disponible en el paquete autónomo",
     "Escape cierra la ayuda del portable y devuelve el foco",
+    "Portable carga el formulario y calendario distribuidos en módulos locales",
     "Operación de negocio y guardado local correctos",
     "Enter detiene el servicio y libera la instancia",
     "Reinicio del lanzador recupera íntegramente el estado guardado",

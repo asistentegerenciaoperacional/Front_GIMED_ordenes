@@ -1,9 +1,9 @@
-import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { ClipboardList, Pin, PinOff, X } from "lucide-react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { Dialog } from "react-aria-components/Dialog";
+import { Modal, ModalOverlay } from "react-aria-components/Modal";
 import { Button } from "./ui";
-
 export const PIN_NAVIGATION_QUERY = "(min-width: 1024px)";
-
 export function NavigationDrawer({
   open,
   pinned,
@@ -19,38 +19,13 @@ export function NavigationDrawer({
   onPinnedChange: (pinned: boolean) => void;
   children: ReactNode;
 }) {
-  const drawer = useRef<HTMLDialogElement>(null);
-  const pinButton = useRef<HTMLButtonElement>(null);
-  const previousPinned = useRef(pinned);
+  const pin = useRef<HTMLButtonElement>(null);
+  const previous = useRef(pinned);
   useLayoutEffect(() => {
-    const changedMode = previousPinned.current !== pinned;
-    previousPinned.current = pinned;
-    if (pinned) {
-      if (changedMode) pinButton.current?.focus({ preventScroll: true });
-      return;
-    }
-    const panel = drawer.current;
-    if (!open || !panel) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    panel.showModal();
-    if (changedMode) {
-      panel.getAnimations().forEach((animation) => animation.cancel());
-      (
-        pinButton.current ??
-        panel.querySelector<HTMLButtonElement>(
-          'button[aria-label="Cerrar navegación"]',
-        )
-      )?.focus({ preventScroll: true });
-    } else {
-      panel.querySelector<HTMLAnchorElement>('a[aria-current="page"]')?.focus();
-    }
-    return () => {
-      if (panel.open) panel.close();
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open, pinned]);
-
+    if (previous.current !== pinned)
+      pin.current?.focus({ preventScroll: true });
+    previous.current = pinned;
+  }, [pinned]);
   const content = (
     <>
       <div className="drawer-heading">
@@ -66,18 +41,18 @@ export function NavigationDrawer({
         <div className="drawer-actions">
           {canPin && (
             <Button
-              ref={pinButton}
+              ref={pin}
               icon={pinned ? PinOff : Pin}
               className="icon-btn drawer-pin"
               variant="ghost"
               aria-label={pinned ? "Desfijar navegación" : "Fijar navegación"}
-              title={pinned ? "Desfijar navegación" : "Fijar navegación"}
               aria-pressed={pinned}
               onClick={() => onPinnedChange(!pinned)}
             />
           )}
           {!pinned && (
             <Button
+              autoFocus={!canPin}
               icon={X}
               className="icon-btn drawer-close"
               variant="ghost"
@@ -90,7 +65,6 @@ export function NavigationDrawer({
       <div className="drawer-scroll">{children}</div>
     </>
   );
-
   return (
     <div className="navigation-slot">
       {pinned ? (
@@ -102,55 +76,25 @@ export function NavigationDrawer({
           {content}
         </aside>
       ) : (
-        <dialog
-          ref={drawer}
-          id="app-navigation"
-          className="sidebar navigation-drawer"
-          aria-label="Menú de navegación"
-          inert={!open}
-          onKeyDown={(event) => {
-            if (
-              event.key !== "Tab" ||
-              event.altKey ||
-              event.ctrlKey ||
-              event.metaKey
-            )
-              return;
-            const controls = Array.from(
-              event.currentTarget.querySelectorAll<HTMLElement>(
-                "a[href], button:not([disabled])",
-              ),
-            ).filter((control) => control.tabIndex >= 0);
-            const first = controls[0];
-            const last = controls.at(-1);
-            if (
-              first &&
-              last &&
-              ((!event.shiftKey && document.activeElement === last) ||
-                (event.shiftKey && document.activeElement === first))
-            ) {
-              event.preventDefault();
-              (event.shiftKey ? last : first).focus();
-            }
+        <ModalOverlay
+          isOpen={open}
+          onOpenChange={(next) => {
+            if (!next) onClose();
           }}
-          onCancel={(event) => {
-            event.preventDefault();
-            onClose();
-          }}
-          onClick={(event) => {
-            if (event.target !== event.currentTarget) return;
-            const box = event.currentTarget.getBoundingClientRect();
-            if (
-              event.clientX < box.left ||
-              event.clientX > box.right ||
-              event.clientY < box.top ||
-              event.clientY > box.bottom
-            )
-              onClose();
-          }}
+          isDismissable
+          className="aria-navigation-overlay"
         >
-          {content}
-        </dialog>
+          <Modal className="aria-navigation-modal">
+            <Dialog
+              id="app-navigation"
+              className="sidebar navigation-drawer"
+              data-modal="true"
+              aria-label="Menú de navegación"
+            >
+              {content}
+            </Dialog>
+          </Modal>
+        </ModalOverlay>
       )}
     </div>
   );

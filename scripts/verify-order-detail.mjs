@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdir, mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { resolve, join, sep } from "node:path";
 import { createServer } from "node:net";
+import {ariaBrowserFile} from "./aria-browser-source.mjs";
 
 const browser = process.argv[2] || "chrome";
 const journey = process.argv.includes("--journey");
@@ -83,7 +84,7 @@ try {
     const source = await readFile("tests/browser-journey.js", "utf8");
     await writeFile(testFile, source.replaceAll("tests/evidence/", "tests/evidence/order-detail/journey/"));
   }
-  const output = await cli(["run-code", `--filename=${testFile}`]);
+  const output = await cli(["run-code", `--filename=${await ariaBrowserFile(testFile)}`]);
   const result = output.match(/### Result\r?\n(\{[^\r\n]+\})/);
   if (!result) throw new Error(output);
   const report = { browser, ...JSON.parse(result[1]) };

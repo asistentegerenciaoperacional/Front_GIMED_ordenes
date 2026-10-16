@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 import { mkdir, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
+import {ariaBrowserFile} from "./aria-browser-source.mjs";
 const automated = process.argv.includes("--check");
 const port = process.env.PROTOTIPO_QA_PORT || "3002";
 const env = {
@@ -72,7 +73,7 @@ await cli([
 if (automated) {
   try {
     const output = await cli(
-      ["run-code", "--filename=tests/browser-journey.js"],
+      ["run-code", "--filename="+await ariaBrowserFile("tests/browser-journey.js")],
       true,
     );
     const result = output.match(/### Result\r?\n(\{[^\r\n]+\})/);

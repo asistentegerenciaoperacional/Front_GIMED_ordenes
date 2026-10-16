@@ -1,4 +1,7 @@
 import { useState } from "react";
+import {I18nProvider} from "react-aria-components/I18nProvider";
+import {ConfirmationProvider} from "../src/components/overlays";
+import "../src/components/aria.css";
 import { createRoot } from "react-dom/client";
 import { makeSeed, sid } from "../shared/seed";
 import {
@@ -12,6 +15,8 @@ import { CatalogForm, InvoiceForm, LotForm, OrderForm } from "../src/forms";
 import { ColumnHeader } from "../src/column-filter";
 import { orderColumns } from "../src/order-table";
 import "../src/styles.css";
+import {DataTable,TableHead,TableRow,TableRows} from "../src/components/data-table";
+import {AriaControlsFixture} from "./aria-controls.fixture";
 
 function Fixture() {
   const [db] = useState(makeSeed);
@@ -62,7 +67,7 @@ function Fixture() {
     <AppContext.Provider
       value={{ db, run, notify: () => {}, navigate: () => {} }}
     >
-      {closed ? (
+      {fixture==='aria' ? <AriaControlsFixture/> : closed ? (
         <p>Formulario cerrado</p>
       ) : fixture === "contact" ? (
         <CatalogForm entity="contacto_interno" onClose={close} />
@@ -76,9 +81,9 @@ function Fixture() {
       ) : fixture === "invoice" ? (
         <InvoiceForm onClose={close} />
       ) : fixture === "filter" ? (
-        <table>
-          <thead>
-            <tr>
+        <DataTable>
+          <TableHead>
+            <TableRow>
               <ColumnHeader
                 column={orderColumns.find((column) => column.key === "total")!}
                 options={[
@@ -90,13 +95,14 @@ function Fixture() {
                 onFilter={() => {}}
                 onSort={() => {}}
               />
-            </tr>
-          </thead>
-        </table>
+            </TableRow>
+          </TableHead>
+          <TableRows />
+        </DataTable>
       ) : (
         <OrderForm onClose={close} />
       )}
     </AppContext.Provider>
   );
 }
-createRoot(document.getElementById("root")!).render(<Fixture />);
+createRoot(document.getElementById("root")!).render(<I18nProvider locale="es-CO"><ConfirmationProvider><Fixture /></ConfirmationProvider></I18nProvider>);

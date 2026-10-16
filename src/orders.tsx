@@ -1,58 +1,71 @@
-import { useDeferredValue, useMemo, useState, type MouseEvent } from "react";
 import {
-  Plus,
-  Search,
-  Clock3,
-  CheckCircle2,
-  Ban,
-  Info,
   ArrowLeft,
-  Pencil,
-  Trash2,
-  Printer,
-  Send,
-  ChevronRight,
-  ChevronLeft,
+  Ban,
+  Check,
+  CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleHelp,
-  Package,
+  Clock3,
   FileCheck2,
   FilePlus2,
-  Check,
+  Info,
+  Package,
+  Pencil,
+  Plus,
+  Printer,
+  Search,
+  Send,
+  Trash2,
 } from "lucide-react";
+import { useDeferredValue, useMemo, useState, type MouseEvent } from "react";
 import {
-  orderLines,
+  deviation,
+  isInitialProductLot,
+  lineTable,
+  nextOrderNumber,
   orderItemLabel,
+  orderLines,
   orderPrefix,
   orderReference,
   orderState,
-  lineTable,
-  totalLines,
-  deviation,
   tolerance,
-  nextOrderNumber,
-  isInitialProductLot,
+  totalLines,
   type Row,
 } from "../shared/schema";
-import {
-  useApp,
-  PageHeading,
-  Button,
-  LinkButton,
-  Badge,
-  Tabs,
-  Empty,
-  RowLink,
-  text,
-  count,
-  money,
-  shortDate,
-  Dialog,
-  ConfirmationDialog,
-} from "./ui";
-import { OrderForm, LotForm, ReceiptForm, Documents, MailForm } from "./forms";
-import { replaceRoute, type OrderListReturn } from "./routing";
 import { ColumnHeader } from "./column-filter";
+import {
+  Action,
+  CheckChoice,
+  ControlInput,
+  ControlLink,
+  ControlSelect,
+} from "./components/controls";
+import {
+  DataTable,
+  TableCell,
+  TableColumn,
+  TableHead,
+  TableRow,
+  TableRows,
+} from "./components/data-table";
+import {
+  LotForm,
+  MailForm,
+  OrderForm,
+  ReceiptForm,
+} from "./forms";
+import { confirmAction } from "./components/overlays";
+import { Documents } from "./document-controls";
+import {
+  customFilters,
+  paginateOrders,
+  readCustomFilter,
+} from "./order-filters";
+import { LineDisclosure, OrderLineCard } from "./order-line-card";
+import { cachedOrderRead } from "./order-read-cache";
+import { buildOrderReadModel, filterCustomOrders } from "./order-read-model";
 import {
   EMPTY_VALUE,
   calendarDay,
@@ -67,14 +80,27 @@ import {
   type ColumnRow,
   type TableState,
 } from "./order-table";
+import { replaceRoute, type OrderListReturn } from "./routing";
 import {
-  customFilters,
-  paginateOrders,
-  readCustomFilter,
-} from "./order-filters";
-import { buildOrderReadModel, filterCustomOrders } from "./order-read-model";
+  Badge,
+  Button,
+  CancelButton,
+  ConfirmationDialog,
+  Dialog,
+  Empty,
+  LinkButton,
+  PageHeading,
+  RowLink,
+  TabContent,
+  TabGroup,
+  TabHeader,
+  count,
+  money,
+  shortDate,
+  text,
+  useApp,
+} from "./ui";
 import { useBogotaDay } from "./use-bogota-day";
-import { OrderLineCard, LineDisclosure } from "./order-line-card";
 
 function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
   const { db } = useApp();
@@ -87,7 +113,7 @@ function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
       row.tipo_documento === "factura_fisica",
   );
   return document ? (
-    <a
+    <ControlLink
       className="invoice-document-link"
       href={"/api/documents/" + document.id + "/content"}
       target="_blank"
@@ -95,7 +121,7 @@ function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
       aria-label={"Abrir documento de factura " + invoice.numero_factura}
     >
       {invoice.numero_factura}
-    </a>
+    </ControlLink>
   ) : (
     <>{invoice.numero_factura}</>
   );
@@ -156,13 +182,38 @@ export function OrdersPage({
         : "",
     query = params.get("q") ?? "";
   const stateKey = params.toString();
+  const tableKey = JSON.stringify([
+    params.get("filtros"),
+    params.get("estado"),
+    params.get("ordenar"),
+    params.get("direccion"),
+  ]);
   const tableState = useMemo(
     () => readTableState(new URLSearchParams(stateKey)),
-    [stateKey],
+    [tableKey],
   );
   const model = useMemo(() => {
     const start = performance.now();
-    const prepared = buildOrderReadModel(db);
+    const prepared = cachedOrderRead(db, "model", () => {
+      const { orders, documentByOrderId } = buildOrderReadModel(db);
+      const strings=new Map<string,string>();
+      const itemGroups=new Map<string,(typeof orders)[number]['itemValues']>();
+      const intern=<T extends string|null>(value:T):T=>{
+        if(value===null)return value;
+        if(!strings.has(value))strings.set(value,value);
+        return strings.get(value) as T;
+      };
+      for(const order of orders){
+        order.total=intern(order.total);
+        order.elaborationDay=intern(order.elaborationDay);
+        order.deliveryDay=intern(order.deliveryDay);
+        order.pendingBatchDay=intern(order.pendingBatchDay);
+        const key=order.tipo_orden+'\0'+order.itemValues.map(item=>JSON.stringify(item)).join('\0');
+        if(!itemGroups.has(key))itemGroups.set(key,order.itemValues);
+        order.itemValues=itemGroups.get(key)!;
+      }
+      return { orders, documentByOrderId };
+    });
     performance.clearMeasures("orders:prepare");
     performance.measure("orders:prepare", { start, end: performance.now() });
     return prepared;
@@ -185,94 +236,123 @@ export function OrdersPage({
   const q = useDeferredValue(query.toLowerCase());
   const searchedNumber = /^\d+$/.test(query.trim()) ? query.trim() : "";
   const initialType = group === "productos" ? "producto" : type || "material";
-  const exactOrder = model.ordersByNumber.get(`${group}:${searchedNumber}`);
+  const exactOrder = searchedNumber
+    ? cachedOrderRead(
+        model,
+        "number-index",
+        () =>
+          new Map(
+            model.orders.map((order) => [
+              `${order.tipo_orden === "producto" ? "productos" : "materiales"}:${order.no_orden}`,
+              order,
+            ]),
+          ),
+      ).get(`${group}:${searchedNumber}`)
+    : undefined;
   const [creating, setCreating] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [openedColumn, setOpenedColumn] = useState<ColumnKey | null>(null);
   const all = useMemo(
     () =>
-      model.orders
-        .filter((o) =>
-          group === "productos"
-            ? o.tipo_orden === "producto"
-            : o.tipo_orden !== "producto",
-        )
-        .map((o) => {
-          const {
-            p,
-            itemValues,
-            name,
-            total,
-            elaborationDay: elaboration,
-            deliveryDay: delivery,
-          } = o;
-          const supplierName = p.nombre_corto ?? p.nombre_largo;
-          const cells: ColumnRow["cells"] = {
-            orden: {
-              sortValue: o.no_orden,
-              values: [
-                {
-                  key: o.no_orden,
-                  label: `${orderReference(o.tipo_orden, o.no_orden)} · ${text(o.tipo_orden)}`,
-                  value: o.no_orden,
-                },
-              ],
-            },
-            proveedor: {
-              sortValue: supplierName,
-              searchValues: [
-                p.nombre_corto,
-                p.nombre_largo,
-                p.nit,
-                `NIT ${p.nit ?? "Sin informar"}`,
-              ].filter((v): v is string => !!v),
-              values: [
-                {
-                  key: p.id,
-                  label: `${supplierName} · NIT ${p.nit ?? "Sin informar"}`,
-                  value: supplierName,
-                },
-              ],
-            },
-            productos: {
-              sortValue: itemValues[0]?.value ?? null,
-              values: itemValues.length
-                ? itemValues
-                : [{ key: EMPTY_VALUE, label: name, value: null }],
-            },
-            elaboracion: {
-              sortValue: elaboration,
-              values: [
-                {
-                  key: elaboration ?? EMPTY_VALUE,
-                  label: shortDate(o.fecha_elaboracion),
-                  value: elaboration,
-                },
-              ],
-            },
-            entrega: {
-              sortValue: delivery,
-              values: [
-                {
-                  key: delivery ?? EMPTY_VALUE,
-                  label: shortDate(o.fecha_solicitada_entrega),
-                  value: delivery,
-                },
-              ],
-            },
-            estado: {
-              sortValue: text(o.visible),
-              values: [
-                { key: o.visible, label: text(o.visible), value: o.visible },
-              ],
-            },
-            total: {
-              sortValue: total,
-              values: [{ key: total, label: money(total), value: total }],
-            },
-          };
-          return { ...o, cells };
-        }),
+      cachedOrderRead(model, group, () => {
+        const shared = new Map<string, ColumnRow["cells"][ColumnKey]>();
+        const shareCell = (
+          key: string,
+          create: () => ColumnRow["cells"][ColumnKey],
+        ) => {
+          if (!shared.has(key)) shared.set(key, create());
+          return shared.get(key)!;
+        };
+        return model.orders
+          .filter((o) =>
+            group === "productos"
+              ? o.tipo_orden === "producto"
+              : o.tipo_orden !== "producto",
+          )
+          .map((o) => {
+            const {
+              p,
+              itemValues,
+              name,
+              total,
+              elaborationDay: elaboration,
+              deliveryDay: delivery,
+            } = o;
+            const supplierName = p.nombre_corto ?? p.nombre_largo;
+            const cells: ColumnRow["cells"] = {
+              orden: {
+                sortValue: o.no_orden,
+                values: [
+                  {
+                    key: o.no_orden,
+                    label: `${orderReference(o.tipo_orden, o.no_orden)} · ${text(o.tipo_orden)}`,
+                    value: o.no_orden,
+                  },
+                ],
+              },
+              proveedor: shareCell("supplier:" + p.id, () => ({
+                sortValue: supplierName,
+                searchValues: [
+                  p.nombre_corto,
+                  p.nombre_largo,
+                  p.nit,
+                  `NIT ${p.nit ?? "Sin informar"}`,
+                ].filter((v): v is string => !!v),
+                values: [
+                  {
+                    key: p.id,
+                    label: `${supplierName} · NIT ${p.nit ?? "Sin informar"}`,
+                    value: supplierName,
+                  },
+                ],
+              })),
+              productos: shareCell(
+                "products:" + itemValues.map((item) => item.key).join("|"),
+                () => ({
+                  sortValue: itemValues[0]?.value ?? null,
+                  values: itemValues.length
+                    ? itemValues
+                    : [{ key: EMPTY_VALUE, label: name, value: null }],
+                }),
+              ),
+              elaboracion: shareCell("elaboration:" + elaboration, () => ({
+                sortValue: elaboration,
+                values: [
+                  {
+                    key: elaboration ?? EMPTY_VALUE,
+                    label: shortDate(o.fecha_elaboracion),
+                    value: elaboration,
+                  },
+                ],
+              })),
+              entrega: shareCell("delivery:" + delivery, () => ({
+                sortValue: delivery,
+                values: [
+                  {
+                    key: delivery ?? EMPTY_VALUE,
+                    label: shortDate(o.fecha_solicitada_entrega),
+                    value: delivery,
+                  },
+                ],
+              })),
+              estado: shareCell("state:" + o.visible, () => ({
+                sortValue: text(o.visible),
+                values: [
+                  { key: o.visible, label: text(o.visible), value: o.visible },
+                ],
+              })),
+              total: shareCell("total:" + total, () => ({
+                sortValue: total,
+                values: [{ key: total, label: money(total), value: total }],
+              })),
+            };
+            // Enrich our derived summary without copying every flag; saved API records are untouched.
+            const row = o as typeof o & ColumnRow;
+            if (itemValues.length) row.itemValues = cells.productos.values;
+            row.cells = cells;
+            return row;
+          });
+      }),
     [model, group],
   );
   const inView = (s: string) =>
@@ -308,7 +388,10 @@ export function OrdersPage({
       ),
     [candidates, tableState],
   );
-  const page = paginateOrders(rows, params.get("pagina"));
+  const page = useMemo(
+    () => paginateOrders(rows, params.get("pagina")),
+    [rows, params.get("pagina")],
+  );
   const openedOptions = useMemo(() => {
     const column = columns.find((column) => column.key === openedColumn);
     if (!column) return [];
@@ -334,6 +417,10 @@ export function OrdersPage({
     }
     return options;
   }, [openedColumn, columns, candidates, tableState]);
+  const tableCacheKey = useMemo(
+    () => ({ page, openedColumn, openedOptions, tableState }),
+    [page, openedColumn, openedOptions, tableState],
+  );
   const filterCount =
     columns.filter((column) => hasFilter(tableState.filters[column.key]))
       .length + (customFilter ? 1 : 0);
@@ -369,422 +456,478 @@ export function OrdersPage({
   ];
   return (
     <>
-      <PageHeading
-        title="Órdenes de compra"
-        description="Emite órdenes, registra entregas y consulta su seguimiento."
-        action={
-          <Button
-            icon={Plus}
-            variant="primary"
-            onClick={() => setCreating(true)}
-          >
-            Nueva orden
-          </Button>
-        }
-      />
-      <div className="order-group-tabs">
-        <Tabs
-          label="Grupos de órdenes"
-          items={[
-            { id: "productos", label: "Productos" },
-            { id: "materiales", label: "Materiales" },
-          ]}
-          value={group}
-          onChange={(value) => navigate(`ordenes/${value}`)}
-        />
-        <div
-          className="order-numbering"
-          aria-label="Consecutivo de órdenes"
-          aria-live="polite"
-        >
-          <span>
-            Última {orderPrefix(initialType)}:{" "}
-            <strong className="num">
-              {db.consecutivo_orden.find(
-                (counter) =>
-                  counter.grupo ===
-                  (group === "productos" ? "producto" : "material"),
-              )?.ultimo_numero ?? 0}
-            </strong>
-          </span>
-          <span>
-            Próxima {orderPrefix(initialType)}:{" "}
-            <strong className="num">{nextOrderNumber(db, initialType)}</strong>
-          </span>
-        </div>
-      </div>
-      <div className="stats">
-        {statDefs.map((s) => (
-          <button
-            type="button"
-            className="stat"
-            key={s.s}
-            onClick={() =>
-              saveTable(
-                {
-                  ...tableState,
-                  filters: {
-                    ...tableState.filters,
-                    estado:
-                      s.s === "no_autorizada" ? undefined : { selected: [s.s] },
-                  },
-                },
-                {
-                  vista:
-                    s.s === "no_autorizada" ? "no_autorizadas" : "seguimiento",
-                },
-              )
-            }
-          >
-            <span className="stat-top">
-              {s.label}
-              <span className={`stat-icon ${s.tone}`}>
-                <s.icon size={16} aria-hidden="true" />
-              </span>
-            </span>
-            <span className="stat-number num">
-              {all.filter((o) => o.visible === s.s).length}
-            </span>
-            <small>{s.hint}</small>
-          </button>
-        ))}
-      </div>
-      <section className="panel">
-        <Tabs
-          items={[
-            {
-              id: "no_autorizadas",
-              label: "No autorizadas",
-              count: all.filter((o) => o.visible === "no_autorizada").length,
-            },
-            {
-              id: "seguimiento",
-              label: "Seguimiento",
-              count: all.filter((o) =>
-                ["autorizada", "parcialmente_anulada", "cerrada"].includes(
-                  o.visible,
-                ),
-              ).length,
-            },
-            {
-              id: "anuladas",
-              label: "Anuladas",
-              count: all.filter((o) => o.visible === "anulada").length,
-            },
-          ]}
-          value={view}
-          onChange={(v) =>
-            saveTable(
-              {
-                ...tableState,
-                filters: { ...tableState.filters, estado: undefined },
-              },
-              { vista: v },
-            )
+      <TabGroup
+        value={group}
+        onChange={(value) => navigate("ordenes/" + value)}
+      >
+        <PageHeading
+          title="Órdenes de compra"
+          description="Emite órdenes, registra entregas y consulta su seguimiento."
+          action={
+            <Button
+              icon={Plus}
+              variant="primary"
+              onClick={() => setCreating(true)}
+            >
+              Nueva orden
+            </Button>
           }
         />
-        <div className="toolbar orders-toolbar">
-          <div className="search">
-            <Search size={16} aria-hidden="true" />
-            <input
-              className="control"
-              aria-label="Buscar órdenes"
-              placeholder={
-                group === "productos"
-                  ? "Buscar por número, producto, código o proveedor…"
-                  : "Buscar por número, material, concepto o proveedor…"
-              }
-              value={query}
-              onChange={(e) => setParams(group, params, { q: e.target.value })}
-            />
+        <div className="order-group-tabs">
+          <TabHeader
+            label="Grupos de órdenes"
+            items={[
+              { id: "productos", label: "Productos" },
+              { id: "materiales", label: "Materiales" },
+            ]}
+            value={group}
+            onChange={(value) => navigate(`ordenes/${value}`)}
+          />
+          <div
+            className="order-numbering"
+            aria-label="Consecutivo de órdenes"
+            aria-live="polite"
+          >
+            <span>
+              Última {orderPrefix(initialType)}:{" "}
+              <strong className="num">
+                {db.consecutivo_orden.find(
+                  (counter) =>
+                    counter.grupo ===
+                    (group === "productos" ? "producto" : "material"),
+                )?.ultimo_numero ?? 0}
+              </strong>
+            </span>
+            <span>
+              Próxima {orderPrefix(initialType)}:{" "}
+              <strong className="num">
+                {nextOrderNumber(db, initialType)}
+              </strong>
+            </span>
           </div>
-          <div className="toolbar-controls">
-            <div className="custom-filter-control">
-              <select
-                className="control custom-filter-select"
-                aria-label="Filtro personalizado"
-                value={customFilter}
-                onChange={(e) =>
-                  setParams(group, params, { filtro: e.target.value })
-                }
-              >
-                <option value="">Sin filtro personalizado</option>
-                {customFilters
-                  .filter(
-                    (filter) => group === "productos" || !filter.productOnly,
-                  )
-                  .map((filter) => (
-                    <optgroup key={filter.id} label={filter.name}>
-                      {filter.options.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-              </select>
-              <Button
-                icon={CircleHelp}
-                className="icon-btn"
-                aria-label="Ayuda de filtros personalizados"
-                title="Ayuda de filtros personalizados"
-                onClick={() => setHelpOpen(true)}
-              />
-            </div>
-            {group === "materiales" && (
-              <select
-                className="control"
-                aria-label="Filtrar tipo de orden"
-                value={type}
-                onChange={(e) =>
-                  setParams(group, params, { tipo: e.target.value })
-                }
-              >
-                <option value="">Todos los tipos</option>
-                <option value="material">Material</option>
-                <option value="otro">Otros</option>
-              </select>
-            )}
-            {filterCount > 0 && (
-              <Button
-                variant="link"
-                className="clear-column-filters"
+        </div>
+        <TabContent id={group}>
+          <div className="stats">
+            {statDefs.map((s) => (
+              <Action
+                type="button"
+                className="stat"
+                key={s.s}
                 onClick={() =>
                   saveTable(
-                    { filters: {}, sort: tableState.sort },
-                    { filtro: "" },
+                    {
+                      ...tableState,
+                      filters: {
+                        ...tableState.filters,
+                        estado:
+                          s.s === "no_autorizada"
+                            ? undefined
+                            : { selected: [s.s] },
+                      },
+                    },
+                    {
+                      vista:
+                        s.s === "no_autorizada"
+                          ? "no_autorizadas"
+                          : "seguimiento",
+                    },
                   )
                 }
               >
-                Limpiar filtros ({filterCount})
-              </Button>
-            )}
+                <span className="stat-top">
+                  {s.label}
+                  <span className={`stat-icon ${s.tone}`}>
+                    <s.icon size={16} aria-hidden="true" />
+                  </span>
+                </span>
+                <span className="stat-number num">
+                  {all.filter((o) => o.visible === s.s).length}
+                </span>
+                <small>{s.hint}</small>
+              </Action>
+            ))}
           </div>
-        </div>
-        {searchedNumber &&
-          (!exactOrder || !rows.some((o) => o.id === exactOrder.id)) && (
-            <div className="lookup-result">
-              <p>
-                {exactOrder
-                  ? inView(exactOrder.visible)
-                    ? "La orden existe y está excluida por los filtros actuales."
-                    : "La orden existe en otra vista."
-                  : `No hay una coincidencia exacta para ${searchedNumber} en el grupo de ${initialType === "producto" ? "producto" : "material y otros"}.`}
-              </p>
-              {exactOrder ? (
-                <LinkButton href={`/ordenes/${exactOrder.id}`}>
-                  Abrir orden {searchedNumber}
-                </LinkButton>
-              ) : (
-                <Button icon={Plus} onClick={() => setCreating(true)}>
-                  Crear nueva orden
-                </Button>
-              )}
-            </div>
-          )}
-        <div className="table-scroll">
-          <table className="data-table orders-table">
-            <thead>
-              <tr>
-                {columns.map((column) => {
-                  return (
-                    <ColumnHeader
-                      key={column.key}
-                      column={column}
-                      options={openedColumn === column.key ? openedOptions : []}
-                      filter={tableState.filters[column.key]}
-                      sort={tableState.sort}
-                      open={openedColumn === column.key}
-                      onOpen={() => setOpenedColumn(column.key)}
-                      onClose={() => setOpenedColumn(null)}
-                      onFilter={(filter) =>
-                        saveTable({
-                          ...tableState,
-                          filters: {
-                            ...tableState.filters,
-                            [column.key]: filter,
-                          },
+          <section className="panel">
+            <TabGroup
+              value={view}
+              onChange={(v) =>
+                saveTable(
+                  {
+                    ...tableState,
+                    filters: { ...tableState.filters, estado: undefined },
+                  },
+                  { vista: v },
+                )
+              }
+            >
+              <TabHeader
+                items={[
+                  {
+                    id: "no_autorizadas",
+                    label: "No autorizadas",
+                    count: all.filter((o) => o.visible === "no_autorizada")
+                      .length,
+                  },
+                  {
+                    id: "seguimiento",
+                    label: "Seguimiento",
+                    count: all.filter((o) =>
+                      [
+                        "autorizada",
+                        "parcialmente_anulada",
+                        "cerrada",
+                      ].includes(o.visible),
+                    ).length,
+                  },
+                  {
+                    id: "anuladas",
+                    label: "Anuladas",
+                    count: all.filter((o) => o.visible === "anulada").length,
+                  },
+                ]}
+                value={view}
+                onChange={(v) =>
+                  saveTable(
+                    {
+                      ...tableState,
+                      filters: { ...tableState.filters, estado: undefined },
+                    },
+                    { vista: v },
+                  )
+                }
+              />
+              <TabContent id={view}>
+                <div className="toolbar orders-toolbar">
+                  <div className="search">
+                    <Search size={16} aria-hidden="true" />
+                    <ControlInput
+                      className="control"
+                      aria-label="Buscar órdenes"
+                      placeholder={
+                        group === "productos"
+                          ? "Buscar por número, producto, código o proveedor…"
+                          : "Buscar por número, material, concepto o proveedor…"
+                      }
+                      value={query}
+                      onChange={(e) =>
+                        setParams(group, params, { q: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="toolbar-controls">
+                    <div className="custom-filter-control">
+                      <ControlSelect
+                        className="control custom-filter-select"
+                        aria-label="Filtro personalizado"
+                        value={customFilter}
+                        onChange={(e) =>
+                          setParams(group, params, { filtro: e.target.value })
+                        }
+                      >
+                        <option value="">Sin filtro personalizado</option>
+                        {customFilters
+                          .filter(
+                            (filter) =>
+                              group === "productos" || !filter.productOnly,
+                          )
+                          .map((filter) => (
+                            <optgroup key={filter.id} label={filter.name}>
+                              {filter.options.map((option) => (
+                                <option key={option.id} value={option.id}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                      </ControlSelect>
+                      <Button
+                        icon={CircleHelp}
+                        className="icon-btn"
+                        aria-label="Ayuda de filtros personalizados"
+                        title="Ayuda de filtros personalizados"
+                        onClick={() => setHelpOpen(true)}
+                      />
+                    </div>
+                    {group === "materiales" && (
+                      <ControlSelect
+                        className="control"
+                        aria-label="Filtrar tipo de orden"
+                        value={type}
+                        onChange={(e) =>
+                          setParams(group, params, { tipo: e.target.value })
+                        }
+                      >
+                        <option value="">Todos los tipos</option>
+                        <option value="material">Material</option>
+                        <option value="otro">Otros</option>
+                      </ControlSelect>
+                    )}
+                    {filterCount > 0 && (
+                      <Button
+                        variant="link"
+                        className="clear-column-filters"
+                        onClick={() =>
+                          saveTable(
+                            { filters: {}, sort: tableState.sort },
+                            { filtro: "" },
+                          )
+                        }
+                      >
+                        Limpiar filtros ({filterCount})
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                {searchedNumber &&
+                  (!exactOrder ||
+                    !rows.some((o) => o.id === exactOrder.id)) && (
+                    <div className="lookup-result">
+                      <p>
+                        {exactOrder
+                          ? inView(exactOrder.visible)
+                            ? "La orden existe y está excluida por los filtros actuales."
+                            : "La orden existe en otra vista."
+                          : `No hay una coincidencia exacta para ${searchedNumber} en el grupo de ${initialType === "producto" ? "producto" : "material y otros"}.`}
+                      </p>
+                      {exactOrder ? (
+                        <LinkButton href={`/ordenes/${exactOrder.id}`}>
+                          Abrir orden {searchedNumber}
+                        </LinkButton>
+                      ) : (
+                        <Button icon={Plus} onClick={() => setCreating(true)}>
+                          Crear nueva orden
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                <div className="table-scroll">
+                  <DataTable
+                    className="data-table orders-table"
+                    rowVersion={page.rows}
+                    cacheKey={tableCacheKey}
+                  >
+                    <TableHead>
+                      <TableRow>
+                        {columns.map((column) => {
+                          return (
+                            <ColumnHeader
+                              key={column.key}
+                              column={column}
+                              options={
+                                openedColumn === column.key ? openedOptions : []
+                              }
+                              filter={tableState.filters[column.key]}
+                              sort={tableState.sort}
+                              open={openedColumn === column.key}
+                              onOpen={() => setOpenedColumn(column.key)}
+                              onClose={() => setOpenedColumn(null)}
+                              onFilter={(filter) =>
+                                saveTable({
+                                  ...tableState,
+                                  filters: {
+                                    ...tableState.filters,
+                                    [column.key]: filter,
+                                  },
+                                })
+                              }
+                              onSort={(sort) =>
+                                saveTable({ ...tableState, sort })
+                              }
+                            />
+                          );
+                        })}
+                        <TableColumn scope="col">
+                          <span className="visually-hidden">Acciones</span>
+                        </TableColumn>
+                      </TableRow>
+                    </TableHead>
+                    <TableRows>
+                      {page.rows.map((o) => {
+                        const { ls, p, name } = o;
+                        const reference = orderReference(
+                          o.tipo_orden,
+                          o.no_orden,
+                        );
+                        const returnTo = `${window.location.pathname}${window.location.search}`;
+                        const signedOrder = model.documentByOrderId.get(o.id);
+                        return (
+                          <TableRow key={o.id}>
+                            <TableCell>
+                              <LinkButton
+                                variant="link"
+                                className="order-link"
+                                href={`/ordenes/${o.id}`}
+                              >
+                                {orderReference(o.tipo_orden, o.no_orden)}
+                              </LinkButton>
+                              <small>
+                                <Badge value={o.tipo_orden} />
+                              </small>
+                            </TableCell>
+                            <TableCell>
+                              <strong>
+                                {p.nombre_corto ?? p.nombre_largo}
+                              </strong>
+                              <small>NIT {p.nit ?? "Sin informar"}</small>
+                            </TableCell>
+                            <TableCell className="description">
+                              <strong>{name}</strong>
+                              <small>
+                                {ls.length}{" "}
+                                {orderItemLabel(o.tipo_orden, ls.length !== 1)}{" "}
+                                · {count(o.requestedQuantity)} unidades
+                                solicitadas
+                              </small>
+                            </TableCell>
+                            <TableCell className="nowrap">
+                              {shortDate(o.fecha_elaboracion)}
+                            </TableCell>
+                            <TableCell className="nowrap">
+                              {shortDate(o.fecha_solicitada_entrega)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge value={o.visible} />
+                            </TableCell>
+                            <TableCell className="right num nowrap">
+                              {money(o.total)}
+                            </TableCell>
+                            <TableCell className="order-actions-cell">
+                              <div className="order-row-actions">
+                                <LinkButton
+                                  icon={Printer}
+                                  className="icon-btn"
+                                  href={`/ordenes/${o.id}/imprimir?returnTo=${encodeURIComponent(returnTo)}`}
+                                  onClick={capturePrintReturnPosition}
+                                  aria-label={`Imprimir ${reference}`}
+                                  title="Imprimir orden"
+                                />
+                                {signedOrder ? (
+                                  <LinkButton
+                                    icon={FileCheck2}
+                                    className="icon-btn"
+                                    variant="primary"
+                                    href={`/api/documents/${signedOrder.id}/content`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={`Ver orden firmada de ${reference}`}
+                                    title="Ver orden firmada"
+                                  />
+                                ) : (
+                                  <Documents
+                                    owner="orden_compra"
+                                    ownerId={o.id}
+                                    documents={[]}
+                                    compact
+                                    showList={false}
+                                    renderAddTrigger={(open) => (
+                                      <Button
+                                        icon={FilePlus2}
+                                        className="icon-btn"
+                                        aria-label={`Agregar orden firmada para ${reference}`}
+                                        title="Agregar orden firmada"
+                                        onClick={open}
+                                      />
+                                    )}
+                                  />
+                                )}
+                                <RowLink
+                                  label={`Ver orden ${o.no_orden}`}
+                                  href={`/ordenes/${o.id}`}
+                                />
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableRows>
+                  </DataTable>
+                </div>
+                {!rows.length && (
+                  <Empty
+                    title="No hay órdenes coincidentes"
+                    description="Cambia los filtros o crea una nueva orden con el consecutivo automático."
+                    action={
+                      !searchedNumber ? (
+                        <Button icon={Plus} onClick={() => setCreating(true)}>
+                          Nueva orden
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                )}
+                <div className="table-footer orders-footer">
+                  <span aria-live="polite">
+                    {rows.length} órdenes en esta vista · Mostrando {page.start}
+                    –{page.end}
+                  </span>
+                  <nav
+                    className="orders-pagination"
+                    aria-label="Paginación de órdenes"
+                  >
+                    <Button
+                      icon={ChevronLeft}
+                      className="small"
+                      disabled={page.page === 1}
+                      onClick={() =>
+                        setParams(group, params, {
+                          pagina: page.page === 2 ? "" : page.page - 1,
                         })
                       }
-                      onSort={(sort) => saveTable({ ...tableState, sort })}
-                    />
-                  );
-                })}
-                <th scope="col">
-                  <span className="visually-hidden">Acciones</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {page.rows.map((o) => {
-                const { ls, p, name } = o;
-                const reference = orderReference(o.tipo_orden, o.no_orden);
-                const returnTo = `${window.location.pathname}${window.location.search}`;
-                const signedOrder = model.documentByOrderId.get(o.id);
-                return (
-                  <tr key={o.id}>
-                    <td>
-                      <LinkButton
-                        variant="link"
-                        className="order-link"
-                        href={`/ordenes/${o.id}`}
-                      >
-                        {orderReference(o.tipo_orden, o.no_orden)}
-                      </LinkButton>
-                      <small>
-                        <Badge value={o.tipo_orden} />
-                      </small>
-                    </td>
-                    <td>
-                      <strong>{p.nombre_corto ?? p.nombre_largo}</strong>
-                      <small>NIT {p.nit ?? "Sin informar"}</small>
-                    </td>
-                    <td className="description">
-                      <strong>{name}</strong>
-                      <small>
-                        {ls.length}{" "}
-                        {orderItemLabel(o.tipo_orden, ls.length !== 1)} ·{" "}
-                        {count(o.requestedQuantity)} unidades solicitadas
-                      </small>
-                    </td>
-                    <td className="nowrap">{shortDate(o.fecha_elaboracion)}</td>
-                    <td className="nowrap">
-                      {shortDate(o.fecha_solicitada_entrega)}
-                    </td>
-                    <td>
-                      <Badge value={o.visible} />
-                    </td>
-                    <td className="right num nowrap">{money(o.total)}</td>
-                    <td className="order-actions-cell">
-                      <div className="order-row-actions">
-                        <LinkButton
-                          icon={Printer}
-                          className="icon-btn"
-                          href={`/ordenes/${o.id}/imprimir?returnTo=${encodeURIComponent(returnTo)}`}
-                          onClick={capturePrintReturnPosition}
-                          aria-label={`Imprimir ${reference}`}
-                          title="Imprimir orden"
-                        />
-                        {signedOrder ? (
-                          <LinkButton
-                            icon={FileCheck2}
-                            className="icon-btn"
-                            variant="primary"
-                            href={`/api/documents/${signedOrder.id}/content`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            aria-label={`Ver orden firmada de ${reference}`}
-                            title="Ver orden firmada"
-                          />
-                        ) : (
-                          <Documents
-                            owner="orden_compra"
-                            ownerId={o.id}
-                            documents={[]}
-                            compact
-                            showList={false}
-                            renderAddTrigger={(open) => (
-                              <Button
-                                icon={FilePlus2}
-                                className="icon-btn"
-                                aria-label={`Agregar orden firmada para ${reference}`}
-                                title="Agregar orden firmada"
-                                onClick={open}
-                              />
-                            )}
-                          />
-                        )}
-                        <RowLink
-                          label={`Ver orden ${o.no_orden}`}
-                          href={`/ordenes/${o.id}`}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        {!rows.length && (
-          <Empty
-            title="No hay órdenes coincidentes"
-            description="Cambia los filtros o crea una nueva orden con el consecutivo automático."
-            action={
-              !searchedNumber ? (
-                <Button icon={Plus} onClick={() => setCreating(true)}>
-                  Nueva orden
-                </Button>
-              ) : undefined
-            }
-          />
-        )}
-        <div className="table-footer orders-footer">
-          <span aria-live="polite">
-            {rows.length} órdenes en esta vista · Mostrando {page.start}–
-            {page.end}
-          </span>
-          <nav className="orders-pagination" aria-label="Paginación de órdenes">
-            <Button
-              icon={ChevronLeft}
-              className="small"
-              disabled={page.page === 1}
-              onClick={() =>
-                setParams(group, params, {
-                  pagina: page.page === 2 ? "" : page.page - 1,
-                })
-              }
-            >
-              Anterior
-            </Button>
-            <span className="num">
-              Página {page.page} de {page.pageCount}
-            </span>
-            <Button
-              icon={ChevronRight}
-              className="small"
-              disabled={page.page === page.pageCount}
-              onClick={() =>
-                setParams(group, params, { pagina: page.page + 1 })
-              }
-            >
-              Siguiente
-            </Button>
-          </nav>
-        </div>
-      </section>
-      {helpOpen && (
-        <Dialog
-          title="Filtros personalizados"
-          subtitle="Elige un filtro y combínalo con la búsqueda y los filtros de columna."
-          onClose={() => setHelpOpen(false)}
-        >
-          <div className="dialog-body custom-filter-help">
-            <dl>
-              {customFilters.map((filter) => (
-                <div className="filter-help-entry" key={filter.id}>
-                  <dt>
-                    {filter.name}
-                    {filter.productOnly && (
-                      <span className="filter-scope">OC de producto</span>
-                    )}
-                  </dt>
-                  <dd>{filter.description}</dd>
+                    >
+                      Anterior
+                    </Button>
+                    <span className="num">
+                      Página {page.page} de {page.pageCount}
+                    </span>
+                    <Button
+                      icon={ChevronRight}
+                      className="small"
+                      disabled={page.page === page.pageCount}
+                      onClick={() =>
+                        setParams(group, params, { pagina: page.page + 1 })
+                      }
+                    >
+                      Siguiente
+                    </Button>
+                  </nav>
                 </div>
-              ))}
-            </dl>
-          </div>
-          <div className="dialog-footer">
-            <Button onClick={() => setHelpOpen(false)}>Entendido</Button>
-          </div>
-        </Dialog>
-      )}
-      {creating && (
-        <OrderForm
-          onClose={() => setCreating(false)}
-          initialType={initialType}
-        />
-      )}
+              </TabContent>
+            </TabGroup>
+          </section>
+          {helpOpen && (
+            <Dialog
+              title="Filtros personalizados"
+              subtitle="Elige un filtro y combínalo con la búsqueda y los filtros de columna."
+              onClose={() => setHelpOpen(false)}
+            >
+              <div className="dialog-body custom-filter-help">
+                <dl>
+                  {customFilters.map((filter) => (
+                    <div className="filter-help-entry" key={filter.id}>
+                      <dt>
+                        {filter.name}
+                        {filter.productOnly && (
+                          <span className="filter-scope">OC de producto</span>
+                        )}
+                      </dt>
+                      <dd>{filter.description}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+              <div className="dialog-footer">
+                <Button onClick={() => setHelpOpen(false)}>Entendido</Button>
+              </div>
+            </Dialog>
+          )}
+          {creating && (
+            <OrderForm
+              onClose={() => setCreating(false)}
+              initialType={initialType}
+            />
+          )}
+        </TabContent>
+      </TabGroup>
     </>
   );
 }
@@ -866,9 +1009,9 @@ export function OrderDetail({
     }
     if (s === "anulada") {
       if (
-        !window.confirm(
+        !(await confirmAction(
           `¿Anular este ${orderItemLabel(o!.tipo_orden)}? La orden conservará su número.`,
-        )
+        ))
       )
         return;
       confirm = true;
@@ -877,9 +1020,9 @@ export function OrderDetail({
       const d = deviation(db, l);
       if (d !== null && Math.abs(d) > tolerance(db)) {
         if (
-          !window.confirm(
+          !(await confirmAction(
             `La desviación del producto es ${d.toFixed(2)} %, fuera del margen ±${tolerance(db)} %. ¿Confirmar el cierre manual?`,
-          )
+          ))
         )
           return;
         confirm = true;
@@ -929,7 +1072,7 @@ export function OrderDetail({
   }
   return (
     <>
-      <a
+      <ControlLink
         className="back-link"
         href={
           listReturn?.path ??
@@ -940,7 +1083,7 @@ export function OrderDetail({
       >
         <ArrowLeft size={15} aria-hidden="true" />
         Volver a órdenes
-      </a>
+      </ControlLink>
       <PageHeading
         title={`Orden de compra ${o.no_orden}`}
         description={`${provider.nombre_largo ?? provider.nombre_corto} · ${text(o.tipo_orden)}`}
@@ -1094,7 +1237,7 @@ export function OrderDetail({
                 );
                 return (
                   <OrderLineCard state={l.estado} key={l.id}>
-                    {({ expanded, contentId, toggle }) => (
+                    {({ expanded }) => (
                       <>
                         <div className="line-card-head">
                           <div>
@@ -1139,9 +1282,9 @@ export function OrderDetail({
                             {o.tipo_orden !== "otro" && (
                               <Button
                                 className="small line-disclosure-toggle"
+                                slot="trigger"
                                 icon={ChevronDown}
                                 aria-expanded={expanded}
-                                aria-controls={contentId}
                                 aria-label={`${expanded ? "Ocultar" : "Desplegar"} ${o.tipo_orden === "producto" ? "lotes" : "documentos"} del ${orderItemLabel(o.tipo_orden)} ${l.posicion}`}
                                 disabled={
                                   o.tipo_orden === "material" &&
@@ -1153,7 +1296,6 @@ export function OrderDetail({
                                     ? "Registra un lote de material para gestionar sus documentos"
                                     : undefined
                                 }
-                                onClick={toggle}
                               ></Button>
                             )}
                           </div>
@@ -1250,47 +1392,62 @@ export function OrderDetail({
                                   Agregar lote
                                 </Button>
                               </div>
-                              <LineDisclosure
-                                expanded={expanded}
-                                contentId={contentId}
-                              >
+                              <LineDisclosure expanded={expanded}>
                                 {lots.length ? (
                                   <div className="lot-list table-scroll">
-                                    <table
+                                    <DataTable
                                       className="data-table product-lots-table"
                                       role="table"
                                       aria-label={
                                         "Lotes del producto " + l.posicion
                                       }
                                     >
-                                      <thead role="rowgroup">
-                                        <tr role="row">
-                                          <th scope="col" role="columnheader">
+                                      <TableHead role="rowgroup">
+                                        <TableRow role="row">
+                                          <TableColumn
+                                            scope="col"
+                                            role="columnheader"
+                                          >
                                             Lote / factura
-                                          </th>
-                                          <th scope="col" role="columnheader">
+                                          </TableColumn>
+                                          <TableColumn
+                                            scope="col"
+                                            role="columnheader"
+                                          >
                                             Recibido
-                                          </th>
-                                          <th scope="col" role="columnheader">
+                                          </TableColumn>
+                                          <TableColumn
+                                            scope="col"
+                                            role="columnheader"
+                                          >
                                             Batch record
-                                          </th>
-                                          <th scope="col" role="columnheader">
+                                          </TableColumn>
+                                          <TableColumn
+                                            scope="col"
+                                            role="columnheader"
+                                          >
                                             Inspección
-                                          </th>
-                                          <th scope="col" role="columnheader">
+                                          </TableColumn>
+                                          <TableColumn
+                                            scope="col"
+                                            role="columnheader"
+                                          >
                                             Estado
-                                          </th>
-                                          <th scope="col" role="columnheader">
+                                          </TableColumn>
+                                          <TableColumn
+                                            scope="col"
+                                            role="columnheader"
+                                          >
                                             <span className="visually-hidden">
                                               Acciones del lote
                                             </span>
-                                          </th>
-                                        </tr>
-                                      </thead>
-                                      <tbody role="rowgroup">
+                                          </TableColumn>
+                                        </TableRow>
+                                      </TableHead>
+                                      <TableRows role="rowgroup">
                                         {lots.map((b, lotIndex) => (
-                                          <tr key={b.id} role="row">
-                                            <td
+                                          <TableRow key={b.id} role="row">
+                                            <TableCell
                                               className="lot-identity"
                                               role="cell"
                                             >
@@ -1306,8 +1463,8 @@ export function OrderDetail({
                                               <small>
                                                 {b.ubicacion ?? "Sin ubicación"}
                                               </small>
-                                            </td>
-                                            <td
+                                            </TableCell>
+                                            <TableCell
                                               className="lot-section lot-section-received"
                                               role="cell"
                                             >
@@ -1326,8 +1483,8 @@ export function OrderDetail({
                                                 label="Fecha de recepción"
                                                 value={b.fecha_recepcion}
                                               />
-                                            </td>
-                                            <td
+                                            </TableCell>
+                                            <TableCell
                                               className="lot-section lot-section-batch"
                                               role="cell"
                                             >
@@ -1354,8 +1511,8 @@ export function OrderDetail({
                                                   }
                                                 />
                                               </div>
-                                            </td>
-                                            <td
+                                            </TableCell>
+                                            <TableCell
                                               className="lot-section"
                                               role="cell"
                                             >
@@ -1372,8 +1529,8 @@ export function OrderDetail({
                                                 label="Fecha de inspección"
                                                 value={b.fecha_inspeccion}
                                               />
-                                            </td>
-                                            <td
+                                            </TableCell>
+                                            <TableCell
                                               className="lot-section"
                                               role="cell"
                                             >
@@ -1388,8 +1545,8 @@ export function OrderDetail({
                                                 label="Confirmación"
                                                 value={b.fecha_confirmacion}
                                               />
-                                            </td>
-                                            <td
+                                            </TableCell>
+                                            <TableCell
                                               className="lot-actions"
                                               role="cell"
                                             >
@@ -1425,11 +1582,11 @@ export function OrderDetail({
                                                   }}
                                                 />
                                               </div>
-                                            </td>
-                                          </tr>
+                                            </TableCell>
+                                          </TableRow>
                                         ))}
-                                      </tbody>
-                                    </table>
+                                      </TableRows>
+                                    </DataTable>
                                   </div>
                                 ) : (
                                   <p
@@ -1517,10 +1674,7 @@ export function OrderDetail({
                               </div>
                               {o.tipo_orden === "material" &&
                                 l.id_lote_material && (
-                                  <LineDisclosure
-                                    expanded={expanded}
-                                    contentId={contentId}
-                                  >
+                                  <LineDisclosure expanded={expanded}>
                                     <div className="line-document-content">
                                       <Documents
                                         owner="lote_material"
@@ -1601,7 +1755,7 @@ export function OrderDetail({
                 [...new Set(related)].map((id) => {
                   const r = db.orden_compra.find((o) => o.id === id)!;
                   return (
-                    <a
+                    <ControlLink
                       className="related-link"
                       key={id}
                       href={`/ordenes/${id}`}
@@ -1619,7 +1773,7 @@ export function OrderDetail({
                         </small>
                       </div>
                       <ChevronRight size={16} aria-hidden="true" />
-                    </a>
+                    </ControlLink>
                   );
                 })
               ) : (
@@ -1723,17 +1877,18 @@ export function OrderDetail({
               Esta acción es irreversible. La orden no podrá volver a no
               autorizada.
             </div>
-            <label className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={signed}
-                onChange={(e) => setSigned(e.target.checked)}
-              />
+            <CheckChoice
+              className="checkbox-row"
+              checked={signed}
+              onChange={setSigned}
+            >
               Confirmo que la orden física tiene todas las firmas necesarias.
-            </label>
+            </CheckChoice>
           </div>
           <div className="dialog-footer">
-            <Button onClick={() => setAuthorize(false)}>Cancelar</Button>
+            <CancelButton onClick={() => setAuthorize(false)}>
+              Cancelar
+            </CancelButton>
             <Button
               variant="primary"
               icon={Check}
@@ -1836,28 +1991,28 @@ export function PrintOrder({ id }: { id: string }) {
           {p.digito_verf ? `-${p.digito_verf}` : ""}
         </div>
       </div>
-      <table className="print-table">
-        <thead>
-          <tr>
-            <th>CÓDIGO</th>
-            <th>PRODUCTO</th>
-            <th>CANTIDAD</th>
-            <th>PRECIO UNIDAD</th>
-            <th>TOTAL</th>
-            <th>No. FACTURA</th>
-            <th>REVISÓ</th>
-          </tr>
-        </thead>
-        <tbody>
+      <DataTable className="print-table">
+        <TableHead>
+          <TableRow>
+            <TableColumn>CÓDIGO</TableColumn>
+            <TableColumn>PRODUCTO</TableColumn>
+            <TableColumn>CANTIDAD</TableColumn>
+            <TableColumn>PRECIO UNIDAD</TableColumn>
+            <TableColumn>TOTAL</TableColumn>
+            <TableColumn>No. FACTURA</TableColumn>
+            <TableColumn>REVISÓ</TableColumn>
+          </TableRow>
+        </TableHead>
+        <TableRows>
           {Array.from({ length: 7 }, (_, i) => {
             const l = ls[i];
             if (!l)
               return (
-                <tr key={i}>
+                <TableRow key={i}>
                   {Array.from({ length: 7 }, (_, n) => (
-                    <td key={n}>&nbsp;</td>
+                    <TableCell key={n}>&nbsp;</TableCell>
                   ))}
-                </tr>
+                </TableRow>
               );
             const invoiceIds =
               o.tipo_orden === "producto"
@@ -1866,8 +2021,8 @@ export function PrintOrder({ id }: { id: string }) {
                     .map((b) => b.id_factura)
                 : [l.id_factura];
             return (
-              <tr key={i}>
-                <td>
+              <TableRow key={i}>
+                <TableCell>
                   {o.tipo_orden === "producto"
                     ? db.codigos_barras.find((c) => c.id === l.id_codigo_barras)
                         ?.codigo
@@ -1877,8 +2032,8 @@ export function PrintOrder({ id }: { id: string }) {
                           ?.codigo_material?.toString()
                           .padStart(3, "0")
                       : ""}
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   {o.tipo_orden === "producto"
                     ? db.productos.find((p) => p.id === l.id_producto)
                         ?.nombre_producto
@@ -1886,11 +2041,17 @@ export function PrintOrder({ id }: { id: string }) {
                       ? db.materiales.find((m) => m.id === l.id_material)
                           ?.nombre_material
                       : l.producto}
-                </td>
-                <td className="right">{count(l.cantidad_solicitada)}</td>
-                <td className="right">{money(l.precio_unitario)}</td>
-                <td className="right">{money(totalLines([l]))}</td>
-                <td>
+                </TableCell>
+                <TableCell className="right">
+                  {count(l.cantidad_solicitada)}
+                </TableCell>
+                <TableCell className="right">
+                  {money(l.precio_unitario)}
+                </TableCell>
+                <TableCell className="right">
+                  {money(totalLines([l]))}
+                </TableCell>
+                <TableCell>
                   {[...new Set(invoiceIds)]
                     .filter(Boolean)
                     .map(
@@ -1898,13 +2059,13 @@ export function PrintOrder({ id }: { id: string }) {
                         db.factura.find((f) => f.id === id)?.numero_factura,
                     )
                     .join(", ")}
-                </td>
-                <td />
-              </tr>
+                </TableCell>
+                <TableCell />
+              </TableRow>
             );
           })}
-        </tbody>
-      </table>
+        </TableRows>
+      </DataTable>
       <div className="print-total">
         <strong>GRAN TOTAL: {money(totalLines(ls))}</strong>
       </div>

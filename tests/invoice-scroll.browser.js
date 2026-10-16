@@ -23,8 +23,8 @@ async (page) => {
     );
   const position = () =>
     page.evaluate(() => ({
-      dialog: document.querySelector("dialog[open]").scrollTop,
-      list: document.querySelector("dialog[open] .check-list").scrollTop,
+      dialog: document.querySelector("[role=dialog]").scrollTop,
+      list: document.querySelector("[role=dialog] .check-list").scrollTop,
       window: window.scrollY,
     }));
   const results = [];
@@ -42,7 +42,7 @@ async (page) => {
           exact: true,
         })
         .click();
-      const dialog = page.locator("dialog[open]");
+      const dialog = page.locator("[role=dialog]");
       await dialog.locator(".check-list").waitFor();
       const provider = dialog.locator('select[data-field-path="id_proveedor"]');
       if (mode === "edit") supplier = await provider.inputValue();
@@ -54,7 +54,7 @@ async (page) => {
           for (let toggle = 0; toggle < 2; toggle++) {
             const before = await page.evaluate(
               ({ target, edge }) => {
-                const dialog = document.querySelector("dialog[open]");
+                const dialog = document.querySelector("[role=dialog]");
                 const list = dialog.querySelector(".check-list");
                 dialog
                   .querySelector(
@@ -83,7 +83,7 @@ async (page) => {
                 if (!row) throw new Error("No fully visible reception row");
                 const input = row.querySelector("input");
                 const r = (
-                  target === "checkbox" ? input : row
+                  target === "checkbox" ? row.querySelector('.aria-check-indicator') : row
                 ).getBoundingClientRect();
                 return {
                   dialog: dialog.scrollTop,
@@ -96,7 +96,7 @@ async (page) => {
                   y: (r.top + r.bottom) / 2,
                   id: input.value,
                   checked: input.checked,
-                  cursor: getComputedStyle(target === "checkbox" ? input : row)
+                  cursor: getComputedStyle(target === "checkbox" ? row.querySelector('.aria-check-indicator') : row)
                     .cursor,
                   margin: getComputedStyle(input).scrollMarginBlock,
                 };
@@ -159,14 +159,14 @@ async (page) => {
         await page.keyboard.press("Tab");
         const visibleFocus = await boxes.nth(i).evaluate((input) => {
           const list = input.closest(".check-list").getBoundingClientRect();
-          const dialog = input.closest("dialog");
+          const dialog = input.closest("[role=dialog]");
           const footer = dialog
             .querySelector(".dialog-footer")
             .getBoundingClientRect();
           const heading = dialog
             .querySelector(".dialog-heading")
             .getBoundingClientRect();
-          const r = input.getBoundingClientRect();
+          const r = input.closest('label').querySelector('.aria-check-indicator').getBoundingClientRect();
           return (
             input === document.activeElement &&
             r.top >= Math.max(list.top, heading.bottom) - 1 &&
@@ -197,9 +197,9 @@ async (page) => {
       );
       // Wheel scrolling remains available inside the nested list.
       const wheel = await dialog.locator(".check-list").evaluate((list) => {
-        list.scrollTop = 50;
+        list.scrollTop = 0;
         const r = list.getBoundingClientRect();
-        const d = list.closest("dialog");
+        const d = list.closest("[role=dialog]");
         const footer = d
           .querySelector(".dialog-footer")
           .getBoundingClientRect();
@@ -218,7 +218,7 @@ async (page) => {
       await page.mouse.wheel(0, 80);
       await page.waitForFunction(
         (before) =>
-          document.querySelector("dialog[open] .check-list").scrollTop > before,
+          document.querySelector("[role=dialog] .check-list").scrollTop > before,
         wheel.scroll,
       );
       if (size.width === 799)

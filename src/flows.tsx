@@ -1,59 +1,52 @@
-import { useMemo, useState } from "react";
 import {
-  Plus,
-  Search,
-  Paperclip,
-  Send,
-  Check,
   ArrowLeft,
-  Info,
+  Check,
   ChevronRight,
   CircleHelp,
   FileText,
-  SlidersHorizontal,
+  Info,
+  Paperclip,
+  Plus,
+  Search,
+  Send,
 } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
-  titles,
-  words,
-  latestBarcode,
-  tolerance,
-  normalizeInvoice,
   orderReference,
+  tolerance,
   type Entity,
   type Row,
 } from "../shared/schema";
-import {
-  useApp,
-  PageHeading,
-  Button,
-  LinkButton,
-  Badge,
-  Empty,
-  Dialog,
-  Field,
-  ErrorNotice,
-  useErrors,
-  text,
-  shortDate,
-  count,
-  money,
-  ProductPicker,
-} from "./ui";
 import { CatalogTable } from "./catalogs";
+import { ColumnHeader } from "./column-filter";
+import {
+  ControlForm,
+  ControlInput,
+  ControlLink,
+  ControlSelect,
+} from "./components/controls";
+import {
+  DataTable,
+  TableCell,
+  TableColumn,
+  TableHead,
+  TableRow,
+  TableRows,
+} from "./components/data-table";
+import { Documents, InvoiceForm, MailForm, receipts } from "./forms";
+import {
+  buildInvoiceRows,
+  invoiceColumns,
+  invoiceDocumentOptions,
+  searchInvoiceRows,
+  type InvoiceColumnKey,
+} from "./invoice-table";
 import { entityValidation } from "./live-validation";
 import {
-  buildSupplyRows,
-  searchSupplyRows,
-  supplyColumns,
-  type SupplyColumnKey,
-} from "./supply-table";
-import { ColumnHeader } from "./column-filter";
-import { replaceRoute } from "./routing";
-import {
+  calendarDay,
   columnOptions,
   filterTableRows,
   hasFilter,
-  calendarDay,
   readColumnState,
   sortTableRows,
   tableParams,
@@ -63,20 +56,33 @@ import {
   type ColumnRow,
   type TableState,
 } from "./order-table";
+import { replaceRoute } from "./routing";
 import {
-  buildInvoiceRows,
-  searchInvoiceRows,
-  invoiceColumns,
-  invoiceDocumentOptions,
-  type InvoiceColumnKey,
-} from "./invoice-table";
+  buildSupplyRows,
+  searchSupplyRows,
+  supplyColumns,
+  type SupplyColumnKey,
+} from "./supply-table";
 import {
-  CatalogForm,
-  Documents,
-  InvoiceForm,
-  MailForm,
-  receipts,
-} from "./forms";
+  Badge,
+  Button,
+  CancelButton,
+  Dialog,
+  Empty,
+  ErrorNotice,
+  Field,
+  LinkButton,
+  PageHeading,
+  ProductPicker,
+  shortDate,
+  TabContent,
+  TabGroup,
+  TabHeader,
+  Tabs,
+  text,
+  useApp,
+  useErrors,
+} from "./ui";
 
 export function SupplyPage({ params }: { params: URLSearchParams }) {
   const { db } = useApp();
@@ -143,160 +149,157 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
         title="Abastecimiento de materiales"
         description="Consulta vínculos entre órdenes y lotes de material."
       />
-      <div className="catalog-tabs">
-        <button
-          type="button"
-          className={tab === "vinculos" ? "active" : ""}
-          onClick={() => setTab("vinculos")}
-        >
-          Vínculos entre órdenes
-        </button>
-        <button
-          type="button"
-          className={tab === "lotes" ? "active" : ""}
-          onClick={() => setTab("lotes")}
-        >
-          Lotes y certificados
-        </button>
-      </div>
-      {tab === "lotes" ? (
-        <CatalogTable entity="lote_material" />
-      ) : (
-        <section className="panel">
-          <div
-            className="toolbar"
-            role="search"
-            aria-label="Búsqueda de órdenes en abastecimiento"
-          >
-            <div className="search">
-              <Search size={16} aria-hidden="true" />
-              <input
-                className="control"
-                type="search"
-                aria-label="Buscar órdenes de producto o material"
-                placeholder="Buscar por OC de producto u OCM de material…"
-                value={query}
-                onChange={(event) => search(event.target.value)}
-              />
-            </div>
-            <div className="filter-actions">
-              {query && (
-                <Button variant="link" onClick={() => search("")}>
-                  Limpiar búsqueda
-                </Button>
-              )}
-              {filterCount > 0 && (
-                <Button
-                  variant="link"
-                  onClick={() =>
-                    saveTable({ filters: {}, sort: tableState.sort })
-                  }
-                >
-                  Limpiar filtros ({filterCount})
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="table-scroll">
-            <table className="data-table catalog-table supply-table">
-              <thead>
-                <tr>
-                  {supplyColumns.map((column) => (
-                    <ColumnHeader
-                      key={column.key}
-                      column={column}
-                      options={openedColumn === column.key ? openedOptions : []}
-                      filter={tableState.filters[column.key]}
-                      sort={tableState.sort}
-                      open={openedColumn === column.key}
-                      onOpen={() => setOpenedColumn(column.key)}
-                      onClose={() => setOpenedColumn(null)}
-                      onFilter={(filter) =>
-                        saveTable({
-                          ...tableState,
-                          filters: {
-                            ...tableState.filters,
-                            [column.key]: filter,
-                          },
-                        })
-                      }
-                      onSort={(sort) => saveTable({ ...tableState, sort })}
-                    />
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {links.map(({ p, m, po, mo }) => {
-                  return (
-                    <tr key={`${p.id}-${m.id}`}>
-                      <td>
-                        <LinkButton variant="link" href={`/ordenes/${po.id}`}>
-                          {orderReference(po.tipo_orden, po.no_orden)}
-                        </LinkButton>
-                      </td>
-                      <td>
-                        <strong>
-                          {
-                            db.productos.find((x) => x.id === p.id_producto)
-                              ?.nombre_producto
-                          }
-                        </strong>
-                        <small>
-                          {
-                            db.proveedor.find((x) => x.id === po.id_proveedor)
-                              ?.nombre_corto
-                          }
-                        </small>
-                      </td>
-                      <td>
-                        <LinkButton variant="link" href={`/ordenes/${mo.id}`}>
-                          {orderReference(mo.tipo_orden, mo.no_orden)}
-                        </LinkButton>
-                      </td>
-                      <td>
-                        <strong>
-                          {
-                            db.materiales.find((x) => x.id === m.id_material)
-                              ?.nombre_material
-                          }
-                        </strong>
-                        <small>
-                          {
-                            db.proveedor.find((x) => x.id === mo.id_proveedor)
-                              ?.nombre_corto
-                          }
-                        </small>
-                      </td>
-                      <td>
-                        <Badge value={m.estado} />
-                      </td>
-                    </tr>
-                  );
-                })}
-                {!links.length && (
-                  <tr>
-                    <td colSpan={5}>
-                      <Empty
-                        title={
-                          all.length
-                            ? "Sin vínculos coincidentes"
-                            : "Sin vínculos entre órdenes"
-                        }
-                        description="Ajusta la búsqueda o los filtros de columna para consultar los vínculos disponibles."
-                      />
-                    </td>
-                  </tr>
+      <Tabs
+        value={tab}
+        onChange={(value) => setTab(value as "vinculos" | "lotes")}
+        label="Vistas de abastecimiento"
+        className="catalog-tabs"
+        items={[
+          { id: "vinculos", label: "Vínculos entre órdenes" },
+          { id: "lotes", label: "Lotes y certificados" },
+        ]}
+      >
+        {tab === "lotes" ? (
+          <CatalogTable entity="lote_material" />
+        ) : (
+          <section className="panel">
+            <div
+              className="toolbar"
+              role="search"
+              aria-label="Búsqueda de órdenes en abastecimiento"
+            >
+              <div className="search">
+                <Search size={16} aria-hidden="true" />
+                <ControlInput
+                  className="control"
+                  type="search"
+                  aria-label="Buscar órdenes de producto o material"
+                  placeholder="Buscar por OC de producto u OCM de material…"
+                  value={query}
+                  onChange={(event) => search(event.target.value)}
+                />
+              </div>
+              <div className="filter-actions">
+                {query && (
+                  <Button variant="link" onClick={() => search("")}>
+                    Limpiar búsqueda
+                  </Button>
                 )}
-              </tbody>
-            </table>
-          </div>
-          <div className="table-footer">
-            <div role="status" aria-live="polite">
-              {links.length} {links.length === 1 ? "vínculo" : "vínculos"}
+                {filterCount > 0 && (
+                  <Button
+                    variant="link"
+                    onClick={() =>
+                      saveTable({ filters: {}, sort: tableState.sort })
+                    }
+                  >
+                    Limpiar filtros ({filterCount})
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+            <div className="table-scroll">
+              <DataTable className="data-table catalog-table supply-table">
+                <TableHead>
+                  <TableRow>
+                    {supplyColumns.map((column) => (
+                      <ColumnHeader
+                        key={column.key}
+                        column={column}
+                        options={
+                          openedColumn === column.key ? openedOptions : []
+                        }
+                        filter={tableState.filters[column.key]}
+                        sort={tableState.sort}
+                        open={openedColumn === column.key}
+                        onOpen={() => setOpenedColumn(column.key)}
+                        onClose={() => setOpenedColumn(null)}
+                        onFilter={(filter) =>
+                          saveTable({
+                            ...tableState,
+                            filters: {
+                              ...tableState.filters,
+                              [column.key]: filter,
+                            },
+                          })
+                        }
+                        onSort={(sort) => saveTable({ ...tableState, sort })}
+                      />
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableRows>
+                  {links.map(({ p, m, po, mo }) => {
+                    return (
+                      <TableRow key={`${p.id}-${m.id}`}>
+                        <TableCell>
+                          <LinkButton variant="link" href={`/ordenes/${po.id}`}>
+                            {orderReference(po.tipo_orden, po.no_orden)}
+                          </LinkButton>
+                        </TableCell>
+                        <TableCell>
+                          <strong>
+                            {
+                              db.productos.find((x) => x.id === p.id_producto)
+                                ?.nombre_producto
+                            }
+                          </strong>
+                          <small>
+                            {
+                              db.proveedor.find((x) => x.id === po.id_proveedor)
+                                ?.nombre_corto
+                            }
+                          </small>
+                        </TableCell>
+                        <TableCell>
+                          <LinkButton variant="link" href={`/ordenes/${mo.id}`}>
+                            {orderReference(mo.tipo_orden, mo.no_orden)}
+                          </LinkButton>
+                        </TableCell>
+                        <TableCell>
+                          <strong>
+                            {
+                              db.materiales.find((x) => x.id === m.id_material)
+                                ?.nombre_material
+                            }
+                          </strong>
+                          <small>
+                            {
+                              db.proveedor.find((x) => x.id === mo.id_proveedor)
+                                ?.nombre_corto
+                            }
+                          </small>
+                        </TableCell>
+                        <TableCell>
+                          <Badge value={m.estado} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                  {!links.length && (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <Empty
+                          title={
+                            all.length
+                              ? "Sin vínculos coincidentes"
+                              : "Sin vínculos entre órdenes"
+                          }
+                          description="Ajusta la búsqueda o los filtros de columna para consultar los vínculos disponibles."
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableRows>
+              </DataTable>
+            </div>
+            <div className="table-footer">
+              <div role="status" aria-live="polite">
+                {links.length} {links.length === 1 ? "vínculo" : "vínculos"}
+              </div>
+            </div>
+          </section>
+        )}
+      </Tabs>
     </>
   );
 }
@@ -381,10 +384,10 @@ export function InvoicesPage({
     const associated = rs.filter((r) => r.invoice === id);
     return (
       <>
-        <a href="/facturas" className="back-link">
+        <ControlLink href="/facturas" className="back-link">
           <ArrowLeft size={15} aria-hidden="true" />
           Volver a facturas
-        </a>
+        </ControlLink>
         <PageHeading
           title={`Factura ${invoice.numero_factura}`}
           description={`${db.proveedor.find((p) => p.id === invoice.id_proveedor)?.nombre_largo} · registrada el ${shortDate(invoice.fecha_registro)}`}
@@ -406,31 +409,31 @@ export function InvoicesPage({
             </div>
             {associated.length ? (
               <div className="table-scroll">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Orden</th>
-                      <th>Producto o concepto</th>
-                      <th>Lote</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <DataTable className="data-table">
+                  <TableHead>
+                    <TableRow>
+                      <TableColumn>Orden</TableColumn>
+                      <TableColumn>Producto o concepto</TableColumn>
+                      <TableColumn>Lote</TableColumn>
+                    </TableRow>
+                  </TableHead>
+                  <TableRows>
                     {associated.map((r) => (
-                      <tr key={r.id}>
-                        <td>
+                      <TableRow key={r.id}>
+                        <TableCell>
                           <LinkButton
                             variant="link"
                             href={`/ordenes/${r.orderId}`}
                           >
                             {orderReference(r.orderType, r.order)}
                           </LinkButton>
-                        </td>
-                        <td>{r.item}</td>
-                        <td>{r.lot}</td>
-                      </tr>
+                        </TableCell>
+                        <TableCell>{r.item}</TableCell>
+                        <TableCell>{r.lot}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableRows>
+                </DataTable>
               </div>
             ) : (
               <Empty
@@ -468,7 +471,7 @@ export function InvoicesPage({
         >
           <div className="search">
             <Search size={16} aria-hidden="true" />
-            <input
+            <ControlInput
               className="control"
               type="search"
               aria-label="Buscar facturas"
@@ -496,9 +499,9 @@ export function InvoicesPage({
           </div>
         </div>
         <div className="table-scroll">
-          <table className="data-table catalog-table invoice-table">
-            <thead>
-              <tr>
+          <DataTable className="data-table catalog-table invoice-table">
+            <TableHead>
+              <TableRow>
                 {invoiceColumns.map((column) => (
                   <ColumnHeader
                     key={column.key}
@@ -521,24 +524,26 @@ export function InvoicesPage({
                     onSort={(sort) => saveTable({ ...tableState, sort })}
                   />
                 ))}
-                <th>
+                <TableColumn>
                   <span className="visually-hidden">Detalle</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+                </TableColumn>
+              </TableRow>
+            </TableHead>
+            <TableRows>
               {rows.map(({ invoice: f, provider, receiptCount, document }) => {
                 return (
-                  <tr key={f.id}>
-                    <td>
+                  <TableRow key={f.id}>
+                    <TableCell>
                       <LinkButton variant="link" href={`/facturas/${f.id}`}>
                         {f.numero_factura}
                       </LinkButton>
-                    </td>
-                    <td>{provider?.nombre_corto ?? provider?.nombre_largo}</td>
-                    <td>{shortDate(f.fecha_registro)}</td>
-                    <td className="num">{receiptCount}</td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
+                      {provider?.nombre_corto ?? provider?.nombre_largo}
+                    </TableCell>
+                    <TableCell>{shortDate(f.fecha_registro)}</TableCell>
+                    <TableCell className="num">{receiptCount}</TableCell>
+                    <TableCell>
                       <LinkButton
                         icon={Paperclip}
                         variant="link"
@@ -560,21 +565,21 @@ export function InvoicesPage({
                       >
                         {document ? "1 archivo" : "Sin archivo"}
                       </LinkButton>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <LinkButton
                         className="icon-btn"
                         icon={ChevronRight}
                         aria-label={`Ver factura ${f.numero_factura}`}
                         href={`/facturas/${f.id}`}
                       />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
               {!rows.length && (
-                <tr>
-                  <td colSpan={6}>
+                <TableRow>
+                  <TableCell colSpan={6}>
                     <Empty
                       title={
                         all.length
@@ -587,11 +592,11 @@ export function InvoicesPage({
                           : "Agrega una factura para comenzar."
                       }
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableRows>
+          </DataTable>
         </div>
         <div className="table-footer">
           <span>{rows.length} facturas</span>
@@ -805,7 +810,7 @@ export function CodesPage() {
         <div className="toolbar">
           <div className="search">
             <Search size={16} aria-hidden="true" />
-            <input
+            <ControlInput
               className="control"
               aria-label="Buscar códigos de barras"
               placeholder="Buscar código o producto…"
@@ -836,9 +841,9 @@ export function CodesPage() {
           </div>
         </div>
         <div className="table-scroll">
-          <table className="data-table catalog-table">
-            <thead>
-              <tr>
+          <DataTable className="data-table catalog-table">
+            <TableHead>
+              <TableRow>
                 {barcodeColumns.map((column) => (
                   <ColumnHeader
                     key={column.key}
@@ -862,25 +867,25 @@ export function CodesPage() {
                     }
                   />
                 ))}
-                <th scope="col">Historial y acciones</th>
-              </tr>
-            </thead>
-            <tbody>
+                <TableColumn scope="col">Historial y acciones</TableColumn>
+              </TableRow>
+            </TableHead>
+            <TableRows>
               {rows.length ? (
                 rows.map((c) => (
-                  <tr key={c.id}>
-                    <td className="mono">
+                  <TableRow key={c.id}>
+                    <TableCell className="mono">
                       <strong>{c.codigo}</strong>
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       {db.productos.find((p) => p.id === c.id_producto)
                         ?.nombre_producto ?? "Sin producto asignado"}
-                    </td>
-                    <td>
+                    </TableCell>
+                    <TableCell>
                       <Badge value={c.estado} />
-                    </td>
-                    <td>{shortDate(c.fecha_creacion)}</td>
-                    <td>
+                    </TableCell>
+                    <TableCell>{shortDate(c.fecha_creacion)}</TableCell>
+                    <TableCell>
                       <div className="inline">
                         {c.estado === "creado_gs1" && (
                           <Button
@@ -923,12 +928,12 @@ export function CodesPage() {
                           Ver órdenes
                         </LinkButton>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={5}>
+                <TableRow>
+                  <TableCell colSpan={5}>
                     <Empty
                       title={
                         allRows.length
@@ -937,11 +942,11 @@ export function CodesPage() {
                       }
                       description="Ajusta la búsqueda o los filtros de columna para consultar los códigos disponibles."
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableRows>
+          </DataTable>
         </div>
         <div className="table-footer">
           <span>{rows.length} códigos</span>
@@ -999,7 +1004,7 @@ export function CodesPage() {
           subtitle="La creación en GS1 ocurre fuera de la aplicación."
           onClose={() => setCreating(false)}
         >
-          <form onSubmit={create}>
+          <ControlForm onSubmit={create}>
             <div className="dialog-body">
               <ErrorNotice error={error} />
               <Field
@@ -1008,7 +1013,7 @@ export function CodesPage() {
                 required
                 error={error?.fields.codigo}
               >
-                <input
+                <ControlInput
                   id="field-codigo"
                   required
                   autoComplete="off"
@@ -1021,12 +1026,14 @@ export function CodesPage() {
               </p>
             </div>
             <div className="dialog-footer">
-              <Button onClick={() => setCreating(false)}>Cancelar</Button>
+              <CancelButton onClick={() => setCreating(false)}>
+                Cancelar
+              </CancelButton>
               <Button type="submit" variant="primary" disabled={busy}>
                 Registrar código
               </Button>
             </div>
-          </form>
+          </ControlForm>
         </Dialog>
       )}
       {action && (
@@ -1054,7 +1061,7 @@ export function CodesPage() {
                   />
                 </Field>
                 <Field id="field-proveedor_producto" label="Proveedor" required>
-                  <input
+                  <ControlInput
                     id="field-proveedor_producto"
                     value={
                       db.proveedor.find(
@@ -1084,7 +1091,9 @@ export function CodesPage() {
             )}
           </div>
           <div className="dialog-footer">
-            <Button onClick={() => setAction(null)}>Cancelar</Button>
+            <CancelButton onClick={() => setAction(null)}>
+              Cancelar
+            </CancelButton>
             <Button
               variant="primary"
               icon={Check}
@@ -1139,27 +1148,27 @@ export function EmailsPage() {
         </div>
         {db.correo_enviado.length ? (
           <div className="table-scroll">
-            <table className="data-table catalog-table">
-              <thead>
-                <tr>
-                  <th>Evento</th>
-                  <th>Fecha</th>
-                  <th>Remitente</th>
-                  <th>Destinatarios utilizados</th>
-                </tr>
-              </thead>
-              <tbody>
+            <DataTable className="data-table catalog-table">
+              <TableHead>
+                <TableRow>
+                  <TableColumn>Evento</TableColumn>
+                  <TableColumn>Fecha</TableColumn>
+                  <TableColumn>Remitente</TableColumn>
+                  <TableColumn>Destinatarios utilizados</TableColumn>
+                </TableRow>
+              </TableHead>
+              <TableRows>
                 {[...db.correo_enviado]
                   .sort((a, b) => b.fecha_envio.localeCompare(a.fecha_envio))
                   .map((m) => (
-                    <tr key={m.id_correo + "-" + m.remitente}>
-                      <td>
+                    <TableRow key={m.id_correo + "-" + m.remitente}>
+                      <TableCell>
                         <strong>{text(m.tipo_evento)}</strong>
                         <small className="mono">{m.id_correo}</small>
-                      </td>
-                      <td>{shortDate(m.fecha_envio)}</td>
-                      <td>{m.remitente}</td>
-                      <td>
+                      </TableCell>
+                      <TableCell>{shortDate(m.fecha_envio)}</TableCell>
+                      <TableCell>{m.remitente}</TableCell>
+                      <TableCell>
                         {db.correo_enviado_destinatario
                           .filter(
                             (r) =>
@@ -1172,11 +1181,11 @@ export function EmailsPage() {
                               {r.destinatario}
                             </small>
                           ))}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-              </tbody>
-            </table>
+              </TableRows>
+            </DataTable>
           </div>
         ) : (
           <Empty title="Todavía no hay envíos" />
@@ -1222,21 +1231,19 @@ export function SettingsPage() {
         title="Configuración"
         description="Parámetros de seguimiento, contactos y sugerencias por proceso."
       />
-      <div className="settings-layout">
-        <nav className="settings-nav" aria-label="Apartados de configuración">
-          {groups.map((g) => (
-            <button
-              type="button"
-              key={g.id}
-              className={tab === g.id ? "selected" : ""}
-              aria-current={tab === g.id ? "page" : undefined}
-              onClick={() => setTab(g.id)}
-            >
-              {g.label}
-            </button>
-          ))}
-        </nav>
-        <div>
+      <TabGroup
+        value={tab}
+        onChange={setTab}
+        className="settings-layout"
+        orientation="vertical"
+      >
+        <TabHeader
+          items={groups}
+          value={tab}
+          className="settings-nav"
+          label="Apartados de configuración"
+        />
+        <TabContent id={tab}>
           {[
             "contacto_interno",
             "destinatario_evento",
@@ -1271,7 +1278,7 @@ export function SettingsPage() {
                 </div>
                 <Badge value="autorizada">±{tolerance(db)} % vigente</Badge>
               </div>
-              <form onSubmit={submit}>
+              <ControlForm onSubmit={submit}>
                 <div className="panel-body stack">
                   <ErrorNotice error={error} />
                   <Field
@@ -1280,7 +1287,7 @@ export function SettingsPage() {
                     hint="La configuración vigente se conserva en el historial."
                     error={error?.fields.margen_tolerancia_pct}
                   >
-                    <input
+                    <ControlInput
                       id="field-margen_tolerancia_pct"
                       type="number"
                       step="0.01"
@@ -1299,41 +1306,41 @@ export function SettingsPage() {
                     </Button>
                   </div>
                 </div>
-              </form>
+              </ControlForm>
               <div className="table-scroll">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Margen</th>
-                      <th>Inicio de vigencia</th>
-                      <th>Configuración</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <DataTable className="data-table">
+                  <TableHead>
+                    <TableRow>
+                      <TableColumn>Margen</TableColumn>
+                      <TableColumn>Inicio de vigencia</TableColumn>
+                      <TableColumn>Configuración</TableColumn>
+                    </TableRow>
+                  </TableHead>
+                  <TableRows>
                     {[...db.parametros_seguimiento]
                       .sort((a, b) =>
                         b.fecha_inicio.localeCompare(a.fecha_inicio),
                       )
                       .map((p, i) => (
-                        <tr key={p.id}>
-                          <td>±{p.margen_tolerancia_pct} %</td>
-                          <td>{shortDate(p.fecha_inicio)}</td>
-                          <td>
+                        <TableRow key={p.id}>
+                          <TableCell>±{p.margen_tolerancia_pct} %</TableCell>
+                          <TableCell>{shortDate(p.fecha_inicio)}</TableCell>
+                          <TableCell>
                             {i === 0 ? (
                               <Badge value="autorizada">Vigente</Badge>
                             ) : (
                               <span className="muted">Histórica</span>
                             )}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                  </tbody>
-                </table>
+                  </TableRows>
+                </DataTable>
               </div>
             </section>
           )}
-        </div>
-      </div>
+        </TabContent>
+      </TabGroup>
     </>
   );
 }
@@ -1361,7 +1368,7 @@ export function DocumentsPage() {
         <div className="toolbar">
           <div className="search">
             <Search size={16} aria-hidden="true" />
-            <input
+            <ControlInput
               className="control"
               aria-label="Buscar documentos"
               placeholder="Buscar nombre o clase de documento…"
@@ -1369,7 +1376,7 @@ export function DocumentsPage() {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <select
+          <ControlSelect
             className="control filter-select"
             aria-label="Filtrar clase de documento"
             value={kind}
@@ -1387,21 +1394,21 @@ export function DocumentsPage() {
                 {text(t)}
               </option>
             ))}
-          </select>
+          </ControlSelect>
         </div>
         {rows.length ? (
           <div className="table-scroll">
-            <table className="data-table catalog-table">
-              <thead>
-                <tr>
-                  <th>Documento</th>
-                  <th>Propietario</th>
-                  <th>Clase</th>
-                  <th>Cargado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
+            <DataTable className="data-table catalog-table">
+              <TableHead>
+                <TableRow>
+                  <TableColumn>Documento</TableColumn>
+                  <TableColumn>Propietario</TableColumn>
+                  <TableColumn>Clase</TableColumn>
+                  <TableColumn>Cargado</TableColumn>
+                  <TableColumn>Acciones</TableColumn>
+                </TableRow>
+              </TableHead>
+              <TableRows>
                 {rows.map((d) => {
                   const order =
                     d.tipo_entidad === "orden_compra"
@@ -1420,9 +1427,9 @@ export function DocumentsPage() {
                               ?.numero_lote
                           : "Global";
                   return (
-                    <tr key={d.id}>
-                      <td>
-                        <a
+                    <TableRow key={d.id}>
+                      <TableCell>
+                        <ControlLink
                           href={`/api/documents/${d.id}/content`}
                           target="_blank"
                           rel="noopener noreferrer"
@@ -1433,10 +1440,10 @@ export function DocumentsPage() {
                             style={{ verticalAlign: "middle", marginRight: 6 }}
                           />
                           {d.nombre_archivo}
-                        </a>
+                        </ControlLink>
                         <small>Placeholder · {d.tipo_mime}</small>
-                      </td>
-                      <td>
+                      </TableCell>
+                      <TableCell>
                         {d.tipo_entidad === "factura" ||
                         d.tipo_entidad === "orden_compra" ? (
                           <LinkButton
@@ -1448,17 +1455,17 @@ export function DocumentsPage() {
                         ) : (
                           owner
                         )}
-                      </td>
-                      <td>{text(d.tipo_documento)}</td>
-                      <td>{shortDate(d.fecha_carga)}</td>
-                      <td>
+                      </TableCell>
+                      <TableCell>{text(d.tipo_documento)}</TableCell>
+                      <TableCell>{shortDate(d.fecha_carga)}</TableCell>
+                      <TableCell>
                         <div className="inline">
-                          <a
+                          <ControlLink
                             href={`/api/documents/${d.id}/content?download=1`}
                             style={{ fontSize: 11 }}
                           >
                             Descargar
-                          </a>
+                          </ControlLink>
                           <Button
                             className="small"
                             onClick={() => setSelected(d)}
@@ -1466,12 +1473,12 @@ export function DocumentsPage() {
                             Gestionar
                           </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
-              </tbody>
-            </table>
+              </TableRows>
+            </DataTable>
           </div>
         ) : (
           <Empty />

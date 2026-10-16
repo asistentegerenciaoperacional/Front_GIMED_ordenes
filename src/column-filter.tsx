@@ -1,6 +1,17 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Filter, Search, X } from "lucide-react";
-import { Button, DateInput } from "./ui";
+import { useEffect, useId, useRef, useState } from "react";
+import { Group } from "react-aria-components/Group";
+import { Popover } from "react-aria-components/Popover";
+import {
+  Action,
+  CheckChoice,
+  ChoiceGroup,
+  ControlForm,
+  ControlInput,
+  ControlLabel,
+  ControlSelect,
+} from "./components/controls";
+import { TableColumn } from "./components/data-table";
 import {
   columnOperators,
   filterProblem,
@@ -12,6 +23,7 @@ import {
   type ColumnValue,
   type Operator,
 } from "./order-table";
+import { Button, CancelButton, DateInput } from "./ui";
 
 type HeaderProps<Key extends string> = {
   column: Column<Key>;
@@ -25,117 +37,17 @@ type HeaderProps<Key extends string> = {
   onSort: (sort?: ColumnSort<Key>) => void;
 };
 
-export function ColumnHeader<Key extends string>(props: HeaderProps<Key>) {
-  const { column, filter, sort, options, open, onOpen, onClose } = props;
-  const id = useId();
+export function ColumnHeader<Key extends string>(
+  props: HeaderProps<Key> & { asContent?: boolean },
+) {
+  const { column, filter, sort, open, onOpen, onClose } = props;
   const trigger = useRef<HTMLButtonElement>(null);
-  const popup = useRef<HTMLDivElement>(null);
   const sorted = !column.selectionOnly && sort?.column === column.key;
   const filtered = hasFilter(filter);
-  const menuLabel = `${column.selectionOnly ? "Filtrar" : "Filtrar y ordenar"} ${column.label}`;
-  const close = (restoreFocus = true) => {
-    onClose();
-    if (restoreFocus) trigger.current?.focus({ preventScroll: true });
-  };
-  useLayoutEffect(() => {
-    const panel = popup.current,
-      button = trigger.current;
-    if (!panel || !button || !open) return;
-    panel.showPopover();
-    const position = () => {
-      const anchor = button.getBoundingClientRect();
-      if (
-        anchor.bottom < 0 ||
-        anchor.top > window.innerHeight ||
-        anchor.right < 0 ||
-        anchor.left > window.innerWidth
-      ) {
-        onClose();
-        return;
-      }
-      panel.style.width = `${Math.min(320, window.innerWidth - 16)}px`;
-      panel.style.setProperty(
-        "--column-menu-height",
-        `${Math.min(400, Math.floor(window.innerHeight * 0.6))}px`,
-      );
-      const height = panel.getBoundingClientRect().height;
-      const below = window.innerHeight - anchor.bottom - 8;
-      const top =
-        below >= height || below >= anchor.top - 8
-          ? anchor.bottom + 6
-          : anchor.top - height - 6;
-      panel.style.left = `${Math.max(8, Math.min(anchor.right - panel.offsetWidth, window.innerWidth - panel.offsetWidth - 8))}px`;
-      panel.style.top = `${Math.max(8, Math.min(top, window.innerHeight - height - 8))}px`;
-    };
-    position();
-    panel
-      .querySelector<HTMLElement>("[data-initial-focus]")
-      ?.focus({ preventScroll: true });
-    let pointerStartedInside = false;
-    const finishPointer = () => {
-      pointerStartedInside = false;
-    };
-    const outside = (event: PointerEvent) => {
-      pointerStartedInside =
-        event.target instanceof Node &&
-        (panel.contains(event.target) || button.contains(event.target));
-      if (event.target instanceof Node && !pointerStartedInside) onClose();
-    };
-    const focusOutside = (event: FocusEvent) => {
-      // Label activation briefly focuses the surrounding main before its checkbox.
-      // Wait for the inside pointer gesture to finish before treating focus as an exit.
-      if (
-        !pointerStartedInside &&
-        event.target instanceof Node &&
-        !panel.contains(event.target) &&
-        !button.contains(event.target)
-      )
-        onClose();
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      onClose();
-      button.focus({ preventScroll: true });
-    };
-    const scrolled = (event: Event) => {
-      if (!(event.target instanceof Node && panel.contains(event.target)))
-        position();
-    };
-    const observer = new ResizeObserver(position);
-    observer.observe(panel);
-    window.addEventListener("resize", position);
-    window.addEventListener("scroll", scrolled, true);
-    document.addEventListener("pointerdown", outside);
-    document.addEventListener("pointerup", finishPointer, true);
-    document.addEventListener("pointercancel", finishPointer, true);
-    document.addEventListener("focusin", focusOutside);
-    document.addEventListener("keydown", escape, true);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", position);
-      window.removeEventListener("scroll", scrolled, true);
-      document.removeEventListener("pointerdown", outside);
-      document.removeEventListener("pointerup", finishPointer, true);
-      document.removeEventListener("pointercancel", finishPointer, true);
-      document.removeEventListener("focusin", focusOutside);
-      document.removeEventListener("keydown", escape, true);
-      if (panel.matches(":popover-open")) panel.hidePopover();
-    };
-  }, [open]);
-  return (
-    <th
-      scope="col"
-      aria-sort={
-        sorted
-          ? sort.direction === "asc"
-            ? "ascending"
-            : "descending"
-          : undefined
-      }
-      className={column.key === "total" ? "right" : undefined}
-    >
+  const menuLabel =
+    (column.selectionOnly ? "Filtrar " : "Filtrar y ordenar ") + column.label;
+  const content = (
+    <>
       <div className="column-heading">
         <span>{column.label}</span>
         {sorted &&
@@ -144,16 +56,15 @@ export function ColumnHeader<Key extends string>(props: HeaderProps<Key>) {
           ) : (
             <ArrowDown size={13} aria-hidden="true" />
           ))}
-        <button
+        <Action
           ref={trigger}
-          type="button"
-          className={`column-filter-button ${filtered || sorted ? "active" : ""}`}
+          className={
+            "column-filter-button " + (filtered || sorted ? "active" : "")
+          }
           aria-label={menuLabel}
           aria-haspopup="dialog"
           aria-expanded={open}
-          aria-controls={`${id}-filter`}
-          title={menuLabel}
-          onClick={() => (open ? close() : onOpen())}
+          onClick={() => (open ? onClose() : onOpen())}
         >
           <Filter
             size={15}
@@ -161,29 +72,41 @@ export function ColumnHeader<Key extends string>(props: HeaderProps<Key>) {
             fill={filtered ? "currentColor" : "none"}
           />
           {filtered && <span className="visually-hidden">Filtro aplicado</span>}
-        </button>
+        </Action>
       </div>
-      <div
-        ref={popup}
-        id={`${id}-filter`}
-        popover="manual"
-        role="dialog"
-        aria-label={menuLabel}
-        className="column-filter-panel"
-      >
-        {open && (
-          <FilterPanel
-            column={column}
-            filter={filter}
-            sort={sort}
-            options={options}
-            onClose={close}
-            onFilter={props.onFilter}
-            onSort={props.onSort}
-          />
-        )}
-      </div>
-    </th>
+      {open && (
+        <Popover
+          isNonModal
+          triggerRef={trigger}
+          isOpen={open}
+          onOpenChange={(next) => (next ? onOpen() : onClose())}
+          placement="bottom end"
+          offset={6}
+          containerPadding={8}
+          maxHeight={Math.min(400, window.innerHeight * 0.6)}
+          className="column-filter-panel"
+        >
+          <Group aria-label={menuLabel} className="column-filter-dialog">
+            <FilterPanel
+              column={column}
+              filter={filter}
+              sort={sort}
+              options={props.options}
+              onClose={onClose}
+              onFilter={props.onFilter}
+              onSort={props.onSort}
+            />
+          </Group>
+        </Popover>
+      )}
+    </>
+  );
+  return props.asContent ? (
+    content
+  ) : (
+    <TableColumn className={column.key === "total" ? "right" : undefined}>
+      {content}
+    </TableColumn>
   );
 }
 
@@ -223,14 +146,11 @@ function FilterPanel<Key extends string>({
       setError("");
   }, [column, error, operator, value, end]);
   const errorRef = useRef<HTMLParagraphElement>(null);
-  const allRef = useRef<HTMLInputElement>(null);
+
   const allChecked =
     options.length > 0 && options.every((v) => selected.has(v.key));
   const someChecked = options.some((v) => selected.has(v.key));
-  useLayoutEffect(() => {
-    if (allRef.current)
-      allRef.current.indeterminate = someChecked && !allChecked;
-  }, [someChecked, allChecked]);
+
   const shown = options.filter((v) =>
     v.label
       .toLocaleLowerCase("es-CO")
@@ -249,7 +169,7 @@ function FilterPanel<Key extends string>({
     change: (value: string) => void,
   ) => (
     <div className="column-filter-field">
-      <label htmlFor={inputId}>{label}</label>
+      <ControlLabel htmlFor={inputId}>{label}</ControlLabel>
       {column.kind === "date" ? (
         <DateInput
           id={inputId}
@@ -261,7 +181,7 @@ function FilterPanel<Key extends string>({
           aria-describedby={error ? `${id}-error` : undefined}
         />
       ) : column.kind === "enum" ? (
-        <select
+        <ControlSelect
           id={inputId}
           className="control"
           value={current}
@@ -274,9 +194,9 @@ function FilterPanel<Key extends string>({
               {v.label}
             </option>
           ))}
-        </select>
+        </ControlSelect>
       ) : (
-        <input
+        <ControlInput
           id={inputId}
           className="control"
           type="text"
@@ -305,7 +225,7 @@ function FilterPanel<Key extends string>({
     </div>
   );
   return (
-    <form
+    <ControlForm
       onSubmit={(event) => {
         event.preventDefault();
         const draft: ColumnFilter = {
@@ -331,23 +251,23 @@ function FilterPanel<Key extends string>({
     >
       <div className="column-filter-title">
         <h3>{column.label}</h3>
-        <button
+        <Action
           type="button"
           className="column-filter-button"
           aria-label={`Cerrar filtros de ${column.label}`}
           onClick={() => onClose()}
         >
           <X size={16} aria-hidden="true" />
-        </button>
+        </Action>
       </div>
       <div className="column-filter-content">
         {!column.selectionOnly && (
           <div className="column-sort-actions" aria-label="Ordenamiento">
             {(["asc", "desc"] as const).map((direction, index) => (
-              <button
+              <Action
                 key={direction}
                 type="button"
-                data-initial-focus={index === 0 ? "true" : undefined}
+                autoFocus={index === 0}
                 aria-pressed={
                   sort?.column === column.key && sort.direction === direction
                 }
@@ -362,10 +282,10 @@ function FilterPanel<Key extends string>({
                   <ArrowDown size={16} aria-hidden="true" />
                 )}
                 {labels[index]}
-              </button>
+              </Action>
             ))}
             {sort?.column === column.key && (
-              <button
+              <Action
                 type="button"
                 onClick={() => {
                   onSort();
@@ -373,15 +293,15 @@ function FilterPanel<Key extends string>({
                 }}
               >
                 Quitar ordenamiento
-              </button>
+              </Action>
             )}
           </div>
         )}
         <div className="column-filter-body">
           {!column.selectionOnly && (
             <div className="column-filter-field">
-              <label htmlFor={`${id}-condition`}>Condición</label>
-              <select
+              <ControlLabel htmlFor={`${id}-condition`}>Condición</ControlLabel>
+              <ControlSelect
                 id={`${id}-condition`}
                 className="control"
                 value={operator}
@@ -395,7 +315,7 @@ function FilterPanel<Key extends string>({
                     {label}
                   </option>
                 ))}
-              </select>
+              </ControlSelect>
             </div>
           )}
           {operator && needsValue(operator) && (
@@ -430,7 +350,7 @@ function FilterPanel<Key extends string>({
             {!column.selectionOnly && (
               <div className="column-value-search">
                 <Search size={14} aria-hidden="true" />
-                <input
+                <ControlInput
                   className="control"
                   type="search"
                   aria-label="Buscar valores"
@@ -442,48 +362,48 @@ function FilterPanel<Key extends string>({
               </div>
             )}
             {!column.selectionOnly && (
-              <label className="column-value-option column-select-all">
-                <input
-                  ref={allRef}
-                  type="checkbox"
-                  checked={allChecked}
-                  disabled={!options.length}
-                  onChange={() =>
-                    setSelected(
-                      allChecked
-                        ? new Set()
-                        : new Set(options.map((v) => v.key)),
-                    )
-                  }
-                />
+              <CheckChoice
+                className="column-value-option column-select-all"
+
+                checked={allChecked}
+                disabled={!options.length}
+                onChange={() =>
+                  setSelected(
+                    allChecked ? new Set() : new Set(options.map((v) => v.key)),
+                  )
+                }
+                indeterminate={someChecked && !allChecked}
+              >
                 Seleccionar todos
-              </label>
+              </CheckChoice>
             )}
-            <div className="column-value-list">
+            <ChoiceGroup
+              className="column-value-list"
+              value={[...selected]}
+              aria-label="Valores de la columna"
+              onChange={(next) => setSelected(new Set(next))}
+            >
               {shown.map((item, index) => (
-                <label key={item.key} className="column-value-option">
-                  <input
-                    type="checkbox"
-                    data-initial-focus={
-                      column.selectionOnly && index === 0 ? "true" : undefined
-                    }
-                    checked={selected.has(item.key)}
-                    onChange={(event) => {
-                      const next = new Set(selected);
-                      if (event.target.checked) next.add(item.key);
-                      else next.delete(item.key);
-                      setSelected(next);
-                    }}
-                  />
+                <CheckChoice
+                  key={item.key}
+                  className="column-value-option"
+                  autoFocus={column.selectionOnly && index === 0}
+
+                  data-initial-focus={
+                    column.selectionOnly && index === 0 ? "true" : undefined
+                  }
+
+                  value={item.key}
+                >
                   <span>{item.label}</span>
-                </label>
+                </CheckChoice>
               ))}
               {!shown.length && (
                 <p className="column-values-empty">
                   No hay valores coincidentes.
                 </p>
               )}
-            </div>
+            </ChoiceGroup>
           </fieldset>
         </div>
       </div>
@@ -499,12 +419,12 @@ function FilterPanel<Key extends string>({
           Quitar filtro
         </Button>
         <div>
-          <Button onClick={() => onClose()}>Cancelar</Button>
+          <CancelButton onClick={() => onClose()}>Cancelar</CancelButton>
           <Button type="submit" variant="primary">
             Aplicar
           </Button>
         </div>
       </div>
-    </form>
+    </ControlForm>
   );
 }

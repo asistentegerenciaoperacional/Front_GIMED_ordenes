@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-13T16:12:33.822Z",
+  "date": "2026-10-16T18:52:56.893Z",
   "checks": [
     "Estado con 28 colecciones",
     "Drawer cerrado y contenido sin espacio lateral reservado a 375 px",
@@ -59,10 +59,10 @@
     "Drawer fijado permanece visible al desplazar la página a 1440 px",
     "Drawer fijado y contenido sin desbordamiento en Órdenes de compra a 1440 px",
     "Drawer fijado y contenido sin desbordamiento en Abastecimiento a 1440 px",
-    "Drawer fijado y contenido sin desbordamiento en Facturas a 1440 px",
     "Drawer fijado y contenido sin desbordamiento en Catálogos a 1440 px",
-    "Drawer fijado y contenido sin desbordamiento en Proveedores a 1440 px",
     "Drawer fijado y contenido sin desbordamiento en Códigos de barras a 1440 px",
+    "Drawer fijado y contenido sin desbordamiento en Proveedores a 1440 px",
+    "Drawer fijado y contenido sin desbordamiento en Facturas a 1440 px",
     "Drawer fijado y contenido sin desbordamiento en Documentos a 1440 px",
     "Drawer fijado y contenido sin desbordamiento en Correos a 1440 px",
     "Drawer fijado y contenido sin desbordamiento en Configuración a 1440 px",
@@ -189,7 +189,7 @@
     "Reemplazar el día conserva el mes y el año",
     "Pegado de fecha ISO conserva formato colombiano",
     "Una fecha inexistente muestra error y detiene la revisión",
-    "Botón de fecha activa el selector de calendario nativo",
+    "Botón de fecha abre el calendario React Aria",
     "Selección del calendario sincroniza el campo digitado",
     "Sugerencia de sticker sin exceso por coma flotante",
     "Corrugado redondeado hacia arriba",
@@ -536,7 +536,7 @@
     "HTTP rechaza el segundo documento de factura: datos y consecutivos intactos",
     "Reemplazar factura conserva el identificador usado por su hipervínculo",
     "Ref. corrugado procede del renglón guardado después de cambiar la recomendación del catálogo",
-    "Código, referencia, cantidad de corrugado y sticker o cinta comparten la cabecera",
+    "Código y resumen comercial comparten la cabecera; corrugado y sticker o cinta ocupan la franja secundaria",
     "Las cinco fechas muestran el día de Bogotá en dd/mm/aaaa, incluidos timestamps cercanos a medianoche",
     "Fechas ausentes del lote se muestran como Sin registrar",
     "Número de factura con documento enlaza de forma segura a su documento vigente",
@@ -625,24 +625,25 @@
   "errors": [],
   "responses": [
     {
-      "url": "http://127.0.0.1:3002/api/commands",
+      "url": "http://127.0.0.1:59380/api/commands",
       "status": 422
     },
     {
-      "url": "http://127.0.0.1:3002/api/commands",
+      "url": "http://127.0.0.1:59380/api/commands",
       "status": 422
     },
     {
-      "url": "http://127.0.0.1:3002/api/commands",
+      "url": "http://127.0.0.1:59380/api/commands",
       "status": 422
     }
   ],
-  "productId": "3923a846de6c12b3f9ae71bb",
+  "productId": "54bc634fcad91fe8acb72001",
   "materialId": "000000000000000000000079",
-  "otherId": "f852658a8087f006127eb2ff",
-  "individualId": "8b2065bf3d2acaa6da25bf94",
-  "manualMaterialId": "4fcbf4086c5e83a1b6a14c0e",
-  "replacementOrderId": "1f3768ab6636aeceb2af6eb7",
-  "detailOrderId": "bcfd66b11589939395cf4510",
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\browser-a41c697b-ccba-4ca7-8b5b-fea57a4108d9\\database.json"
+  "otherId": "eb8f634c4f3e6086b91549fa",
+  "individualId": "4d4d2b68bf13e3326e5ebaf4",
+  "manualMaterialId": "80ba936cf6a1834ce899acd0",
+  "replacementOrderId": "c2ccab9fe2ca64a9c6a8b081",
+  "detailOrderId": "72930fb320cdc57662d4fbce",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-9zZWMx\\database.json"
 }

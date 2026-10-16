@@ -1,41 +1,28 @@
+import { History, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
-  Plus,
-  Search,
-  Pencil,
-  Trash2,
-  History,
-  Info,
-  Boxes,
-} from "lucide-react";
-import {
-  meta,
-  titles,
-  labels,
-  primaryKey,
-  latestBarcode,
   currentCost,
+  labels,
+  latestBarcode,
+  meta,
   orderReference,
+  primaryKey,
+  titles,
   type Entity,
   type Row,
 } from "../shared/schema";
-import {
-  useApp,
-  PageHeading,
-  Button,
-  LinkButton,
-  displayField,
-  Dialog,
-  Badge,
-  Empty,
-  Tabs,
-  text,
-  money,
-  shortDate,
-  recordName,
-} from "./ui";
-import { CatalogForm, Documents } from "./forms";
 import { ColumnHeader } from "./column-filter";
+import { ControlInput, ControlLink } from "./components/controls";
+import {
+  DataTable,
+  TableCell,
+  TableColumn,
+  TableHead,
+  TableRow,
+  TableRows,
+} from "./components/data-table";
+import { confirmAction } from "./components/overlays";
+import { CatalogForm, Documents } from "./forms";
 import {
   columnOptions,
   filterTableRows,
@@ -47,6 +34,24 @@ import {
   type ColumnRow,
   type TableState,
 } from "./order-table";
+import {
+  Badge,
+  Button,
+  Dialog,
+  Empty,
+  LinkButton,
+  PageHeading,
+  TabContent,
+  TabGroup,
+  TabHeader,
+  Tabs,
+  displayField,
+  money,
+  recordName,
+  shortDate,
+  text,
+  useApp,
+} from "./ui";
 
 type CatalogFilterRow = ColumnRow<string> & {
   record: Row;
@@ -227,13 +232,11 @@ export function CatalogTable({ entity }: { entity: Entity }) {
       : entity === "materiales"
         ? materialFilterColumns
         : providerEntities.includes(entity)
-          ? fields.map(
-              (field): Column<string> => ({
-                key: field,
-                label: labels[field] ?? text(field),
-                kind: providerBooleanFields.has(field) ? "enum" : "text",
-              }),
-            )
+          ? fields.map((field): Column<string> => ({
+              key: field,
+              label: labels[field] ?? text(field),
+              kind: providerBooleanFields.has(field) ? "enum" : "text",
+            }))
           : null;
   const catalogRows = useMemo(
     () => buildCatalogFilterRows(db, entity, fields),
@@ -290,7 +293,7 @@ export function CatalogTable({ entity }: { entity: Entity }) {
         <div className="toolbar">
           <div className="search">
             <Search size={16} aria-hidden="true" />
-            <input
+            <ControlInput
               className="control"
               aria-label={`Buscar en ${titles[entity]}`}
               value={query}
@@ -317,9 +320,9 @@ export function CatalogTable({ entity }: { entity: Entity }) {
         </div>
         {rows.length || filterColumns ? (
           <div className="table-scroll">
-            <table className="data-table catalog-table">
-              <thead>
-                <tr>
+            <DataTable className="data-table catalog-table">
+              <TableHead>
+                <TableRow>
                   {filterColumns
                     ? filterColumns.map((column) => {
                         const availableRows = filterTableRows(
@@ -371,21 +374,21 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                         );
                       })
                     : fields.map((field) => (
-                        <th scope="col" key={field}>
+                        <TableColumn scope="col" key={field}>
                           {labels[field] ?? text(field)}
-                        </th>
+                        </TableColumn>
                       ))}
-                  <th scope="col">
+                  <TableColumn scope="col">
                     <span className="visually-hidden">Acciones</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  </TableColumn>
+                </TableRow>
+              </TableHead>
+              <TableRows>
                 {rows.length ? (
                   rows.map((row) => (
-                    <tr key={primaryKey(entity, row)}>
+                    <TableRow key={primaryKey(entity, row)}>
                       {fields.map((f) => (
-                        <td key={f}>
+                        <TableCell key={f}>
                           {typeof row[f] === "boolean" ? (
                             <Badge value={row[f] ? "cerrada" : "inactivo"}>
                               {row[f] ? "Sí" : "No"}
@@ -393,11 +396,11 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                           ) : (
                             displayField(db, entity, f, row[f])
                           )}
-                        </td>
+                        </TableCell>
                       ))}
                       {entity === "productos" && (
                         <>
-                          <td>
+                          <TableCell>
                             <strong>
                               {db.materiales_asociados.some(
                                 (a) => a.id_producto === row.id,
@@ -412,13 +415,13 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                               )?.iva ?? "—"}{" "}
                               %
                             </small>
-                          </td>
-                          <td className="mono">
+                          </TableCell>
+                          <TableCell className="mono">
                             {latestBarcode(db, row.id)?.codigo ?? "Sin código"}
-                          </td>
+                          </TableCell>
                         </>
                       )}
-                      <td>
+                      <TableCell>
                         <div className="inline">
                           <Button
                             className="icon-btn"
@@ -442,9 +445,9 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                             className="icon-btn"
                             icon={Trash2}
                             aria-label={`Eliminar ${recordName(db, entity, row)}`}
-                            onClick={() => {
+                            onClick={async () => {
                               if (
-                                window.confirm(
+                                await confirmAction(
                                   "¿Eliminar este registro? Solo se eliminará si no deja referencias pendientes.",
                                 )
                               )
@@ -456,18 +459,20 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                             }}
                           />
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan={(filterColumns?.length ?? fields.length) + 1}>
+                  <TableRow>
+                    <TableCell
+                      colSpan={(filterColumns?.length ?? fields.length) + 1}
+                    >
                       <Empty />
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableRows>
+            </DataTable>
           </div>
         ) : (
           <Empty />
@@ -535,26 +540,26 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                 </div>
                 <h3>Historial de códigos de barras</h3>
                 <div className="table-scroll">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Código</th>
-                        <th>Estado</th>
-                        <th>Creado</th>
-                        <th>Órdenes</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <DataTable className="data-table">
+                    <TableHead>
+                      <TableRow>
+                        <TableColumn>Código</TableColumn>
+                        <TableColumn>Estado</TableColumn>
+                        <TableColumn>Creado</TableColumn>
+                        <TableColumn>Órdenes</TableColumn>
+                      </TableRow>
+                    </TableHead>
+                    <TableRows>
                       {db.codigos_barras
                         .filter((c) => c.id_producto === details.id)
                         .map((c) => (
-                          <tr key={c.id}>
-                            <td className="mono">{c.codigo}</td>
-                            <td>
+                          <TableRow key={c.id}>
+                            <TableCell className="mono">{c.codigo}</TableCell>
+                            <TableCell>
                               <Badge value={c.estado} />
-                            </td>
-                            <td>{shortDate(c.fecha_creacion)}</td>
-                            <td>
+                            </TableCell>
+                            <TableCell>{shortDate(c.fecha_creacion)}</TableCell>
+                            <TableCell>
                               <LinkButton
                                 variant="link"
                                 href={`/ordenes?q=${c.codigo}`}
@@ -568,38 +573,40 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                                 }{" "}
                                 órdenes
                               </LinkButton>
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                    </tbody>
-                  </table>
+                    </TableRows>
+                  </DataTable>
                 </div>
                 <h3>Historial de costos</h3>
                 <div className="table-scroll">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Costo</th>
-                        <th>Desde</th>
-                        <th>Hasta</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <DataTable className="data-table">
+                    <TableHead>
+                      <TableRow>
+                        <TableColumn>Costo</TableColumn>
+                        <TableColumn>Desde</TableColumn>
+                        <TableColumn>Hasta</TableColumn>
+                      </TableRow>
+                    </TableHead>
+                    <TableRows>
                       {db.costos_maquila
                         .filter((c) => c.id_producto === details.id)
                         .map((c) => (
-                          <tr key={c.id}>
-                            <td>{c.costo === null ? "—" : money(c.costo)}</td>
-                            <td>{shortDate(c.fecha_inicio)}</td>
-                            <td>
+                          <TableRow key={c.id}>
+                            <TableCell>
+                              {c.costo === null ? "—" : money(c.costo)}
+                            </TableCell>
+                            <TableCell>{shortDate(c.fecha_inicio)}</TableCell>
+                            <TableCell>
                               {c.fecha_fin
                                 ? shortDate(c.fecha_fin)
                                 : "Sin fecha final"}
-                            </td>
-                          </tr>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                    </tbody>
-                  </table>
+                    </TableRows>
+                  </DataTable>
                 </div>
               </>
             )}
@@ -623,16 +630,16 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                 </div>
                 <h3>Precios conservados en órdenes</h3>
                 <div className="table-scroll">
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th>Orden</th>
-                        <th>Proveedor</th>
-                        <th>Fecha</th>
-                        <th>Precio unitario</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <DataTable className="data-table">
+                    <TableHead>
+                      <TableRow>
+                        <TableColumn>Orden</TableColumn>
+                        <TableColumn>Proveedor</TableColumn>
+                        <TableColumn>Fecha</TableColumn>
+                        <TableColumn>Precio unitario</TableColumn>
+                      </TableRow>
+                    </TableHead>
+                    <TableRows>
                       {db.orden_material
                         .filter((l) => l.id_material === details.id)
                         .map((l) => {
@@ -640,8 +647,8 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                             (o) => o.id === l.id_orden_compra,
                           )!;
                           return (
-                            <tr key={l.id}>
-                              <td>
+                            <TableRow key={l.id}>
+                              <TableCell>
                                 <LinkButton
                                   variant="link"
                                   href={`/ordenes/${o.id}`}
@@ -649,21 +656,23 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                                 >
                                   {orderReference(o.tipo_orden, o.no_orden)}
                                 </LinkButton>
-                              </td>
-                              <td>
+                              </TableCell>
+                              <TableCell>
                                 {
                                   db.proveedor.find(
                                     (p) => p.id === o.id_proveedor,
                                   )?.nombre_corto
                                 }
-                              </td>
-                              <td>{shortDate(o.fecha_elaboracion)}</td>
-                              <td>{money(l.precio_unitario)}</td>
-                            </tr>
+                              </TableCell>
+                              <TableCell>
+                                {shortDate(o.fecha_elaboracion)}
+                              </TableCell>
+                              <TableCell>{money(l.precio_unitario)}</TableCell>
+                            </TableRow>
                           );
                         })}
-                    </tbody>
-                  </table>
+                    </TableRows>
+                  </DataTable>
                 </div>
               </>
             )}
@@ -676,7 +685,7 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                       (o) => o.id === l.id_orden_compra,
                     )!;
                     return (
-                      <a
+                      <ControlLink
                         className="related-link"
                         key={l.id}
                         href={`/ordenes/${o.id}`}
@@ -695,7 +704,7 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                             {l.ubicacion ?? "Sin ubicación"}
                           </small>
                         </div>
-                      </a>
+                      </ControlLink>
                     );
                   })}
                 <Documents owner="lote_material" ownerId={details.id} compact />
@@ -755,6 +764,24 @@ export function CatalogPage({
     materiales_asociados: "Materiales por producto",
     producto_corrugado: "Corrugado por producto",
   };
+  const content = (
+    <Tabs
+      items={childTabs.map((id) => ({
+        id,
+        label: childLabel[id] ?? titles[id],
+      }))}
+      value={entity}
+      onChange={(value) => setEntity(value as Entity)}
+      className="catalog-tabs"
+      label={
+        group === "proveedores"
+          ? "Apartados de proveedores"
+          : "Apartados del catálogo"
+      }
+    >
+      <CatalogTable key={entity} entity={entity} />
+    </Tabs>
+  );
   return (
     <>
       <PageHeading
@@ -767,46 +794,31 @@ export function CatalogPage({
             : "Productos, materiales y sus condiciones de abastecimiento."
         }
       />
-      {group === "proveedores" ? null : (
-        <div className="order-group-tabs">
-          <Tabs
-            label="Grupos de catálogos"
-            items={[
-              { id: "productos", label: "Productos" },
-              { id: "materiales", label: "Materiales" },
-              { id: "relacionados", label: "Productos & materiales" },
-            ]}
-            value={catalogGroup}
-            onChange={(value) => {
-              const nextGroup = value as CatalogGroup;
-              setCatalogGroup(nextGroup);
-              setEntity(catalogGroups[nextGroup][0]);
-            }}
-          />
-        </div>
+      {group === "proveedores" ? (
+        content
+      ) : (
+        <TabGroup
+          value={catalogGroup}
+          onChange={(value) => {
+            const next = value as CatalogGroup;
+            setCatalogGroup(next);
+            setEntity(catalogGroups[next][0]);
+          }}
+        >
+          <div className="order-group-tabs">
+            <TabHeader
+              label="Grupos de catálogos"
+              value={catalogGroup}
+              items={[
+                { id: "productos", label: "Productos" },
+                { id: "materiales", label: "Materiales" },
+                { id: "relacionados", label: "Productos & materiales" },
+              ]}
+            />
+          </div>
+          <TabContent id={catalogGroup}>{content}</TabContent>
+        </TabGroup>
       )}
-      <div
-        className="catalog-tabs"
-        role="navigation"
-        aria-label={
-          group === "proveedores"
-            ? "Apartados de proveedores"
-            : `Catálogos de ${catalogGroup === "relacionados" ? "productos y materiales" : catalogGroup}`
-        }
-      >
-        {childTabs.map((e) => (
-          <button
-            type="button"
-            key={e}
-            className={entity === e ? "active" : ""}
-            aria-current={entity === e ? "page" : undefined}
-            onClick={() => setEntity(e)}
-          >
-            {childLabel[e] ?? titles[e]}
-          </button>
-        ))}
-      </div>
-      <CatalogTable key={entity} entity={entity} />
     </>
   );
 }

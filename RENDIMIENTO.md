@@ -294,3 +294,41 @@ Reproducción desde `prototipo`, siempre con una base temporal independiente:
 
 La segunda orden usa la compilación generada por la primera. El script no
 abre ni modifica `data/database.json` y elimina únicamente su directorio temporal.
+
+## Comparación de la migración a React Aria
+
+Referencia: commit `bd37e32c943477dd36c6936c8453160c0abf34b9`; compilación congelada en `tests/.tmp/aria-baseline/dist`. Harness: `scripts/measure-aria.ts`. La compilación final aprobó **39 de 39 límites** en Chrome **155.0.8059.80**, Windows y el mismo equipo. Evidencias completas: [referencia](tests/evidence/aria/baseline-performance.json), [migración](tests/evidence/aria/after-performance.json) y [comparación por métrica](tests/evidence/aria/comparison.json). No se atribuye a la migración el resultado de mediciones históricas anteriores.
+
+La prueba usa producción, Chrome y fixtures idénticos de 6.000 y 60.000 lotes, sin limitar la CPU, a 1440 y 375 px. Por confirmación expresa del usuario, el ensayo adicional con CPU 4× es informativo y se reporta aparte. Cada interacción empieza en el evento real, después de preparar el control visible, y termina con el resultado pintado. Se excluye el desplazamiento automático y el envío del comando de Playwright. Se mide P95 de carga, búsqueda, selección, diálogos, filtros, ordenamiento, paginación y navegación; heap tras GC y ciclos repetidos; JavaScript descargado.
+
+Presupuestos: incremento máximo del mayor entre 15 % y 20 ms por interacción; entre 15 % y 100 ms para carga; entre 15 % y 5 MB para memoria estable. Las mediciones se ejecutan sin recorridos simultáneos. Cualquier exceso debe resolverse antes de aceptar la entrega.
+
+Cada escenario contiene 20 cargas, 30 muestras por interacción de búsqueda, selección, paginación, menús, ordenamiento y diálogos, y 20 navegaciones de ida/regreso. La memoria se mide tras GC, con 50 ciclos adicionales de apertura/cierre. Los MB de la tabla son decimales (1 MB = 1.000.000 bytes).
+
+| Escenario sin limitar CPU | Carga P95 antes → después | Límite de carga | Heap estable antes → después | Límite de heap |
+|---|---:|---:|---:|---:|
+| 6.000 lotes, 1440 × 1000 | 126,3 → 143,8 ms | 226,3 ms | 13,00 → 17,43 MB | 18,00 MB |
+| 6.000 lotes, 375 × 812 | 113,8 → 162,2 ms | 213,8 ms | 13,00 → 16,27 MB | 18,00 MB |
+| 60.000 lotes, 1440 × 1000 | 637,1 → 709,2 ms | 737,1 ms | 65,22 → 40,35 MB | 75,00 MB |
+
+Los 33 P95 de interacción cumplen individualmente; el mayor P95 final de cada escenario fue 60,7, 61,0 y 71,8 ms respectivamente. El retorno al listado con 60.000 lotes pasó de 242,6 a 46,3 ms gracias a reutilizar el modelo indexado. La colección de 50 posiciones conserva todas sus filas accesibles mientras React Aria monta solo las visibles.
+
+El JavaScript inicial descargado pasa de **515.237 a 830.537 bytes** (+315.300 bytes, aproximadamente 61 %). El módulo principal final ocupa 241,08 kB gzip; CSS, 42,83 kB / 9,34 kB gzip. El calendario y las pantallas secundarias se cargan por demanda. Formularios principales y captura de fechas están disponibles desde el inicio para evitar la pausa de Suspense en su primera apertura. Este aumento de código está incluido en las mediciones de carga; el servicio local de la prueba entrega los recursos sin compresión.
+
+En la última carga y sus interacciones se registraron 1, 0 y 5 tareas de más de 50 ms, frente a 0, 0 y 23 en la referencia; los máximos finales fueron 55 ms en escritorio con 6.000 y 251 ms con 60.000. Las muestras sin redondear y los seis puntos de memoria por escenario figuran en los JSON. Son mediciones locales con API sintética en memoria; no representan latencia de red o disco ni otros equipos.
+
+Se eliminaron transiciones de hover que retenían nodos desmontados en el seguimiento global de transiciones de React Aria 3.53.1. Se conservaron sus estados visuales y las animaciones de desplegado/drawer. El snapshot recién recibido comparte cadenas iguales mediante un pool temporal; no normaliza ni modifica valores, identificadores o decimales, y no cambia la API ni el archivo del usuario. El modelo de órdenes conserva únicamente los índices necesarios y usa una caché débil por snapshot.
+
+Reproducción de aceptación: `npm run benchmark:aria`. El script prepara la referencia aislada si falta, compila y mide ambas versiones secuencialmente, y falla si alguna métrica supera el presupuesto.
+
+Se amplió la observación a **600 aperturas y cierres**, con 61 puntos de memoria separados por GC. El heap final fue 13.223.152 bytes en la referencia y 17.577.548 en la migración, también dentro de 5 MB de diferencia. Entre los ciclos 510 y 600 creció 22.528 bytes (0,13 %), tras el calentamiento. La captura del heap no mostró contenedores `div`, `section`, `form` o `dialog` desmontados retenidos. Esta ventana comprueba estabilización en el ensayo; no prueba una ausencia absoluta de cualquier fuga durante un tiempo ilimitado. Evidencias: [resumen](tests/evidence/aria/soak-summary.json), [referencia prolongada](tests/evidence/aria/baseline-quick-soak-performance.json) y [migración prolongada](tests/evidence/aria/after-quick-soak-performance.json).
+
+Reproducción prolongada: ejecutar ambas fases con `--quick --soak --cycles=600`; para la fase final establecer `ARIA_HEAP_SNAPSHOT=1` y ejecutar después `node scripts/summarize-aria-soak.mjs`. `--quick` reduce las muestras de interacción de este diagnóstico adicional; los resultados de aceptación anteriores usan las muestras completas. La captura cruda queda ignorada en `tests/.tmp`.
+
+### Ensayo adicional de estrés, CPU 4×
+
+Por confirmación expresa del usuario, este ensayo queda **fuera del criterio de aceptación**. Se ejecutó por separado con 6.000 lotes y 375 × 812 px. La carga P95 pasó de 418,9 a 506,1 ms y el heap estable de 13,37 a 16,29 MB. Ocho de las once interacciones superarían los márgenes si se aplicaran también a esta simulación: por ejemplo, abrir el formulario pasó de 74,0 a 152,2 ms y abrir el filtro de 44,5 a 109,2 ms. El retorno al listado mejoró de 210,4 a 107,8 ms. Este resultado no permite afirmar que las mismas cotas se cumplan en equipos mucho más lentos.
+
+Evidencias: [referencia CPU 4×](tests/evidence/aria/baseline-stress-performance.json) y [migración CPU 4×](tests/evidence/aria/after-stress-performance.json). Reproducción: `npx tsx scripts/measure-aria.ts baseline --scenario=stress` y `npx tsx scripts/measure-aria.ts after --scenario=stress`.
+
+Los desplegados nuevos usan la altura calculada por React Aria mediante `--disclosure-panel-height` y una transición de 180 ms, con opacidad de 140 ms. La librería controla medición, apertura y ocultación; la aplicación no añade un bucle de medición por fotograma. Se conserva contenido montado y se desactiva la animación con movimiento reducido.

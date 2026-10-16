@@ -1,13 +1,21 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import localesPlugin from "@react-aria/optimize-locales-plugin";
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    { ...localesPlugin.vite({ locales: ["es-ES", "en-US"] }), enforce: "pre" },
+  ],
   server: {
     host: "127.0.0.1",
     port: 5173,
     strictPort: true,
     watch: {
-      ignored: ["**/.playwright/**", "**/tests/.tmp/**", "**/tests/evidence/**"],
+      ignored: [
+        "**/.playwright/**",
+        "**/tests/.tmp/**",
+        "**/tests/evidence/**",
+      ],
     },
     proxy: { "/api": "http://127.0.0.1:3001" },
   },

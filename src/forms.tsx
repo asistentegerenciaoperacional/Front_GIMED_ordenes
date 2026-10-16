@@ -1,72 +1,77 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  Plus,
-  Trash2,
-  Paperclip,
-  FileText,
-  Download,
-  Printer,
-  RefreshCw,
-  Send,
-  Info,
-  Check,
   ArrowLeft,
+  Check,
   ChevronRight,
+  Info,
+  Paperclip,
+  Plus,
+  Send,
+  Trash2,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
-  meta,
   blankRow,
-  primaryKey,
-  labels,
-  titles,
-  schemas,
-  orderDeliverySchema,
-  dateSchema,
-  normalizeInvoice,
   currentCost,
-  latestBarcode,
-  recommendations,
-  increasedQuantity,
+  dateSchema,
   decimal,
-  orderLines,
-  orderItemLabel,
-  orderReference,
-  nextOrderNumber,
-  totalLines,
+  increasedQuantity,
   isInitialProductLot,
-  productLotNeedsNumber,
+  labels,
+  latestBarcode,
   materialKind,
+  meta,
+  nextOrderNumber,
+  normalizeInvoice,
+  orderDeliverySchema,
+  orderItemLabel,
+  orderLines,
+  orderReference,
+  primaryKey,
+  productLotNeedsNumber,
+  recommendations,
+  schemas,
+  titles,
+  totalLines,
   validEmail,
   type Entity,
   type Row,
 } from "../shared/schema";
+import {
+  CheckChoice,
+  ChoiceGroup,
+  ControlForm,
+  ControlInput,
+  ControlLink,
+  ControlSelect,
+  ControlTextArea,
+  SuggestionList,
+} from "./components/controls";
+import { Documents } from "./document-controls";
 import {
   entityValidation,
   validEntityField,
   validPrice,
 } from "./live-validation";
 import {
-  useApp,
   ApiError,
-  request,
-  Dialog,
-  ConfirmationDialog,
-  Button,
-  Field,
-  DateInput,
-  ErrorNotice,
-  useErrors,
-  text,
-  displayField,
-  recordName,
-  today,
-  isoDate,
-  shortDate,
-  money,
-  count,
   Badge,
-  Empty,
+  Button,
+  CancelButton,
+  ConfirmationDialog,
+  count,
+  DateInput,
+  Dialog,
+  ErrorNotice,
+  Field,
+  isoDate,
+  money,
   ProductPicker,
+  recordName,
+  request,
+  text,
+  today,
+  useApp,
+  useErrors,
 } from "./ui";
 
 export function CatalogForm({
@@ -171,7 +176,7 @@ export function CatalogForm({
       onClose={onClose}
       dirty={dirty}
     >
-      <form onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid">
@@ -194,7 +199,7 @@ export function CatalogForm({
                   );
                 else if (ref)
                   control = (
-                    <select
+                    <ControlSelect
                       id={id}
                       value={value ?? ""}
                       onChange={(e) => update(field, e.target.value || null)}
@@ -208,11 +213,11 @@ export function CatalogForm({
                           {recordName(db, ref.target, r)}
                         </option>
                       ))}
-                    </select>
+                    </ControlSelect>
                   );
                 else if (spec.type === "boolean")
                   control = (
-                    <select
+                    <ControlSelect
                       id={id}
                       value={value === null ? "" : String(value)}
                       onChange={(e) =>
@@ -227,11 +232,11 @@ export function CatalogForm({
                       <option value="">Sin informar</option>
                       <option value="true">Sí</option>
                       <option value="false">No</option>
-                    </select>
+                    </ControlSelect>
                   );
                 else if (meta.enums[spec.type])
                   control = (
-                    <select
+                    <ControlSelect
                       id={id}
                       value={value ?? ""}
                       onChange={(e) => update(field, e.target.value || null)}
@@ -242,7 +247,7 @@ export function CatalogForm({
                           {text(v)}
                         </option>
                       ))}
-                    </select>
+                    </ControlSelect>
                   );
                 else if (spec.type === "datetime")
                   control = (
@@ -254,7 +259,7 @@ export function CatalogForm({
                   );
                 else
                   control = (
-                    <input
+                    <ControlInput
                       id={id}
                       type={
                         spec.type === "integer" && field !== "codigo_material"
@@ -314,264 +319,17 @@ export function CatalogForm({
           )}
         </div>
         <div className="dialog-footer">
-          <Button onClick={onClose}>Cancelar</Button>
+          <CancelButton onClick={onClose}>Cancelar</CancelButton>
           <Button type="submit" variant="primary" disabled={busy}>
             {busy ? "Guardando…" : "Guardar registro"}
           </Button>
         </div>
-      </form>
+      </ControlForm>
     </Dialog>
   );
 }
 
-export function Documents({
-  owner,
-  ownerId,
-  compact = false,
-  showList = true,
-  renderAddTrigger,
-  documents,
-  draft,
-  onDraftSave,
-}: {
-  owner: "factura" | "orden_compra" | "lote_material" | null;
-  ownerId: string | null;
-  compact?: boolean;
-  showList?: boolean;
-  renderAddTrigger?: (open: () => void) => ReactNode;
-  documents?: readonly Row[];
-  draft?: { tipo_documento: string; nombre_archivo: string };
-  onDraftSave?: (draft: {
-    tipo_documento: string;
-    nombre_archivo: string;
-  }) => void;
-}) {
-  const { db, run, notify } = useApp();
-  const [editing, setEditing] = useState<Row | null | undefined>();
-  const docs =
-    documents ??
-    db.documento.filter(
-      (d) => d.tipo_entidad === owner && d.id_entidad === ownerId,
-    );
-  const types =
-    owner === "factura"
-      ? ["factura_fisica"]
-      : owner === "orden_compra"
-        ? ["orden_compra_escaneada"]
-        : owner === "lote_material"
-          ? ["certificado_calidad", "certificado_liberacion"]
-          : ["plantilla_certificado_liberacion"];
-  const availableTypes = types.filter(
-    (type) => !docs.some((doc) => doc.tipo_documento === type),
-  );
-  const [name, setName] = useState(""),
-    [kind, setKind] = useState(types[0]),
-    [busy, setBusy] = useState(false);
-  const { error, catchError } = useErrors(
-    entityValidation(
-      "documento",
-      {
-        nombre_archivo: name,
-        tipo_documento: kind,
-        tipo_entidad: owner,
-        id_entidad: ownerId,
-      },
-      db,
-      editing ?? undefined,
-    ),
-  );
-  function edit(doc?: Row) {
-    const nextKind = doc?.tipo_documento ?? availableTypes[0];
-    if (!nextKind) {
-      notify("Ya existe el documento. Usa Reemplazar para corregirlo.", true);
-      return;
-    }
-    setEditing(doc ?? null);
-    setName(
-      doc?.nombre_archivo ??
-        draft?.nombre_archivo ??
-        `${text(nextKind).replaceAll(" ", "-")}.html`,
-    );
-    setKind(nextKind);
-  }
-  async function save(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    try {
-      const parsedName = schemas.documento.shape.nombre_archivo.safeParse(
-        name.trim(),
-      );
-      if (!name.trim() || !parsedName.success)
-        throw new ApiError({
-          message: "Revisa el nombre del archivo.",
-          fields: { nombre_archivo: "Indica un nombre de archivo válido." },
-        });
-      if (onDraftSave) {
-        onDraftSave({ tipo_documento: kind, nombre_archivo: name.trim() });
-        setEditing(undefined);
-        return;
-      }
-      await run(
-        "saveDocument",
-        {
-          id: editing?.id,
-          tipo_entidad: owner,
-          id_entidad: ownerId,
-          tipo_documento: kind,
-          nombre_archivo: name,
-        },
-        editing ? "Placeholder reemplazado" : "Placeholder agregado",
-      );
-      setEditing(undefined);
-    } catch (e) {
-      catchError(e);
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <>
-      {showList && (
-        <div className={compact ? "" : "panel-body"}>
-          <div className="spread">
-            <h3>
-              Documentos{" "}
-              {docs.length > 0 && (
-                <span className="muted">({docs.length})</span>
-              )}
-            </h3>
-            {availableTypes.length > 0 &&
-              (renderAddTrigger ? (
-                renderAddTrigger(() => edit())
-              ) : (
-                <Button icon={Plus} className="small" onClick={() => edit()}>
-                  Agregar
-                </Button>
-              ))}
-          </div>
-          {docs.length === 0 ? (
-            <div className="notice subtle" style={{ marginTop: 14 }}>
-              <Paperclip size={16} aria-hidden="true" />
-              Sin documentos adjuntos.
-            </div>
-          ) : (
-            docs.map((d) => (
-              <div className="doc-item" key={d.id}>
-                <span className="doc-icon">
-                  <FileText size={17} aria-hidden="true" />
-                </span>
-                <div className="doc-item-body">
-                  <strong>{d.nombre_archivo}</strong>
-                  <small>
-                    {text(d.tipo_documento)} · {shortDate(d.fecha_carga)}
-                  </small>
-                  <div className="doc-actions">
-                    <a
-                      href={`/api/documents/${d.id}/content`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Ver
-                    </a>
-                    <a href={`/api/documents/${d.id}/content?download=1`}>
-                      Descargar
-                    </a>
-                    <a
-                      href={`/api/documents/${d.id}/content`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Imprimir
-                    </a>
-                    <Button variant="link" onClick={() => edit(d)}>
-                      Reemplazar
-                    </Button>
-                    <Button
-                      variant="link"
-                      aria-label={`Eliminar ${d.nombre_archivo}`}
-                      onClick={() => {
-                        if (window.confirm("¿Eliminar este placeholder?"))
-                          void run(
-                            "deleteDocument",
-                            { id: d.id },
-                            "Placeholder eliminado",
-                          ).catch((e) => notify(e.message, true));
-                      }}
-                    >
-                      Eliminar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-      {!showList &&
-        availableTypes.length > 0 &&
-        renderAddTrigger?.(() => edit())}
-      {editing !== undefined && (
-        <Dialog
-          title={editing ? "Reemplazar placeholder" : "Agregar placeholder"}
-          subtitle="El contenido será ficticio. Se conserva la relación con su propietario."
-          onClose={() => setEditing(undefined)}
-        >
-          <form onSubmit={save}>
-            <div className="dialog-body">
-              <ErrorNotice error={error} />
-              <Field
-                id="field-tipo_documento"
-                label="Clase de documento"
-                error={error?.fields.tipo_documento}
-              >
-                <select
-                  id="field-tipo_documento"
-                  value={kind}
-                  onChange={(e) => setKind(e.target.value)}
-                  disabled={!!editing}
-                >
-                  {types.map((t) => (
-                    <option
-                      key={t}
-                      value={t}
-                      disabled={!editing && !availableTypes.includes(t)}
-                    >
-                      {text(t)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-              <Field
-                id="field-nombre_archivo"
-                label="Nombre del archivo"
-                required
-                error={error?.fields.nombre_archivo}
-              >
-                <input
-                  id="field-nombre_archivo"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </Field>
-              <div className="notice subtle">
-                <Info size={16} aria-hidden="true" />
-                Cada clase admite un documento por propietario. Reemplazar
-                actualiza su registro vigente.
-              </div>
-            </div>
-            <div className="dialog-footer">
-              <Button onClick={() => setEditing(undefined)}>Cancelar</Button>
-              <Button type="submit" variant="primary" disabled={busy}>
-                {editing ? "Reemplazar placeholder" : "Guardar placeholder"}
-              </Button>
-            </div>
-          </form>
-        </Dialog>
-      )}
-    </>
-  );
-}
+export { Documents } from "./document-controls";
 
 export function receipts(db: ReturnType<typeof useApp>["db"]): Row[] {
   const result: Row[] = [];
@@ -745,7 +503,7 @@ export function InvoiceForm({
         !!documentDraft
       }
     >
-      <form onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           {error?.details.existingId && onSaved && (
@@ -770,7 +528,7 @@ export function InvoiceForm({
               required
               error={error?.fields.id_proveedor}
             >
-              <select
+              <ControlSelect
                 id="field-id_proveedor"
                 value={supplier}
                 disabled={!!provider || !!invoice}
@@ -785,7 +543,7 @@ export function InvoiceForm({
                     {p.nombre_largo ?? p.nombre_corto}
                   </option>
                 ))}
-              </select>
+              </ControlSelect>
             </Field>
             <Field
               id="field-numero_factura"
@@ -793,7 +551,7 @@ export function InvoiceForm({
               required
               error={error?.fields.numero_factura}
             >
-              <input
+              <ControlInput
                 id="field-numero_factura"
                 value={number}
                 readOnly={!!invoice}
@@ -836,28 +594,34 @@ export function InvoiceForm({
             </div>
           )}
           <h3>Recepciones opcionales</h3>
-          <input
+          <ControlInput
             className="control"
             aria-label="Buscar orden o lote para la factura"
             placeholder="Buscar por orden, lote, producto o proveedor…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <div className="check-list">
+          <ChoiceGroup
+            className="check-list"
+            value={selected}
+            aria-label="Recepciones disponibles"
+            onChange={(next) => {
+              if (!supplier) {
+                const chosen = options.find((option) =>
+                  next.includes(option.id),
+                );
+                if (chosen) setSupplier(chosen.provider);
+              }
+              setSelected(next);
+            }}
+          >
             {options.length ? (
               options.map((r) => (
-                <label key={r.id}>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(r.id)}
-                    value={r.id}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        if (!supplier) setSupplier(r.provider);
-                        setSelected([...selected, r.id]);
-                      } else setSelected(selected.filter((id) => id !== r.id));
-                    }}
-                  />
+                <CheckChoice
+                  key={r.id}
+
+                  value={r.id}
+                >
                   <span>
                     {r.label}
                     {r.invoice && (
@@ -870,23 +634,23 @@ export function InvoiceForm({
                       </small>
                     )}
                   </span>
-                </label>
+                </CheckChoice>
               ))
             ) : (
               <p style={{ padding: 12 }}>No hay recepciones coincidentes.</p>
             )}
-          </div>
+          </ChoiceGroup>
           <p className="compact-note">
             También puedes guardar la factura sin lotes ni documentos.
           </p>
         </div>
         <div className="dialog-footer">
-          <Button onClick={onClose}>Cancelar</Button>
+          <CancelButton onClick={onClose}>Cancelar</CancelButton>
           <Button type="submit" variant="primary" disabled={busy}>
             {invoice ? "Guardar asociaciones" : "Guardar factura"}
           </Button>
         </div>
-      </form>
+      </ControlForm>
     </Dialog>
   );
 }
@@ -923,7 +687,7 @@ export function InvoicePicker({
   return (
     <>
       <div className="invoice-picker">
-        <input
+        <ControlInput
           {...inputProps}
           id={id}
           aria-label="Buscar número de factura"
@@ -956,7 +720,7 @@ export function InvoicePicker({
             }
           />
         )}
-        <select
+        <ControlSelect
           aria-label="Seleccionar factura del proveedor"
           value={value ?? ""}
           onChange={(e) => {
@@ -970,7 +734,7 @@ export function InvoicePicker({
               {f.numero_factura}
             </option>
           ))}
-        </select>
+        </ControlSelect>
       </div>
       {create && (
         <InvoiceForm
@@ -1057,7 +821,7 @@ export function LotForm({
       wide
       dirty={dirty}
     >
-      <form onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid three">
@@ -1069,7 +833,7 @@ export function LotForm({
                 const id = `field-${field}`;
                 const isDate = spec.type === "datetime";
                 const control = meta.enums[spec.type] ? (
-                  <select
+                  <ControlSelect
                     id={id}
                     value={row[field] ?? ""}
                     onChange={(e) => update(field, e.target.value)}
@@ -1079,7 +843,7 @@ export function LotForm({
                         {text(v)}
                       </option>
                     ))}
-                  </select>
+                  </ControlSelect>
                 ) : isDate ? (
                   <DateInput
                     id={id}
@@ -1087,7 +851,7 @@ export function LotForm({
                     onChange={(value) => update(field, isoDate(value))}
                   />
                 ) : (
-                  <input
+                  <ControlInput
                     id={id}
                     type={spec.type === "integer" ? "number" : "text"}
                     step={spec.type === "integer" ? 1 : undefined}
@@ -1135,12 +899,12 @@ export function LotForm({
           )}
         </div>
         <div className="dialog-footer">
-          <Button onClick={onClose}>Cancelar</Button>
+          <CancelButton onClick={onClose}>Cancelar</CancelButton>
           <Button type="submit" variant="primary" disabled={busy || !line.id}>
             {busy ? "Guardando…" : "Guardar lote"}
           </Button>
         </div>
-      </form>
+      </ControlForm>
     </Dialog>
   );
 }
@@ -1186,7 +950,7 @@ export function ReceiptForm({
       onClose={onClose}
       dirty={JSON.stringify(row) !== JSON.stringify(line)}
     >
-      <form onSubmit={submit}>
+      <ControlForm onSubmit={submit}>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid">
@@ -1195,7 +959,7 @@ export function ReceiptForm({
               label="Cantidad recibida (facturada)"
               error={error?.fields.cantidad_recibida}
             >
-              <input
+              <ControlInput
                 id="field-cantidad_recibida"
                 type="number"
                 step="1"
@@ -1213,7 +977,7 @@ export function ReceiptForm({
               label="Ubicación de recepción"
               error={error?.fields.ubicacion}
             >
-              <input
+              <ControlInput
                 id="field-ubicacion"
                 value={row.ubicacion ?? ""}
                 onChange={(e) => update("ubicacion", e.target.value || null)}
@@ -1239,7 +1003,7 @@ export function ReceiptForm({
                 label="Identidad del lote de material"
                 error={error?.fields.id_lote_material}
               >
-                <select
+                <ControlSelect
                   id="field-id_lote_material"
                   value={row.id_lote_material ?? ""}
                   onChange={(e) =>
@@ -1252,7 +1016,7 @@ export function ReceiptForm({
                       {l.numero_lote}
                     </option>
                   ))}
-                </select>
+                </ControlSelect>
                 <Button
                   className="small"
                   icon={Plus}
@@ -1282,12 +1046,12 @@ export function ReceiptForm({
           </div>
         </div>
         <div className="dialog-footer">
-          <Button onClick={onClose}>Cancelar</Button>
+          <CancelButton onClick={onClose}>Cancelar</CancelButton>
           <Button type="submit" variant="primary" disabled={busy}>
             Guardar recepción
           </Button>
         </div>
-      </form>
+      </ControlForm>
       {lotCreate && (
         <CatalogForm
           entity="lote_material"
@@ -1727,7 +1491,7 @@ export function OrderForm({
       onClose={onClose}
       dirty={dirty}
     >
-      <form onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           {replacement && (
@@ -1752,7 +1516,7 @@ export function OrderForm({
             <>
               <div className="form-grid three">
                 <Field id="field-tipo_orden" label="Tipo de orden">
-                  <select
+                  <ControlSelect
                     id="field-tipo_orden"
                     value={type}
                     disabled={!!order}
@@ -1763,14 +1527,14 @@ export function OrderForm({
                         {text(t)}
                       </option>
                     ))}
-                  </select>
+                  </ControlSelect>
                 </Field>
                 <Field
                   id="field-no_orden"
                   label="Número de orden"
                   error={error?.fields.no_orden}
                 >
-                  <input
+                  <ControlInput
                     id="field-no_orden"
                     value={number}
                     readOnly
@@ -1783,7 +1547,7 @@ export function OrderForm({
                   required
                   error={error?.fields.id_proveedor}
                 >
-                  <select
+                  <ControlSelect
                     id="field-id_proveedor"
                     value={supplier}
                     disabled={authorized}
@@ -1795,7 +1559,7 @@ export function OrderForm({
                         {p.nombre_largo ?? p.nombre_corto}
                       </option>
                     ))}
-                  </select>
+                  </ControlSelect>
                 </Field>
                 <Field
                   id="field-fecha_elaboracion"
@@ -1921,7 +1685,7 @@ export function OrderForm({
                               onChange={(id) => changeProduct(i, id)}
                             />
                           ) : type === "material" ? (
-                            <select
+                            <ControlSelect
                               id={key("id_material")}
                               value={l.id_material}
                               onChange={(e) =>
@@ -1934,10 +1698,10 @@ export function OrderForm({
                                   {recordName(db, "materiales", m)}
                                 </option>
                               ))}
-                            </select>
+                            </ControlSelect>
                           ) : (
                             <>
-                              <input
+                              <ControlInput
                                 id={key("producto")}
                                 value={l.producto}
                                 list={`conceptos-anteriores-${i}`}
@@ -1945,7 +1709,7 @@ export function OrderForm({
                                   update(i, "producto", e.target.value)
                                 }
                               />
-                              <datalist id={`conceptos-anteriores-${i}`}>
+                              <SuggestionList id={`conceptos-anteriores-${i}`}>
                                 {[
                                   ...new Set(
                                     db.orden_otro.map((o) => o.producto),
@@ -1953,7 +1717,7 @@ export function OrderForm({
                                 ].map((p) => (
                                   <option key={p} value={p} />
                                 ))}
-                              </datalist>
+                              </SuggestionList>
                             </>
                           )}
                         </Field>
@@ -1965,7 +1729,7 @@ export function OrderForm({
                             error?.fields[`lines.${i}.cantidad_solicitada`]
                           }
                         >
-                          <input
+                          <ControlInput
                             id={key("cantidad_solicitada")}
                             type="number"
                             step="1"
@@ -2007,7 +1771,7 @@ export function OrderForm({
                             error?.fields.precio_unitario
                           }
                         >
-                          <input
+                          <ControlInput
                             id={key("precio_unitario")}
                             inputMode="decimal"
                             value={l.precio_unitario}
@@ -2119,7 +1883,7 @@ export function OrderForm({
                             id={`field-lines.${i}.ref_corrugado`}
                             label="Referencia de corrugado"
                           >
-                            <select
+                            <ControlSelect
                               id={`field-lines.${i}.ref_corrugado`}
                               value={l.ref_corrugado ?? ""}
                               onChange={(e) =>
@@ -2140,7 +1904,7 @@ export function OrderForm({
                                     {m.nombre_material}
                                   </option>
                                 ))}
-                            </select>
+                            </ControlSelect>
                           </Field>
                           <Field
                             id={`field-lines.${i}.cantidad_corrugado`}
@@ -2152,7 +1916,7 @@ export function OrderForm({
                             }
                             error={error?.fields.cantidad_corrugado}
                           >
-                            <input
+                            <ControlInput
                               id={`field-lines.${i}.cantidad_corrugado`}
                               type="number"
                               step="1"
@@ -2179,7 +1943,7 @@ export function OrderForm({
                                 label="Cantidad de sticker"
                                 tooltip="Cantidad solicitada x 2 + % adicional"
                               >
-                                <input
+                                <ControlInput
                                   id={`field-lines.${i}.cantidad_sticker`}
                                   aria-label="Cantidad de sticker · provisional"
                                   type="number"
@@ -2202,7 +1966,7 @@ export function OrderForm({
                                 tooltip="Cantidad solicitada x 2 + % adicional"
                                 error={error?.fields[`lines.${i}.sticker_pct`]}
                               >
-                                <input
+                                <ControlInput
                                   aria-label="Adicional recomendado de sticker (%)"
                                   type="number"
                                   inputMode="decimal"
@@ -2227,7 +1991,7 @@ export function OrderForm({
                               label="Cantidad de cinta · provisional"
                               tooltip="Cantidad solicitada ÷ 4000"
                             >
-                              <input
+                              <ControlInput
                                 id={`field-lines.${i}.cantidad_cinta`}
                                 type="number"
                                 step="1"
@@ -2277,7 +2041,7 @@ export function OrderForm({
               Volver
             </Button>
           )}
-          <Button onClick={onClose}>Cancelar</Button>
+          <CancelButton onClick={onClose}>Cancelar</CancelButton>
           <Button
             type="submit"
             variant="primary"
@@ -2295,7 +2059,7 @@ export function OrderForm({
                     : "Crear orden"}
           </Button>
         </div>
-      </form>
+      </ControlForm>
       {pendingSupplier !== null && (
         <ConfirmationDialog
           title="Cambiar proveedor y reemplazar la orden"
@@ -2413,12 +2177,12 @@ export function MailForm({
       onClose={onClose}
       dirty={changed}
     >
-      <form onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid three">
             <Field id="field-event" label="Proceso">
-              <select
+              <ControlSelect
                 id="field-event"
                 value={event}
                 onChange={(e) => setEvent(e.target.value)}
@@ -2428,11 +2192,11 @@ export function MailForm({
                     {text(t)}
                   </option>
                 ))}
-              </select>
+              </ControlSelect>
             </Field>
             {event === "envio_orden_compra" && (
               <Field id="field-orderId" label="Orden">
-                <select
+                <ControlSelect
                   id="field-orderId"
                   value={orderId}
                   onChange={(e) => setOrderId(e.target.value)}
@@ -2444,12 +2208,12 @@ export function MailForm({
                       {text(o.tipo_orden)}
                     </option>
                   ))}
-                </select>
+                </ControlSelect>
               </Field>
             )}
             {event.startsWith("envio_certificado") && (
               <Field id="field-loteMaterialId" label="Lote de material">
-                <select
+                <ControlSelect
                   id="field-loteMaterialId"
                   value={lotId}
                   onChange={(e) => setLotId(e.target.value)}
@@ -2460,7 +2224,7 @@ export function MailForm({
                       {l.numero_lote}
                     </option>
                   ))}
-                </select>
+                </ControlSelect>
               </Field>
             )}
             <div className="field">
@@ -2485,7 +2249,7 @@ export function MailForm({
           </div>
           {recipients.map((r, i) => (
             <div className="recipient" key={i}>
-              <select
+              <ControlSelect
                 className="control"
                 aria-label={`Tipo de destinatario ${i + 1}`}
                 value={r.type}
@@ -2503,8 +2267,8 @@ export function MailForm({
                     {text(t)}
                   </option>
                 ))}
-              </select>
-              <input
+              </ControlSelect>
+              <ControlInput
                 className="control"
                 type="email"
                 list="correo-directorio"
@@ -2532,13 +2296,13 @@ export function MailForm({
               />
             </div>
           ))}
-          <datalist id="correo-directorio">
+          <SuggestionList id="correo-directorio">
             {manualContacts.map((c) => (
               <option key={c.id} value={c.correo!}>
                 {c.nombre}
               </option>
             ))}
-          </datalist>
+          </SuggestionList>
           {!recipients.length && (
             <p className="compact-note">
               Sin sugerencias. Puedes agregar cualquier dirección válida.
@@ -2549,7 +2313,7 @@ export function MailForm({
             label="Contenido del correo"
             hint="El cuerpo se usa en la simulación y no se conserva en el historial."
           >
-            <textarea
+            <ControlTextArea
               id="field-body"
               rows={7}
               value={body}
@@ -2565,14 +2329,14 @@ export function MailForm({
               preview.documents.map((d: Row) => (
                 <div key={d.id} className="inline" style={{ marginTop: 8 }}>
                   <Paperclip size={15} aria-hidden="true" />
-                  <a
+                  <ControlLink
                     href={`/api/documents/${d.id}/content`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ fontSize: 12 }}
                   >
                     {d.nombre_archivo}
-                  </a>
+                  </ControlLink>
                   <Badge value="material">Placeholder</Badge>
                 </div>
               ))
@@ -2601,7 +2365,7 @@ export function MailForm({
           )}
         </div>
         <div className="dialog-footer">
-          <Button onClick={onClose}>Cancelar</Button>
+          <CancelButton onClick={onClose}>Cancelar</CancelButton>
           <Button
             type="submit"
             icon={Send}
@@ -2611,7 +2375,7 @@ export function MailForm({
             {busy ? "Confirmando…" : "Simular envío"}
           </Button>
         </div>
-      </form>
+      </ControlForm>
     </Dialog>
   );
 }

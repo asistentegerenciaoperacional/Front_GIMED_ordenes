@@ -43,7 +43,7 @@ Las órdenes de producto se identifican como **OC** y las de materiales y otros 
 
 **Catálogos** organiza sus secciones en tres grupos principales, con el estilo de pestañas de Órdenes: **Productos** (Lista de productos, Categorías, Costos de maquila), **Materiales** (Lista de materiales, Tipos de material, Proveedores de material) y **Productos & materiales** (Materiales por producto, Corrugado por producto). Los botones de las secciones secundarias conservan su estilo actual.
 
-Los formularios que asignan un producto existente permiten escribir su nombre y muestran coincidencias con la lista nativa del navegador (`datalist`). En órdenes solo aparecen productos activos del proveedor de la orden, además del producto histórico que ya tenga ese renglón. Los formularios de relaciones del catálogo y la asignación GS1 consultan los productos disponibles; al asignar un código GS1, debajo del producto se muestra el proveedor asociado en un campo bloqueado.
+Los formularios que asignan un producto existente permiten escribir su nombre y muestran coincidencias con el `ComboBox` compartido de React Aria, con selección por identificador. En órdenes solo aparecen productos activos del proveedor de la orden, además del producto histórico que ya tenga ese renglón. Los formularios de relaciones del catálogo y la asignación GS1 consultan los productos disponibles; al asignar un código GS1, debajo del producto se muestra el proveedor asociado en un campo bloqueado.
 
 ## Requisito de filtros por columna
 
@@ -215,3 +215,7 @@ La arquitectura y el stack de producción continúan pendientes. También perman
 | [Cobertura](COBERTURA.md)                                  | Correspondencia entre requisitos y pantallas.               |
 | [Verificación](VERIFICACION.md)                            | Resultados, fechas, reportes y capturas.                    |
 | [Interfaz](design-system/MASTER.md)                        | Navegación, formularios, filtros y accesibilidad.           |
+
+## Migración a React Aria
+
+La directriz obligatoria de componentes está en [MASTER.md](design-system/MASTER.md). El inventario, el commit de recuperación y el estado de las pruebas se mantienen en [MIGRACION-ARIA.md](MIGRACION-ARIA.md). Las cifras de las verificaciones anteriores son referencias históricas, no el resultado de la migración.

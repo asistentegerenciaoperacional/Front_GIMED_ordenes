@@ -1,0 +1,379 @@
+.aria-text-root,
+.aria-select-root,
+.aria-dialog-content {
+  display: contents;
+}
+.aria-tab-group {
+  display: contents;
+}
+.aria-tab-panel {
+  min-width: 0;
+  width: 100%;
+  outline: none;
+}
+.aria-select-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 6px;
+  padding: 9px 11px;
+  color: #1e293b;
+  font-size: 12px;
+  min-height: 36px;
+  line-height: 1.5;
+}
+.aria-select-control[data-disabled] {
+  background: #f1f5f9;
+  color: #64748b;
+}
+.aria-select-control > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.aria-select-control svg {
+  flex-shrink: 0;
+}
+.aria-combo-root {
+  min-width: 0;
+  width: 100%;
+}
+.aria-combo-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.aria-combo-field input {
+  width: 100%;
+  padding-right: 32px !important;
+}
+.aria-combo-trigger {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  bottom: 4px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+}
+.aria-options {
+  z-index: 1300;
+  width: var(--trigger-width);
+  min-width: 120px;
+  max-width: calc(100vw - 16px);
+  padding: 0;
+  border: 1px solid #8896aa;
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: none;
+  overflow: hidden;
+}
+.aria-option-list {
+  max-height: min(280px, 50dvh);
+  overflow: auto;
+  outline: 0;
+  padding: 0;
+}
+.aria-option {
+  padding: 5px 8px;
+  min-height: 26px;
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: pointer;
+  outline: none;
+  white-space: normal;
+}
+.aria-option[data-focused],
+.aria-option[data-selected] {
+  background: #1967d2;
+  color: #fff;
+}
+.aria-option[data-disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+.aria-option small {
+  display: block;
+  font-size: 10px;
+  color: inherit;
+}
+.aria-options-empty {
+  display: block;
+  padding: 9px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.aria-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: #14243c65;
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  isolation: isolate;
+}
+.aria-modal {
+  max-height: 100%;
+  outline: 0;
+}
+.aria-modal .dialog {
+  overflow: auto;
+  outline: none;
+  margin: 0;
+}
+.aria-calendar-popover {
+  z-index: 1300;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 8px 30px #172c4b26;
+}
+.aria-calendar-dialog {
+  outline: none;
+}
+.react-aria-Calendar header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.react-aria-Calendar header button {
+  border: 0;
+  background: transparent;
+  padding: 6px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+}
+.react-aria-Calendar header h2 {
+  font-size: 13px;
+}
+.react-aria-CalendarGrid {
+  border-collapse: collapse;
+}
+.react-aria-CalendarHeaderCell {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 4px;
+}
+.react-aria-CalendarCell {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  outline: none;
+}
+.react-aria-CalendarCell[data-hovered] {
+  background: #eff6ff;
+}
+.react-aria-CalendarCell[data-selected] {
+  background: var(--primary);
+  color: #fff;
+}
+.react-aria-CalendarCell[data-outside-month] {
+  color: #94a3b8;
+}
+.react-aria-CalendarCell[data-disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+.aria-checkbox {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  cursor: pointer;
+  outline: none;
+}
+.aria-checkbox > span:has(> input[type="checkbox"]) {
+  width: 14px !important;
+  height: 14px !important;
+  clip: auto !important;
+  clip-path: none !important;
+  overflow: visible !important;
+  margin: 3px 0 0 !important;
+  opacity: 0;
+}
+.aria-checkbox > span > input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: pointer;
+}
+.aria-check-indicator {
+  display: grid;
+  place-items: center;
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  border: 1px solid #768397;
+  border-radius: 3px;
+  background: #fff;
+}
+.aria-check-indicator svg {
+  visibility: hidden;
+}
+.aria-checkbox[data-selected] .aria-check-indicator {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+.aria-checkbox[data-selected] .aria-check-indicator svg {
+  visibility: visible;
+}
+.aria-checkbox[data-indeterminate] .aria-check-indicator {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.aria-checkbox[data-indeterminate] .aria-check-indicator::after {
+  content: "";
+  height: 2px;
+  width: 8px;
+  background: white;
+}
+.aria-checkbox input[type="checkbox"] {
+  scroll-margin-block: 0;
+}
+[data-focus-visible] {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.aria-checkbox[data-focus-visible] {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.column-filter-panel {
+  display: flex;
+  flex-direction: column;
+  z-index: 1200;
+}
+.column-filter-dialog {
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: inherit;
+}
+.column-filter-panel form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: inherit;
+}
+.field.invalid .aria-select-control {
+  border-color: #dc2626;
+}
+.field-tooltip {
+  z-index: 1400;
+}
+.field-tooltip::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+.aria-navigation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #14243c65;
+}
+.aria-navigation-modal {
+  position: fixed;
+  inset: 0 auto 0 0;
+  outline: none;
+}
+.navigation-drawer[data-modal="true"] {
+  display: flex;
+  animation: drawer-enter 180ms ease-out;
+}
+.data-table [data-focus-visible] {
+  outline-offset: -3px;
+}
+/* Page scrolling must not temporarily block the table's header actions. */
+.virtual-table > div {
+  pointer-events: auto !important;
+}
+.virtual-table [role="columnheader"] {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  color: #526179;
+  font-weight: 550;
+  font-size: 11px;
+  white-space: nowrap;
+  border-block: 1px solid var(--border);
+  padding: 8px 18px;
+  height: 100%;
+}
+.virtual-table :is([role="gridcell"], [role="rowheader"]) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  border-bottom: 1px solid #edf1f6;
+  padding: 17px 18px;
+  color: #334155;
+  line-height: 1.5;
+  min-height: 89px;
+  height: 100%;
+}
+.virtual-table :is([role="gridcell"], [role="rowheader"]).right {
+  align-items: flex-end;
+}
+.virtual-table :is([role="gridcell"], [role="rowheader"]) strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+.virtual-table :is([role="gridcell"], [role="rowheader"]) small {
+  display: block;
+  font-size: 10px;
+  margin-top: 3px;
+}
+.virtual-table [role="row"]:hover :is([role="gridcell"], [role="rowheader"]) {
+  background: #fbfcff;
+}
+.virtual-table .order-actions-cell {
+  width: auto;
+  align-items: flex-end;
+}
+@media (max-width: 600px) {
+  .aria-modal-overlay {
+    padding: 12px 0;
+  }
+  .aria-options {
+    max-width: calc(100vw - 16px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navigation-drawer[data-modal="true"] {
+    animation: none;
+  }
+}
+@media print {
+  .aria-modal-overlay,
+  .aria-navigation-overlay,
+  .aria-options,
+  .aria-calendar-popover,
+  .field-tooltip {
+    display: none !important;
+  }
+}

@@ -287,3 +287,19 @@ no se contabiliza como aprobado en esta revisión; los resultados generales
 del 13 de octubre conservan su fecha y alcance. La revisión actual usa bases
 persistidas temporales y una respuesta amplificada solo en el navegador para
 el ensayo de rendimiento, sin modificar el archivo de datos del usuario.
+
+## Migración React Aria — 16 de octubre de 2026
+
+La regla de componentes y el inventario están en [MASTER.md](design-system/MASTER.md) y [MIGRACION-ARIA.md](MIGRACION-ARIA.md). Las revisiones anteriores conservan su fecha y alcance. La verificación de la migración está completada: compilación, funcionalidad, persistencia y portable pasan; se aprobaron los 39 límites de rendimiento del equipo actual. El ensayo de CPU 4× queda separado por confirmación del usuario.
+
+Resultados funcionales confirmados: **133 pruebas automatizadas; 598 comprobaciones del recorrido completo de Chromium; 43 de validación; 52 de filtros; 60 de detalle y desplegados; 56 de componentes en cada uno de Chromium, Firefox y WebKit**. Incluyen selección del calendario con flechas/Enter y cancelación con Escape a 375, 768, 1024 y 1440 px. Se comprobaron 32 clics de selección de recepciones con delta de scroll de 0 px, además de Tab, Espacio y rueda. El portable temporal superó 18 comprobaciones, incluyendo la carga local de formulario y calendario. El reinicio recuperó íntegramente las 28 colecciones temporales. Los datos del usuario conservan su SHA-256 inicial.
+
+Los recorridos utilizan roles y nombres accesibles de React Aria y seleccionan opciones visibles por identificador. El calendario se verifica mediante celdas reales; los campos numéricos mantienen decimales inválidos para que los señale Zod. Los formularios anidados aíslan `FormContext` y el tooltip mantiene acceso sobre el diálogo modal. Las casillas conservan un área de foco de 14 px alineada con su indicador.
+
+Evidencias: [pruebas automatizadas](tests/evidence/aria/unit-tests.tap), [recorrido completo](tests/evidence/aria/chromium-browser-journey.json), [validación](tests/evidence/aria/chromium-live-errors.browser.json), [filtros](tests/evidence/order-filters-browser-report.json), [detalle](tests/evidence/order-detail/chrome-report.json), [scroll de facturas](tests/evidence/aria/chromium-invoice-scroll.browser.json), [Chromium](tests/evidence/aria/chromium-aria-controls.browser.json), [Firefox](tests/evidence/aria/firefox-aria-controls.browser.json), [WebKit](tests/evidence/aria/webkit-aria-controls.browser.json), [reinicio](tests/evidence/restart-report.json) y [portable](tests/evidence/portable-report.json).
+
+Firefox 156.0 de Playwright presentó un fallo SideBySide de Windows al iniciar. Se probó una copia temporal de sus mismos binarios, extrayendo `mozglue.manifest` del XML ya incluido en `mozglue.dll`; no se modificaron binarios ni instalaciones del usuario. `PROTOTIPO_FIREFOX_EXECUTABLE` permite indicar esa copia al runner.
+
+`node scripts/prepare-firefox-runtime.mjs` prepara esa copia local. Después se usa `PROTOTIPO_FIREFOX_EXECUTABLE=tests/.tmp/firefox-runtime/firefox.exe` al ejecutar `node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js firefox`. El mismo runner admite `chromium` y `webkit`.
+
+La [prueba prolongada de memoria](tests/evidence/aria/soak-summary.json) completó 600 ciclos: 17.577.548 bytes finales frente a 13.223.152 en la referencia, dentro del margen de 5 MB. Entre los ciclos 510 y 600 varió 22.528 bytes (0,13 %); el heap no retuvo contenedores de formularios desmontados. La comparación y las limitaciones del ensayo de estrés están en [RENDIMIENTO.md](RENDIMIENTO.md#comparación-de-la-migración-a-react-aria).

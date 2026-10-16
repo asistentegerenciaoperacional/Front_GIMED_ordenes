@@ -32,7 +32,7 @@ async (page) => {
   };
   const requiredDeliveryBlocked = async (type) => {
     const field=dialog().getByRole('textbox',{name:'Entrega solicitada',exact:true});
-    check(await field.getAttribute('required')!==null,'Entrega solicitada marcada obligatoria en '+type);
+    check((await field.getAttribute('required')!==null || await field.getAttribute('aria-required')==='true'),'Entrega solicitada marcada obligatoria en '+type);
     await dialog().getByRole('button',{name:'Revisar orden',exact:true}).click();
     await dialog().getByRole('alert').waitFor();
     check(await field.getAttribute('aria-invalid')==='true' &&
@@ -43,23 +43,32 @@ async (page) => {
     check(await field.evaluate((element) => element===document.activeElement),
       'El error de entrega enfoca el campo obligatorio en '+type);
   };
+  const optionsFor=async control=>{
+    if(await control.evaluate(el=>el.tagName)==='INPUT')await control.locator('xpath=..').getByRole('button',{name:'Mostrar opciones',exact:true}).click();
+    else await control.click();
+    const options=await page.getByRole('option').allTextContents();
+    await page.keyboard.press('Escape');
+    return options;
+  };
   const shot = async (name) =>
     page.screenshot({
       path: "tests/evidence/" + name + ".png",
       fullPage: true,
     });
-  const dialog = () => page.locator("dialog[open]").last();
+  const dialog = () => page.locator("[role=dialog]").last();
   const helpFor = (control) => control.locator('xpath=ancestor::div[contains(concat(" ",normalize-space(@class)," ")," field ")][1]').locator('button.field-help');
   const tooltipFor = async (control) => {
-    const description = await helpFor(control).getAttribute('aria-describedby');
-    const id = description?.split(' ').find((part) => part.endsWith('-tooltip'));
-    if (!id) throw new Error('Ayuda sin descripción enlazada al tooltip');
-    return page.locator('[id='+JSON.stringify(id)+']');
+    const tooltip=page.getByRole('tooltip');
+    await tooltip.waitFor({state:'visible'});
+    const description=await helpFor(control).getAttribute('aria-describedby');
+    const id=await tooltip.getAttribute('id');
+    if(!id || !description?.split(' ').includes(id))throw new Error('Ayuda sin descripción enlazada al tooltip');
+    return tooltip;
   };
   const dismissHelp = async () => {
     await dialog().locator('.dialog-heading h2').click();
     await page.mouse.move(0,0);
-    await page.waitForFunction(() => !document.querySelector('[role=tooltip]:popover-open'));
+    await page.waitForFunction(() => !document.querySelector('[role=tooltip]'));
   };
   const openNavigation = async () => {
     const drawer=page.locator('#app-navigation');
@@ -71,10 +80,12 @@ async (page) => {
   };
   const nav = async (name) => {
     const drawer=await openNavigation();
-    const floating=await drawer.evaluate((el) => el instanceof HTMLDialogElement);
+    const floating=await drawer.evaluate((el) => el.dataset.modal === "true");
     await drawer.getByRole("link", { name, exact: true }).click();
     if (floating) await drawer.waitFor({state:'hidden'});
     await page.waitForFunction(() => document.activeElement === document.getElementById('main-content'));
+    await page.getByRole('heading',{name:new RegExp('^'+name),level:1}).waitFor();
+    await page.evaluate(()=>new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok))));
   };
   const authorize = async () => {
     await page.getByRole("button", { name: "Autorizar", exact: true }).click();
@@ -109,9 +120,9 @@ async (page) => {
     const drawer=await openNavigation();
     check(await drawer.getByRole('link').allTextContents().then((labels) => labels.join('|')===drawerRoutes.join('|')),
       'Drawer conserva todos los destinos y Configuración a '+width+' px');
-    check(await drawer.evaluate((el) => el.matches(':modal') && el.contains(document.activeElement)) &&
+    check(await drawer.evaluate((el) => el.matches('[data-modal="true"]') && el.contains(document.activeElement)) &&
       await page.locator('.main-area').evaluate((el) => el.inert) &&
-      await page.evaluate(() => document.body.style.overflow==='hidden'),
+      await page.evaluate(() => (document.documentElement.style.overflow==='hidden'||document.body.style.overflow==='hidden')),
       'Drawer retiene foco, bloquea el fondo y su desplazamiento a '+width+' px');
     const after=await page.locator('.main-area').boundingBox();
     check(Math.abs(before.x-after.x)<1 && Math.abs(before.width-after.width)<1,
@@ -141,7 +152,7 @@ async (page) => {
     await page.waitForFunction(() => document.activeElement === document.querySelector('button[aria-controls="app-navigation"]'));
     check(await menuButton.evaluate((el) => el===document.activeElement) &&
       await page.locator('.main-area').evaluate((el) => !el.inert) &&
-      await page.evaluate(() => document.body.style.overflow!== 'hidden'),
+      await page.evaluate(() => document.documentElement.style.overflow!== 'hidden'),
       'Escape cierra el drawer y restaura foco y desplazamiento a '+width+' px');
     await openNavigation();
     await drawer.getByRole('button',{name:'Cerrar navegación',exact:true}).click();
@@ -244,7 +255,7 @@ async (page) => {
     drawer=page.locator('#app-navigation');
     await drawer.getByRole('button',{name:'Fijar navegación',exact:true}).waitFor();
     await finishLayoutTransition();
-    check(await drawer.evaluate((el) => el instanceof HTMLDialogElement && el.matches(':modal')) &&
+    check(await drawer.evaluate((el) => el.dataset.modal === "true" && el.matches('[data-modal="true"]')) &&
       await page.locator('.main-area').evaluate((el) => el.getBoundingClientRect().left===0 && el.inert),
       'Desfijar mantiene abierto el panel flotante y devuelve todo el ancho al contenido a '+width+' px');
     check(await drawer.getByRole('button',{name:'Fijar navegación',exact:true}).evaluate((el) => el===document.activeElement),
@@ -262,11 +273,11 @@ async (page) => {
     await page.locator('#app-navigation.navigation-pinned').waitFor();
     await page.setViewportSize({width,height:668});
     drawer=page.locator('#app-navigation');
-    await page.locator('dialog#app-navigation[open]').waitFor();
+    await page.locator('#app-navigation[data-modal=true]').waitFor();
     await finishLayoutTransition();
     check(await drawer.getByRole('button',{name:/Fijar navegación|Desfijar navegación/}).count()===0 &&
       await page.locator('.shell.nav-pinned').count()===0 &&
-      await drawer.evaluate(el=>el.matches(':modal')),
+      await drawer.evaluate(el=>el.matches('[data-modal="true"]')),
       'Reducir un drawer fijado a '+width+' px lo convierte en flotante y oculta fijación');
     check(await page.locator('.main-area').evaluate(el=>el.getBoundingClientRect().left===0 && el.inert) &&
       await drawer.getByRole('button',{name:'Cerrar navegación',exact:true}).evaluate(el=>el===document.activeElement),
@@ -274,7 +285,7 @@ async (page) => {
     if(width===375) await shot('49-drawer-redimensionado-375');
     await page.setViewportSize({width:1440,height:900});
     await drawer.getByRole('button',{name:'Fijar navegación',exact:true}).waitFor();
-    check(await drawer.evaluate(el=>el instanceof HTMLDialogElement && el.matches(':modal')) &&
+    check(await drawer.evaluate(el=>el.dataset.modal === "true" && el.matches('[data-modal="true"]')) &&
       await page.locator('.shell.nav-pinned').count()===0,
       'Volver a escritorio mantiene el drawer desfijado tras reducir a '+width+' px');
     await page.keyboard.press('Escape');
@@ -288,7 +299,7 @@ async (page) => {
     await shortDrawer.getByRole('button',{name:'Cerrar navegación',exact:true}).isVisible(),
     'Drawer tiene scroll interno en una ventana baja y conserva su botón de cierre');
   await page.setViewportSize({width:1024,height:900});
-  check(await shortDrawer.isVisible() && await shortDrawer.evaluate((el) => el.open),
+  check(await shortDrawer.isVisible() && await shortDrawer.evaluate((el) => el.dataset.modal === 'true'),
     'Drawer abierto se adapta al cambiar de tamaño entre móvil y escritorio');
   await shortDrawer.getByRole('button',{name:'Cerrar navegación',exact:true}).click();
   await shortDrawer.waitFor({state:'hidden'});
@@ -324,7 +335,7 @@ async (page) => {
   const materialOrderLabels=await page.locator('.orders-table .order-link').allTextContents();
   check(materialOrderLabels.length>0 && materialOrderLabels.every((label) => /^OCM \d+$/.test(label.trim())),
     'Listado de materiales y otros usa OCM en todas sus órdenes');
-  check(await materialFilter.locator('option').allTextContents().then((types) => types.join('|') === 'Todos los tipos|Material|Otros'), 'Filtro de Materiales admite materiales y otros');
+  check(await optionsFor(materialFilter).then((types) => types.join('|') === 'Todos los tipos|Material|Otros'), 'Filtro de Materiales admite materiales y otros');
   let materialTypes=[];
   for (const view of ['Seguimiento','No autorizadas','Anuladas']) {
     await page.getByRole('tab',{name:new RegExp('^'+view)}).click();
@@ -380,14 +391,14 @@ async (page) => {
   for (const width of [1440,375]) {
     await page.setViewportSize({width,height:900});
     await page.waitForFunction(() => {
-      return !document.getElementById('app-navigation').open;
+      return !document.querySelector('#app-navigation[data-modal=true]');
     });
     const rowPanel=await openColumn('Estado');
     const valueBox=rowPanel.getByRole('checkbox',{name:'Autorizada',exact:true});
     const valueRow=rowPanel.locator('.column-value-option').filter({has:page.getByRole('checkbox',{name:'Autorizada',exact:true})});
-    await valueRow.locator('span').click();
+    await valueRow.locator('span').last().click();
     check(await rowPanel.isVisible() && !await valueBox.isChecked(), 'Clic en el texto desmarca el valor sin cerrar el menú a '+width+' px');
-    await valueRow.locator('span').click();
+    await valueRow.locator('span').last().click();
     check(await rowPanel.isVisible() && await valueBox.isChecked(), 'Segundo clic en el texto marca el valor una sola vez a '+width+' px');
     for (const edge of ['left','right']) {
       await valueRow.scrollIntoViewIfNeeded();
@@ -427,11 +438,13 @@ async (page) => {
       'Clic en el espacio de Seleccionar todos marca todos los valores a '+width+' px');
     await rowPanel.getByRole('button',{name:'Aplicar',exact:true}).focus();
     await page.keyboard.press('Tab');
+    if(await rowPanel.isVisible())await page.keyboard.press('Tab');
+    await rowPanel.waitFor({state:'hidden'});
     check(await rowPanel.isHidden(), 'Salir con Tab sigue cerrando el menú después de seleccionar valores a '+width+' px');
     check((await tableNumbers()).join('|') === initialNumbers.join('|'), 'Cambios de selección se conservan como borrador hasta aplicar a '+width+' px');
   }
   await page.setViewportSize({width:1440,height:900});
-  await page.waitForFunction(() => !document.getElementById('app-navigation').open);
+  await page.waitForFunction(() => !document.querySelector('#app-navigation[data-modal=true]'));
   let columnPanel=await openColumn('Proveedor');
   check(await columnPanel.getByRole('button',{name:'De A a Z',exact:true}).count() === 1 &&
     await columnPanel.getByRole('combobox',{name:'Condición',exact:true}).count() === 1 &&
@@ -536,6 +549,7 @@ async (page) => {
   check(page.url() === beforeCancel && (await tableNumbers()).length === 4, 'Cancelar el menú descarta la selección sin aplicar');
   columnPanel=await openColumn('Proveedor');
   await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>document.activeElement?.getAttribute('aria-label')==='Filtrar y ordenar Proveedor');
   check(await columnPanel.isHidden() && await page.getByRole('button',{name:'Filtrar y ordenar Proveedor',exact:true}).evaluate((el) => el === document.activeElement),
     'Escape cierra el menú y devuelve el foco a su cabecera');
   columnPanel=await openColumn('Proveedor');
@@ -544,7 +558,7 @@ async (page) => {
   for (const width of [375,768,802,1024,1440]) {
     await page.setViewportSize({width,height:width===802 ? 668 : 900});
     await page.waitForFunction(() => {
-      return !document.getElementById('app-navigation').open;
+      return !document.querySelector('#app-navigation[data-modal=true]');
     });
     columnPanel=await openColumn('Total');
     await columnPanel.getByRole('combobox',{name:'Condición',exact:true}).selectOption('between');
@@ -643,15 +657,13 @@ async (page) => {
   await dialog().getByRole('button',{name:'Revisar orden',exact:true}).click();
   check(await deliveryField.getAttribute('aria-invalid')==='true' && await dialog().getByRole('button',{name:'Revisar orden',exact:true}).isVisible(),'Una fecha inexistente muestra error y detiene la revisión');
   await deliveryField.fill('20/10/2026');
-  await page.evaluate(() => {
-    window.__qaCalendarCalls=0;
-    window.__qaOriginalPicker=HTMLInputElement.prototype.showPicker;
-    HTMLInputElement.prototype.showPicker=function(){ window.__qaCalendarCalls++; };
-  });
   await dialog().getByRole('button',{name:'Abrir calendario: Entrega solicitada',exact:true}).click();
-  check(await page.evaluate(() => window.__qaCalendarCalls)===1,'Botón de fecha activa el selector de calendario nativo');
-  await page.evaluate(() => { HTMLInputElement.prototype.showPicker=window.__qaOriginalPicker; });
-  await deliveryField.locator('..').locator('input[type=date]').fill('2026-10-20');
+  const calendar=page.getByRole('dialog',{name:'Calendario: Entrega solicitada',exact:true});
+  await calendar.waitFor();
+  await calendar.locator('.react-aria-CalendarCell').first().waitFor();
+  check(await calendar.locator('.react-aria-CalendarCell').count()>=28,'Botón de fecha abre el calendario React Aria');
+  await calendar.locator('.react-aria-CalendarCell').filter({hasText:/^20$/}).click();
+  await calendar.waitFor({state:'hidden'});
   check(await deliveryField.inputValue()==='20/10/2026','Selección del calendario sincroniza el campo digitado');
   await dialog()
     .getByRole("button", { name: "Revisar orden", exact: true })
@@ -675,8 +687,8 @@ async (page) => {
   check(await dialog().getByRole('spinbutton',{name:'Adicional recomendado de sticker (%)',exact:true}).inputValue()==='10','Revisión propone porcentaje de sticker individual de 10 %');
   check(await dialog().locator('.order-form-line .field > small:not(.field-error)').count()===0,'Ayudas de cálculo retiradas del texto permanente');
   const corrugadoInput=dialog().getByRole('spinbutton',{name:'Cantidad de corrugado',exact:true});
-  const corrugadoTip=await tooltipFor(corrugadoInput);
   await helpFor(corrugadoInput).hover();
+  const corrugadoTip=await tooltipFor(corrugadoInput);
   await corrugadoTip.waitFor({state:'visible'});
   check(await corrugadoTip.innerText().then((s) => s.includes('÷ capacidad') && s.includes('+ 5 adicionales')),'Hover del icono de ayuda de corrugado muestra su fórmula');
   await corrugadoTip.hover();
@@ -686,16 +698,16 @@ async (page) => {
   check(await dialog().isVisible(),'Escape cierra la ayuda de hover sin cerrar la orden');
   await dismissHelp();
   const stickerInput=dialog().getByRole('spinbutton',{name:'Cantidad de sticker · provisional',exact:true});
-  const stickerTip=await tooltipFor(stickerInput);
   await helpFor(stickerInput).focus();
+  const stickerTip=await tooltipFor(stickerInput);
   await stickerTip.waitFor({state:'visible'});
   check(await stickerTip.innerText().then((s) => s.includes('x 2') && s.includes('% adicional')) && await helpFor(stickerInput).evaluate((el) => el===document.activeElement),'Foco en el icono de ayuda muestra fórmula de sticker sin mover el foco');
   await helpFor(stickerInput).press('Escape');
   await stickerTip.waitFor({state:'hidden'});
   check(await dialog().isVisible() && await helpFor(stickerInput).evaluate((el) => el===document.activeElement),'Escape cierra ayuda de teclado y conserva el icono y formulario');
   const percentageInput=dialog().getByRole('spinbutton',{name:'Adicional recomendado de sticker (%)',exact:true});
-  const percentageTip=await tooltipFor(percentageInput);
   await helpFor(percentageInput).focus();
+  const percentageTip=await tooltipFor(percentageInput);
   await percentageTip.waitFor({state:'visible'});
   check(await percentageTip.innerText().then((s) => s.includes('x 2') && s.includes('% adicional')),'Porcentaje compacto conserva la fórmula en su ayuda accesible');
   await dismissHelp();
@@ -816,7 +828,7 @@ async (page) => {
     "Los diálogos no anidan formularios HTML",
   );
   const ids = await page
-    .locator("dialog[open] [id]")
+    .locator("[role=dialog] [id]")
     .evaluateAll((nodes) => nodes.map((n) => n.id));
   check(
     new Set(ids).size === ids.length,
@@ -1088,8 +1100,8 @@ async (page) => {
   await invoiceFilter.getByRole('button', {name: 'Quitar ordenamiento', exact: true}).click();
   check(!new URL(page.url()).searchParams.has('ordenar'), 'Facturas permite quitar el ordenamiento desde el menú de columna');
   invoiceFilter = await invoiceMenu('Recepciones');
-  check((await invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}).locator('option').allTextContents()).includes('Es mayor que') &&
-    !(await invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}).locator('option').allTextContents()).includes('Contiene'),
+  check((await optionsFor(invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}))).includes('Es mayor que') &&
+    !(await optionsFor(invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}))).includes('Contiene'),
     'Recepciones ofrece condiciones numéricas');
   await invoiceFilter.getByRole('button', {name: 'De menor a mayor', exact: true}).click();
   const receptionCounts = (await invoiceRows().locator('td:nth-child(4)').allTextContents()).map(Number);
@@ -1107,7 +1119,7 @@ async (page) => {
     "Facturas sin recepciones se consulta mediante el valor cero de su columna",
   );
   invoiceFilter = await invoiceMenu('Proveedor');
-  check((await invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}).locator('option').allTextContents()).includes('Comienza con'),
+  check((await optionsFor(invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}))).includes('Comienza con'),
     'Proveedor ofrece condiciones de texto');
   await invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}).selectOption('contains');
   await invoiceFilter.getByRole('textbox', {name: 'Valor del filtro', exact: true}).fill('Andina');
@@ -1117,7 +1129,7 @@ async (page) => {
     'Proveedor y cantidad de recepciones se filtran conjuntamente');
   await clearInvoiceFilters();
   invoiceFilter = await invoiceMenu('Registro');
-  check((await invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}).locator('option').allTextContents()).includes('Es anterior a'),
+  check((await optionsFor(invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}))).includes('Es anterior a'),
     'Registro ofrece condiciones de fecha');
   await invoiceFilter.getByRole('combobox', {name: 'Condición', exact: true}).selectOption('between');
   await invoiceFilter.getByRole('textbox', {name: 'Desde', exact: true}).fill('02/10/2026');
@@ -1143,7 +1155,7 @@ async (page) => {
     await invoiceFilter.getByRole('searchbox').count() === 0 &&
     await invoiceFilter.locator('.column-sort-actions').count() === 0,
     'Documentos solo ofrece Con documento y Sin documento, sin búsqueda, condición ni ordenamiento');
-  await invoiceFilter.locator('.column-value-option').filter({hasText: 'Sin documento'}).locator('span').click();
+  await invoiceFilter.locator('.column-value-option').filter({hasText: 'Sin documento'}).locator('span').last().click();
   check(await invoiceFilter.isVisible() && !await invoiceFilter.getByRole('checkbox', {name: 'Sin documento', exact: true}).isChecked() &&
     await invoiceFilter.getByRole('checkbox', {name: 'Con documento', exact: true}).isChecked(),
     'Hacer clic sobre el texto del valor alterna su checkbox sin cerrar el menú');
@@ -1251,7 +1263,7 @@ async (page) => {
     'Material / proveedor admite condiciones de texto combinadas');
   await clearSupply();
   let supplyFilter=await supplyMenu('Estado del material');
-  const stateOperators=await supplyFilter.getByRole('combobox',{name:'Condición',exact:true}).locator('option').allTextContents();
+  const stateOperators=await optionsFor(supplyFilter.getByRole('combobox',{name:'Condición',exact:true}));
   check(stateOperators.includes('Es igual a') && !stateOperators.includes('Contiene'), 'Estado del material usa valores de su enumeración');
   await page.keyboard.press('Escape');
   supplyFilter=await supplyMenu('Orden de material');
@@ -1406,6 +1418,7 @@ async (page) => {
   await dialog()
     .getByRole("combobox", { name: "Producto o concepto", exact: true })
     .fill("Servicio de demostración CLI");
+  await page.keyboard.press('Tab');
   await dialog()
     .getByRole("spinbutton", { name: "Cantidad solicitada", exact: true })
     .fill("2");
@@ -1453,8 +1466,8 @@ async (page) => {
   await shot("11-orden-otros");
 
   await nav("Configuración");
-  check(await page.getByRole('button',{name:'Consecutivos y pendientes',exact:true}).count()===0,'Consecutivos retirados de Configuración');
-  check(await page.getByRole('button',{name:'Pendientes documentados',exact:true}).count()===1,'Configuración conserva los pendientes documentados');
+  check(await page.getByRole('tab',{name:'Consecutivos y pendientes',exact:true}).count()===0,'Consecutivos retirados de Configuración');
+  check(await page.getByRole('tab',{name:'Pendientes documentados',exact:true}).count()===1,'Configuración conserva los pendientes documentados');
   await page
     .getByRole("spinbutton", { name: "Nueva tolerancia (%)", exact: true })
     .fill("5");
@@ -1597,6 +1610,8 @@ async (page) => {
   await page.setViewportSize({width:375,height:900});
   await shot('19-revision-productos-movil');
   await helpFor(pct(0)).focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
   await compactTip.waitFor({state:'visible'});
   check(await compactTip.evaluate((el) => {const r=el.getBoundingClientRect();return r.left>=0 && r.right<=innerWidth && r.top>=0 && r.bottom<=innerHeight;}),'Tooltip de porcentaje queda dentro de la ventana móvil');
   await helpFor(pct(0)).press('Escape');
@@ -1631,8 +1646,8 @@ async (page) => {
   await dialog().getByRole('textbox',{name:'Entrega solicitada',exact:true}).fill('24/10/2026');
   await dialog().getByRole('button',{name:'Revisar orden',exact:true}).click();
   const tape=dialog().getByRole('spinbutton',{name:'Cantidad de cinta · provisional',exact:true});
-  const tapeTip=await tooltipFor(tape);
   await helpFor(tape).hover();
+  const tapeTip=await tooltipFor(tape);
   await tapeTip.waitFor({state:'visible'});
   check(await tapeTip.innerText().then((s) => s.includes('÷ 4000')),'Cinta muestra su fórmula en el icono de ayuda');
   check(await dialog().getByRole('group',{name:'Sticker del producto 1',exact:true}).count()===0,'Producto con cinta conserva exclusión de campos de sticker');
@@ -1657,7 +1672,7 @@ async (page) => {
   for (const width of [375, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.waitForFunction(() => {
-      return !document.getElementById('app-navigation').open;
+      return !document.querySelector('#app-navigation[data-modal=true]');
     });
     const size = await page.evaluate(() => ({
       scroll: document.documentElement.scrollWidth,
@@ -1677,7 +1692,7 @@ async (page) => {
   await page.getByRole("link", { name: "Facturas", exact: true }).waitFor();
   await page.keyboard.press("Escape");
   await page.waitForFunction(
-    () => document.getElementById("app-navigation").inert,
+    () => !document.querySelector('#app-navigation[data-modal=true]'),
   );
   check(
     await page
@@ -1732,9 +1747,12 @@ async (page) => {
   await page.reload();
   await page.locator('.page-heading').getByRole('button',{name:'Nueva orden',exact:true}).click();
   const productChoice=dialog().getByRole('combobox',{name:'Producto',exact:true});
-  check(await productChoice.locator('option[value="'+ruleProduct.id+'"]').count()===0,
+  await productChoice.fill('');
+  await productChoice.press('ArrowDown');
+  check(await page.locator('[role=option][data-key="'+ruleProduct.id+'"]').count()===0,
     'Producto inactivo no aparece como opción al crear una OC');
-  const availableProductIds=await productChoice.locator('option').evaluateAll((options) => options.map((option) => option.value).filter(Boolean));
+  const availableProductIds=await page.getByRole('option').evaluateAll(options=>options.map(option=>option.dataset.key).filter(Boolean));
+  await page.keyboard.press('Escape');
   check(availableProductIds.length>0 && availableProductIds.every((id) => db.productos.find((product) => product.id===id)?.activo===true),
     'La lista de productos disponibles contiene únicamente activos');
   await requiredDeliveryBlocked('producto con catálogo actualizado');
@@ -1834,7 +1852,7 @@ async (page) => {
   check(await pendingLotNumber.inputValue()==='' && await pendingLotNumber.getAttribute('required')===null,
     'La fecha de un lote puede ajustarse sin conocer el número');
   await dialog().getByRole('spinbutton',{name:'Cantidad recibida',exact:true}).fill('1');
-  check(await pendingLotNumber.getAttribute('required')!==null,'Registrar recepción vuelve obligatorio el número de lote');
+  check(await pendingLotNumber.getAttribute('required')!==null || await pendingLotNumber.getAttribute('aria-required')==='true','Registrar recepción vuelve obligatorio el número de lote');
   await dialog().getByRole('spinbutton',{name:'Cantidad recibida',exact:true}).fill('');
   await dialog().getByRole('button',{name:'Guardar lote',exact:true}).click();
   await page.getByRole('dialog').waitFor({state:'hidden'});
@@ -1863,7 +1881,7 @@ async (page) => {
   const acceptSupplier = async () => {
     await dialog().getByRole('button', { name: 'Cambiar proveedor', exact: true }).click();
     await page.getByRole('dialog', { name: 'Cambiar proveedor y reemplazar la orden', exact: true }).waitFor({ state: 'hidden' });
-    await page.waitForFunction(() => document.querySelector('dialog[open] input.date-input-text[id$="field-fecha_solicitada_entrega"]')?.value === '');
+    await page.waitForFunction(() => document.querySelector('[role=dialog] input.date-input-text[id$="field-fecha_solicitada_entrega"]')?.value === '');
   };
   const rejected = async (name, payload, code, label) => {
     const before = await state();
@@ -1934,11 +1952,11 @@ async (page) => {
   await acceptSupplier();
   check(await dialog().getByRole('textbox', { name: 'Entrega solicitada', exact: true }).inputValue() === '' &&
     await dialog().locator('.order-form-line').count() === 1 &&
-    await dialog().getByRole('combobox', { name: 'Producto', exact: true }).evaluate((field) => Array.from(field.options).filter((option) => option.value).every((option) => option.textContent.includes('Loción') || option.textContent.includes('Bálsamo'))) &&
+    await optionsFor(dialog().getByRole('combobox', { name: 'Producto', exact: true })).then(options=>options.length>0&&options.every(option=>option.includes('Loción')||option.includes('Bálsamo'))) &&
     await dialog().getByRole('spinbutton', { name: 'Cantidad solicitada', exact: true }).inputValue() === '6000',
     'Aceptar prepara productos activos del nuevo proveedor, cantidades nuevas y entrega vacía obligatoria');
   await dialog().getByRole('combobox', { name: 'Proveedor', exact: true }).selectOption(sid(1));
-  await page.waitForFunction(() => document.querySelector('dialog[open] input.date-input-text[id$="field-fecha_solicitada_entrega"]')?.value === '28/10/2026');
+  await page.waitForFunction(() => document.querySelector('[role=dialog] input.date-input-text[id$="field-fecha_solicitada_entrega"]')?.value === '28/10/2026');
   check(await dialog().getByRole('spinbutton', { name: 'Cantidad solicitada', exact: true }).first().inputValue() === '333' &&
     await dialog().getByRole('textbox', { name: 'Entrega solicitada', exact: true }).inputValue() === '28/10/2026' &&
     await dialog().locator('.order-form-line').count() === 2 && await dialog().locator('p.notice[role=status]').count() === 0,
@@ -2069,7 +2087,7 @@ async (page) => {
   await dialog().getByRole('textbox', { name: 'Número de factura', exact: true }).fill('FACT-RECEPCIONES-UI');
   for (const width of [375, 708, 1440]) {
     await page.setViewportSize({ width, height: 668 });
-    check((await dialog().getByRole('button').allTextContents()).map((value) => value.trim()).filter(Boolean).join('|') === 'Adjuntar documento|Cancelar|Guardar factura',
+    check((await dialog().locator('.btn').allTextContents()).map((value) => value.trim()).filter(Boolean).join('|') === 'Adjuntar documento|Cancelar|Guardar factura',
       'Acciones del formulario de factura a ' + width + ' px');
     check(await dialog().evaluate((element) => element.scrollWidth <= element.clientWidth + 1), 'Factura sin desborde a ' + width + ' px');
     if (width === 708) await shot('39-factura-formulario');
@@ -2087,7 +2105,7 @@ async (page) => {
   await receiptOption.check();
   for (const width of [375, 708, 1440]) {
     await page.setViewportSize({ width, height: 668 });
-    check((await dialog().getByRole('button').allTextContents()).map((value) => value.trim()).filter(Boolean).join('|') === 'Cancelar|Guardar asociaciones',
+    check((await dialog().locator('.btn').allTextContents()).map((value) => value.trim()).filter(Boolean).join('|') === 'Cancelar|Guardar asociaciones',
       'Acciones de asociación de recepciones a ' + width + ' px');
     if (width === 708) await shot('41-factura-asociacion');
   }
@@ -2222,7 +2240,11 @@ async (page) => {
   check(await invoiceLink.getAttribute('href') === '/api/documents/' + invoiceDoc.id + '/content' &&
     await invoiceLink.getAttribute('target') === '_blank' && (await invoiceLink.getAttribute('rel')).includes('noopener'),
     'Número de factura con documento enlaza de forma segura a su documento vigente');
-  await invoiceLink.focus();
+  await lotRow.focus();
+  for(let step=0;step<20&&!await invoiceLink.evaluate(link=>link===document.activeElement);step++){
+    await page.keyboard.press('ArrowRight');
+    await page.evaluate(()=>new Promise(ok=>requestAnimationFrame(ok)));
+  }
   check(await invoiceLink.evaluate((link) => link === document.activeElement && getComputedStyle(link).textDecorationLine.includes('underline')),
     'El hipervínculo de factura admite foco de teclado y está subrayado');
   const popupPromise = page.waitForEvent('popup');

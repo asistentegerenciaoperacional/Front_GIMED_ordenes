@@ -19,7 +19,7 @@ async (page) => {
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('dialog', (dialog) => dialog.accept());
     await page.goto(origin+'/tests/live-errors.html?fixture='+fixture);
-    if (hasDialog) await page.locator('dialog[open]').waitFor();
+    if (hasDialog) await page.locator('[role=dialog]').waitFor();
   };
 
   await visit('order');

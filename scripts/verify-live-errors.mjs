@@ -3,6 +3,7 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createServer } from "vite";
 import react from "@vitejs/plugin-react";
+import {ariaBrowserFile} from "./aria-browser-source.mjs";
 
 const server = await createServer({
   configFile: false,
@@ -53,7 +54,7 @@ try {
   ]);
   const output = await cli([
     "run-code",
-    "--filename=tests/live-errors.browser.js",
+    "--filename="+await ariaBrowserFile("tests/live-errors.browser.js"),
   ]);
   const result = output.match(/### Result\r?\n(\{[^\r\n]+\})/);
   if (!result) throw new Error(output);

@@ -28,14 +28,12 @@ body {
 }
 button,
 input,
-select,
 textarea {
   font: inherit;
 }
 button,
 a,
 input,
-select,
 textarea {
   -webkit-tap-highlight-color: transparent;
 }
@@ -56,7 +54,6 @@ button:disabled {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
-select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible {
   outline: 3px solid var(--focus);
@@ -190,16 +187,11 @@ small {
   overflow: hidden;
   box-shadow: 10px 0 36px #18253b24;
 }
-.navigation-drawer:not([open]) {
-  display: none;
-}
-.navigation-drawer[open] {
+
+.navigation-drawer[data-modal="true"] {
   animation: drawer-enter 180ms ease-out;
 }
-.navigation-drawer::backdrop {
-  background: #14243c65;
-  animation: drawer-backdrop-enter 180ms ease-out;
-}
+
 .drawer-heading {
   display: flex;
   align-items: center;
@@ -306,9 +298,6 @@ small {
   font-size: 13px;
   font-weight: 550;
   text-decoration: none;
-  transition:
-    background var(--motion),
-    color var(--motion);
 }
 .nav a > svg {
   flex-shrink: 0;
@@ -477,10 +466,6 @@ small {
   gap: 7px;
   line-height: 1.4;
   min-height: 36px;
-  transition:
-    background var(--motion),
-    border-color var(--motion),
-    box-shadow var(--motion);
   white-space: nowrap;
 }
 .btn:hover:not(:disabled) {
@@ -576,9 +561,6 @@ small {
   border-radius: 10px;
   padding: 17px 18px;
   text-align: left;
-  transition:
-    border-color var(--motion),
-    box-shadow var(--motion);
 }
 .stat:hover {
   border-color: #b9cbeb;
@@ -654,7 +636,7 @@ small {
   padding: 0 20px;
   overflow-x: auto;
 }
-.tabs button {
+.tabs [role="tab"] {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -667,7 +649,7 @@ small {
   font-weight: 600;
   white-space: nowrap;
 }
-.tabs button.selected {
+.tabs [role="tab"].selected {
   color: var(--primary);
   border-bottom-color: var(--primary);
 }
@@ -691,7 +673,7 @@ small {
   padding: 0;
   gap: 28px;
 }
-.order-group-tabs .tabs button {
+.order-group-tabs .tabs [role="tab"] {
   font-size: 14px;
   padding: 8px 4px 12px;
 }
@@ -922,9 +904,6 @@ th.right .column-heading {
 }
 .column-filter-panel {
   --column-menu-height: min(400px, 60dvh);
-  position: fixed;
-  inset: auto;
-  margin: 0;
   padding: 0;
   width: 320px;
   max-width: calc(100vw - 16px);
@@ -941,11 +920,6 @@ th.right .column-heading {
   line-height: 1.5;
   text-align: left;
   white-space: normal;
-}
-.column-filter-panel > form {
-  display: flex;
-  flex-direction: column;
-  max-height: calc(var(--column-menu-height) - 2px);
 }
 .column-filter-content {
   min-height: 0;
@@ -1258,7 +1232,6 @@ th.right .column-heading {
   border-color: #b9cbeb;
 }
 input,
-select,
 textarea {
   scroll-margin-block: 100px;
 }
@@ -1266,10 +1239,10 @@ textarea {
   color: #64748b;
 }
 .field input,
-.field select,
+.field .aria-select-control,
 .field textarea,
 input.control,
-select.control,
+.aria-select-control.control,
 textarea.control {
   width: 100%;
   border: 1px solid #cbd5e1;
@@ -1287,7 +1260,7 @@ textarea.control {
   resize: vertical;
 }
 .field input:disabled,
-.field select:disabled {
+.field .aria-select-control:disabled {
   background: #f1f5f9;
   color: #64748b;
 }
@@ -1326,17 +1299,9 @@ textarea.control {
   background: #eff5ff;
   color: var(--primary);
 }
-.field .date-calendar-input {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 38px;
-  height: 36px;
-  opacity: 0;
-  pointer-events: none;
-}
+
 .field.invalid input,
-.field.invalid select,
+.field.invalid .aria-select-control,
 .field.invalid textarea {
   border-color: #dc2626;
 }
@@ -1344,9 +1309,6 @@ textarea.control {
   color: #b91c1c !important;
 }
 .field-tooltip {
-  position: fixed;
-  inset: auto;
-  margin: 0;
   width: min(280px, calc(100vw - 24px));
   padding: 10px 12px;
   border: 1px solid #334155;
@@ -1377,10 +1339,7 @@ textarea.control {
 .dialog.wide {
   width: min(1050px, calc(100vw - 32px));
 }
-.dialog::backdrop {
-  background: #14243c65;
-  backdrop-filter: blur(2px);
-}
+
 .dialog-heading {
   display: flex;
   justify-content: space-between;
@@ -1608,13 +1567,12 @@ textarea.control {
   transform: rotate(180deg);
 }
 .line-disclosure {
-  display: grid;
-  grid-template-rows: 1fr;
+  height: var(--disclosure-panel-height, auto);
+  overflow: hidden;
   opacity: 1;
-  transition: grid-template-rows 180ms ease-out, opacity 140ms ease-out;
+  transition: height 180ms ease-out, opacity 140ms ease-out;
 }
 .line-disclosure[data-expanded="false"] {
-  grid-template-rows: 0fr;
   opacity: 0;
 }
 .line-disclosure-inner {
@@ -1897,7 +1855,7 @@ textarea.control {
   flex-wrap: wrap;
   margin-bottom: 20px;
 }
-.catalog-tabs button {
+.catalog-tabs [role="tab"] {
   padding: 8px 12px;
   border-radius: 6px;
   border: 1px solid var(--border);
@@ -1905,7 +1863,7 @@ textarea.control {
   color: var(--muted);
   background: #fff;
 }
-.catalog-tabs button.active {
+.catalog-tabs [role="tab"].active {
   background: #edf3ff;
   color: #2455b2;
   border-color: #bbd0f6;
@@ -2003,7 +1961,7 @@ textarea.control {
   gap: 8px;
   align-items: center;
 }
-.recipient select {
+.recipient .aria-select-control {
   width: 85px !important;
 }
 .recipient input {
@@ -2032,7 +1990,7 @@ textarea.control {
   flex: 1;
   min-width: 120px;
 }
-.invoice-picker select {
+.invoice-picker .aria-select-control {
   width: 100%;
   margin-top: 6px;
 }
@@ -2084,7 +2042,7 @@ textarea.control {
   align-content: start;
   gap: 7px;
 }
-.settings-nav button {
+.settings-nav [role="tab"] {
   padding: 12px 14px;
   text-align: left;
   background: #fff;
@@ -2093,7 +2051,7 @@ textarea.control {
   font-size: 12px;
   color: var(--muted);
 }
-.settings-nav button.selected {
+.settings-nav [role="tab"].selected {
   color: var(--primary);
   border-color: #bcd0f4;
   background: #eef4ff;
@@ -2194,7 +2152,7 @@ textarea.control {
     display: flex;
     overflow-x: auto;
   }
-  .settings-nav button {
+  .settings-nav [role="tab"] {
     white-space: nowrap;
   }
   .data-table.orders-table {
@@ -2374,7 +2332,7 @@ textarea.control {
   .recipient {
     gap: 5px;
   }
-  .recipient select {
+  .recipient .aria-select-control {
     width: 65px !important;
   }
   .doc-actions .btn {
@@ -2417,7 +2375,7 @@ textarea.control {
     display: flex;
     overflow-x: auto;
   }
-  .settings-nav button {
+  .settings-nav [role="tab"] {
     white-space: nowrap;
   }
 }
@@ -2471,7 +2429,7 @@ textarea.control {
     padding-inline: 10px;
     gap: 10px;
   }
-  .tabs button {
+  .tabs [role="tab"] {
     flex-shrink: 0;
   }
   .table-footer span:last-child {
@@ -2531,8 +2489,7 @@ textarea.control {
 @media (prefers-reduced-motion: reduce) {
   *,
   *:before,
-  *:after,
-  .navigation-drawer::backdrop {
+  *:after {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;

@@ -1,31 +1,36 @@
 import {
+  Barcode,
+  Boxes,
+  CheckCircle2,
+  ChevronRight,
+  ClipboardList,
+  FlaskConical,
+  FolderOpen,
+  Mail,
+  Menu,
+  Package,
+  ReceiptText,
+  RefreshCw,
+  Settings2,
+  Truck,
+  X,
+} from "lucide-react";
+import {
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
-import {
-  ClipboardList,
-  Boxes,
-  ReceiptText,
-  Package,
-  Building2,
-  Barcode,
-  FolderOpen,
-  Mail,
-  Settings2,
-  ChevronRight,
-  Menu,
-  FlaskConical,
-  CheckCircle2,
-  X,
-  ArrowUpRight,
-  RefreshCw,
-  Truck,
-} from "lucide-react";
 import type { Database } from "../shared/models";
-import { AppContext, ApiError, request, Button, Loading, Empty } from "./ui";
+import type { Row } from "../shared/schema";
+import { shareSnapshotStrings } from "./snapshot-memory";
+import { ControlLink } from "./components/controls";
+import { confirmAction } from "./components/overlays";
+import { NavigationDrawer, PIN_NAVIGATION_QUERY } from "./navigation-drawer";
+import { OrderDetail, OrdersPage, PrintOrder } from "./orders";
 import {
   currentRoute,
   normalizeRoute,
@@ -34,18 +39,28 @@ import {
   type OrderListReturn,
   type ScrollPosition,
 } from "./routing";
-import { NavigationDrawer, PIN_NAVIGATION_QUERY } from "./navigation-drawer";
-import { OrdersPage, OrderDetail, PrintOrder } from "./orders";
-import { CatalogPage } from "./catalogs";
-import {
-  SupplyPage,
-  InvoicesPage,
-  CodesPage,
-  EmailsPage,
-  SettingsPage,
-  DocumentsPage,
-} from "./flows";
-import type { Row } from "../shared/schema";
+import { ApiError, AppContext, Button, Empty, Loading, request } from "./ui";
+const CatalogPage = lazy(() =>
+  import("./catalogs").then((module) => ({ default: module.CatalogPage })),
+);
+const SupplyPage = lazy(() =>
+  import("./flows").then((module) => ({ default: module.SupplyPage })),
+);
+const InvoicesPage = lazy(() =>
+  import("./flows").then((module) => ({ default: module.InvoicesPage })),
+);
+const CodesPage = lazy(() =>
+  import("./flows").then((module) => ({ default: module.CodesPage })),
+);
+const EmailsPage = lazy(() =>
+  import("./flows").then((module) => ({ default: module.EmailsPage })),
+);
+const SettingsPage = lazy(() =>
+  import("./flows").then((module) => ({ default: module.SettingsPage })),
+);
+const DocumentsPage = lazy(() =>
+  import("./flows").then((module) => ({ default: module.DocumentsPage })),
+);
 const navigation = [
   { id: "ordenes", label: "Órdenes de compra", icon: ClipboardList },
   { id: "abastecimiento", label: "Abastecimiento", icon: Boxes },
@@ -102,21 +117,36 @@ export function App() {
         ? menuRef.current
         : document.getElementById("main-content");
     navigationFocus.current = null;
-    target?.focus({ preventScroll: true });
+    let followup = 0;
+    const frame = requestAnimationFrame(() => {
+      followup = requestAnimationFrame(() =>
+        target?.focus({ preventScroll: true }),
+      );
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(followup);
+    };
   }, [navOpen, route]);
   useLayoutEffect(() => {
     const position = pendingScrollRestore.current;
     if (position === null) return;
     pendingScrollRestore.current = null;
-    if (position.tableLeft !== null)
-      document
-        .querySelector(".orders-table")
-        ?.closest(".table-scroll")
-        ?.scrollTo({
-          left: position.tableLeft,
-          behavior: "instant",
-        });
-    window.scrollTo({ top: position.top, behavior: "instant" });
+    let followup = 0;
+    const frame = requestAnimationFrame(() => {
+      followup = requestAnimationFrame(() => {
+        if (position.tableLeft !== null)
+          document
+            .querySelector(".orders-table")
+            ?.closest(".table-scroll")
+            ?.scrollTo({ left: position.tableLeft, behavior: "instant" });
+        window.scrollTo({ top: position.top, behavior: "instant" });
+      });
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(followup);
+    };
   }, [route]);
   const [toast, setToast] = useState<{
     message: string;
@@ -132,7 +162,7 @@ export function App() {
   }, []);
   const load = useCallback(async () => {
     try {
-      setDb(await request("state"));
+      setDb(shareSnapshotStrings(await request("state")));
       setLoadError("");
     } catch (e) {
       setLoadError((e as Error).message);
@@ -141,11 +171,13 @@ export function App() {
   useEffect(() => {
     void load();
     window.history.replaceState(null, "", `/${previousRoute.current}`);
-    const changed = () => {
+    const changed = async () => {
       if (
         !intentionalNavigation.current &&
-        document.querySelector('dialog[open][data-dirty="true"]') &&
-        !window.confirm("Hay cambios sin guardar. ¿Salir del formulario?")
+        document.querySelector('.dialog[data-dirty="true"]') &&
+        !(await confirmAction(
+          "Hay cambios sin guardar. ¿Salir del formulario?",
+        ))
       ) {
         window.history.replaceState(null, "", `/${previousRoute.current}`);
         return;
@@ -166,14 +198,14 @@ export function App() {
       );
       const fromDrawer = document
         .getElementById("app-navigation")
-        ?.matches(":modal");
+        ?.matches('[data-modal="true"]');
       if (fromDrawer) navigationFocus.current = "content";
       previousRoute.current = next;
       window.history.replaceState(null, "", `/${next}`);
       setRoute(next);
       setNavOpen(false);
     };
-    const clicked = (e: MouseEvent) => {
+    const clicked = async (e: MouseEvent) => {
       if (
         e.defaultPrevented ||
         e.button !== 0 ||
@@ -194,8 +226,10 @@ export function App() {
         return;
       e.preventDefault();
       if (
-        document.querySelector('dialog[open][data-dirty="true"]') &&
-        !window.confirm("Hay cambios sin guardar. ¿Salir del formulario?")
+        document.querySelector('.dialog[data-dirty="true"]') &&
+        !(await confirmAction(
+          "Hay cambios sin guardar. ¿Salir del formulario?",
+        ))
       )
         return;
       const next = normalizeRoute(href);
@@ -213,7 +247,7 @@ export function App() {
       if (navigationPanel?.contains(link)) {
         if (
           next === previousRoute.current &&
-          !navigationPanel.matches(":modal")
+          !navigationPanel.matches('[data-modal="true"]')
         )
           document
             .getElementById("main-content")
@@ -259,7 +293,7 @@ export function App() {
       setSaving((n) => n + 1);
       try {
         const { result } = await request("commands", { name, payload });
-        setDb(await request("state"));
+        setDb(shareSnapshotStrings(await request("state")));
         if (message) notify(message);
         return result;
       } catch (error) {
@@ -352,7 +386,7 @@ export function App() {
         content
       ) : (
         <div className={`shell${navPinned ? " nav-pinned" : ""}`}>
-          <a
+          <ControlLink
             className="skip-link"
             href="#main-content"
             onClick={(e) => {
@@ -361,7 +395,7 @@ export function App() {
             }}
           >
             Saltar al contenido
-          </a>
+          </ControlLink>
           <NavigationDrawer
             open={navOpen}
             pinned={navPinned}
@@ -372,7 +406,7 @@ export function App() {
             <span className="nav-label">OPERACIÓN</span>
             <nav className="nav" aria-label="Navegación principal">
               {navigation.map((n) => (
-                <a
+                <ControlLink
                   key={n.id}
                   href={`/${n.id}`}
                   className={page === n.id ? "active" : ""}
@@ -380,19 +414,19 @@ export function App() {
                 >
                   <n.icon size={18} aria-hidden="true" />
                   <span className="nav-text">{n.label}</span>
-                </a>
+                </ControlLink>
               ))}
             </nav>
             <div className="nav-divider" />
             <nav className="nav" aria-label="Configuración">
-              <a
+              <ControlLink
                 href="/configuracion"
                 className={page === "configuracion" ? "active" : ""}
                 aria-current={page === "configuracion" ? "page" : undefined}
               >
                 <Settings2 size={18} aria-hidden="true" />
                 <span className="nav-text">Configuración</span>
-              </a>
+              </ControlLink>
             </nav>
           </NavigationDrawer>
           <div className="main-area" inert={navOpen && !navPinned}>
@@ -431,7 +465,7 @@ export function App() {
               </div>
             </header>
             <main id="main-content" className="content" tabIndex={-1}>
-              {content}
+              <Suspense fallback={<Loading />}>{content}</Suspense>
             </main>
           </div>
         </div>

@@ -83,3 +83,9 @@ Registro sanitario y cálculo de vida útil o presencia comercial de unidades
 permanecen fuera del alcance.
 
 La [revisión de renglones del 14 de octubre](VERIFICACION.md#revisión-de-renglones-del-14-de-octubre-de-2026) añade cuatro pruebas de reapertura OCM: **130 pruebas automatizadas correctas**, más **60 comprobaciones específicas en Chrome y 60 en Edge**, a 375/799/1440 px y con un ensayo de 280 lotes. El recorrido general histórico se intentó y se detuvo en un selector anterior de Producto; no se contabiliza como aprobado en esta revisión.
+
+## Interfaz compartida React Aria
+
+Toda la interfaz operativa usa la capa compartida basada en React Aria Components. Incluye órdenes, detalle e impresión, abastecimiento, facturas, catálogos, proveedores, GS1, documentos, correos, configuración y navegación. El inventario por archivo y familia está en [MIGRACION-ARIA.md](MIGRACION-ARIA.md). La prueba de arquitectura impide nuevos controles HTML propios fuera de la capa compartida.
+
+Se mantienen contratos del servicio, validación Zod, selección por ID, importes exactos, campos bloqueados, historial y procesos existentes. La aceptación funcional y de rendimiento de la migración se registra separadamente de las revisiones históricas en [VERIFICACION.md](VERIFICACION.md) y [RENDIMIENTO.md](RENDIMIENTO.md).

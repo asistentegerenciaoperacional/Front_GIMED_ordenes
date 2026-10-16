@@ -23,7 +23,7 @@ const name = "GIMED-Prototipo-Windows-x64";
 const stage = resolve(project, ".portable-build", randomUUID());
 const packageRoot = resolve(stage, name);
 const app = resolve(packageRoot, "app");
-const archive = resolve(workspace, name + ".zip");
+const archive = process.env.PROTOTIPO_PACKAGE_ARCHIVE ? resolve(process.env.PROTOTIPO_PACKAGE_ARCHIVE) : resolve(workspace, name + ".zip");
 const temporaryArchive = resolve(stage, name + ".zip");
 const runtimeVersion = process.version;
 const cache = resolve(project, ".portable-cache");
@@ -243,7 +243,7 @@ await new Promise((ok, fail) => {
 await rename(temporaryArchive, archive);
 const archiveBody = await readFile(archive);
 await writeFile(
-  resolve(workspace, name + ".sha256.txt"),
+  archive.replace(/\.zip$/i, ".sha256.txt"),
   hash(archiveBody) + "  " + name + ".zip\r\n",
 );
 console.log("ZIP portable: " + archive);

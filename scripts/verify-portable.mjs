@@ -6,12 +6,15 @@ import { resolve, dirname, relative, isAbsolute, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "node:net";
 import { createHash, randomUUID } from "node:crypto";
+import { ariaBrowserSource } from "./aria-browser-source.mjs";
 
 const exec = promisify(execFile);
 const project = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const workspace = resolve(project, "..");
 const name = "GIMED-Prototipo-Windows-x64";
-const archive = resolve(workspace, name + ".zip");
+const archive = process.env.PROTOTIPO_PACKAGE_ARCHIVE
+  ? resolve(process.env.PROTOTIPO_PACKAGE_ARCHIVE)
+  : resolve(workspace, name + ".zip");
 // A sibling of prototipo prevents Node from falling back to its node_modules.
 const checkRoot = resolve(workspace, ".portable-check-" + randomUUID());
 const destination = resolve(checkRoot, "PC sin herramientas á prueba");
@@ -229,20 +232,22 @@ try {
   );
   const filters = await browser([
     "run-code",
-    `async page => {
+    await ariaBrowserSource(`async page => {
       const selector = page.getByRole("combobox", { name: "Filtro personalizado", exact: true });
-      const variants = await selector.locator("option").count();
+      await selector.click();
+      const variants = await page.getByRole("option").count();
+      await page.keyboard.press("Escape");
       await selector.selectOption("documento_con");
       await page.waitForFunction(() => new URLSearchParams(location.search).get("filtro") === "documento_con");
       const filtered = (await selector.inputValue()) === "documento_con";
       const trigger = page.getByRole("button", { name: "Ayuda de filtros personalizados", exact: true });
       await trigger.click();
-      const help = await page.locator("dialog[open] .filter-help-entry").count();
+      const help = await page.locator("[role=dialog] .filter-help-entry").count();
       await page.keyboard.press("Escape");
       const restored = await trigger.evaluate(button => button === document.activeElement);
       await selector.selectOption("");
       return { variants, filtered, help, restored };
-    }`,
+    }`),
   ]);
   check(
     filters.stdout.includes('"variants":18') &&
@@ -256,6 +261,23 @@ try {
   check(
     filters.stdout.includes('"restored":true'),
     "Escape cierra la ayuda del portable y devuelve el foco",
+  );
+  const lazyControls = await browser([
+    "run-code",
+    await ariaBrowserSource(`async page=>{
+    await page.getByRole('button',{name:'Nueva orden',exact:true}).click();
+    await page.getByRole('dialog',{name:'Nueva orden de compra',exact:true}).waitFor();
+    await page.getByRole('button',{name:'Abrir calendario: Entrega solicitada',exact:true}).click();
+    await page.locator('.react-aria-CalendarCell').first().waitFor();
+    const calendar=await page.locator('.react-aria-CalendarCell').count();
+    await page.keyboard.press('Escape');
+    await page.getByRole('button',{name:'Cancelar',exact:true}).click();
+    return {calendar};
+  }`),
+  ]);
+  check(
+    /"calendar":(?:2[89]|[3-9][0-9])/.test(lazyControls.stdout),
+    "Portable carga el formulario y calendario distribuidos en módulos locales",
   );
   await browser(["close"]);
   browserOpened = false;
@@ -306,7 +328,7 @@ try {
     passed: true,
     platform: "Windows x64",
     runtime: manifest.runtime.version,
-    archive: name + ".zip",
+    archive: relative(workspace, archive),
     archiveSha256: sha(archiveBody),
     archiveSizeBytes: archiveBody.length,
     packages: manifest.packages.length,

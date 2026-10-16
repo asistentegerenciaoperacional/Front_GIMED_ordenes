@@ -1,3 +1,4 @@
+import { ariaPage } from "../tests/aria-playwright.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -62,7 +63,7 @@ const browser = await chromium.launch({ channel: "chrome", headless: true });
 const context = await browser.newContext({
   viewport: { width: 1440, height: 1000 },
 });
-const page = await context.newPage();
+const page: Page = ariaPage(await context.newPage());
 page.setDefaultTimeout(20000);
 page.on("pageerror", (error) => errors.push(error.message));
 const variants = customFilters.flatMap((filter) =>
@@ -97,25 +98,69 @@ async function waitRows(
   offset = 0,
   target: Page = page,
 ) {
+  const values = ids(rows, offset);
   await target.waitForFunction(
     ({ values, count }) => {
-      const links = Array.from(
-        document.querySelectorAll<HTMLAnchorElement>(
-          ".orders-table tbody .order-link",
-        ),
-      );
+      const table = document.querySelector(".orders-table");
+      if (!table) return false;
+      const links = [
+        ...table.querySelectorAll<HTMLAnchorElement>(".order-link"),
+      ];
       const actual = links.map((link) =>
         new URL(link.href).pathname.split("/").pop(),
       );
+      const ready = table.classList.contains("virtual-table")
+        ? Number(table.getAttribute("aria-rowcount")) === values.length + 1 &&
+          actual.length > 0 &&
+          links.every(
+            (link) =>
+              values[
+                Number(
+                  link.closest("[role=row]")?.getAttribute("aria-rowindex"),
+                ) - 2
+              ] === new URL(link.href).pathname.split("/").pop(),
+          )
+        : JSON.stringify(actual) === JSON.stringify(values);
       return (
-        JSON.stringify(actual) === JSON.stringify(values) &&
+        ready &&
         document
           .querySelector(".table-footer [aria-live]")
-          ?.textContent?.startsWith(`${count} órdenes en esta vista`)
+          ?.textContent?.startsWith(count + " órdenes en esta vista")
       );
     },
-    { values: ids(rows, offset), count: rows.length },
+    { values, count: rows.length },
   );
+  if (await target.locator(".virtual-table").count()) {
+    // Verify every page item through the actual windowed DOM, then restore the viewport.
+    const actual = await target.evaluate(`(async()=>{
+      await new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(ok)));
+      const table=document.querySelector('.orders-table'),saved=scrollY,found=new Map();
+      const top=table.getBoundingClientRect().top+scrollY,bottom=top+table.getBoundingClientRect().height;
+      const frame=()=>new Promise(ok=>requestAnimationFrame(()=>requestAnimationFrame(()=>ok())));
+      const collect=()=>table.querySelectorAll('.order-link').forEach(link=>found.set(Number(link.closest('[role=row]')?.getAttribute('aria-rowindex'))-2,new URL(link.href).pathname.split('/').pop()));
+      for(let y=Math.max(0,top-80);y<bottom;y+=Math.max(250,innerHeight-150)){window.scrollTo({top:y,behavior:'instant'});await frame();collect();}
+      window.scrollTo({top:saved,behavior:'instant'});await frame();
+      return [...found].sort((a,b)=>a[0]-b[0]).map(([,id])=>id);
+    })()`);
+    assert.deepEqual(
+      actual,
+      values,
+      "Todas las filas virtualizadas conservan ID y posición",
+    );
+  }
+}
+async function renderedRowCount() {
+  const grid = page.locator(".orders-table");
+  const count = await grid.getAttribute("aria-rowcount");
+  return count ? Number(count) - 1 : grid.locator("tbody tr").count();
+}
+async function optionCount() {
+  await page
+    .getByRole("combobox", { name: "Filtro personalizado", exact: true })
+    .click();
+  const count = await page.getByRole("option").count();
+  await page.keyboard.press("Escape");
+  return count;
 }
 async function selectMeasured(
   filter: CustomFilterId | "",
@@ -125,23 +170,34 @@ async function selectMeasured(
   const measure = `({ filter, values, count }) => new Promise((ok, fail) => {
     const start = performance.now();
     const control = document.querySelector(".custom-filter-select");
-    control.value = filter;
-    control.dispatchEvent(new Event("change", { bubbles: true }));
+    document.addEventListener("click",()=>{ window.__filterStarted=performance.now(); },{capture:true,once:true});
     const timeout = setTimeout(() => fail(new Error("Timed out waiting for filtered rows")), 15000);
     const inspect = () => {
-      const actual = Array.from(document.querySelectorAll(".orders-table tbody .order-link"))
+      const actual = Array.from(document.querySelectorAll(".orders-table .order-link"))
         .map((link) => new URL(link.href).pathname.split("/").pop());
-      const ready = JSON.stringify(actual) === JSON.stringify(values) &&
+      const table=document.querySelector(".orders-table");
+      const ready = (table?.classList.contains("virtual-table") ? Number(table.getAttribute("aria-rowcount"))===values.length+1 && actual.length>0 && actual.every(id=>values.includes(id)) : JSON.stringify(actual)===JSON.stringify(values)) &&
         document.querySelector(".table-footer [aria-live]")?.textContent?.startsWith(count + " órdenes en esta vista") &&
         (new URLSearchParams(location.search).get("filtro") ?? "") === filter;
-      if (ready) requestAnimationFrame(() => { clearTimeout(timeout); ok(performance.now() - start); });
+      if (ready) requestAnimationFrame(() => { clearTimeout(timeout); ok(performance.now() - (window.__filterStarted ?? start)); });
       else requestAnimationFrame(inspect);
     };
     requestAnimationFrame(inspect);
   })`;
-  return page.evaluate<number>(
+  await page
+    .getByRole("combobox", { name: "Filtro personalizado", exact: true })
+    .click();
+  const pending = page.evaluate<number>(
     `(${measure})(${JSON.stringify({ filter, values: ids(rows), count: rows.length })})`,
   );
+  await page
+    .getByRole("option")
+    .locator(`[data-key=${JSON.stringify(filter)}]`)
+    .count();
+  await page
+    .locator(`[role="option"][data-key=${JSON.stringify(filter)}]`)
+    .click();
+  return pending;
 }
 function stats(values: number[]) {
   const ordered = [...values].sort((a, b) => a - b);
@@ -174,7 +230,7 @@ try {
   await page.goto(origin + "/ordenes/productos");
   await waitRows(expected(model, ""));
   check(
-    (await page.locator(".custom-filter-select option").count()) === 18,
+    (await optionCount()) === 18,
     "Productos ofrece 17 variantes y una opción para retirar el filtro",
   );
   await screenshot("40-filtros-personalizados-escritorio");
@@ -194,7 +250,7 @@ try {
     .selectOption("");
   await waitRows(expected(model, ""));
   check(
-    (await page.locator(".orders-table tbody tr").count()) === 50,
+    (await renderedRowCount()) === 50,
     "El listado monta como máximo cincuenta órdenes",
   );
   await page.getByRole("button", { name: "Siguiente", exact: true }).click();
@@ -221,7 +277,7 @@ try {
     .click();
   check(
     (await page
-      .locator(".column-filter-panel:popover-open")
+      .locator(".column-filter-panel")
       .getByRole("checkbox")
       .count()) ===
       expected(model, "batch_vencido").length + 1,
@@ -232,22 +288,26 @@ try {
   await waitRows(expected(model, "batch_vencido"), 50);
   const listUrl = page.url();
   await page
-    .locator(".orders-table tbody .order-link")
+    .locator(".orders-table .order-link")
     .nth(5)
     .scrollIntoViewIfNeeded();
   const detailScroll = await page.evaluate(() => scrollY);
-  await page.locator(".orders-table tbody .order-link").nth(5).click();
+  await page.locator(".orders-table .order-link").nth(5).click();
   await page
     .getByRole("link", { name: "Volver a órdenes", exact: true })
     .click();
   await waitRows(expected(model, "batch_vencido"), 50);
+  await page.waitForFunction(
+    (top) => Math.abs(scrollY - top) < 2,
+    detailScroll,
+  );
   check(
     page.url() === listUrl &&
       Math.abs((await page.evaluate(() => scrollY)) - detailScroll) < 2,
     "Volver del detalle recupera filtro, página y desplazamiento",
   );
   const printLink = page
-    .locator(".orders-table tbody tr")
+    .locator(".orders-table [role=row][data-key]")
     .nth(5)
     .getByRole("link", { name: /^Imprimir OC / });
   await printLink.scrollIntoViewIfNeeded();
@@ -257,6 +317,7 @@ try {
     .getByRole("link", { name: "Volver a órdenes", exact: true })
     .click();
   await waitRows(expected(model, "batch_vencido"), 50);
+  await page.waitForFunction((top) => Math.abs(scrollY - top) < 2, printScroll);
   check(
     page.url() === listUrl &&
       Math.abs((await page.evaluate(() => scrollY)) - printScroll) < 2,
@@ -266,7 +327,7 @@ try {
   await page
     .getByRole("button", { name: "Filtrar y ordenar Estado", exact: true })
     .click();
-  const menu = page.locator(".column-filter-panel:popover-open");
+  const menu = page.locator(".column-filter-panel");
   await menu
     .getByRole("checkbox", { name: "Seleccionar todos", exact: true })
     .uncheck();
@@ -332,22 +393,22 @@ try {
     })
     .click();
   check(
-    (await page.locator("dialog[open] .filter-help-entry").count()) === 13,
+    (await page.locator("[role=dialog] .filter-help-entry").count()) === 13,
     "La ayuda contiene los trece filtros",
   );
   check(
     (await page
       .getByRole("dialog")
-      .getByText(/OCM 150 tiene cajas cerradas/)
+      .getByText("No cuentan otros renglones de esa OCM.", { exact: false })
       .count()) === 1,
-    "La ayuda explica la OCM compartida con el ejemplo confirmado",
+    "La ayuda explica que solo cuentan los renglones vinculados de la OCM",
   );
   await screenshot("42-ayuda-filtros-escritorio");
   for (let i = 0; i < 3; i++) {
     await page.keyboard.press("Tab");
     check(
       await page.evaluate(
-        () => !!document.activeElement?.closest("dialog[open]"),
+        () => !!document.activeElement?.closest("[role=dialog]"),
       ),
       "El teclado permanece dentro del diálogo de ayuda " + i,
     );
@@ -365,7 +426,7 @@ try {
   );
   await page.getByRole("combobox", { name: "Filtro personalizado" }).waitFor();
   check(
-    (await page.locator(".custom-filter-select option").count()) === 11,
+    (await optionCount()) === 11,
     "Materiales y Otros ofrecen únicamente las diez variantes comunes",
   );
   check(
@@ -381,7 +442,7 @@ try {
     .getByRole("combobox", { name: "Filtro personalizado" })
     .selectOption("recepciones_sin_factura");
   check(
-    (await page.locator(".orders-table tbody tr").count()) > 0,
+    (await renderedRowCount()) > 0,
     "Otros consulta recepciones desde sus renglones",
   );
 
@@ -401,7 +462,7 @@ try {
   await page
     .getByRole("button", { name: "Guardar placeholder", exact: true })
     .click();
-  await page.locator("dialog[open]").waitFor({ state: "hidden" });
+  await page.locator("[role=dialog]").waitFor({ state: "hidden" });
   model = buildOrderReadModel(database);
   await waitRows(expected(model, "documento_sin"));
   check(
@@ -518,7 +579,7 @@ try {
       await screenshot("44-ayuda-filtros-movil");
       check(
         await page
-          .locator("dialog[open]")
+          .locator("[role=dialog]")
           .evaluate(
             (dialog) => dialog.getBoundingClientRect().width <= innerWidth,
           ),
@@ -562,7 +623,7 @@ try {
   // Separate clock page: the timing samples above used the real performance clock.
   database = makeOrderPerformanceFixture(120);
   model = buildOrderReadModel(database);
-  const clockPage = await context.newPage();
+  const clockPage: Page = ariaPage(await context.newPage());
   clockPage.on("pageerror", (error) => errors.push(error.message));
   await clockPage.clock.install({ time: new Date("2026-10-10T04:59:40Z") });
   await clockPage.clock.pauseAt(new Date("2026-10-10T04:59:50Z"));
@@ -614,6 +675,22 @@ try {
     ),
   );
 } catch (error) {
+  console.error(
+    await page.evaluate(() =>
+      [...document.querySelectorAll(".column-filter-button")]
+        .slice(0, 2)
+        .map((el) => {
+          const r = el.getBoundingClientRect();
+          return {
+            rect: r.toJSON(),
+            hit: document
+              .elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+              ?.outerHTML.slice(0, 300),
+            parents: el.parentElement?.parentElement?.outerHTML.slice(0, 500),
+          };
+        }),
+    ),
+  );
   await page
     .screenshot({
       path: resolve(evidence, "order-filters-failure.png"),
