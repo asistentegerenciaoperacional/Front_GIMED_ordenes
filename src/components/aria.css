@@ -3,6 +3,138 @@
 .aria-dialog-content {
   display: contents;
 }
+.aria-option-section {
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--soft);
+}
+.grouped-relations td:last-child {
+  width: 74px;
+  text-align: right;
+}
+.relation-details {
+  padding: 4px 20px 8px 36px;
+  background: var(--soft);
+}
+.relation-provider-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.relation-provider-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.relation-provider-list li:last-child {
+  border-bottom: 0;
+}
+.relation-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "available-title selected-title"
+    "available selected";
+  column-gap: 20px;
+  margin-top: 20px;
+  min-width: 0;
+}
+.relation-picker-headings {
+  display: contents;
+}
+.relation-picker-headings h3:first-child {
+  grid-area: available-title;
+}
+.relation-picker-headings h3:last-child {
+  grid-area: selected-title;
+}
+.relation-picker section {
+  min-width: 0;
+}
+.relation-available-column {
+  grid-area: available;
+}
+.relation-picker input {
+  width: 100%;
+}
+.relation-picker h3 {
+  margin: 0 0 12px;
+}
+.relation-picker small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.relation-available {
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 12px;
+}
+.relation-final {
+  grid-area: selected;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+}
+.relation-final-list {
+  max-height: 374px;
+  overflow: auto;
+}
+.relation-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.relation-selected > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.relation-picker .relation-new {
+  color: var(--primary);
+}
+.relation-changes {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.relation-changes p {
+  margin: 4px 0;
+}
+@media (max-width: 600px) {
+  .relation-picker {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "available-title"
+      "available"
+      "selected-title"
+      "selected";
+    column-gap: 16px;
+  }
+  .relation-picker-headings h3:last-child {
+    margin-top: 16px;
+  }
+  .relation-available {
+    max-height: 220px;
+  }
+  .relation-final-list {
+    max-height: 220px;
+  }
+  .relation-details {
+    padding: 4px 12px;
+  }
+}
 .aria-tab-group {
   display: contents;
 }
