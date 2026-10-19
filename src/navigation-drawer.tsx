@@ -22,8 +22,13 @@ export function NavigationDrawer({
   const pin = useRef<HTMLButtonElement>(null);
   const previous = useRef(pinned);
   useLayoutEffect(() => {
-    if (previous.current !== pinned)
+    if (previous.current !== pinned) {
+      document
+        .getElementById("app-navigation")
+        ?.getAnimations()
+        .forEach((animation) => animation.cancel());
       pin.current?.focus({ preventScroll: true });
+    }
     previous.current = pinned;
   }, [pinned]);
   const content = (
