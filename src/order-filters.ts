@@ -48,7 +48,7 @@ export const customFilters: readonly FilterDefinition[] = [
     id: "entrega_vencida",
     name: "Entrega solicitada vencida",
     description:
-      "Órdenes con productos/materiales pendientes y fecha de entrega vencida.",
+      "Órdenes con productos/materiales pendientes y fecha de entrega vencida a día de hoy.",
     options: [{ id: "entrega_vencida", label: "Entrega solicitada vencida" }],
   },
   {
@@ -72,7 +72,7 @@ export const customFilters: readonly FilterDefinition[] = [
     id: "batch_vencido",
     name: "Batch record vencido",
     description:
-      "Algún lote con estimación anterior a hoy y sin fecha de recepción del batch record; no exige recepción física.",
+      "Órdenes con lotes sin recibir y cuya fecha estimada de batch record está vencida a día de hoy.",
     productOnly: true,
     options: [{ id: "batch_vencido", label: "Batch record vencido" }],
   },
@@ -80,7 +80,7 @@ export const customFilters: readonly FilterDefinition[] = [
     id: "recibido_sin_batch",
     name: "Producto recibido sin batch record",
     description:
-      "Algún lote recibido físicamente sin fecha de recepción del batch record.",
+      "Órdenes con lotes que tienen cantidad recibida pero sin fecha de recepción del batch record.",
     productOnly: true,
     options: [
       { id: "recibido_sin_batch", label: "Producto recibido sin batch record" },
@@ -90,15 +90,14 @@ export const customFilters: readonly FilterDefinition[] = [
     id: "inspeccion",
     name: "Inspección pendiente",
     description:
-      "Algún lote con fecha de recepción del batch record y sin fecha de inspección.",
+      "Órdenes con lotes que tienen fecha de recepción de batch record pero sin fecha de inspección.",
     productOnly: true,
     options: [{ id: "inspeccion_pendiente", label: "Inspección pendiente" }],
   },
   {
     id: "recibidos_sin_inspeccion",
     name: "Recibidos sin inspección",
-    description:
-      "Algún lote recibido físicamente sin fecha de inspección. Puede coincidir con Inspección pendiente.",
+    description: "Órdenes con lotes recibidos sin fecha de inspección.",
     productOnly: true,
     options: [
       { id: "recibidos_sin_inspeccion", label: "Recibidos sin inspección" },
@@ -107,7 +106,7 @@ export const customFilters: readonly FilterDefinition[] = [
   {
     id: "confirmacion",
     name: "Confirmación pendiente",
-    description: "Algún lote recibido físicamente sin fecha de confirmación.",
+    description: "Órdenes con lotes recibidos sin fecha de confirmación.",
     productOnly: true,
     options: [
       { id: "confirmacion_pendiente", label: "Confirmación pendiente" },
@@ -117,7 +116,7 @@ export const customFilters: readonly FilterDefinition[] = [
     id: "por_cerrar",
     name: "Seguimiento por cerrar",
     description:
-      "Algún renglón en seguimiento con al menos un lote no anulado y todos sus lotes efectivos cerrados.",
+      "Órdenes con productos aún en seguimiento pero que todos sus lotes ya fueron cerrados.",
     productOnly: true,
     options: [
       { id: "seguimiento_por_cerrar", label: "Seguimiento por cerrar" },
@@ -126,8 +125,7 @@ export const customFilters: readonly FilterDefinition[] = [
   {
     id: "vinculos",
     name: "Vínculos de abastecimiento",
-    description:
-      "Con o sin relaciones existentes, en cualquiera de las dos direcciones, independientemente de sus estados.",
+    description: "Órdenes que tienen OCM/OC vinculadas.",
     options: [
       { id: "vinculos_con", label: "Con vínculos de abastecimiento" },
       { id: "vinculos_sin", label: "Sin vínculos de abastecimiento" },
@@ -137,7 +135,7 @@ export const customFilters: readonly FilterDefinition[] = [
     id: "ocm_pendientes",
     name: "OCM vinculadas pendientes",
     description:
-      "Algún renglón de material efectivamente vinculado a la OC permanece en seguimiento. No cuentan otros renglones de esa OCM.",
+      "Órdenes con productos que tienen materiales vinculados pendientes por entregar.",
     productOnly: true,
     options: [{ id: "ocm_pendientes", label: "OCM vinculadas pendientes" }],
   },
