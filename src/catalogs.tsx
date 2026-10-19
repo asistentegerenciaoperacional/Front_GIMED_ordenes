@@ -23,6 +23,7 @@ import {
 } from "./components/data-table";
 import { confirmAction } from "./components/overlays";
 import { CatalogForm, Documents } from "./forms";
+import { FavoriteSuppliersTable } from "./favorite-suppliers";
 import {
   columnOptions,
   filterTableRows,
@@ -481,7 +482,6 @@ export function CatalogTable({ entity }: { entity: Entity }) {
           <span>
             {rows.length} de {db[entity].length} registros
           </span>
-          <span>Los registros relacionados conservan su trazabilidad.</span>
         </div>
       </section>
       {editing !== undefined && (
@@ -612,10 +612,19 @@ export function CatalogTable({ entity }: { entity: Entity }) {
             )}
             {entity === "materiales" && (
               <>
-                <h3>Proveedores asociados</h3>
+                <h3>
+                  Proveedores favoritos del tipo{" "}
+                  {
+                    db.tipos_materiales.find(
+                      (t) => t.id === details.id_tipo_material,
+                    )?.tipo_material
+                  }
+                </h3>
                 <div className="inline">
                   {db.proveedores_favoritos
-                    .filter((v) => v.id_material === details.id)
+                    .filter(
+                      (v) => v.id_tipo_material === details.id_tipo_material,
+                    )
                     .map((v) => (
                       <Badge key={v.id_proveedor} value="producto">
                         {
@@ -625,8 +634,8 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                       </Badge>
                     ))}
                   {!db.proveedores_favoritos.some(
-                    (v) => v.id_material === details.id,
-                  ) && <p>Sin proveedores asociados.</p>}
+                    (v) => v.id_tipo_material === details.id_tipo_material,
+                  ) && <p>Sin proveedores favoritos para este tipo.</p>}
                 </div>
                 <h3>Precios conservados en órdenes</h3>
                 <div className="table-scroll">
@@ -760,7 +769,7 @@ export function CatalogPage({
     categorias: "Categorías",
     costos_maquila: "Costos de maquila",
     tipos_materiales: "Tipos de material",
-    proveedores_favoritos: "Proveedores de material",
+    proveedores_favoritos: "Proveedores favoritos por tipo",
     materiales_asociados: "Materiales por producto",
     producto_corrugado: "Corrugado por producto",
   };
@@ -779,7 +788,11 @@ export function CatalogPage({
           : "Apartados del catálogo"
       }
     >
-      <CatalogTable key={entity} entity={entity} />
+      {entity === "proveedores_favoritos" ? (
+        <FavoriteSuppliersTable />
+      ) : (
+        <CatalogTable key={entity} entity={entity} />
+      )}
     </Tabs>
   );
   return (

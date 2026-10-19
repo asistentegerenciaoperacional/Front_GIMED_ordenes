@@ -3,6 +3,7 @@ import {
   canonical,
   decimal,
   materialKind,
+  materialCodeRequired,
   meta,
   primaryKey,
   schemas,
@@ -89,6 +90,13 @@ export function validEntityField(
   )
     return false;
   if (!db) return true;
+  if (
+    entity === "materiales" &&
+    field === "codigo_material" &&
+    value === null &&
+    materialCodeRequired(db, values.id_tipo_material)
+  )
+    return false;
   const ref = meta.refs.find(
     (item) => item.table === entity && item.field === field,
   );

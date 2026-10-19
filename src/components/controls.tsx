@@ -26,7 +26,12 @@ import { I18nProvider } from "react-aria-components/I18nProvider";
 import { Input } from "react-aria-components/Input";
 import { Label } from "react-aria-components/Label";
 import { Link as AriaLink } from "react-aria-components/Link";
-import { ListBox, ListBoxItem } from "react-aria-components/ListBox";
+import {
+  ListBox,
+  ListBoxItem,
+  ListBoxSection,
+} from "react-aria-components/ListBox";
+import { Header } from "react-aria-components/Header";
 import { NumberField } from "react-aria-components/NumberField";
 import { Popover } from "react-aria-components/Popover";
 import { SearchField } from "react-aria-components/SearchField";
@@ -159,6 +164,7 @@ export type Choice = {
   label: string;
   description?: string;
   disabled?: boolean;
+  section?: string;
 };
 export function flatten(
   nodes: ReactNode,
@@ -181,10 +187,13 @@ export function nodeText(node: ReactNode): string {
     return nodeText((node.props as { children?: ReactNode }).children);
   return "";
 }
-function readChoices(children: ReactNode): Choice[] {
+function readChoices(children: ReactNode, section?: string): Choice[] {
   return flatten(children).flatMap((node) => {
     if (node.type === "optgroup")
-      return readChoices(node.props.children as ReactNode);
+      return readChoices(
+        node.props.children as ReactNode,
+        String(node.props.label ?? ""),
+      );
     const label =
       nodeText(node.props.children as ReactNode) ||
       String(node.props.value ?? "");
@@ -193,6 +202,7 @@ function readChoices(children: ReactNode): Choice[] {
         id: String(node.props.value ?? label),
         label,
         disabled: !!node.props.disabled,
+        section,
       },
     ];
   });
@@ -254,16 +264,32 @@ export function ControlSelect({
         <ChevronDown size={15} aria-hidden="true" />
       </AriaButton>
       <Popover className="aria-options" placement="bottom start" offset={1}>
-        <ListBox items={options} className="aria-option-list">
-          {(option) => (
-            <ListBoxItem
-              id={option.id}
-              textValue={option.label}
-              isDisabled={option.disabled}
-              className="aria-option"
-            >
-              {option.label}
-            </ListBoxItem>
+        <ListBox className="aria-option-list">
+          {[...new Set(options.map((option) => option.section))].map(
+            (section) => {
+              const items = options.filter(
+                (option) => option.section === section,
+              );
+              const render = (option: Choice) => (
+                <ListBoxItem
+                  key={option.id}
+                  id={option.id}
+                  textValue={option.label}
+                  isDisabled={option.disabled}
+                  className="aria-option"
+                >
+                  {option.label}
+                </ListBoxItem>
+              );
+              return section ? (
+                <ListBoxSection key={section} id={section}>
+                  <Header className="aria-option-section">{section}</Header>
+                  {items.map(render)}
+                </ListBoxSection>
+              ) : (
+                items.map(render)
+              );
+            },
           )}
         </ListBox>
       </Popover>

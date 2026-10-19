@@ -149,17 +149,16 @@ export function makeSeed(): Database {
     }),
   );
   [
-    [50, 3],
-    [51, 3],
-    [52, 4],
-    [53, 4],
-    [54, 4],
-    [55, 4],
-    [56, 3],
-    [56, 4],
+    [40, 3],
+    [41, 3],
+    [42, 4],
+    [43, 4],
+    [44, 4],
+    [45, 4],
+    [40, 4],
   ].forEach(([m, p]) =>
     add("proveedores_favoritos", null, {
-      id_material: sid(m),
+      id_tipo_material: sid(m),
       id_proveedor: sid(p),
     }),
   );

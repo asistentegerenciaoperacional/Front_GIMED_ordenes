@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn, execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdir, readFile, writeFile, access, rm } from "node:fs/promises";
+import { mkdir, readFile, writeFile, access, rm, readdir } from "node:fs/promises";
 import { resolve, dirname, relative, isAbsolute, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "node:net";
@@ -143,7 +143,7 @@ try {
       "-NoProfile",
       "-NonInteractive",
       "-Command",
-      '$ErrorActionPreference = "Stop"; Expand-Archive -LiteralPath $env:PROTOTIPO_VERIFY_ZIP -DestinationPath $env:PROTOTIPO_VERIFY_DEST',
+      '$ErrorActionPreference = "Stop"; Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory($env:PROTOTIPO_VERIFY_ZIP, $env:PROTOTIPO_VERIFY_DEST)',
     ],
     {
       env: {
@@ -315,6 +315,29 @@ try {
   assert.deepEqual(recovered, saved);
   check(true, "Reinicio del lanzador recupera íntegramente el estado guardado");
   await stop(process2);
+  // Upgrade an isolated portable database with the historical material pairs.
+  const legacy = { ...saved, proveedores_favoritos: [[50,3],[51,3],[52,4],[53,4],[54,4],[55,4],[56,3],[56,4]].map(([material,provider]) => ({
+    id_material: material.toString(16).padStart(24,"0"), id_proveedor: provider.toString(16).padStart(24,"0"),
+  })) };
+  const portableData = resolve(root, "data/database.json");
+  const legacyBody = JSON.stringify(legacy, null, 2) + "\n";
+  await writeFile(portableData, legacyBody);
+  const process3 = start();
+  await waitReady(process3);
+  const migrated = await (await fetch(url + "/api/state")).json();
+  assert.deepEqual(migrated, saved);
+  check(true, "Portable convierte ocho favoritos por material en siete por tipo sin cambiar otras colecciones");
+  await stop(process3);
+  const backups = (await readdir(resolve(root, "data"))).filter(name => name.endsWith(".bak"));
+  assert.equal(backups.length, 1);
+  assert.equal(await readFile(resolve(root, "data", backups[0]), "utf8"), legacyBody);
+  check(true, "Migración portable conserva un respaldo exacto del archivo anterior");
+  const process4 = start();
+  await waitReady(process4);
+  assert.deepEqual(await (await fetch(url + "/api/state")).json(), migrated);
+  await stop(process4);
+  assert.equal((await readdir(resolve(root, "data"))).filter(name => name.endsWith(".bak")).length, 1);
+  check(true, "Segundo reinicio portable conserva la migración sin otro respaldo");
   const finalOriginalHash = (await present(originalFile))
     ? sha(await readFile(originalFile))
     : null;

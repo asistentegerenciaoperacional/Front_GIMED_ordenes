@@ -109,6 +109,7 @@ function DataTableView({
           return (
             <Cell
               {...(rest as React.ComponentProps<typeof Cell>)}
+              colSpan={colSpan as number | undefined}
               key={index}
               textValue={nodeText(content as ReactNode)}
             >
@@ -120,9 +121,13 @@ function DataTableView({
     ),
     [],
   );
-  const emptyRow = rows.find(
-    (row) => row.cells.length === 1 && Number(row.cells[0].props.colSpan) > 1,
-  );
+  const emptyRow =
+    rows.length === 1
+      ? rows.find(
+          (row) =>
+            row.cells.length === 1 && Number(row.cells[0].props.colSpan) > 1,
+        )
+      : undefined;
   const data = emptyRow ? [] : rows;
   const virtual =
     data.length >= 50 && !!props.className?.includes("orders-table");

@@ -332,3 +332,28 @@ Por confirmación expresa del usuario, este ensayo queda **fuera del criterio de
 Evidencias: [referencia CPU 4×](tests/evidence/aria/baseline-stress-performance.json) y [migración CPU 4×](tests/evidence/aria/after-stress-performance.json). Reproducción: `npx tsx scripts/measure-aria.ts baseline --scenario=stress` y `npx tsx scripts/measure-aria.ts after --scenario=stress`.
 
 Los desplegados nuevos usan la altura calculada por React Aria mediante `--disclosure-panel-height` y una transición de 180 ms, con opacidad de 140 ms. La librería controla medición, apertura y ocultación; la aplicación no añade un bucle de medición por fotograma. Se conserva contenido montado y se desactiva la animación con movimiento reducido.
+
+<!-- favorites-results-start -->
+## Favoritos por tipo de material — cierre del 19 de octubre de 2026
+
+La comparación de producción contra el commit de recuperación aprueba **39 de 39 límites**, con el mismo Chrome, equipo, colecciones deterministas y CPU sin limitación. Se conservaron los hashes de los datos de cada escenario y se midieron eventos reales hasta el resultado visible, excluyendo la automatización. La copia fija de control evita interferir con la base abierta del usuario.
+
+| Escenario | Carga P95 anterior | Carga P95 actual | Límite |
+|---|---|---|---|
+| 6000 lotes / 1440px | 149,5 ms | 154,7 ms | 249,5 ms |
+| 6000 lotes / 375px | 145,7 ms | 141,8 ms | 245,7 ms |
+| 60000 lotes / 1440px | 797,4 ms | 744,1 ms | 917 ms |
+
+Todas las interacciones y la memoria estable cumplen el mayor entre 15 % y 20 ms, 100 ms o 5 MB según la métrica. La descarga de JavaScript, tareas largas y muestras de memoria figuran en la [comparación](tests/evidence/favorites/comparison.json).
+
+El nuevo editor se verifica además por separado:
+
+| Lotes | Ciclos | Apertura P95 | Búsqueda P95 | Crecimiento tras GC |
+|---|---|---|---|---|
+| 6.000 | 150 | 45,3 ms | 41,7 ms | 0,4 MB |
+| 60.000 | 150 | 45,9 ms | 41,2 ms | 0,4 MB |
+
+Ensayo prolongado: 630 ciclos adicionales, con muestras de heap y nodos DOM tras GC. Las muestras de los últimos 120 ciclos se mantuvieron en 371 nodos y el recuento final descendió a 222; entre los ciclos 480 y 600 el heap varió 16,8 KB. Se comprobó automáticamente que no aumentaran los nodos retenidos y que esa variación final quedara por debajo de 250 KB. [Resultados del editor](tests/evidence/favorites/component-performance.json) y [secuencia prolongada](tests/evidence/favorites/component-soak-performance.json). La tabla mantiene sus colecciones y callbacks mientras se abre o cierra el editor.
+
+El [ensayo CPU 4×](tests/evidence/favorites/after-stress-performance.json) es informativo y no modifica los criterios de aceptación acordados. Reproducir con <code>npm run benchmark:favorites</code> y <code>npx tsx scripts/measure-favorites.ts</code>; añadir <code>--soak</code> para la secuencia prolongada.
+<!-- favorites-results-end -->

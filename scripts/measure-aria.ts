@@ -28,9 +28,10 @@ const root = resolve(
   process.env.ARIA_DIST ??
     (phase === "baseline" ? "tests/.tmp/aria-baseline/dist" : "dist"),
 );
-const evidence = resolve("tests/evidence/aria");
+const evidence = resolve(process.env.ARIA_EVIDENCE ?? "tests/evidence/aria");
 await mkdir(evidence, { recursive: true });
-const original = await readFile("data/database.json");
+const guardFile = process.env.ARIA_GUARD_FILE ?? "data/database.json";
+const original = await readFile(guardFile);
 const hash = (b: Buffer) => createHash("sha256").update(b).digest("hex");
 let db = makeOrderPerformanceFixture(6000);
 const api = express();
@@ -245,10 +246,7 @@ try {
           "location.search.includes('filtro=documento_con')",
           () =>
             page
-              .getByRole("option", {
-                name: "Con documento de la orden",
-                exact: true,
-              })
+              .locator('[role="option"][data-key="documento_con"]')
               .click(),
         );
         await page
@@ -320,6 +318,7 @@ try {
       "({rows:document.querySelectorAll('.orders-table [role=row]').length,cells:document.querySelectorAll('.orders-table [role=gridcell],.orders-table [role=rowheader]').length})",
     );
     cases.push({
+      fixtureHash: hash(Buffer.from(JSON.stringify(db))),
       lots,
       width,
       height,
@@ -344,7 +343,7 @@ try {
           browser: browser.version(),
           date: new Date().toISOString(),
           quick,
-          baselineCommit: "bd37e32c943477dd36c6936c8453160c0abf34b9",
+          baselineCommit: process.env.ARIA_BASELINE_COMMIT ?? "bd37e32c943477dd36c6936c8453160c0abf34b9",
           cases,
           dataHash: hash(original),
         },
@@ -355,12 +354,12 @@ try {
     console.log(phase + " measured " + lots + " lots at " + width + "px");
     await context.close();
   }
-  assert.equal(hash(await readFile("data/database.json")), hash(original));
+  assert.equal(hash(await readFile(guardFile)), hash(original));
   const report = {
     phase,
     browser: browser.version(),
     date: new Date().toISOString(),
-    baselineCommit: "bd37e32c943477dd36c6936c8453160c0abf34b9",
+    baselineCommit: process.env.ARIA_BASELINE_COMMIT ?? "bd37e32c943477dd36c6936c8453160c0abf34b9",
     cases,
     dataHash: hash(original),
   };
@@ -368,7 +367,7 @@ try {
     resolve(evidence, reportName),
     JSON.stringify(report, null, 2) + "\n",
   );
-  console.log("Report: tests/evidence/aria/" + reportName);
+  console.log("Report: " + resolve(evidence, reportName));
 } finally {
   await browser.close();
   await new Promise<void>((ok) => server.close(() => ok()));

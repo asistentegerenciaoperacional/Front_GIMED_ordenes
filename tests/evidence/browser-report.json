@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-16T18:52:56.893Z",
+  "date": "2026-10-19T13:34:55.503Z",
   "checks": [
     "Estado con 28 colecciones",
     "Drawer cerrado y contenido sin espacio lateral reservado a 375 px",
@@ -625,25 +625,25 @@
   "errors": [],
   "responses": [
     {
-      "url": "http://127.0.0.1:59380/api/commands",
+      "url": "http://127.0.0.1:58790/api/commands",
       "status": 422
     },
     {
-      "url": "http://127.0.0.1:59380/api/commands",
+      "url": "http://127.0.0.1:58790/api/commands",
       "status": 422
     },
     {
-      "url": "http://127.0.0.1:59380/api/commands",
+      "url": "http://127.0.0.1:58790/api/commands",
       "status": 422
     }
   ],
-  "productId": "54bc634fcad91fe8acb72001",
+  "productId": "e8005d07a401f2c09131751f",
   "materialId": "000000000000000000000079",
-  "otherId": "eb8f634c4f3e6086b91549fa",
-  "individualId": "4d4d2b68bf13e3326e5ebaf4",
-  "manualMaterialId": "80ba936cf6a1834ce899acd0",
-  "replacementOrderId": "c2ccab9fe2ca64a9c6a8b081",
-  "detailOrderId": "72930fb320cdc57662d4fbce",
+  "otherId": "69d469bf7f95e332f73ed21e",
+  "individualId": "e669f6f77f844f3cb75fc82e",
+  "manualMaterialId": "38db3f27ca388304330a15c6",
+  "replacementOrderId": "3643ee0f37962a3e0eb6928e",
+  "detailOrderId": "bfa2554cf5aae6498e99ffd8",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-9zZWMx\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-K1M033\\database.json"
 }

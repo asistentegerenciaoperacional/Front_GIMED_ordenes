@@ -300,6 +300,7 @@ export function App() {
         if (
           error instanceof ApiError &&
           (error.code === "CONSECUTIVE_CHANGED" ||
+            error.code === "FAVORITES_CHANGED" ||
             (["createOrder", "editOrder"].includes(name) &&
               Object.keys(error.fields).some((field) =>
                 /^lines\.\d+\.id_producto$/.test(field),
@@ -451,10 +452,6 @@ export function App() {
                 </div>
               </div>
               <div className="topbar-right">
-                <span className="saved-status" role="status">
-                  <span className="status-dot" />
-                  {saving ? "Guardando…" : "Guardado local"}
-                </span>
                 <span className="demo-pill">
                   <FlaskConical size={12} aria-hidden="true" />
                   Demostración

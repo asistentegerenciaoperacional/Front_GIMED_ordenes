@@ -5,19 +5,36 @@ import { setTimeout as pause } from "node:timers/promises";
 import type { Database } from "../shared/models";
 import { makeSeed } from "../shared/seed";
 import { validateDatabase } from "./integrity";
+import { migrateFavoriteSuppliers } from "./favorite-migration";
 export class JsonStore {
   private state!: Database;
   private queue: Promise<unknown> = Promise.resolve();
   private constructor(public file: string) {}
+  migration?: { before: number; after: number; backup: string };
   static async open(file: string, seed: () => Database = makeSeed) {
     const store = new JsonStore(file);
     await mkdir(dirname(file), { recursive: true });
+    let original: string;
     try {
-      store.state = validateDatabase(JSON.parse(await readFile(file, "utf8")));
+      original = await readFile(file, "utf8");
     } catch (e) {
       if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
       store.state = validateDatabase(seed());
       await store.persist(store.state);
+      return store;
+    }
+    const migration = migrateFavoriteSuppliers(JSON.parse(original));
+    store.state = validateDatabase(migration.database as Database);
+    if (migration.changed) {
+      const backup = `${file}.favorites-${Date.now()}-${randomUUID()}.bak`;
+      await writeFile(backup, original, { encoding: "utf8", flag: "wx" });
+      // Validation and exact backup must succeed before the atomic replacement.
+      await store.persist(migration.database as Database);
+      store.migration = {
+        before: migration.before,
+        after: migration.after,
+        backup,
+      };
     }
     return store;
   }

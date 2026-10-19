@@ -517,6 +517,23 @@ test("R08/R09: sugerencias resueltas por área normalizada, internos activos y p
     ["compras1@proveedor.example"],
   );
 });
+test("el aviso de códigos incluye solo los códigos pendientes seleccionados", () => {
+  const db = makeSeed();
+  const pending = db.codigos_barras.find((code) => code.estado === "creado_gs1")!;
+  const verified = db.codigos_barras.find(
+    (code) => code.estado === "verificado_sistema",
+  )!;
+  const all = mailPreview(db, { event: "codigos_barras_nuevos" });
+  assert.match(all.body, new RegExp(pending.codigo));
+  assert.doesNotMatch(all.body, new RegExp(verified.codigo));
+
+  const selected = mailPreview(db, {
+    event: "codigos_barras_nuevos",
+    barcodeIds: [pending.id],
+  });
+  assert.match(selected.body, new RegExp(pending.codigo));
+  assert.doesNotMatch(selected.body, new RegExp(verified.codigo));
+});
 test("R09: cargos equivalentes no duplican configuración; sin configuración se permite envío manual", async (t) => {
   const store = await fixture(t);
   await assert.rejects(

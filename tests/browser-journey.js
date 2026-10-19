@@ -2325,6 +2325,7 @@ async (page) => {
     const invoice = (await invoke('createInvoice', { id_proveedor: supplier, numero_factura: 'DETALLE-' + type, placeholder: true })).row;
     await invoke('saveReceipt', { entity: table, id: line.id, row: { id_factura: invoice.id } });
     await page.goto(origin + '/ordenes/' + id);
+    await page.getByRole('link', { name: 'Abrir documento de factura ' + invoice.numero_factura, exact: true }).waitFor();
     check(await page.getByRole('link', { name: 'Abrir documento de factura ' + invoice.numero_factura, exact: true }).count() === 1,
       'Factura de recepción de ' + type + ' enlaza su documento asociado');
     check(await page.locator('.line-card-head').first().evaluate((head) =>

@@ -223,7 +223,7 @@ await new Promise((ok, fail) => {
       "-NoProfile",
       "-NonInteractive",
       "-Command",
-      '$ErrorActionPreference = "Stop"; Compress-Archive -LiteralPath $env:PROTOTIPO_PACKAGE_SOURCE -DestinationPath $env:PROTOTIPO_PACKAGE_ZIP -CompressionLevel Optimal',
+      '$ErrorActionPreference = "Stop"; Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::CreateFromDirectory($env:PROTOTIPO_PACKAGE_SOURCE, $env:PROTOTIPO_PACKAGE_ZIP, [System.IO.Compression.CompressionLevel]::Optimal, $true)',
     ],
     {
       windowsHide: true,

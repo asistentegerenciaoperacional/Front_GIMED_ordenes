@@ -2,7 +2,7 @@
 
 Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
 
-Actualizado el 16 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+Actualizado el 19 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
 
 ## Bases
 
@@ -37,7 +37,17 @@ La migración, su punto de recuperación y su verificación se registran en [MIG
 
 Órdenes es la pantalla inicial. La navegación lateral agrupa los procesos y reserva Configuración al final. Se presenta como un drawer cerrado inicialmente en todos los tamaños de pantalla; el botón de menú lo abre sobre el contenido, con un fondo atenuado. Su icono de fijación cambia entre panel flotante y navegación permanente. El contenido usa título, acción principal, filtros y tabla. El detalle mantiene la información de la orden de compra, sus productos, materiales o conceptos y los documentos vinculados. Los diálogos separan captura y revisión antes del guardado.
 
-Catálogos separa la navegación con pestañas principales **Productos**, **Materiales** y **Productos & materiales**, siguiendo el estilo de grupos de Órdenes. Debajo, los botones secundarios conservan el diseño actual: Productos contiene Lista de productos, Categorías y Costos de maquila; Materiales, Lista de materiales, Tipos de material y Proveedores de material; Productos & materiales, Materiales por producto y Corrugado por producto.
+Catálogos separa la navegación con pestañas principales **Productos**, **Materiales** y **Productos & materiales**, siguiendo el estilo de grupos de Órdenes. Debajo, los botones secundarios conservan el diseño actual: Productos contiene Lista de productos, Categorías y Costos de maquila; Materiales, Lista de materiales, Tipos de material y Proveedores favoritos por tipo; Productos & materiales, Materiales por producto y Corrugado por producto.
+
+### Relaciones agrupadas y selección múltiple
+
+Usar `GroupedRelationsTable` cuando varias relaciones compartan una entidad principal: una fila por entidad, conteo, expansión accesible (`aria-expanded`/`aria-controls`) y detalle a todo el ancho. Incluir entidades sin relaciones; bloquear solo su despliegue y mantener el lápiz de edición habilitado. Buscar por principal o relacionados; abrir los grupos coincidentes y permitir cerrarlos. Si todas las entidades ya están representadas, no añadir Agregar global.
+
+Mantener memorizados los grupos, callbacks y contenido vacío: abrir o cerrar el editor no debe reconstruir la colección de la tabla. Regenerarla cuando cambien los datos, la búsqueda o los grupos desplegados.
+
+Usar `MultiRelationPicker` dentro del diálogo compartido para modificar un conjunto: búsqueda con casillas React Aria y una selección final visible independiente del filtro, con acciones para quitar, conteo y altas/bajas antes de guardar. Mantener IDs estables, distinguir homónimos con contexto y no guardar al marcar cada casilla. Cancelar/Escape descarta con confirmación; errores conservan el borrador; un conflicto exige revisar la selección actual. Bloquear envíos duplicados, conservar scroll y devolver foco al disparador mediante React Aria. En móvil apilar listas; conservar los tokens y el lápiz cuadrado secundario existentes.
+
+Favoritos aplica estos patrones a tipos de material y proveedores. Los materiales heredan los favoritos del tipo. Los selectores de órdenes presentan secciones compactas Favoritos/Otros proveedores sin restringir opciones elegibles ni modificar una selección existente. Especificación, recuperación y pruebas en [PROVEEDORES-FAVORITOS.md](../PROVEEDORES-FAVORITOS.md).
 
 Los campos para elegir un producto existente usan el `ComboBox` compartido de React Aria: al escribir aparecen coincidencias y la elección guarda el identificador del producto. En órdenes, las sugerencias se limitan a productos activos del proveedor seleccionado y al producto histórico del renglón cuando aplica. En formularios de catálogo y asignación GS1 se muestran las opciones disponibles. Al asignar un código GS1, el proveedor del producto aparece debajo como campo de solo lectura.
 
@@ -54,6 +64,8 @@ Los errores aparecen junto al campo y en un resumen con foco al validar. Los enl
 El foco visible usa un contorno azul. Las transiciones breves respetan movimiento reducido. La impresión oculta controles y conserva siete posiciones, total y firmas en A4 horizontal.
 
 Las cantidades recomendadas son editables. Los textos de demostración distinguen documentos ficticios y correos simulados de las operaciones guardadas.
+
+En Agregar/Editar material, Código MAIA es opcional únicamente cuando el tipo seleccionado es **Corrugado**; la etiqueta no lleva asterisco y la ayuda explica la excepción. Para los demás tipos se muestra como obligatorio. El cambio de tipo actualiza la obligación y la validación del código sin borrar el valor escrito. Un código vacío se conserva como `null`, incluso si el usuario nunca tocó el campo; cualquier código informado debe tener tres dígitos y ser único.
 
 Los renglones de OC y OCM distinguen su cabecera con borde `#E2E8F0` y ribete lateral de 3 px. En seguimiento se conservan fondo `#F6F8FC` y ribete `#2563EB`; cerrado usa gris verdoso `#F1F5F3` / `#749486`, y anulado gris rosado `#F7F2F2` / `#AD8585`, en la familia cromática de su etiqueta. Se conservan texto `#18253B` y secundario `#526179`, con contraste mínimo de 4,5:1 sobre los tres fondos. El código de barras y MAIA usan monospace de 16 px y peso 600.
 
@@ -135,6 +147,6 @@ Todas las tablas siguientes muestran un botón de filtro en cada cabecera de dat
 | Proveedores → Proveedores                         | Nombre completo, nombre resumido y NIT (texto); proveedor de maquila, proveedor de materiales y activo (enumeraciones Sí/No).                                                                                                                                                                                                                                          |
 | Proveedores → Direcciones de proveedor            | Proveedor, nombre de bodega, ciudad, dirección y complemento (texto).                                                                                                                                                                                                                                                                                                  |
 | Proveedores → Contactos de proveedor              | Proveedor, nombre, cargo o área, correo y celular (texto).                                                                                                                                                                                                                                                                                                             |
-| Códigos de barras                                 | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). El botón **(?)** junto a la búsqueda abre un diálogo modal con fondo atenuado y las definiciones de Creado en GS1, Verificado en sistema, Asignado e Inactivo. Se cierra con **X**, **Entendido**, Escape o clic fuera; mientras está abierto bloquea la interacción con la aplicación. |
+| Códigos de barras                                 | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). El botón **(?)** junto a la búsqueda abre un diálogo modal con fondo atenuado y las definiciones de Creado en GS1, Verificado en sistema, Asignado e Inactivo. Se cierra con **X**, **Entendido**, Escape o clic fuera; mientras está abierto bloquea la interacción con la aplicación. **Avisar códigos nuevos** abre un diálogo de selección que muestra los códigos en estado Creado en GS1, todos seleccionados por defecto. Permite seleccionar o deseleccionar códigos individualmente y ofrece una casilla para seleccionar todos; al continuar, el cuerpo del correo incluye solo los códigos seleccionados. Si no hay códigos por verificar, informa el estado y deshabilita la preparación del aviso. Reutiliza el diálogo compartido, las casillas de selección y los estilos existentes. |
 
 En la asignación de una factura existente, las casillas reflejan las asociaciones iniciales. Desmarcar y guardar retira únicamente esa factura del lote o recepción; buscar conserva las selecciones ocultas. Al crear una factura, **Adjuntar documento** reutiliza el formulario de placeholder: clase Factura física y nombre de archivo. El documento se prepara en el borrador, con Reemplazar documento y Quitar documento, y se guarda conjuntamente al confirmar la factura.

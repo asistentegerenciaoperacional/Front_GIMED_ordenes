@@ -113,6 +113,7 @@ export function Dialog({
   onClose,
   wide = false,
   dirty = false,
+  busy = false,
 }: {
   title: string;
   subtitle?: string;
@@ -120,6 +121,7 @@ export function Dialog({
   onClose: () => void;
   wide?: boolean;
   dirty?: boolean;
+  busy?: boolean;
 }) {
   const titleId = useId();
   const [edited, setEdited] = useState(false);
@@ -140,12 +142,14 @@ export function Dialog({
       "Descartar cambios",
     ));
   const close = async () => {
+    if (busy) return;
     if (await canClose()) onClose();
   };
   return (
     <ModalOverlay
       isOpen
-      isDismissable
+      isDismissable={!busy}
+      isKeyboardDismissDisabled={busy}
       onOpenChange={(open) => {
         if (!open) void close();
       }}
@@ -191,6 +195,7 @@ export function Dialog({
               <Action
                 className="btn secondary icon-btn"
                 aria-label={"Cerrar " + title}
+                disabled={busy}
                 onClick={() => void close()}
               >
                 <X size={16} aria-hidden="true" />

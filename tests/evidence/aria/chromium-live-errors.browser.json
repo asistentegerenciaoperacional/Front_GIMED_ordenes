@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-16T18:52:51.101Z",
+  "date": "2026-10-16T21:43:58.164Z",
   "checks": [
     "Orden muestra fecha, cantidad y precio inválidos",
     "Otra cantidad decimal conserva el error",
@@ -49,5 +49,5 @@
   "isolatedFixtures": true,
   "savedRecords": 0,
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-aAcvX4\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-56FM4B\\database.json"
 }

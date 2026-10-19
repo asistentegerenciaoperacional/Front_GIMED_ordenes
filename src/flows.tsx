@@ -20,6 +20,8 @@ import {
 import { CatalogTable } from "./catalogs";
 import { ColumnHeader } from "./column-filter";
 import {
+  CheckChoice,
+  ChoiceGroup,
   ControlForm,
   ControlInput,
   ControlLink,
@@ -643,7 +645,9 @@ export function CodesPage() {
     [action, setAction] = useState<Row | null>(null),
     [product, setProduct] = useState(""),
     [busy, setBusy] = useState(false),
-    [mail, setMail] = useState(false);
+    [mail, setMail] = useState(false),
+    [mailSelection, setMailSelection] = useState(false),
+    [mailCodeIds, setMailCodeIds] = useState<string[]>([]);
   const [tableState, setTableState] = useState<TableState<string>>({
     filters: {},
   });
@@ -735,6 +739,9 @@ export function CodesPage() {
   const filterCount = barcodeColumns.filter((column) =>
     hasFilter(tableState.filters[column.key]),
   ).length;
+  const pendingVerificationCodes = db.codigos_barras.filter(
+    (barcode) => barcode.estado === "creado_gs1",
+  );
   const clearFilters = () =>
     setTableState((current) => ({ filters: {}, sort: current.sort }));
   async function create(e: React.FormEvent) {
@@ -777,7 +784,13 @@ export function CodesPage() {
         description="Registra códigos GS1, confirma su disponibilidad y asígnalos al producto."
         action={
           <div className="inline">
-            <Button icon={Send} onClick={() => setMail(true)}>
+            <Button
+              icon={Send}
+              onClick={() => {
+                setMailCodeIds(pendingVerificationCodes.map((item) => item.id));
+                setMailSelection(true);
+              }}
+            >
               Avisar códigos nuevos
             </Button>
             <Button
@@ -998,6 +1011,85 @@ export function CodesPage() {
           </div>
         </Dialog>
       )}
+      {mailSelection && (
+        <Dialog
+          title="Avisar códigos nuevos"
+          subtitle="Selecciona los códigos creados en GS1 que se enviarán para verificar en el sistema."
+          onClose={() => setMailSelection(false)}
+        >
+          <div className="dialog-body">
+            {pendingVerificationCodes.length ? (
+              <>
+                <div className="spread">
+                  <strong>
+                    Códigos por verificar ({mailCodeIds.length} de{" "}
+                    {pendingVerificationCodes.length})
+                  </strong>
+                  <CheckChoice
+                    id="select-all-new-barcodes"
+                    checked={
+                      mailCodeIds.length === pendingVerificationCodes.length
+                    }
+                    indeterminate={
+                      mailCodeIds.length > 0 &&
+                      mailCodeIds.length < pendingVerificationCodes.length
+                    }
+                    onChange={(checked) =>
+                      setMailCodeIds(
+                        checked
+                          ? pendingVerificationCodes.map((item) => item.id)
+                          : [],
+                      )
+                    }
+                  >
+                    Seleccionar todos
+                  </CheckChoice>
+                </div>
+                <ChoiceGroup
+                  aria-label="Códigos para enviar a verificación"
+                  className="check-list"
+                  value={mailCodeIds}
+                  onChange={(value) => setMailCodeIds(value as string[])}
+                >
+                  {pendingVerificationCodes.map((item) => (
+                    <CheckChoice key={item.id} value={item.id}>
+                      <span className="mono">
+                        <strong>{item.codigo}</strong>
+                      </span>
+                    </CheckChoice>
+                  ))}
+                </ChoiceGroup>
+              </>
+            ) : (
+              <Empty
+                title="No hay códigos pendientes de verificación"
+                description="Los códigos deben estar en estado «Creado en GS1» para incluirse en este aviso."
+              />
+            )}
+          </div>
+          <div className="dialog-footer">
+            <CancelButton onClick={() => setMailSelection(false)}>
+              Cancelar
+            </CancelButton>
+            <Button
+              variant="primary"
+              icon={Send}
+              disabled={!mailCodeIds.length || !pendingVerificationCodes.length}
+              onClick={() => {
+                setMailCodeIds((current) =>
+                  pendingVerificationCodes
+                    .filter((item) => current.includes(item.id))
+                    .map((item) => item.id),
+                );
+                setMailSelection(false);
+                setMail(true);
+              }}
+            >
+              Preparar aviso
+            </Button>
+          </div>
+        </Dialog>
+      )}
       {creating && (
         <Dialog
           title="Registrar código GS1"
@@ -1107,8 +1199,11 @@ export function CodesPage() {
       )}
       {mail && (
         <MailForm
-          context={{ event: "codigos_barras_nuevos" }}
-          onClose={() => setMail(false)}
+          context={{ event: "codigos_barras_nuevos", barcodeIds: mailCodeIds }}
+          onClose={() => {
+            setMail(false);
+            setMailCodeIds([]);
+          }}
         />
       )}
     </>

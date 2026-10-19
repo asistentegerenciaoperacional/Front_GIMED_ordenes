@@ -84,7 +84,7 @@ export interface producto_corrugado {
 }
 
 export interface proveedores_favoritos {
-  id_material: string;
+  id_tipo_material: string;
   id_proveedor: string;
 }
 

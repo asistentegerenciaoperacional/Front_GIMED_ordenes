@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
-const root = "tests/evidence/aria/";
+const root = (process.env.ARIA_EVIDENCE ?? "tests/evidence/aria").replaceAll("\\", "/").replace(/\/$/, "") + "/";
 const baseline = JSON.parse(
   await readFile(root + "baseline-performance.json", "utf8"),
 );
@@ -31,6 +31,7 @@ for (let i = 0; i < 3; i++) {
     [a.lots, a.width, a.throttle],
     [b.lots, b.width, b.throttle],
   );
+  if (a.fixtureHash || b.fixtureHash) assert.equal(a.fixtureHash, b.fixtureHash, "Misma colección determinista en ambas compilaciones");
   const scenario = `${a.lots} lotes / ${a.width}px / CPU ${a.throttle}x`;
   assert.equal(a.load.samples.length, 20);
   add(scenario, "load P95 ms", b.load.p95, a.load.p95, 100);

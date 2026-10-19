@@ -1,0 +1,199 @@
+- generic [ref=e3]:
+  - link "Saltar al contenido" [ref=e4] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - banner [ref=e6]:
+      - generic [ref=e7]:
+        - button "Abrir navegación" [ref=e8] [cursor=pointer]
+        - generic [ref=e10]:
+          - generic [ref=e11]: Compras
+          - strong [ref=e14]: Órdenes de compra
+      - generic [ref=e15]:
+        - generic [ref=e16]: Demostración
+        - generic "Espacio GIMED" [ref=e19]: GI
+    - main [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - heading "Órdenes de compra" [level=1] [ref=e24]
+            - paragraph [ref=e25]: Emite órdenes, registra entregas y consulta su seguimiento.
+          - button "Nueva orden" [ref=e26] [cursor=pointer]
+        - generic [ref=e28]:
+          - tablist "Grupos de órdenes" [ref=e29]:
+            - tab "Productos" [selected] [ref=e30] [cursor=pointer]
+            - tab "Materiales" [ref=e31] [cursor=pointer]
+          - generic "Consecutivo de órdenes" [ref=e32]:
+            - generic [ref=e33]:
+              - text: "Última OC:"
+              - strong [ref=e34]: "2804"
+            - generic [ref=e35]:
+              - text: "Próxima OC:"
+              - strong [ref=e36]: "2805"
+        - tabpanel "Productos" [ref=e37]:
+          - generic [ref=e38]:
+            - button "Sin autorización 1 Pendientes de firma" [ref=e39] [cursor=pointer]:
+              - generic [ref=e40]: Sin autorización
+              - generic [ref=e45]: "1"
+              - text: Pendientes de firma
+            - button "En seguimiento 1 Órdenes autorizadas" [ref=e46] [cursor=pointer]:
+              - generic [ref=e47]: En seguimiento
+              - generic [ref=e53]: "1"
+              - text: Órdenes autorizadas
+            - button "Parcialmente anuladas 1 Con anulaciones parciales" [ref=e54] [cursor=pointer]:
+              - generic [ref=e55]: Parcialmente anuladas
+              - generic [ref=e60]: "1"
+              - text: Con anulaciones parciales
+            - button "Cerradas 2 Seguimiento finalizado" [ref=e61] [cursor=pointer]:
+              - generic [ref=e62]: Cerradas
+              - generic [ref=e67]: "2"
+              - text: Seguimiento finalizado
+          - generic [ref=e69]:
+            - tablist "Vistas de órdenes" [ref=e70]:
+              - tab "No autorizadas 1" [ref=e71] [cursor=pointer]:
+                - text: No autorizadas
+                - generic [ref=e72]: "1"
+              - tab "Seguimiento 4" [selected] [ref=e73] [cursor=pointer]:
+                - text: Seguimiento
+                - generic [ref=e74]: "4"
+              - tab "Anuladas 0" [ref=e75] [cursor=pointer]:
+                - text: Anuladas
+                - generic [ref=e76]: "0"
+            - tabpanel "Seguimiento 4" [ref=e77]:
+              - generic [ref=e78]:
+                - textbox "Buscar órdenes" [ref=e84]:
+                  - /placeholder: Buscar por número, producto, código o proveedor…
+                - generic [ref=e86]:
+                  - generic [ref=e87]:
+                    - generic [ref=e88]: Filtro personalizado
+                    - button "Filtro personalizado" [ref=e89] [cursor=pointer]:
+                      - generic [ref=e90]: Sin filtro personalizado
+                    - combobox [ref=e95]
+                  - button "Ayuda de filtros personalizados" [ref=e96] [cursor=pointer]
+              - grid "Orden / tipo, Proveedor, Productos, Fecha de elaboración, Entrega solicitada, Estado, Total, Acciones" [ref=e101]:
+                - rowgroup [ref=e102]:
+                  - row [ref=e103]:
+                    - columnheader "Orden / tipo Filtrar y ordenar Orden / tipo" [ref=e104]:
+                      - generic [ref=e105]:
+                        - generic [ref=e106]: Orden / tipo
+                        - button "Filtrar y ordenar Orden / tipo" [ref=e107] [cursor=pointer]
+                    - columnheader "Proveedor Filtrar y ordenar Proveedor" [ref=e110]:
+                      - generic [ref=e111]:
+                        - generic [ref=e112]: Proveedor
+                        - button "Filtrar y ordenar Proveedor" [ref=e113] [cursor=pointer]
+                    - columnheader "Productos Filtrar y ordenar Productos" [ref=e116]:
+                      - generic [ref=e117]:
+                        - generic [ref=e118]: Productos
+                        - button "Filtrar y ordenar Productos" [ref=e119] [cursor=pointer]
+                    - columnheader "Fecha de elaboración Filtrar y ordenar Fecha de elaboración" [ref=e122]:
+                      - generic [ref=e123]:
+                        - generic [ref=e124]: Fecha de elaboración
+                        - button "Filtrar y ordenar Fecha de elaboración" [ref=e125] [cursor=pointer]
+                    - columnheader "Entrega solicitada Filtrar y ordenar Entrega solicitada" [ref=e128]:
+                      - generic [ref=e129]:
+                        - generic [ref=e130]: Entrega solicitada
+                        - button "Filtrar y ordenar Entrega solicitada" [ref=e131] [cursor=pointer]
+                    - columnheader "Estado Filtrar y ordenar Estado" [ref=e134]:
+                      - generic [ref=e135]:
+                        - generic [ref=e136]: Estado
+                        - button "Filtrar y ordenar Estado" [ref=e137] [cursor=pointer]
+                    - columnheader "Total Filtrar y ordenar Total" [ref=e140]:
+                      - generic [ref=e141]:
+                        - generic [ref=e142]: Total
+                        - button "Filtrar y ordenar Total" [ref=e143] [cursor=pointer]
+                    - columnheader "Acciones" [ref=e146]
+                - rowgroup [ref=e148]:
+                  - row [ref=e149]:
+                    - rowheader "OC 2804 Producto" [ref=e150]:
+                      - link "OC 2804" [ref=e151] [cursor=pointer]:
+                        - /url: /ordenes/000000000000000000000067
+                      - generic [ref=e152]: Producto
+                    - gridcell "Aurora NIT 900123401" [ref=e154]:
+                      - strong [ref=e155]: Aurora
+                      - generic [ref=e156]: NIT 900123401
+                    - gridcell "Crema corporal · 250 ml 1 producto · 12.000 unidades solicitadas" [ref=e157]:
+                      - strong [ref=e158]: Crema corporal · 250 ml
+                      - generic [ref=e159]: 1 producto · 12.000 unidades solicitadas
+                    - gridcell "21 de sept de 2026" [ref=e160]
+                    - gridcell "09 de oct de 2026" [ref=e161]
+                    - gridcell "Cerrada" [ref=e162]
+                    - gridcell "$ 38.400.000,00" [ref=e164]
+                    - gridcell [ref=e165]:
+                      - generic [ref=e166]:
+                        - link "Imprimir OC 2804" [ref=e167] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000067/imprimir?returnTo=%2Fordenes%2Fproductos
+                        - button "Agregar orden firmada para OC 2804" [ref=e172] [cursor=pointer]
+                        - link "Ver orden 2804" [ref=e176] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000067
+                  - row [ref=e179]:
+                    - rowheader "OC 2803 Producto" [ref=e180]:
+                      - link "OC 2803" [ref=e181] [cursor=pointer]:
+                        - /url: /ordenes/000000000000000000000066
+                      - generic [ref=e182]: Producto
+                    - gridcell "Aurora NIT 900123401" [ref=e184]:
+                      - strong [ref=e185]: Aurora
+                      - generic [ref=e186]: NIT 900123401
+                    - gridcell "Crema corporal · 250 ml 2 productos · 8.000 unidades solicitadas" [ref=e187]:
+                      - strong [ref=e188]: Crema corporal · 250 ml
+                      - generic [ref=e189]: 2 productos · 8.000 unidades solicitadas
+                    - gridcell "21 de sept de 2026" [ref=e190]
+                    - gridcell "22 de oct de 2026" [ref=e191]
+                    - gridcell "Parcialmente anulada" [ref=e192]
+                    - gridcell "$ 23.350.000,00" [ref=e194]
+                    - gridcell [ref=e195]:
+                      - generic [ref=e196]:
+                        - link "Imprimir OC 2803" [ref=e197] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000066/imprimir?returnTo=%2Fordenes%2Fproductos
+                        - button "Agregar orden firmada para OC 2803" [ref=e202] [cursor=pointer]
+                        - link "Ver orden 2803" [ref=e206] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000066
+                  - row [ref=e209]:
+                    - rowheader "OC 2801 Producto" [ref=e210]:
+                      - link "OC 2801" [ref=e211] [cursor=pointer]:
+                        - /url: /ordenes/000000000000000000000064
+                      - generic [ref=e212]: Producto
+                    - gridcell "Aurora NIT 900123401" [ref=e214]:
+                      - strong [ref=e215]: Aurora
+                      - generic [ref=e216]: NIT 900123401
+                    - gridcell "Crema corporal · 250 ml 2 productos · 20.000 unidades solicitadas" [ref=e217]:
+                      - strong [ref=e218]: Crema corporal · 250 ml
+                      - generic [ref=e219]: 2 productos · 20.000 unidades solicitadas
+                    - gridcell "21 de sept de 2026" [ref=e220]
+                    - gridcell "15 de oct de 2026" [ref=e221]
+                    - gridcell "Autorizada" [ref=e222]
+                    - gridcell "$ 58.000.000,00" [ref=e224]
+                    - gridcell [ref=e225]:
+                      - generic [ref=e226]:
+                        - link "Imprimir OC 2801" [ref=e227] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000064/imprimir?returnTo=%2Fordenes%2Fproductos
+                        - link "Ver orden firmada de OC 2801" [ref=e232] [cursor=pointer]:
+                          - /url: /api/documents/0000000000000000000000aa/content
+                        - link "Ver orden 2801" [ref=e237] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000064
+                  - row [ref=e240]:
+                    - rowheader "OC 2750 Producto" [ref=e241]:
+                      - link "OC 2750" [ref=e242] [cursor=pointer]:
+                        - /url: /ordenes/000000000000000000000068
+                      - generic [ref=e243]: Producto
+                    - gridcell "Aurora NIT 900123401" [ref=e245]:
+                      - strong [ref=e246]: Aurora
+                      - generic [ref=e247]: NIT 900123401
+                    - gridcell "Crema corporal · 250 ml 1 producto · 10.000 unidades solicitadas" [ref=e248]:
+                      - strong [ref=e249]: Crema corporal · 250 ml
+                      - generic [ref=e250]: 1 producto · 10.000 unidades solicitadas
+                    - gridcell "21 de sept de 2026" [ref=e251]
+                    - gridcell "20 de ago de 2025" [ref=e252]
+                    - gridcell "Cerrada" [ref=e253]
+                    - gridcell "$ 32.000.000,00" [ref=e255]
+                    - gridcell [ref=e256]:
+                      - generic [ref=e257]:
+                        - link "Imprimir OC 2750" [ref=e258] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000068/imprimir?returnTo=%2Fordenes%2Fproductos
+                        - button "Agregar orden firmada para OC 2750" [ref=e263] [cursor=pointer]
+                        - link "Ver orden 2750" [ref=e267] [cursor=pointer]:
+                          - /url: /ordenes/000000000000000000000068
+              - generic [ref=e270]:
+                - generic [ref=e271]: 4 órdenes en esta vista · Mostrando 1–4
+                - navigation "Paginación de órdenes" [ref=e272]:
+                  - button "Anterior" [disabled] [ref=e273]
+                  - generic [ref=e276]: Página 1 de 1
+                  - button "Siguiente" [disabled] [ref=e277]

@@ -41,7 +41,7 @@ El **número de orden es siempre de solo lectura**, también al editar antes o d
 
 Las órdenes de producto se identifican como **OC** y las de materiales y otros como **OCM**. El prefijo se aplica en listados, consecutivos, revisión de órdenes, vínculos, catálogos, facturas, documentos y selección de órdenes para correo.
 
-**Catálogos** organiza sus secciones en tres grupos principales, con el estilo de pestañas de Órdenes: **Productos** (Lista de productos, Categorías, Costos de maquila), **Materiales** (Lista de materiales, Tipos de material, Proveedores de material) y **Productos & materiales** (Materiales por producto, Corrugado por producto). Los botones de las secciones secundarias conservan su estilo actual.
+**Catálogos** organiza sus secciones en tres grupos principales, con el estilo de pestañas de Órdenes: **Productos** (Lista de productos, Categorías, Costos de maquila), **Materiales** (Lista de materiales, Tipos de material, Proveedores favoritos por tipo) y **Productos & materiales** (Materiales por producto, Corrugado por producto). Los botones de las secciones secundarias conservan su estilo actual. Los favoritos se configuran una vez por tipo, con filas desplegables y selección múltiple en un diálogo; se priorizan en las órdenes sin restringir otros proveedores. La migración conserva los datos anteriores con respaldo automático: [funcionamiento y recuperación](PROVEEDORES-FAVORITOS.md).
 
 Los formularios que asignan un producto existente permiten escribir su nombre y muestran coincidencias con el `ComboBox` compartido de React Aria, con selección por identificador. En órdenes solo aparecen productos activos del proveedor de la orden, además del producto histórico que ya tenga ese renglón. Los formularios de relaciones del catálogo y la asignación GS1 consultan los productos disponibles; al asignar un código GS1, debajo del producto se muestra el proveedor asociado en un campo bloqueado.
 
@@ -126,7 +126,7 @@ La cantidad de sticker y su porcentaje comparten fila, con el porcentaje más es
 
 ## Entrega portable para Windows
 
-El [ZIP portable](../GIMED-Prototipo-Windows-x64.zip) se reconstruyó y verificó el **13 de octubre de 2026**. Pasaron **17 comprobaciones** de arranque, navegador, instancia única, guardado y recuperación después de reiniciar. Incluye Node.js v24.17.0 y 72 paquetes de ejecución. La [suma SHA-256](../GIMED-Prototipo-Windows-x64.sha256.txt) corresponde a esta entrega; el [reporte](tests/evidence/portable-report.json) registra los resultados obtenidos.
+El [ZIP portable](../GIMED-Prototipo-Windows-x64.zip) se reconstruyó y verificó el **19 de octubre de 2026** con el código actual del prototipo. Pasaron **21 comprobaciones** de arranque, navegador, instancia única, guardado, recuperación después de reiniciar y migración de proveedores favoritos con respaldo. Incluye Node.js v24.17.0 y 72 paquetes de ejecución. La [suma SHA-256](../GIMED-Prototipo-Windows-x64.sha256.txt) corresponde a esta entrega; el [reporte](tests/evidence/portable-report.json) registra los resultados obtenidos.
 
 Desde `prototipo`, ejecuta `npm run package:portable`. Compila la interfaz y genera `GIMED-Prototipo-Windows-x64.zip` y su archivo SHA-256 en la raíz del proyecto. El paquete incluye el ejecutable de Node.js utilizado al prepararlo, verificado contra su distribución oficial, y las dependencias de ejecución con sus licencias. La primera preparación descarga la licencia y las sumas oficiales de Node; después utiliza la caché local.
 
@@ -158,7 +158,7 @@ En una etapa anterior del **7 de octubre de 2026** se reinició el archivo de de
 - `src/invoice-table.ts`: columnas de factura, proveedor, registro, cantidad de recepciones y presencia del documento propio.
 - `src/supply-table.ts`: vínculos de abastecimiento y columnas de órdenes, producto/maquilador, material/proveedor y estado.
 
-Los importes `decimal(14,2)` se guardan como cadenas con dos decimales y se calculan en centavos enteros. Las fechas se serializan en ISO UTC; los booleanos mantienen su tipo y los campos vacíos opcionales son `null`. El código de material conserva el tipo entero del DBML y se captura y muestra con tres dígitos, incluidos ceros iniciales.
+Los importes `decimal(14,2)` se guardan como cadenas con dos decimales y se calculan en centavos enteros. Las fechas se serializan en ISO UTC; los booleanos mantienen su tipo y los campos vacíos opcionales son `null`. El código de material conserva el tipo entero del DBML y se captura y muestra con tres dígitos, incluidos ceros iniciales. Solo el tipo **Corrugado** permite omitir el código MAIA al crear o editar: el campo es opcional y se guarda como `null`, sin convertirlo en cero. Los demás tipos requieren código; cualquier código informado mantiene las restricciones de formato, rango y unicidad.
 
 `cantidad_sticker` y `cantidad_cinta` son extensiones **provisionales del prototipo** en `orden_producto`. Se conserva la exclusión entre ambos. Estas extensiones no se incorporan al DBML de referencia. `npm run models` regenera las interfaces y los metadatos desde ese archivo, incorporando estas dos extensiones.
 

@@ -17,6 +17,7 @@ import {
   deviation,
   isInitialProductLot,
   canonical,
+  materialCodeRequired,
   validEmail,
   decimal,
   type Entity,
@@ -69,7 +70,6 @@ export const editableEntities: Entity[] = [
   "materiales",
   "materiales_asociados",
   "producto_corrugado",
-  "proveedores_favoritos",
   "contacto_interno",
   "destinatario_evento",
   "adjunto_evento",
@@ -558,7 +558,8 @@ export function mailPreview(db: Database, p: Row): Row {
       ? `Códigos registrados para verificación y asignación:\n${db.codigos_barras
           .filter(
             (c) =>
-              c.estado === "creado_gs1" || c.estado === "verificado_sistema",
+              c.estado === "creado_gs1" &&
+              (!Array.isArray(p.barcodeIds) || p.barcodeIds.includes(c.id)),
           )
           .map((c) => c.codigo)
           .join("\n")}`
@@ -621,6 +622,48 @@ export async function command(
   transport: MailTransport = simulatedTransport,
 ): Promise<Row> {
   switch (name) {
+    case "setFavoriteSuppliers": {
+      findRecord(db, "tipos_materiales", { id: p.id_tipo_material });
+      const ids = (value: unknown): string[] => {
+        check(
+          Array.isArray(value) &&
+            value.every((id) => typeof id === "string" && id.length > 0),
+          "Selecciona proveedores válidos.",
+          "TYPE",
+          {
+            id_proveedores:
+              "La selección debe contener identificadores válidos.",
+          },
+        );
+        return [...new Set(value as string[])].sort();
+      };
+      const desired = ids(p.id_proveedores);
+      const expected = ids(p.expected_id_proveedores);
+      const current = db.proveedores_favoritos
+        .filter((r) => r.id_tipo_material === p.id_tipo_material)
+        .map((r) => r.id_proveedor)
+        .sort();
+      if (JSON.stringify(desired) === JSON.stringify(current))
+        return { id_proveedores: current };
+      check(
+        JSON.stringify(expected) === JSON.stringify(current),
+        "Los proveedores de este tipo cambiaron. Revisa la selección actualizada antes de guardar.",
+        "FAVORITES_CHANGED",
+        {},
+        { id_proveedores: current },
+      );
+      desired.forEach((id) => findRecord(db, "proveedor", { id }));
+      db.proveedores_favoritos = db.proveedores_favoritos.filter(
+        (r) => r.id_tipo_material !== p.id_tipo_material,
+      );
+      db.proveedores_favoritos.push(
+        ...desired.map((id_proveedor) => ({
+          id_tipo_material: p.id_tipo_material,
+          id_proveedor,
+        })),
+      );
+      return { id_proveedores: desired };
+    }
     case "saveEntity": {
       const table = p.entity as Entity;
       check(
@@ -643,6 +686,14 @@ export async function command(
           Object.fromEntries(
             parsed.error.issues.map((e) => [e.path.join("."), e.message]),
           ),
+        );
+      if (table === "materiales")
+        check(
+          parsed.data.codigo_material !== null ||
+            !materialCodeRequired(db, String(parsed.data.id_tipo_material)),
+          "El código MAIA es obligatorio salvo para corrugados.",
+          "R12",
+          { codigo_material: "Introduce exactamente tres dígitos." },
         );
       if (old)
         (db[table] as Row[])[(db[table] as Row[]).indexOf(old)] = parsed.data;

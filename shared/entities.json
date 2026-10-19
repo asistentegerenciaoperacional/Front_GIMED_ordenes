@@ -382,7 +382,7 @@
     },
     "proveedores_favoritos": {
       "fields": {
-        "id_material": {
+        "id_tipo_material": {
           "type": "object_id",
           "required": true
         },
@@ -392,7 +392,7 @@
         }
       },
       "pk": [
-        "id_material",
+        "id_tipo_material",
         "id_proveedor"
       ],
       "unique": []
@@ -1066,8 +1066,8 @@
     },
     {
       "table": "proveedores_favoritos",
-      "field": "id_material",
-      "target": "materiales",
+      "field": "id_tipo_material",
+      "target": "tipos_materiales",
       "targetField": "id"
     },
     {

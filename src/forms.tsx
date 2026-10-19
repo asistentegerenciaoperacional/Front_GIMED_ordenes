@@ -10,6 +10,11 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
+  materialSupplierGroups,
+  suggestedMaterial,
+  supplierOptionLabel,
+} from "../shared/favorite-suppliers";
+import {
   blankRow,
   currentCost,
   dateSchema,
@@ -19,6 +24,7 @@ import {
   labels,
   latestBarcode,
   materialKind,
+  materialCodeRequired,
   meta,
   nextOrderNumber,
   normalizeInvoice,
@@ -105,7 +111,7 @@ export function CatalogForm({
       for (const [field, spec] of Object.entries(meta.tables[entity].fields)) {
         if (field === "id") continue;
         const raw = row[field];
-        if (raw === "" || raw === undefined) {
+        if (raw === "" || raw === undefined || raw === null) {
           row[field] = spec.required ? "" : null;
           continue;
         }
@@ -133,6 +139,15 @@ export function CatalogForm({
         )
           row[field] = isoDate(raw);
       }
+      if (
+        entity === "materiales" &&
+        row.codigo_material === null &&
+        materialCodeRequired(db, row.id_tipo_material)
+      )
+        throw new ApiError({
+          message: "El código MAIA es obligatorio para este tipo de material.",
+          fields: { codigo_material: "Introduce exactamente tres dígitos." },
+        });
       if (!row.id && Object.hasOwn(row, "id")) delete row.id;
       const checked = {
         ...blankRow(entity),
@@ -303,8 +318,18 @@ export function CatalogForm({
                     key={field}
                     id={id}
                     label={labels[field] ?? text(field)}
-                    required={spec.required}
-                    error={error?.fields[field]}
+                    required={
+                      entity === "materiales" && field === "codigo_material"
+                        ? materialCodeRequired(db, values.id_tipo_material)
+                        : spec.required
+                    }
+                    hint={
+                      entity === "materiales" && field === "codigo_material"
+                        ? materialCodeRequired(db, values.id_tipo_material)
+                          ? "Obligatorio: exactamente tres dígitos."
+                          : "Opcional para corrugados. Si lo indicas, usa tres dígitos."
+                        : undefined
+                    }
                   >
                     {control}
                   </Field>
@@ -1112,11 +1137,8 @@ export function OrderForm({
       };
     }
     if (t === "material") {
-      const favored = db.proveedores_favoritos.find(
-        (v) => v.id_proveedor === provider,
-      );
       return {
-        id_material: favored?.id_material ?? db.materiales[0]?.id ?? "",
+        id_material: suggestedMaterial(db, provider)?.id ?? "",
         cantidad_solicitada: 0,
         precio_unitario: "0.00",
       };
@@ -1133,6 +1155,10 @@ export function OrderForm({
       : [fresh(initialType, suppliers(initialType)[0]?.id ?? "")],
   );
   const [stage, setStage] = useState(1);
+  const materialGroups = materialSupplierGroups(
+    db,
+    type === "material" ? lines.map((line) => line.id_material) : [],
+  );
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
   const originalDraft = useRef<{
@@ -1554,11 +1580,34 @@ export function OrderForm({
                     onChange={(e) => changeSupplier(e.target.value)}
                   >
                     <option value="">Seleccionar…</option>
-                    {suppliers(type).map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.nombre_largo ?? p.nombre_corto}
-                      </option>
-                    ))}
+                    {type === "material" ? (
+                      <>
+                        {materialGroups.favorites.length > 0 && (
+                          <optgroup label="Favoritos">
+                            {materialGroups.favorites.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {supplierOptionLabel(p, db.proveedor)}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                        {materialGroups.others.length > 0 && (
+                          <optgroup label="Otros proveedores">
+                            {materialGroups.others.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {supplierOptionLabel(p, db.proveedor)}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )}
+                      </>
+                    ) : (
+                      suppliers(type).map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {supplierOptionLabel(p, db.proveedor)}
+                        </option>
+                      ))
+                    )}
                   </ControlSelect>
                 </Field>
                 <Field
@@ -1840,12 +1889,6 @@ export function OrderForm({
               {type === "producto" && (
                 <>
                   <h3>Cantidades recomendadas</h3>
-                  <div className="notice subtle">
-                    <Info size={16} aria-hidden="true" />
-                    Las sugerencias se redondean hacia arriba. Las cantidades
-                    finales son editables. Sticker y cinta son campos
-                    provisionales.
-                  </div>
                   {lines.map((l, i) => {
                     const box = db.producto_corrugado.find(
                       (c) =>

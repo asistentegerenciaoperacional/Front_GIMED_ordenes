@@ -86,16 +86,17 @@ try {
     "return (" + source.trim().replace(/;\s*$/, "") + ")",
   )();
   const result = await journey(
-    ariaPage(page, { autoConfirm: !file.includes("aria-controls") }),
+    ariaPage(page, { autoConfirm: !file.includes("aria-controls") && !file.includes("favorites") }),
   );
   assert.deepEqual(
     consoleMessages,
     [],
     "Sin errores ni advertencias de React o React Aria",
   );
-  await mkdir("tests/evidence/aria", { recursive: true });
+  const evidence = file.includes("favorites") ? "tests/evidence/favorites" : "tests/evidence/aria";
+  await mkdir(evidence, { recursive: true });
   const report =
-    "tests/evidence/aria/" +
+    evidence + "/" +
     engine +
     "-" +
     file.split("/").pop().replace(".js", ".json");

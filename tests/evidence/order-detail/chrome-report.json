@@ -67,12 +67,12 @@
     "lines": 7,
     "lots": 280,
     "toggles": 4,
-    "measuredFrames": 58,
-    "frameMedianMs": 16.69999999999999,
-    "frameP95Ms": 33.39999999999998,
-    "frameMaxMs": 49.89999999999998,
-    "layoutMs": 7.037,
-    "styleMs": 41.945,
-    "scriptMs": 185.796
+    "measuredFrames": 60,
+    "frameMedianMs": 16.700000000000045,
+    "frameP95Ms": 33.299999999999955,
+    "frameMaxMs": 33.400000000000034,
+    "layoutMs": 5.8919999999999995,
+    "styleMs": 39.658,
+    "scriptMs": 170.567
   }
 }

@@ -303,3 +303,52 @@ Firefox 156.0 de Playwright presentó un fallo SideBySide de Windows al iniciar.
 `node scripts/prepare-firefox-runtime.mjs` prepara esa copia local. Después se usa `PROTOTIPO_FIREFOX_EXECUTABLE=tests/.tmp/firefox-runtime/firefox.exe` al ejecutar `node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js firefox`. El mismo runner admite `chromium` y `webkit`.
 
 La [prueba prolongada de memoria](tests/evidence/aria/soak-summary.json) completó 600 ciclos: 17.577.548 bytes finales frente a 13.223.152 en la referencia, dentro del margen de 5 MB. Entre los ciclos 510 y 600 varió 22.528 bytes (0,13 %); el heap no retuvo contenedores de formularios desmontados. La comparación y las limitaciones del ensayo de estrés están en [RENDIMIENTO.md](RENDIMIENTO.md#comparación-de-la-migración-a-react-aria).
+
+## Proveedores favoritos por tipo — 16 de octubre de 2026
+
+Implementada la opción A ajustada. Punto de recuperación: `ad313845dcb9f8aec535842d93415bfb0c751919`, más copias exactas de DBML y base local. La conversión reúne ocho relaciones en siete pares únicos. La inspección al convertir confirmó que las otras 27 colecciones no cambiaron. Los cambios posteriores de la base activa se conservan y no se usan como datos del ensayo.
+
+Resultados funcionales: **151 pruebas automatizadas**, **598 comprobaciones del recorrido completo**, **71 comprobaciones de favoritos en cada uno de Chromium, Firefox y WebKit**, y **21 del portable actualizado**. Reinicio: las 28 colecciones temporales coinciden íntegramente. Se ejecutaron también validación (43), filtros (52), detalle (60), controles compartidos (56) y scroll de facturas (32 clics; delta máximo 0 px).
+
+Los nuevos casos cubren herencia en dos materiales del mismo tipo, tipos vacíos, búsqueda y despliegue, selección múltiple independiente del filtro, bajas desde la selección final, homónimos diferenciados por NIT e ID, teclado, confirmaciones anidadas, errores del servicio, conflicto y revisión, envío único, bloqueo durante guardado, retorno de foco y conservación del scroll. Se comprobaron 375, 768, 1024 y 1440 px. No hubo errores ni advertencias de React/React Aria en los recorridos aprobados.
+
+Las pruebas de datos incluyen formato anterior y mixto, duplicados, idempotencia, referencias inválidas, fallo al crear respaldo sin recurrir a la semilla, copia exacta, segunda apertura, integridad y atomicidad. El portable se probó desde una extracción temporal con una base anterior, respaldo exacto y dos reinicios; no se utilizaron los archivos guardados del usuario.
+
+Especificación, inventario y recuperación: [PROVEEDORES-FAVORITOS.md](PROVEEDORES-FAVORITOS.md). Evidencias: [Chromium](tests/evidence/favorites/chromium-favorites.browser.json), [Firefox](tests/evidence/favorites/firefox-favorites.browser.json), [WebKit](tests/evidence/favorites/webkit-favorites.browser.json), [editor](tests/evidence/favorites/editor-1440.png) y [móvil](tests/evidence/favorites/editor-375.png). La comparación de rendimiento se registra separadamente en [RENDIMIENTO.md](RENDIMIENTO.md).
+
+### Cierre de verificación — 19 de octubre de 2026
+
+La revisión del repositorio actualizado conserva las 151 pruebas unitarias, 598 comprobaciones generales, 71 de favoritos por navegador y 21 del portable aprobadas. Se sincronizó la descripción de Documento de la orden en `../filtros.md` con el texto nuevo de la interfaz, conservando el cambio y la prueba de coherencia. La comparación de rendimiento se repitió con referencia y versión actual consecutivas en esta sesión: 39/39 límites aprobados, incluidos 60.000 lotes. Se conservó además un respaldo duradero del DBML anterior en `data/schema-before-favorites-20261016.md.bak`.
+
+El [informe de entrega](tests/evidence/favorites/delivery-report.json) registra hashes, recuperación, migración, pruebas y rendimiento. Las modificaciones concurrentes de GS1 y los datos de la aplicación abierta permanecen conservados.
+
+## Código MAIA de corrugados — 19 de octubre de 2026
+
+Se corrigió la creación de corrugados cuyo campo de código permanece vacío
+sin interacción: `null` se normaliza como ausencia antes de validar el
+formato y no se transforma en cero. La obligación por tipo se comparte
+entre formulario, validación en vivo y guardado; solo Corrugado admite
+omitir el código. También se comprueba al editar o cambiar el tipo del material.
+No se modificó el esquema ni se migraron los registros guardados.
+
+La compilación pasó. Las cinco pruebas de `tests/material-code.test.ts`
+verifican creación y edición con código omitido/null, persistencia al
+reiniciar, rechazo sin modificaciones para los demás tipos, cambio de tipo,
+código cero, rango, unicidad y corrección de errores al elegir Corrugado.
+Las **26 comprobaciones de navegador** en Chrome, a 1440 y 375 px, recorren
+el formulario real: crear con el código inicial intacto, editar, obligación
+según tipo, cambio de tipo después de un error, dos dígitos, duplicados,
+códigos con ceros iniciales y ausencia de desbordamiento. El navegador no
+registró errores ni advertencias de React/React Aria.
+
+[Reporte de formulario](tests/evidence/aria/chromium-material-code.browser.json).
+Para reproducir, con base de pruebas independiente:
+
+    node node_modules/tsx/dist/cli.mjs --test tests/material-code.test.ts
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/material-code.browser.js chromium
+
+La ejecución completa de pruebas obtuvo **155 correctas y un fallo** en
+`tests/order-filters.test.ts`: las descripciones actuales de los filtros de
+órdenes difieren de `filtros.md`. Ese desacuerdo pertenece a los cambios
+previos de filtros y no se alteró como parte de esta corrección.

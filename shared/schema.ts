@@ -260,6 +260,10 @@ export function materialKind(db: Database, id: string): string {
       ?.tipo_material ?? "",
   );
 }
+export function materialCodeRequired(db: Database, typeId: string): boolean {
+  const type = db.tipos_materiales.find((row) => row.id === typeId);
+  return canonical(type?.tipo_material ?? "") !== "corrugado";
+}
 export function recommendations(
   db: Database,
   productId: string,
@@ -328,7 +332,7 @@ export const titles: Record<Entity, string> = {
   materiales: "Materiales",
   materiales_asociados: "Materiales por producto",
   producto_corrugado: "Corrugado por producto",
-  proveedores_favoritos: "Proveedores de material",
+  proveedores_favoritos: "Proveedores favoritos por tipo",
   orden_compra: "Órdenes",
   orden_producto: "Productos de la orden",
   lote_producto: "Lotes de producto",

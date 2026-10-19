@@ -30,17 +30,16 @@ export const customFilters: readonly FilterDefinition[] = [
   {
     id: "documento",
     name: "Documento de la orden",
-    description:
-      "Con o sin documento de clase orden escaneada perteneciente a esa cabecera.",
+    description: "Órdenes con o sin documento escaneado adjunto.",
     options: [
-      { id: "documento_con", label: "Con documento de la orden" },
-      { id: "documento_sin", label: "Sin documento de la orden" },
+      { id: "documento_con", label: "Con orden escaneada" },
+      { id: "documento_sin", label: "Sin orden escaneada" },
     ],
   },
   {
     id: "sin_factura",
     name: "Recepciones sin factura",
-    description: "Alguna recepción física sin factura asociada.",
+    description: "Órdenes con lotes recibidos sin factura adjunta.",
     options: [
       { id: "recepciones_sin_factura", label: "Recepciones sin factura" },
     ],
@@ -49,14 +48,14 @@ export const customFilters: readonly FilterDefinition[] = [
     id: "entrega_vencida",
     name: "Entrega solicitada vencida",
     description:
-      "Entrega de cabecera anterior a hoy y algún renglón en seguimiento.",
+      "Órdenes con productos/materiales pendientes y fecha de entrega vencida.",
     options: [{ id: "entrega_vencida", label: "Entrega solicitada vencida" }],
   },
   {
     id: "proximas",
     name: "Próximas entregas",
     description:
-      "Entrega de cabecera entre hoy y hoy más 7, 15 o 30 días, incluidos ambos extremos.",
+      "Órdenes con fecha solicitada de entrega en los próximos 7, 15 o 30 días.",
     options: [
       { id: "proximas_7", label: "Próximas entregas · 7 días" },
       { id: "proximas_15", label: "Próximas entregas · 15 días" },
@@ -66,8 +65,7 @@ export const customFilters: readonly FilterDefinition[] = [
   {
     id: "sin_recepciones",
     name: "Sin recepciones registradas",
-    description:
-      "Ninguna cantidad recibida registrada en sus renglones o lotes efectivos. Una fecha sin cantidad permite aparecer aquí.",
+    description: "Órdenes sin ningún producto o material recibido.",
     options: [{ id: "sin_recepciones", label: "Sin recepciones registradas" }],
   },
   {

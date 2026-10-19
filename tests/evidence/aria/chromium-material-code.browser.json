@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "Código opcional para Corrugado a 1440px",
+    "Crear corrugado sin tocar código persiste null a 1440px",
+    "Editar corrugado precarga código vacío a 1440px",
+    "Editar conserva null sin transformarlo en cero a 1440px",
+    "Envase requiere código a 1440px",
+    "Envase vacío se rechaza con error de campo a 1440px",
+    "Rechazo no crea material a 1440px",
+    "Cambiar a Corrugado retira obligación y error a 1440px",
+    "Corrugado rechaza código escrito de dos dígitos a 1440px",
+    "Corrugado rechaza código duplicado a 1440px",
+    "Código válido conserva su valor entero a 1440px",
+    "Listado muestra los tres dígitos a 1440px",
+    "Sin desbordamiento horizontal a 1440px",
+    "Código opcional para Corrugado a 375px",
+    "Crear corrugado sin tocar código persiste null a 375px",
+    "Editar corrugado precarga código vacío a 375px",
+    "Editar conserva null sin transformarlo en cero a 375px",
+    "Envase requiere código a 375px",
+    "Envase vacío se rechaza con error de campo a 375px",
+    "Rechazo no crea material a 375px",
+    "Cambiar a Corrugado retira obligación y error a 375px",
+    "Corrugado rechaza código escrito de dos dígitos a 375px",
+    "Corrugado rechaza código duplicado a 375px",
+    "Código válido conserva su valor entero a 375px",
+    "Listado muestra los tres dígitos a 375px",
+    "Sin desbordamiento horizontal a 375px"
+  ],
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-fS58Tx\\database.json"
+}
