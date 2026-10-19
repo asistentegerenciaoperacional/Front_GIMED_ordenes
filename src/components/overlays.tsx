@@ -19,6 +19,17 @@ type Confirmation = {
   resolve: (answer: boolean) => void;
 };
 const confirmEvent = "prototipo:confirmation";
+type AnnotationDocument = Document & {
+  oai?: {
+    annotation?: {
+      isActive?: () => boolean;
+    };
+  };
+};
+export function shouldCloseOnInteractOutside(_element: Element) {
+  const annotation = (document as AnnotationDocument).oai?.annotation;
+  return !annotation?.isActive?.();
+}
 export function confirmAction(
   message: string,
   confirmLabel = "Confirmar",
@@ -54,6 +65,7 @@ export function ConfirmationProvider({ children }: { children: ReactNode }) {
         <ModalOverlay
           isOpen
           isDismissable
+          shouldCloseOnInteractOutside={shouldCloseOnInteractOutside}
           onOpenChange={(open) => {
             if (!open) answer(false);
           }}
@@ -150,6 +162,7 @@ export function Dialog({
       isOpen
       isDismissable={!busy}
       isKeyboardDismissDisabled={busy}
+      shouldCloseOnInteractOutside={shouldCloseOnInteractOutside}
       onOpenChange={(open) => {
         if (!open) void close();
       }}

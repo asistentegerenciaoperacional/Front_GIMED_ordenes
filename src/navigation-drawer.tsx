@@ -2,6 +2,7 @@ import { ClipboardList, Pin, PinOff, X } from "lucide-react";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { Dialog } from "react-aria-components/Dialog";
 import { Modal, ModalOverlay } from "react-aria-components/Modal";
+import { shouldCloseOnInteractOutside } from "./components/overlays";
 import { Button } from "./ui";
 export const PIN_NAVIGATION_QUERY = "(min-width: 1024px)";
 export function NavigationDrawer({
@@ -87,6 +88,7 @@ export function NavigationDrawer({
             if (!next) onClose();
           }}
           isDismissable
+          shouldCloseOnInteractOutside={shouldCloseOnInteractOutside}
           className="aria-navigation-overlay"
         >
           <Modal className="aria-navigation-modal">
