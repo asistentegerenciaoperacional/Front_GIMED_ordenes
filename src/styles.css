@@ -1101,7 +1101,6 @@ th.right .column-heading {
 }
 .badge.autorizada,
 .badge.asignado,
-.badge.verificado_sistema,
 .badge.en_seguimiento {
   background: #eff5ff;
   border-color: #d8e5fe;
@@ -1132,7 +1131,8 @@ th.right .column-heading {
   background: #fff2f2;
   border-color: #f4d5d5;
 }
-.badge.parcialmente_anulada {
+.badge.parcialmente_anulada,
+.badge.verificado_sistema {
   color: #9b4b18;
   background: #fff5ed;
   border-color: #f4ddca;
