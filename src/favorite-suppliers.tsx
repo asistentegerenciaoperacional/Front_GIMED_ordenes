@@ -74,7 +74,9 @@ export function FavoriteSuppliersTable() {
               <ul className="relation-provider-list">
                 {suppliers.map((p) => (
                   <li key={p.id}>
-                    <strong>{supplierName(p)}</strong>
+                    <span className="relation-provider-name">
+                      {supplierName(p)}
+                    </span>
                     <small>
                       NIT {p.nit ?? "Sin registrar"}
                       {p.activo === false ? " · Inactivo" : ""}

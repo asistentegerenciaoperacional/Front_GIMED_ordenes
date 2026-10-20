@@ -10,13 +10,68 @@
   color: var(--muted);
   background: var(--soft);
 }
+.grouped-relations {
+  --relation-cell-inset: 18px;
+  --relation-toggle-size: 34px;
+  --relation-label-gap: 10px;
+}
+.grouped-relations .relation-group-row > td {
+  padding-block: 18px;
+}
+@media (min-width: 1600px) {
+  .grouped-relations .relation-group-row > td {
+    padding-block: 21px;
+  }
+}
+.grouped-relations .relation-group-label {
+  gap: var(--relation-label-gap);
+}
+.relation-toggle.btn.icon-btn {
+  width: var(--relation-toggle-size);
+  height: var(--relation-toggle-size);
+  min-height: var(--relation-toggle-size);
+  flex-shrink: 0;
+  border-color: #cbd5e1;
+}
+.relation-toggle svg {
+  transition: transform 180ms ease-out;
+}
+.relation-toggle[aria-expanded="true"] svg {
+  transform: rotate(90deg);
+}
 .grouped-relations td:last-child {
   width: 74px;
   text-align: right;
 }
+.grouped-relations .relation-details-row > .relation-details-cell {
+  width: auto;
+  padding: 0;
+  border-bottom: 0;
+  text-align: left;
+}
+.relation-disclosure {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms ease-out,
+    opacity 140ms ease-out;
+}
+.relation-disclosure[data-expanded="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.relation-disclosure-inner {
+  min-height: 0;
+  overflow: hidden;
+}
 .relation-details {
-  padding: 4px 20px 8px 36px;
-  background: var(--soft);
+  padding: 0 var(--relation-cell-inset) 4px
+    calc(
+      var(--relation-cell-inset) + var(--relation-toggle-size) +
+        var(--relation-label-gap) + 24px
+    );
+  border-bottom: 1px solid var(--border);
 }
 .relation-provider-list {
   margin: 0;
@@ -27,9 +82,12 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 0;
+  gap: 2px 12px;
+  padding: 6px 0;
   border-bottom: 1px solid var(--border);
+}
+.relation-provider-name {
+  font-weight: 400;
 }
 .relation-provider-list li:last-child {
   border-bottom: 0;
@@ -112,6 +170,11 @@
 .relation-changes p {
   margin: 4px 0;
 }
+@media (max-width: 1190px) {
+  .grouped-relations {
+    --relation-cell-inset: 14px;
+  }
+}
 @media (max-width: 600px) {
   .relation-picker {
     grid-template-columns: 1fr;
@@ -131,8 +194,8 @@
   .relation-final-list {
     max-height: 220px;
   }
-  .relation-details {
-    padding: 4px 12px;
+  .grouped-relations {
+    --relation-toggle-size: 40px;
   }
 }
 .aria-tab-group {

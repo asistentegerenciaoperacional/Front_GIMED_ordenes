@@ -2,7 +2,7 @@
 
 Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
 
-Actualizado el 19 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+Actualizado el 20 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
 
 ## Bases
 
@@ -42,6 +42,12 @@ Catálogos separa la navegación con pestañas principales **Productos**, **Mate
 ### Relaciones agrupadas y selección múltiple
 
 Usar `GroupedRelationsTable` cuando varias relaciones compartan una entidad principal: una fila por entidad, conteo, expansión accesible (`aria-expanded`/`aria-controls`) y detalle a todo el ancho. Incluir entidades sin relaciones; bloquear solo su despliegue y mantener el lápiz de edición habilitado. Buscar por principal o relacionados; abrir los grupos coincidentes y permitir cerrarlos. Si todas las entidades ya están representadas, no añadir Agregar global.
+
+En favoritos, las filas de tipos de material conservan las medidas comunes de las tablas con **2 px adicionales de altura total**, repartidos en 1 px arriba y 1 px abajo. El padding superior e inferior es de 18 px; desde 1600 px de ancho de ventana, de 21 px. El padding horizontal es de 18 px y pasa a 14 px hasta 1190 px de ancho. La altura sigue adaptándose al contenido y a los controles; la compactación del detalle de proveedores se aplica por separado.
+
+El tipo conserva el énfasis y sus proveedores usan peso 400 con sangría de 24 px respecto al nombre del tipo. Cada proveedor tiene 6 px de padding arriba y abajo. El detalle no añade padding a la celda ni arriba de la lista y deja 4 px abajo, sin tarjeta de fondo. El botón de desplegar/ocultar conserva la variante ghost y presenta un borde gris de 1 px `#CBD5E1`, visible también sin hover, con radio de 7 px. Mide 34 × 34 px y pasa a 40 × 40 px hasta 600 px de ancho de ventana; mantiene foco visible y nombre accesible.
+
+Desplegar/ocultar anima altura mediante CSS Grid en 180 ms y opacidad en 140 ms, con giro de chevrón en 180 ms. Se retira el detalle después del cierre; durante él queda `inert` y `aria-hidden`. Movimiento reducido elimina la transición. Los temporizadores se cancelan ante cambios rápidos o desmontaje, y el foco permanece en el botón.
 
 Mantener memorizados los grupos, callbacks y contenido vacío: abrir o cerrar el editor no debe reconstruir la colección de la tabla. Regenerarla cuando cambien los datos, la búsqueda o los grupos desplegados.
 
@@ -148,5 +154,7 @@ Todas las tablas siguientes muestran un botón de filtro en cada cabecera de dat
 | Proveedores → Direcciones de proveedor            | Proveedor, nombre de bodega, ciudad, dirección y complemento (texto).                                                                                                                                                                                                                                                                                                  |
 | Proveedores → Contactos de proveedor              | Proveedor, nombre, cargo o área, correo y celular (texto).                                                                                                                                                                                                                                                                                                             |
 | Códigos de barras                                 | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). El botón **(?)** junto a la búsqueda abre un diálogo modal con fondo atenuado y las definiciones de Creado en GS1, Verificado en sistema, Asignado e Inactivo. Se cierra con **X**, **Entendido**, Escape o clic fuera; mientras está abierto bloquea la interacción con la aplicación. **Avisar códigos nuevos** abre un diálogo de selección que muestra los códigos en estado Creado en GS1, todos seleccionados por defecto. Permite seleccionar o deseleccionar códigos individualmente y ofrece una casilla para seleccionar todos; al continuar, el cuerpo del correo incluye solo los códigos seleccionados. Si no hay códigos por verificar, informa el estado y deshabilita la preparación del aviso. Reutiliza el diálogo compartido, las casillas de selección y los estilos existentes. |
+
+Los pasos **Creado en GS1**, **Verificado en sistema** y **Asignado al producto** son botones que aplican una selección exclusiva al filtro existente de la columna Estado GS1/sistema. Conservan la búsqueda, los filtros de otras columnas y el ordenamiento, sin introducir otro mecanismo de filtrado. Su estado `aria-pressed` y resaltado azul reflejan la selección única de esa columna; quitar o limpiar el filtro desactiva el resaltado. El fondo normal es blanco y el hover es gris `#f8fafc`. Inactivo permanece disponible desde el filtro de columna.
 
 En la asignación de una factura existente, las casillas reflejan las asociaciones iniciales. Desmarcar y guardar retira únicamente esa factura del lote o recepción; buscar conserva las selecciones ocultas. Al crear una factura, **Adjuntar documento** reutiliza el formulario de placeholder: clase Factura física y nombre de archivo. El documento se prepara en el borrador, con Reemplazar documento y Quitar documento, y se guarda conjuntamente al confirmar la factura.

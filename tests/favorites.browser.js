@@ -40,7 +40,7 @@ async (page) => {
       .click();
   const dialog = () => page.getByRole("dialog", { name: /Editar proveedores/ });
   const final = () =>
-    dialog().getByRole("region", { name: "Selección final", exact: true });
+    dialog().getByRole("region", { name: "Proveedores seleccionados", exact: true });
   const choice = (id) =>
     dialog().getByRole("checkbox", { name: new RegExp(names[id]) });
   const close = async () => {
@@ -130,7 +130,7 @@ async (page) => {
     (await page
       .locator(".relation-details")
       .first()
-      .locator("xpath=..")
+      .locator("xpath=ancestor::*[@colspan][1]")
       .getAttribute("colspan")) === "3",
     "Detalle abarca las tres columnas",
   );
@@ -148,6 +148,7 @@ async (page) => {
   });
   await search.fill(names[sid(3)]);
   await page.locator(".relation-details").first().waitFor();
+  await page.waitForFunction(() => document.querySelectorAll(".relation-details").length === 2);
   check(
     (await page.locator(".relation-details").count()) === 2,
     "Buscar proveedor abre los dos tipos asociados",
@@ -155,6 +156,7 @@ async (page) => {
   await page
     .getByRole("button", { name: "Ocultar proveedores de Envase", exact: true })
     .click();
+  await page.waitForFunction(() => document.querySelectorAll(".relation-details").length === 1);
   check(
     (await page.locator(".relation-details").count()) === 1,
     "Los grupos abiertos por búsqueda pueden cerrarse manualmente",
@@ -191,6 +193,7 @@ async (page) => {
     });
     await find.fill(names[sid(5)]);
     await choice(sid(5)).check();
+    await final().getByRole("button", { name: "Quitar " + names[sid(5)], exact: true }).waitFor();
     check(
       (await final()
         .getByRole("button", { name: /^Quitar / })
@@ -218,7 +221,8 @@ async (page) => {
     const stacked = await dialog()
       .locator(".relation-picker")
       .evaluate((el) => {
-        const [a, b] = el.children;
+        const a = el.querySelector(".relation-available-column");
+        const b = el.querySelector(".relation-final");
         return (
           Math.abs(
             a.getBoundingClientRect().top - b.getBoundingClientRect().top,
@@ -272,7 +276,7 @@ async (page) => {
   await open("Tipo sin favoritos");
   check(
     await final()
-      .getByText("Este tipo quedará sin proveedores favoritos.", {
+      .getByText("Sin proveedores favoritos para este tipo de material.", {
         exact: true,
       })
       .isVisible(),

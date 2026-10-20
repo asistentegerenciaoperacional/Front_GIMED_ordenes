@@ -2019,15 +2019,24 @@ textarea.control {
   align-items: center;
   flex-wrap: wrap;
 }
-.code-step {
+.btn.code-step {
   font-size: 12px;
+  font-weight: 400;
   display: flex;
   align-items: center;
   gap: 7px;
-  background: #f8fafc;
+  background: #fff;
   border: 1px solid var(--border);
   padding: 10px 14px;
   border-radius: 7px;
+}
+.btn.code-step:hover {
+  background: #f8fafc;
+}
+.btn.code-step[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: #eff6ff;
+  color: var(--primary);
 }
 .code-step span {
   font-weight: 600;
@@ -2326,7 +2335,7 @@ textarea.control {
   .section-heading h2 {
     font-size: 16px;
   }
-  .code-step {
+  .btn.code-step {
     padding: 8px 10px;
     font-size: 11px;
   }

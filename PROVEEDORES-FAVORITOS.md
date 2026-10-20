@@ -49,7 +49,17 @@ En órdenes de materiales, el selector conserva las reglas de elegibilidad exist
 
 Todas las elecciones conservan IDs estables; nombre y NIT distinguen proveedores con nombres iguales. No se introducen controles nativos, listeners de foco duplicados ni bibliotecas nuevas. Otras tablas de relaciones conservan su presentación.
 
+La lista usa proveedores con peso 400, sangrados 24 px respecto al nombre del tipo; el tipo conserva su énfasis. Las filas de proveedor tienen 6 px de padding vertical, el contenedor 0 px arriba y 4 px abajo, sin fondo de tarjeta adicional ni padding en la celda contenedora. Las filas del tipo usan 8 px verticales y un chevrón sin borde permanente; el NIT y las acciones existentes se conservan. En móvil se mantiene la sangría y los botones usan 40 px.
+
+Abrir/cerrar interpola la altura con CSS Grid durante 180 ms `ease-out` y la opacidad durante 140 ms, con giro del chevrón en 180 ms. Los paneles se montan al abrir y se retiran al finalizar el cierre; no quedan filas vacías permanentes. Durante el cierre, `inert` y `aria-hidden` retiran el contenido del teclado y del árbol accesible, manteniendo el foco en el botón. Movimiento reducido desactiva la transición y retira el panel inmediatamente. Los temporizadores y fotogramas pendientes se cancelan al cambiar de estado o desmontar, por lo que los clics rápidos no duplican filas. La búsqueda conserva su apertura automática y permite cerrar manualmente cada grupo.
+
 ## Verificación reproducible
+
+Revisión visual del **20 de octubre de 2026**: compilación correcta; **45 comprobaciones** de animación/presentación en Chromium a 375/803/1440 px y **71 comprobaciones** del recorrido de favoritos a 375/768/1024/1440 px. Incluyen alturas intermedias de apertura y cierre, altura final cero, ausencia de filas residuales y solicitudes al alternar, teclado, foco, movimiento reducido, clics rápidos, búsqueda, selección, cancelación y guardado. Las capturas compactas se inspeccionaron visualmente. Reportes: [despliegue](tests/evidence/favorites/chromium-favorites-disclosure.browser.json) y [recorrido](tests/evidence/favorites/chromium-favorites.browser.json).
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/favorites-disclosure.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/favorites.browser.js chromium
 
 Inventario de puntos actualizados:
 

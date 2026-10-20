@@ -1,5 +1,12 @@
-import { Fragment, memo, useId, type ReactNode } from "react";
-import { ChevronDown, ChevronRight, Pencil, X } from "lucide-react";
+import {
+  Fragment,
+  memo,
+  useId,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { ChevronRight, Pencil, X } from "lucide-react";
 import { Button } from "../ui";
 import {
   CheckChoice,
@@ -24,6 +31,37 @@ export type RelationGroup = {
   autoExpand?: boolean;
 };
 export const GroupedRelationsTable = memo(GroupedRelationsTableView);
+
+function useRelationDisclosure(openIds: string[]) {
+  const openKey = openIds.join("|");
+  const [present, setPresent] = useState(() => new Set(openIds));
+  const [expanded, setExpanded] = useState(new Set<string>());
+  useLayoutEffect(() => {
+    const open = new Set(openKey ? openKey.split("|") : []);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setPresent(open);
+      setExpanded(open);
+      return;
+    }
+    setPresent((current) => new Set([...current, ...open]));
+    setExpanded(
+      (current) => new Set([...current].filter((id) => open.has(id))),
+    );
+    // Let newly mounted, collapsed panels paint before the CSS transition.
+    let nextFrame = 0;
+    const frame = requestAnimationFrame(() => {
+      nextFrame = requestAnimationFrame(() => setExpanded(open));
+    });
+    const timer = window.setTimeout(() => setPresent(open), 180);
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(nextFrame);
+      window.clearTimeout(timer);
+    };
+  }, [openKey]);
+  return { present, expanded };
+}
+
 function GroupedRelationsTableView({
   groups,
   expanded,
@@ -51,6 +89,16 @@ function GroupedRelationsTableView({
   countLabel?: (count: number) => string;
 }) {
   const prefix = useId();
+  const disclosure = useRelationDisclosure(
+    groups
+      .filter(
+        (group) =>
+          group.count > 0 &&
+          !collapsed.has(group.id) &&
+          (expanded.has(group.id) || group.autoExpand),
+      )
+      .map((group) => group.id),
+  );
   return (
     <div className="table-scroll">
       <DataTable
@@ -78,12 +126,13 @@ function GroupedRelationsTableView({
               const detailId = `${prefix}-${group.id}`;
               return (
                 <Fragment key={group.id}>
-                  <TableRow key={group.id}>
+                  <TableRow key={group.id} className="relation-group-row">
                     <TableCell>
-                      <div className="inline">
+                      <div className="inline relation-group-label">
                         <Button
-                          className="icon-btn"
-                          icon={open ? ChevronDown : ChevronRight}
+                          className="icon-btn relation-toggle"
+                          variant="ghost"
+                          icon={ChevronRight}
                           disabled={!group.count}
                           aria-label={`${open ? "Ocultar" : "Mostrar"} ${relationName} de ${group.label}`}
                           aria-expanded={Boolean(open)}
@@ -103,11 +152,26 @@ function GroupedRelationsTableView({
                       />
                     </TableCell>
                   </TableRow>
-                  {open && (
-                    <TableRow key={`${group.id}-details`}>
-                      <TableCell colSpan={3}>
-                        <div id={detailId} className="relation-details">
-                          {group.details}
+                  {disclosure.present.has(group.id) && (
+                    <TableRow
+                      key={`${group.id}-details`}
+                      className="relation-details-row"
+                      aria-hidden={!open}
+                      inert={!open}
+                    >
+                      <TableCell colSpan={3} className="relation-details-cell">
+                        <div
+                          id={detailId}
+                          className="relation-disclosure"
+                          data-expanded={disclosure.expanded.has(group.id)}
+                          aria-hidden={!open}
+                          inert={!open}
+                        >
+                          <div className="relation-disclosure-inner">
+                            <div className="relation-details">
+                              {group.details}
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>

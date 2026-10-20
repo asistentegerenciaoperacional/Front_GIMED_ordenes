@@ -352,3 +352,42 @@ La ejecución completa de pruebas obtuvo **155 correctas y un fallo** en
 `tests/order-filters.test.ts`: las descripciones actuales de los filtros de
 órdenes difieren de `filtros.md`. Ese desacuerdo pertenece a los cambios
 previos de filtros y no se alteró como parte de esta corrección.
+
+## Despliegue y presentación compacta de favoritos — 20 de octubre de 2026
+
+Compilación correcta y 116 comprobaciones de navegador en Chromium: 45 del
+nuevo recorrido de animación/presentación y 71 del recorrido de favoritos.
+El primero verifica apertura/cierre con alturas intermedias, retirada completa
+de la fila, foco, Enter/Espacio, exclusión accesible durante el cierre,
+movimiento reducido, clics rápidos y ausencia de solicitudes al alternar.
+A 375/803/1440 px se comprobaron peso 400, sangría 24 px respecto al tipo,
+padding de proveedor 6 px, contenedor sin padding vertical superior ni de
+celda, 4 px inferiores y ausencia de desbordamiento. Las capturas se
+inspeccionaron visualmente.
+
+El recorrido de favoritos conserva búsquedas, apertura automática y cierre
+manual, selección múltiple, cancelación, errores, conflictos, guardado vacío
+y prioridad de proveedores a 375/768/1024/1440 px. Sus localizadores se
+actualizaron a los nombres y secciones actuales del editor, y esperan la
+finalización del cierre antes de contar filas. Ambos recorridos usan bases
+temporales y no registraron errores ni advertencias de React/React Aria.
+
+Reportes: [animación y presentación](tests/evidence/favorites/chromium-favorites-disclosure.browser.json)
+y [favoritos](tests/evidence/favorites/chromium-favorites.browser.json).
+Reproducción y detalles en [PROVEEDORES-FAVORITOS.md](PROVEEDORES-FAVORITOS.md#verificación-reproducible).
+
+## Pasos de códigos de barras como filtros — 20 de octubre de 2026
+
+Compilación correcta y 37 comprobaciones de Chromium con una base temporal.
+El recorrido verifica que los tres pasos comparten el filtro de estado de la
+columna, sincronizan su selección con las casillas del menú, conservan búsqueda,
+otros filtros y ordenamiento, y permiten quitar o limpiar filtros. Incluye
+Inactivo desde la columna, combinaciones sin resultados, fondo normal blanco,
+hover gris, Enter/Espacio y foco a 375/803/1440 px. Sin errores ni advertencias
+de React/React Aria; capturas revisadas visualmente.
+
+[Reporte](tests/evidence/aria/chromium-barcode-steps.browser.json).
+Reproducción:
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/barcode-steps.browser.js chromium

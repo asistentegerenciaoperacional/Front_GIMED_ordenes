@@ -10,7 +10,7 @@ import {
   Search,
   Send,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   orderReference,
   tolerance,
@@ -621,6 +621,12 @@ const barcodeColumns: Column<string>[] = [
   { key: "creacion", label: "Creación", kind: "date" },
 ];
 
+const barcodeSteps = [
+  { status: "creado_gs1", label: "Creado en GS1" },
+  { status: "verificado_sistema", label: "Verificado en sistema" },
+  { status: "asignado", label: "Asignado al producto" },
+];
+
 type BarcodeFilterRow = ColumnRow<string> & {
   barcode: Row;
   searchText: string;
@@ -807,17 +813,32 @@ export function CodesPage() {
         }
       />
       <div className="code-flow" style={{ marginBottom: 24 }}>
-        <div className="code-step">
-          <span>01</span>Creado en GS1
-        </div>
-        <ChevronRight size={16} className="flow-arrow" aria-hidden="true" />
-        <div className="code-step">
-          <span>02</span>Verificado en sistema
-        </div>
-        <ChevronRight size={16} className="flow-arrow" aria-hidden="true" />
-        <div className="code-step">
-          <span>03</span>Asignado al producto
-        </div>
+        {barcodeSteps.map((step, index) => (
+          <Fragment key={step.status}>
+            {index > 0 && (
+              <ChevronRight size={16} className="flow-arrow" aria-hidden="true" />
+            )}
+            <Button
+              className="code-step"
+              aria-pressed={
+                tableState.filters.estado?.selected?.length === 1 &&
+                tableState.filters.estado.selected[0] === step.status
+              }
+              onClick={() =>
+                setTableState((current) => ({
+                  ...current,
+                  filters: {
+                    ...current.filters,
+                    estado: { selected: [step.status] },
+                  },
+                }))
+              }
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {step.label}
+            </Button>
+          </Fragment>
+        ))}
       </div>
       <section className="panel">
         <div className="toolbar">
@@ -1228,14 +1249,6 @@ export function EmailsPage() {
           </Button>
         }
       />
-      <div className="notice" style={{ marginBottom: 20 }}>
-        <Info size={18} aria-hidden="true" />
-        <div>
-          Todos los envíos se confirman mediante un simulador local. Se conserva
-          el mensaje y sus destinatarios; el cuerpo y las versiones de adjuntos
-          no se guardan.
-        </div>
-      </div>
       <section className="panel">
         <div className="section-heading">
           <h2>Historial de envíos simulados</h2>
