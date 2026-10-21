@@ -614,32 +614,52 @@ export function OrdersPage({
                       }
                     />
                   </div>
-                  <div className="toolbar-controls">
+                  <div
+                    className={`toolbar-controls${group === "materiales" ? " has-order-type-filter" : ""}`}
+                  >
+                    {group === "materiales" && (
+                      <div className="order-type-filter-wrap">
+                        <ControlSelect
+                          className="control order-type-filter"
+                          aria-label="Filtrar tipo de orden"
+                          value={type}
+                          onChange={(e) =>
+                            setParams(group, params, { tipo: e.target.value })
+                          }
+                        >
+                          <option value="">Todos los tipos</option>
+                          <option value="material">Material</option>
+                          <option value="otro">Otros</option>
+                        </ControlSelect>
+                      </div>
+                    )}
                     <div className="custom-filter-control">
-                      <ControlSelect
-                        className="control custom-filter-select"
-                        aria-label="Filtro personalizado"
-                        value={customFilter}
-                        onChange={(e) =>
-                          setParams(group, params, { filtro: e.target.value })
-                        }
-                      >
-                        <option value="">Sin filtro personalizado</option>
-                        {customFilters
-                          .filter(
-                            (filter) =>
-                              group === "productos" || !filter.productOnly,
-                          )
-                          .map((filter) => (
-                            <optgroup key={filter.id} label={filter.name}>
-                              {filter.options.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </optgroup>
-                          ))}
-                      </ControlSelect>
+                      <div className="custom-filter-select-wrap">
+                        <ControlSelect
+                          className="control custom-filter-select"
+                          aria-label="Filtro personalizado"
+                          value={customFilter}
+                          onChange={(e) =>
+                            setParams(group, params, { filtro: e.target.value })
+                          }
+                        >
+                          <option value="">Sin filtro personalizado</option>
+                          {customFilters
+                            .filter(
+                              (filter) =>
+                                group === "productos" || !filter.productOnly,
+                            )
+                            .map((filter) => (
+                              <optgroup key={filter.id} label={filter.name}>
+                                {filter.options.map((option) => (
+                                  <option key={option.id} value={option.id}>
+                                    {option.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                        </ControlSelect>
+                      </div>
                       <Button
                         icon={CircleHelp}
                         className="icon-btn"
@@ -648,20 +668,6 @@ export function OrdersPage({
                         onClick={() => setHelpOpen(true)}
                       />
                     </div>
-                    {group === "materiales" && (
-                      <ControlSelect
-                        className="control"
-                        aria-label="Filtrar tipo de orden"
-                        value={type}
-                        onChange={(e) =>
-                          setParams(group, params, { tipo: e.target.value })
-                        }
-                      >
-                        <option value="">Todos los tipos</option>
-                        <option value="material">Material</option>
-                        <option value="otro">Otros</option>
-                      </ControlSelect>
-                    )}
                     {filterCount > 0 && (
                       <Button
                         variant="link"

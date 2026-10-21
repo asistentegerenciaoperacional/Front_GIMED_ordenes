@@ -132,12 +132,14 @@ export function Dialog({
   children,
   onClose,
   titleAction,
+  className = "",
   wide = false,
   dirty = false,
   busy = false,
 }: {
   title: string;
   titleAction?: ReactNode;
+  className?: string;
   subtitle?: string;
   children: ReactNode;
   onClose: () => void;
@@ -181,7 +183,7 @@ export function Dialog({
     >
       <Modal className="aria-modal">
         <AriaDialog
-          className={"dialog " + (wide ? "wide" : "")}
+          className={`dialog ${wide ? "wide" : ""} ${className}`}
           aria-labelledby={titleId}
           data-dirty={unsaved}
         >

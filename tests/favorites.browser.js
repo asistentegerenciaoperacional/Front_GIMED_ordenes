@@ -476,9 +476,9 @@ async (page) => {
     name: "Nueva orden de compra",
     exact: true,
   });
-  const provider = order.getByLabel("Proveedor", { exact: false });
+  const provider = order.getByRole("combobox", { name: "Proveedor", exact: true });
   const before = await provider.inputValue();
-  await provider.click();
+  await provider.locator("..").getByRole("button", { name: "Mostrar opciones", exact: true }).click();
   check(
     (await page.getByText("Favoritos", { exact: true }).isVisible()) &&
       (await page.getByText("Otros proveedores", { exact: true }).isVisible()),
@@ -491,13 +491,13 @@ async (page) => {
     "Otros proveedores siguen disponibles",
   );
   await page.getByRole("option", { name: names[sid(5)], exact: true }).click();
-  const material = order.getByRole("button", { name: "Material", exact: true });
+  const material = order.getByRole("combobox", { name: "Material", exact: true });
   await material.selectOption(sid(51));
   check(
-    (await provider.inputValue()) === sid(5),
+    (await provider.inputValue()) === names[sid(5)],
     "Cambiar material conserva proveedor elegido aunque no sea favorito",
   );
-  await provider.click();
+  await provider.locator("..").getByRole("button", { name: "Mostrar opciones", exact: true }).click();
   check(
     await page.locator(`[role="option"][data-key="${sid(3)}"]`).isVisible(),
     "Favoritos del nuevo tipo disponibles",

@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from "react";
 import {
   materialSupplierGroups,
   suggestedMaterial,
-  supplierOptionLabel,
 } from "../shared/favorite-suppliers";
 import {
   blankRow,
@@ -74,6 +73,8 @@ import {
   isoDate,
   money,
   ProductPicker,
+  ProviderPicker,
+  MaterialPicker,
   recordName,
   request,
   text,
@@ -275,6 +276,24 @@ export function CatalogForm({
                   control = (
                     <ProductPicker
                       products={db.productos}
+                      value={String(value ?? "")}
+                      onChange={(id) => update(field, id || null)}
+                    />
+                  );
+                else if (ref?.target === "proveedor")
+                  control = (
+                    <ProviderPicker
+                      id={id}
+                      providers={db.proveedor}
+                      value={String(value ?? "")}
+                      onChange={(id) => update(field, id || null)}
+                    />
+                  );
+                else if (ref?.target === "materiales")
+                  control = (
+                    <MaterialPicker
+                      id={id}
+                      materials={db.materiales}
                       value={String(value ?? "")}
                       onChange={(id) => update(field, id || null)}
                     />
@@ -620,22 +639,17 @@ export function InvoiceForm({
               required
               error={error?.fields.id_proveedor}
             >
-              <ControlSelect
+              <ProviderPicker
                 id="field-id_proveedor"
+                providers={db.proveedor}
+                placeholder="Buscar proveedor o elegir el primer lote…"
                 value={supplier}
                 disabled={!!provider || !!invoice}
-                onChange={(e) => {
-                  setSupplier(e.target.value);
+                onChange={(id) => {
+                  setSupplier(id);
                   setSelected([]);
                 }}
-              >
-                <option value="">Seleccionar o elegir el primer lote…</option>
-                {db.proveedor.map((p) => (
-                  <option value={p.id} key={p.id}>
-                    {p.nombre_largo ?? p.nombre_corto}
-                  </option>
-                ))}
-              </ControlSelect>
+              />
             </Field>
             <Field
               id="field-numero_factura"
@@ -675,39 +689,39 @@ export function InvoiceForm({
                     <small>Adjunta una factura en PDF, imagen o HTML.</small>
                   </div>
                 )}
-              <Documents
-                owner="factura"
-                ownerId={null}
-                showList={false}
-                draft={documentDraft ?? undefined}
-                onDraftSave={setDocumentDraft}
-                renderAddTrigger={(open) => (
-                  <Button
-                    icon={Paperclip}
-                    className="invoice-attach-button"
-                    disabled={busy}
-                    onClick={open}
-                  >
-                    {documentDraft ? "Reemplazar" : "Seleccionar documento"}
-                  </Button>
+                <Documents
+                  owner="factura"
+                  ownerId={null}
+                  showList={false}
+                  draft={documentDraft ?? undefined}
+                  onDraftSave={setDocumentDraft}
+                  renderAddTrigger={(open) => (
+                    <Button
+                      icon={Paperclip}
+                      className="invoice-attach-button"
+                      disabled={busy}
+                      onClick={open}
+                    >
+                      {documentDraft ? "Reemplazar" : "Seleccionar documento"}
+                    </Button>
+                  )}
+                />
+                {documentDraft && (
+                  <>
+                    <span
+                      className="invoice-draft-document-divider"
+                      aria-hidden="true"
+                    />
+                    <Button
+                      variant="link"
+                      className="invoice-draft-document-remove"
+                      disabled={busy}
+                      onClick={() => setDocumentDraft(null)}
+                    >
+                      Quitar documento
+                    </Button>
+                  </>
                 )}
-              />
-              {documentDraft && (
-                <>
-                  <span
-                    className="invoice-draft-document-divider"
-                    aria-hidden="true"
-                  />
-                  <Button
-                    variant="link"
-                    className="invoice-draft-document-remove"
-                    disabled={busy}
-                    onClick={() => setDocumentDraft(null)}
-                  >
-                    Quitar documento
-                  </Button>
-                </>
-              )}
               </div>
             </div>
           )}
@@ -1666,42 +1680,37 @@ export function OrderForm({
                   required
                   error={error?.fields.id_proveedor}
                 >
-                  <ControlSelect
+                  <ProviderPicker
                     id="field-id_proveedor"
                     value={supplier}
                     disabled={authorized}
-                    onChange={(e) => changeSupplier(e.target.value)}
-                  >
-                    <option value="">Seleccionar…</option>
-                    {type === "material" ? (
-                      <>
-                        {materialGroups.favorites.length > 0 && (
-                          <optgroup label="Favoritos">
-                            {materialGroups.favorites.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {supplierOptionLabel(p, db.proveedor)}
-                              </option>
-                            ))}
-                          </optgroup>
-                        )}
-                        {materialGroups.others.length > 0 && (
-                          <optgroup label="Otros proveedores">
-                            {materialGroups.others.map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {supplierOptionLabel(p, db.proveedor)}
-                              </option>
-                            ))}
-                          </optgroup>
-                        )}
-                      </>
-                    ) : (
-                      suppliers(type).map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {supplierOptionLabel(p, db.proveedor)}
-                        </option>
-                      ))
-                    )}
-                  </ControlSelect>
+                    providers={
+                      type === "material"
+                        ? [
+                            ...materialGroups.favorites,
+                            ...materialGroups.others,
+                          ]
+                        : suppliers(type)
+                    }
+                    sections={
+                      type === "material"
+                        ? Object.fromEntries([
+                            ...materialGroups.favorites.map((p) => [
+                              p.id,
+                              "Favoritos",
+                            ]),
+                            ...materialGroups.others.map((p) => [
+                              p.id,
+                              "Otros proveedores",
+                            ]),
+                          ])
+                        : undefined
+                    }
+                    commitOnSelection
+                    onChange={(id) => {
+                      if (id) changeSupplier(id);
+                    }}
+                  />
                 </Field>
                 <Field
                   id="field-fecha_elaboracion"
@@ -1827,20 +1836,12 @@ export function OrderForm({
                               onChange={(id) => changeProduct(i, id)}
                             />
                           ) : type === "material" ? (
-                            <ControlSelect
+                            <MaterialPicker
                               id={key("id_material")}
+                              materials={db.materiales}
                               value={l.id_material}
-                              onChange={(e) =>
-                                update(i, "id_material", e.target.value)
-                              }
-                            >
-                              <option value="">Seleccionar…</option>
-                              {db.materiales.map((m) => (
-                                <option key={m.id} value={m.id}>
-                                  {recordName(db, "materiales", m)}
-                                </option>
-                              ))}
-                            </ControlSelect>
+                              onChange={(id) => update(i, "id_material", id)}
+                            />
                           ) : (
                             <>
                               <ControlInput
@@ -2019,28 +2020,19 @@ export function OrderForm({
                             id={`field-lines.${i}.ref_corrugado`}
                             label="Referencia de corrugado"
                           >
-                            <ControlSelect
+                            <MaterialPicker
                               id={`field-lines.${i}.ref_corrugado`}
                               value={l.ref_corrugado ?? ""}
-                              onChange={(e) =>
-                                update(i, "ref_corrugado", e.target.value)
-                              }
-                            >
-                              <option value="">Seleccionar…</option>
-                              {db.materiales
-                                .filter((m) =>
-                                  /corrugad/.test(
-                                    db.tipos_materiales
-                                      .find((t) => t.id === m.id_tipo_material)
-                                      ?.tipo_material?.toLowerCase() ?? "",
-                                  ),
-                                )
-                                .map((m) => (
-                                  <option key={m.id} value={m.id}>
-                                    {m.nombre_material}
-                                  </option>
-                                ))}
-                            </ControlSelect>
+                              placeholder="Buscar corrugado…"
+                              onChange={(id) => update(i, "ref_corrugado", id)}
+                              materials={db.materiales.filter((m) =>
+                                /corrugad/.test(
+                                  db.tipos_materiales
+                                    .find((t) => t.id === m.id_tipo_material)
+                                    ?.tipo_material?.toLowerCase() ?? "",
+                                ),
+                              )}
+                            />
                           </Field>
                           <Field
                             id={`field-lines.${i}.cantidad_corrugado`}

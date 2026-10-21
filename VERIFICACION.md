@@ -436,3 +436,28 @@ Reproducción:
 
     npm run build
     node scripts/verify-aria-browser.mjs tests/document-lot-navigation.browser.js chromium
+
+## Autocompletado de proveedores y materiales — 21 de octubre de 2026
+
+Compilación correcta y 161 comprobaciones de Chromium: 34 de autocompletado,
+56 de controles compartidos y 71 del recorrido de favoritos. Se verificaron
+búsquedas por nombre y código MAIA, teclado, ausencia de coincidencias,
+agrupaciones de favoritos y homónimos, persistencia de los identificadores en
+contactos y OCM, proveedor de factura, corrugados sin código y restricciones
+de tipo. Escribir un proveedor no dispara el reemplazo de una OC; seleccionarlo
+mantiene la confirmación y cancelarla conserva la etiqueta y el borrador.
+El proveedor de una orden autorizada sigue bloqueado.
+
+El recorrido de controles conserva el comportamiento de productos, fechas,
+importes, diálogos anidados y protección del borrador. Se revisaron capturas a
+375/1440 px y no hubo errores ni advertencias de React/React Aria.
+
+Reportes: [autocompletado](tests/evidence/favorites/chromium-favorites-autocomplete.browser.json),
+[controles](tests/evidence/aria/chromium-aria-controls.browser.json) y
+[favoritos](tests/evidence/favorites/chromium-favorites.browser.json).
+Reproducción:
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/favorites-autocomplete.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/favorites.browser.js chromium

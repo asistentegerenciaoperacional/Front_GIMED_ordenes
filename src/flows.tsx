@@ -964,9 +964,7 @@ export function CodesPage() {
               {rows.length ? (
                 rows.map((c) => (
                   <TableRow key={c.id}>
-                    <TableCell className="mono">
-                      <span className="barcode-number">{c.codigo}</span>
-                    </TableCell>
+                    <TableCell>{c.codigo}</TableCell>
                     <TableCell>
                       {db.productos.find((p) => p.id === c.id_producto)
                         ?.nombre_producto ?? "Sin producto asignado"}

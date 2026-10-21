@@ -26,6 +26,7 @@ import {
   ControlError,
   ControlLabel,
   ControlLink,
+  type Choice,
 } from "./components/controls";
 import { DateInput } from "./components/date-control";
 import {
@@ -44,6 +45,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { Database } from "../shared/models";
+import { supplierOptionLabel } from "../shared/favorite-suppliers";
 import {
   meta,
   orderReference,
@@ -387,6 +389,102 @@ export function Field({
   const className = `field ${error ? "invalid" : ""}`;
   return <div className={className}>{body}</div>;
 }
+type PickerProps = Omit<
+  React.ComponentPropsWithoutRef<"input">,
+  "value" | "defaultValue" | "onChange" | "type"
+> & {
+  value: string;
+  onChange: (id: string) => void;
+  "data-field-path"?: string;
+};
+
+function ReferencePicker({
+  options,
+  value,
+  onChange,
+  commitOnSelection = false,
+  onBlur,
+  ...inputProps
+}: PickerProps & { options: Choice[]; commitOnSelection?: boolean }) {
+  const selected = options.find((option) => option.id === value);
+  const [query, setQuery] = useState(selected?.label ?? "");
+  useEffect(() => {
+    if (selected || commitOnSelection) setQuery(selected?.label ?? "");
+  }, [value, selected?.label, commitOnSelection]);
+  return (
+    <ChoiceCombo
+      options={options}
+      value={commitOnSelection && query !== selected?.label ? "" : value}
+      inputValue={query}
+      onInputChange={(next) => {
+        setQuery(next);
+        if (!commitOnSelection && next !== selected?.label) onChange("");
+      }}
+      onSelectionChange={(id) => {
+        if (id) {
+          onChange(id);
+          setQuery(
+            commitOnSelection
+              ? (selected?.label ?? "")
+              : (options.find((option) => option.id === id)?.label ?? ""),
+          );
+        }
+      }}
+      inputProps={{
+        ...inputProps,
+        onBlur: (event) => {
+          if (commitOnSelection) setQuery(selected?.label ?? "");
+          onBlur?.(event);
+        },
+      }}
+    />
+  );
+}
+
+export function ProviderPicker({
+  providers,
+  sections,
+  placeholder = "Buscar proveedor…",
+  ...props
+}: PickerProps & {
+  providers: Database["proveedor"];
+  sections?: Record<string, string>;
+  commitOnSelection?: boolean;
+}) {
+  const { db } = useApp();
+  const options = useMemo(
+    () =>
+      providers.map((provider) => ({
+        id: provider.id,
+        label: supplierOptionLabel(provider, db.proveedor),
+        section: sections?.[provider.id],
+      })),
+    [providers, sections, db.proveedor],
+  );
+  return (
+    <ReferencePicker {...props} options={options} placeholder={placeholder} />
+  );
+}
+
+export function MaterialPicker({
+  materials,
+  placeholder = "Buscar material…",
+  ...props
+}: PickerProps & { materials: Database["materiales"] }) {
+  const { db } = useApp();
+  const options = useMemo(
+    () =>
+      materials.map((material) => ({
+        id: material.id,
+        label: recordName(db, "materiales", material),
+      })),
+    [materials, db],
+  );
+  return (
+    <ReferencePicker {...props} options={options} placeholder={placeholder} />
+  );
+}
+
 export function ProductPicker({
   products,
   value,
@@ -394,25 +492,8 @@ export function ProductPicker({
   disabled = false,
   placeholder = "Buscar producto…",
   ...inputProps
-}: {
-  products: readonly Row[];
-  value: string;
-  onChange: (id: string) => void;
-  disabled?: boolean;
-  placeholder?: string;
-  id?: string;
-  name?: string;
-  required?: boolean;
-  "aria-describedby"?: string;
-  "aria-invalid"?: boolean;
-  "data-field-path"?: string;
-}) {
+}: PickerProps & { products: readonly Row[] }) {
   const { db } = useApp();
-  const selected = products.find((product) => product.id === value);
-  const [query, setQuery] = useState(selected?.nombre_producto ?? "");
-  useEffect(() => {
-    if (selected) setQuery(selected.nombre_producto);
-  }, [value, selected?.nombre_producto]);
   const options = useMemo(() => {
     const names = new Map<string, number>();
     const providers = new Map(
@@ -435,21 +516,13 @@ export function ProductPicker({
     }));
   }, [products, db.proveedor]);
   return (
-    <ChoiceCombo
+    <ReferencePicker
       options={options}
       value={value}
-      inputValue={query}
-      onInputChange={(next) => {
-        setQuery(next);
-        if (next !== selected?.nombre_producto) onChange("");
-      }}
-      onSelectionChange={(id) => {
-        if (id) {
-          onChange(id);
-          setQuery(options.find((option) => option.id === id)?.label ?? "");
-        }
-      }}
-      inputProps={{ ...inputProps, disabled, placeholder }}
+      onChange={onChange}
+      {...inputProps}
+      disabled={disabled}
+      placeholder={placeholder}
     />
   );
 }

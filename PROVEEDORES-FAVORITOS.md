@@ -40,6 +40,12 @@ Valida referencias, elimina IDs repetidos y sustituye solo el conjunto del tipo 
 
 En órdenes de materiales, el selector conserva las reglas de elegibilidad existentes y agrupa por **Favoritos** y **Otros proveedores**, ordenados alfabéticamente. Se utiliza la unión de favoritos de los tipos de todos los materiales del formulario. Cambiar materiales no sustituye el proveedor elegido. La sugerencia inicial de material consulta los tipos favoritos del proveedor y conserva el orden estable del catálogo. Abastecimiento sigue consultando los vínculos actuales; no se añade un formulario nuevo.
 
+El selector de proveedor permite escribir para filtrar opciones con el mismo
+autocompletado compartido de productos y materiales, conservando las secciones
+de favoritos. Buscar o abandonar una consulta sin seleccionar no cambia el
+proveedor ni reinicia renglones. La selección confirma el identificador; los
+proveedores homónimos conservan su distinción por NIT.
+
 ## Interacción y patrones reutilizables
 
 `GroupedRelationsTable` y `MultiRelationPicker`, en la capa compartida React Aria, implementan dos patrones:

@@ -17,6 +17,7 @@ import { Button as AriaButton } from "react-aria-components/Button";
 import { Checkbox } from "react-aria-components/Checkbox";
 import { CheckboxGroup } from "react-aria-components/CheckboxGroup";
 import { ComboBox } from "react-aria-components/ComboBox";
+import { Collection } from "react-aria-components/Collection";
 import {
   FieldError,
   FieldErrorContext,
@@ -351,6 +352,28 @@ export function ChoiceCombo({
   inputProps = {},
 }: ComboProps) {
   const edited = useContext(FieldEditContext);
+  type Section = { id: string; label: string; children: Choice[] };
+  const items = useMemo<(Choice | Section)[]>(() => {
+    if (!options.some((option) => option.section)) return options;
+    return [...new Set(options.map((option) => option.section))].map(
+      (section) => ({
+        id: `section-${section ?? "ungrouped"}`,
+        label: section ?? "Opciones",
+        children: options.filter((option) => option.section === section),
+      }),
+    );
+  }, [options]);
+  const renderOption = (option: Choice) => (
+    <ListBoxItem
+      id={option.id}
+      textValue={option.label}
+      isDisabled={option.disabled}
+      className="aria-option"
+    >
+      <span>{option.label}</span>
+      {option.description && <small>{option.description}</small>}
+    </ListBoxItem>
+  );
   const {
     id,
     name,
@@ -375,7 +398,7 @@ export function ChoiceCombo({
         edited();
         onSelectionChange(String(key ?? ""));
       }}
-      defaultItems={options}
+      defaultItems={items}
       allowsCustomValue={allowsCustomValue}
       allowsEmptyCollection
       menuTrigger="input"
@@ -410,17 +433,16 @@ export function ChoiceCombo({
             <span className="aria-options-empty">Sin coincidencias</span>
           )}
         >
-          {(option: Choice) => (
-            <ListBoxItem
-              id={option.id}
-              textValue={option.label}
-              isDisabled={option.disabled}
-              className="aria-option"
-            >
-              <span>{option.label}</span>
-              {option.description && <small>{option.description}</small>}
-            </ListBoxItem>
-          )}
+          {(item: Choice | Section) =>
+            "children" in item ? (
+              <ListBoxSection id={item.id}>
+                <Header className="aria-option-section">{item.label}</Header>
+                <Collection items={item.children}>{renderOption}</Collection>
+              </ListBoxSection>
+            ) : (
+              renderOption(item)
+            )
+          }
         </ListBox>
       </Popover>
     </ComboBox>

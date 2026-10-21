@@ -256,8 +256,8 @@ export function Documents({
               </Field>
               <div className="notice subtle">
                 <Info size={16} aria-hidden="true" />
-                Cada clase admite un documento por propietario. Reemplazar
-                actualiza su registro vigente.
+                Únicamente se admite un documento. Reemplazar actualiza su
+                registro vigente.
               </div>
             </div>
             <div className="dialog-footer">

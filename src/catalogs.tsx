@@ -1,7 +1,6 @@
 import { History, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
-  currentCost,
   labels,
   assignedBarcode,
   meta,
@@ -24,6 +23,7 @@ import {
 import { confirmAction } from "./components/overlays";
 import { CatalogForm, Documents } from "./forms";
 import { FavoriteSuppliersTable } from "./favorite-suppliers";
+import { ProductHistory } from "./product-history";
 import {
   columnOptions,
   filterTableRows,
@@ -445,7 +445,7 @@ export function CatalogTable({
                               %
                             </small>
                           </TableCell>
-                          <TableCell className="mono">
+                          <TableCell className="catalog-assigned-barcode">
                             {assignedBarcode(db, row.id)?.codigo ?? "Sin código"}
                           </TableCell>
                         </>
@@ -526,119 +526,17 @@ export function CatalogTable({
           title={recordName(db, entity, details)}
           subtitle="Información relacionada e historial"
           onClose={() => setDetails(null)}
+          className={entity === "productos" ? "product-history-dialog" : undefined}
           wide
         >
-          <div className="dialog-body">
+          <div
+            className={`dialog-body${entity === "productos" ? " product-history" : ""}`}
+          >
             {entity === "productos" && (
-              <>
-                <div className="form-grid">
-                  <div>
-                    <small>Tipo de maquila</small>
-                    <h3>
-                      {db.materiales_asociados.some(
-                        (a) => a.id_producto === details.id,
-                      )
-                        ? "PARCIAL"
-                        : "FULL"}
-                    </h3>
-                  </div>
-                  <div>
-                    <small>Costo de maquila vigente</small>
-                    <h3>
-                      {currentCost(db, details.id)?.costo !== null &&
-                      currentCost(db, details.id)
-                        ? money(currentCost(db, details.id)!.costo!)
-                        : "Sin costo registrado"}
-                    </h3>
-                  </div>
-                </div>
-                <h3>Materiales asociados</h3>
-                <div className="inline">
-                  {db.materiales_asociados
-                    .filter((a) => a.id_producto === details.id)
-                    .map((a) => (
-                      <Badge key={a.id_material} value="material">
-                        {
-                          db.materiales.find((m) => m.id === a.id_material)
-                            ?.nombre_material
-                        }
-                      </Badge>
-                    ))}
-                  {!db.materiales_asociados.some(
-                    (a) => a.id_producto === details.id,
-                  ) && <p>No tiene materiales asociados.</p>}
-                </div>
-                <h3>Historial de códigos de barras</h3>
-                <div className="table-scroll">
-                  <DataTable className="data-table">
-                    <TableHead>
-                      <TableRow>
-                        <TableColumn>Código</TableColumn>
-                        <TableColumn>Estado</TableColumn>
-                        <TableColumn>Creado</TableColumn>
-                        <TableColumn>Órdenes</TableColumn>
-                      </TableRow>
-                    </TableHead>
-                    <TableRows>
-                      {db.codigos_barras
-                        .filter((c) => c.id_producto === details.id)
-                        .map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell className="mono">{c.codigo}</TableCell>
-                            <TableCell>
-                              <Badge value={c.estado} />
-                            </TableCell>
-                            <TableCell>{shortDate(c.fecha_creacion)}</TableCell>
-                            <TableCell>
-                              <LinkButton
-                                variant="link"
-                                href={`/ordenes?q=${c.codigo}`}
-                                onClick={() => setDetails(null)}
-                              >
-                                Consultar{" "}
-                                {
-                                  db.orden_producto.filter(
-                                    (l) => l.id_codigo_barras === c.id,
-                                  ).length
-                                }{" "}
-                                órdenes
-                              </LinkButton>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableRows>
-                  </DataTable>
-                </div>
-                <h3>Historial de costos</h3>
-                <div className="table-scroll">
-                  <DataTable className="data-table">
-                    <TableHead>
-                      <TableRow>
-                        <TableColumn>Costo</TableColumn>
-                        <TableColumn>Desde</TableColumn>
-                        <TableColumn>Hasta</TableColumn>
-                      </TableRow>
-                    </TableHead>
-                    <TableRows>
-                      {db.costos_maquila
-                        .filter((c) => c.id_producto === details.id)
-                        .map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell>
-                              {c.costo === null ? "—" : money(c.costo)}
-                            </TableCell>
-                            <TableCell>{shortDate(c.fecha_inicio)}</TableCell>
-                            <TableCell>
-                              {c.fecha_fin
-                                ? shortDate(c.fecha_fin)
-                                : "Sin fecha final"}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableRows>
-                  </DataTable>
-                </div>
-              </>
+              <ProductHistory
+                productId={details.id}
+                onClose={() => setDetails(null)}
+              />
             )}
             {entity === "materiales" && (
               <>
