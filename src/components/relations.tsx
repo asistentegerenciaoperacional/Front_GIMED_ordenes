@@ -130,7 +130,7 @@ function GroupedRelationsTableView({
                     <TableCell>
                       <div className="inline relation-group-label">
                         <Button
-                          className="icon-btn relation-toggle"
+                          className="icon-btn table-action relation-toggle"
                           variant="ghost"
                           icon={ChevronRight}
                           disabled={!group.count}
@@ -145,7 +145,7 @@ function GroupedRelationsTableView({
                     <TableCell>{countLabel(group.count)}</TableCell>
                     <TableCell>
                       <Button
-                        className="icon-btn"
+                        className="icon-btn table-action"
                         icon={Pencil}
                         aria-label={`Editar ${relationName} de ${group.label}`}
                         onClick={() => onEdit(group.id)}

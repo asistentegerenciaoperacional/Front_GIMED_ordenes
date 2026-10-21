@@ -226,12 +226,28 @@ const columns: Partial<Record<Entity, string[]>> = {
   costos_maquila: ["id_producto", "costo", "fecha_inicio", "fecha_fin"],
   contacto_interno: ["nombre", "correo", "cargo_area", "activo"],
 };
-export function CatalogTable({ entity }: { entity: Entity }) {
+export function CatalogTable({
+  entity,
+  detailsId,
+  onDetailsChange,
+}: {
+  entity: Entity;
+  detailsId?: string | null;
+  onDetailsChange?: (id: string | null) => void;
+}) {
   const { db, run, notify, navigate } = useApp();
   const [query, setQuery] = useState("");
   const q = useDeferredValue(query.toLowerCase());
   const [editing, setEditing] = useState<Row | null | undefined>();
-  const [details, setDetails] = useState<Row | null>(null);
+  const [localDetails, setLocalDetails] = useState<Row | null>(null);
+  const details =
+    detailsId === undefined
+      ? localDetails
+      : (db[entity] as Row[]).find((row) => row.id === detailsId) ?? null;
+  const setDetails = (row: Row | null) => {
+    if (detailsId === undefined) setLocalDetails(row);
+    onDetailsChange?.(row?.id ?? null);
+  };
   const [tableState, setTableState] = useState<TableState<string>>({
     filters: {},
   });
@@ -437,7 +453,7 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                       <TableCell>
                         <div className="inline">
                           <Button
-                            className="icon-btn"
+                            className="icon-btn table-action"
                             icon={Pencil}
                             aria-label={`Editar ${recordName(db, entity, row)}`}
                             onClick={() => setEditing(row)}
@@ -448,14 +464,14 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                             "lote_material",
                           ].includes(entity) && (
                             <Button
-                              className="icon-btn"
+                              className="icon-btn table-action"
                               icon={History}
                               aria-label={`Consultar historial de ${recordName(db, entity, row)}`}
                               onClick={() => setDetails(row)}
                             />
                           )}
                           <Button
-                            className="icon-btn delete-action"
+                            className="icon-btn table-action delete-action"
                             icon={Trash2}
                             aria-label={`Eliminar ${recordName(db, entity, row)}`}
                             onClick={async () => {
@@ -701,35 +717,49 @@ export function CatalogTable({ entity }: { entity: Entity }) {
             )}
             {entity === "lote_material" && (
               <>
-                {db.orden_material
-                  .filter((l) => l.id_lote_material === details.id)
-                  .map((l) => {
-                    const o = db.orden_compra.find(
-                      (o) => o.id === l.id_orden_compra,
-                    )!;
-                    return (
-                      <ControlLink
-                        className="related-link"
-                        key={l.id}
-                        href={`/ordenes/${o.id}`}
-                        onClick={() => setDetails(null)}
-                      >
-                        <div>
-                          <strong>
-                            {orderReference(o.tipo_orden, o.no_orden)} ·{" "}
-                            {
-                              db.materiales.find((m) => m.id === l.id_material)
-                                ?.nombre_material
-                            }
-                          </strong>
-                          <small>
-                            {l.cantidad_recibida ?? 0} unidades ·{" "}
-                            {l.ubicacion ?? "Sin ubicación"}
-                          </small>
-                        </div>
-                      </ControlLink>
-                    );
-                  })}
+                <section className="related-materials">
+                  <h3>
+                    Materiales relacionados (
+                    {
+                      db.orden_material.filter(
+                        (l) => l.id_lote_material === details.id,
+                      ).length
+                    }
+                    )
+                  </h3>
+                  <div className="related-materials-list">
+                    {db.orden_material
+                      .filter((l) => l.id_lote_material === details.id)
+                      .map((l) => {
+                        const o = db.orden_compra.find(
+                          (o) => o.id === l.id_orden_compra,
+                        )!;
+                        return (
+                          <ControlLink
+                            className="related-link"
+                            key={l.id}
+                            href={`/ordenes/${o.id}`}
+                            onClick={() => setDetails(null)}
+                          >
+                            <div>
+                              <strong>
+                                {orderReference(o.tipo_orden, o.no_orden)} ·{" "}
+                                {
+                                  db.materiales.find(
+                                    (m) => m.id === l.id_material,
+                                  )?.nombre_material
+                                }
+                              </strong>
+                              <small>
+                                {l.cantidad_recibida ?? 0} unidades ·{" "}
+                                {l.ubicacion ?? "Sin ubicación"}
+                              </small>
+                            </div>
+                          </ControlLink>
+                        );
+                      })}
+                  </div>
+                </section>
                 <Documents owner="lote_material" ownerId={details.id} compact />
               </>
             )}

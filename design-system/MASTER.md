@@ -2,7 +2,7 @@
 
 Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
 
-Actualizado el 20 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+Actualizado el 21 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
 
 ## Bases
 
@@ -31,7 +31,9 @@ La migración, su punto de recuperación y su verificación se registran en [MIG
 - Texto principal: `#18253B`; texto secundario: `#526179`.
 - Tipografía del sistema: Segoe UI, system-ui, sans-serif. Identificadores técnicos usan monospace; cantidades usan cifras tabulares.
 - Separación habitual: 8, 12, 16, 20 y 24 px. Paneles con radio de 12 px.
-- Iconos Lucide en SVG, decorativos con `aria-hidden`; controles de solo icono tienen nombre accesible.
+- Iconos Lucide en SVG, decorativos con `aria-hidden`; controles de solo icono tienen nombre accesible. Todas las acciones de tabla usan `table-action` en `Button` o `LinkButton` para obtener el tooltip compartido `ActionTooltip`, al pasar el cursor o enfocar. El texto procede de `title`, `aria-label` o el texto del botón, en ese orden; se evita el tooltip nativo duplicado y la implementación por pantalla.
+
+Todas las pestañas de nivel 1 y 2 (`[role="tab"]`) y los encabezados de columna (`.data-table th`) muestran `cursor: pointer` al hacer hover.
 
 ## Organización
 
@@ -53,17 +55,21 @@ Mantener memorizados los grupos, callbacks y contenido vacío: abrir o cerrar el
 
 Usar `MultiRelationPicker` dentro del diálogo compartido para modificar un conjunto: búsqueda con casillas React Aria y una selección final visible independiente del filtro, con acciones para quitar, conteo y altas/bajas antes de guardar. Mantener IDs estables, distinguir homónimos con contexto y no guardar al marcar cada casilla. Cancelar/Escape descarta con confirmación; errores conservan el borrador; un conflicto exige revisar la selección actual. Bloquear envíos duplicados, conservar scroll y devolver foco al disparador mediante React Aria. En móvil apilar listas; conservar los tokens y el lápiz cuadrado secundario existentes.
 
+Los títulos de proveedores disponibles y seleccionados comparten una fila, fuera del panel gris. Este panel se alinea arriba y abajo con el conjunto de búsqueda y lista disponible. Ambas listas usan la misma tipografía de 12 px y altura de línea 1,6; en móvil cada título precede a su panel apilado.
+
 Favoritos aplica estos patrones a tipos de material y proveedores. Los materiales heredan los favoritos del tipo. Los selectores de órdenes presentan secciones compactas Favoritos/Otros proveedores sin restringir opciones elegibles ni modificar una selección existente. Especificación, recuperación y pruebas en [PROVEEDORES-FAVORITOS.md](../PROVEEDORES-FAVORITOS.md).
 
 Los campos para elegir un producto existente usan el `ComboBox` compartido de React Aria: al escribir aparecen coincidencias y la elección guarda el identificador del producto. En órdenes, las sugerencias se limitan a productos activos del proveedor seleccionado y al producto histórico del renglón cuando aplica. En formularios de catálogo y asignación GS1 se muestran las opciones disponibles. Al asignar un código GS1, el proveedor del producto aparece debajo como campo de solo lectura.
 
-El drawer fijado ocupa una columna propia y permanece visible al navegar y desplazar la página. Al desfijarlo, la columna se libera y el panel permanece abierto de forma flotante, con todo el ancho disponible para el contenido. El cambio de ancho utiliza una transición de 180 ms, desactivada con movimiento reducido. La fijación está disponible desde 1024 px de ancho de ventana. Por debajo, el botón desaparece y el panel fijado pasa automáticamente a flotante, liberando su columna y enfocando el cierre. Ampliar la ventana conserva el modo flotante hasta una nueva fijación.
+El drawer fijado ocupa una columna propia y permanece visible al navegar y desplazar la página. Al desfijarlo, la columna se libera y el panel permanece abierto de forma flotante, con todo el ancho disponible para el contenido. Al cambiar entre fijado y flotante se cancelan las animaciones del panel para evitar repetir su entrada; la apertura habitual conserva su animación. El cambio de ancho utiliza una transición de 180 ms, desactivada con movimiento reducido. La fijación está disponible desde 1024 px de ancho de ventana. Por debajo, el botón desaparece y el panel fijado pasa automáticamente a flotante, liberando su columna y enfocando el cierre. Ampliar la ventana conserva el modo flotante hasta una nueva fijación.
 
 La cabecera conserva el botón de fijar/desfijar en los anchos permitidos; el cierre aparece en el modo flotante. Los destinos tienen desplazamiento interno y las tablas tienen desplazamiento horizontal propio cuando no caben. Las columnas de formularios se reducen a una por debajo de 600 px.
 
 ## Estados e interacción
 
 Autorizada y en seguimiento usan azul; pendientes, ámbar; cerrada/aprobada/validada, verde; anulada/rechazada/inactiva, rojo. Cada estado incluye texto.
+
+Los botones de papelera para eliminar registros y lotes, **Inactivar** y las confirmaciones de **Eliminar**, **Descartar cambios**, **Anular producto** y **Anular** un renglón comparten un hover rojo: texto `#A13939`, borde `#F4D5D5` y fondo `#FFF2F2`, en la familia de la badge Inactivo. Se aplica únicamente a botones habilitados, sin transición de color o sombra. Reutilizar `delete-action` para las papeleras y `destructive-confirm` para las confirmaciones destructivas del diálogo compartido. Las confirmaciones de guardado y reapertura conservan sus estilos propios.
 
 Los errores aparecen junto al campo y en un resumen con foco al validar. Los enlaces del resumen permiten llegar al control. Al corregir un dato se retira su error si ya es válido, se conservan los pendientes y el foco permanece en el control; editar un valor sin resolver su formato, duplicado o relación mantiene el aviso. Los diálogos React Aria retienen el foco; las pestañas admiten flechas, Inicio y Fin. El drawer flotante bloquea la interacción y el desplazamiento del fondo. Tab y Shift+Tab recorren sus controles; Escape, el botón de cierre y el clic en el fondo lo cierran y devuelven el foco al botón de apertura. Seleccionar una sección cierra el drawer flotante y enfoca el contenido. En el modo fijado se puede pasar con Tab hacia el contenido, interactuar con la página y cambiar de sección conservando el panel. Cambiar de modo conserva el foco en el botón de fijación. Los cambios pendientes avisan al salir o cerrar el diálogo.
 
@@ -100,6 +106,12 @@ Cada lote tiene una acción de eliminar con nombre accesible, deshabilitada sin 
 Cantidad de sticker y porcentaje comparten fila en escritorio y móvil. El porcentaje ocupa 64 px y ambos campos tienen 8 px de separación. Las fórmulas y límites se muestran en tooltips al pasar el cursor o enfocar el control, con descripciones enlazadas mediante `aria-describedby`. La ayuda se puede leer al mover el cursor sobre ella; Escape la cierra sin cerrar el diálogo. Los errores de validación permanecen visibles junto al campo. El posicionamiento de los tooltips respeta los límites de la ventana y los controles fijos del diálogo.
 
 Solo los productos activos del maquilador seleccionado aparecen como opciones para agregar a la orden. Un producto histórico desactivado mantiene su opción actual bloqueada al editar. Las acciones manuales de seguimiento, incluidos cerrar y anular, aparecen deshabilitadas mientras la cabecera no está autorizada, con una indicación del motivo. Estas comprobaciones visuales acompañan las validaciones del servicio.
+
+## Proveedores: NIT
+
+Agregar y editar proveedores usa un único campo **NIT** con formato `NIT-DV`: números sin puntos, guion y exactamente un dígito de verificación, por ejemplo `900123404-5`. Validar el formato cuando se informe; el campo conserva su carácter opcional. El botón **(?)** junto al título explica el formato al pasar el cursor o enfocarlo. Al guardar, NIT y DV se mantienen separados en el modelo.
+
+La columna NIT, la búsqueda y los filtros usan el formato `NIT-DV`. Los registros históricos sin DV muestran únicamente el NIT, sin añadir un guion vacío ni inventar el dígito.
 
 ## Acciones de órdenes e impresión
 
@@ -143,6 +155,8 @@ Los estados vacíos conservan las cabeceras para ajustar o quitar filtros. Los m
 
 Todas las tablas siguientes muestran un botón de filtro en cada cabecera de datos. Cada botón abre el mismo menú para seleccionar varios valores, aplicar condiciones según el tipo de campo y ordenar. Las cabeceras de acciones no ofrecen filtros. La búsqueda de la tabla conserva su comportamiento y se combina con los filtros.
 
+Los menús de filtro permanecen abiertos al desplazar la página o cualquier contenedor, también fuera del menú. Conservan su desplazamiento interno y el cierre con Escape, clic fuera o salida del foco con Tab.
+
 | Pantalla y tabla                                  | Columnas con menú y tipo                                                                                                                                                                                                                                                                                                                                               |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Órdenes → Productos; Órdenes → Materiales y Otros | Orden/tipo (entero), proveedor (texto), productos/materiales/conceptos (texto), fecha de elaboración (fecha), entrega solicitada (fecha), estado (enumeración) y total (importe).                                                                                                                                                                                      |
@@ -153,20 +167,37 @@ Todas las tablas siguientes muestran un botón de filtro en cada cabecera de dat
 | Proveedores → Proveedores                         | Nombre completo, nombre resumido y NIT (texto); proveedor de maquila, proveedor de materiales y activo (enumeraciones Sí/No).                                                                                                                                                                                                                                          |
 | Proveedores → Direcciones de proveedor            | Proveedor, nombre de bodega, ciudad, dirección y complemento (texto).                                                                                                                                                                                                                                                                                                  |
 | Proveedores → Contactos de proveedor              | Proveedor, nombre, cargo o área, correo y celular (texto).                                                                                                                                                                                                                                                                                                             |
+| Documentos | Documento y propietario (texto), clase (enumeración), cargado (fecha). Reutiliza el menú compartido de selección múltiple, condiciones y ordenamiento; Acciones no lleva filtro. El selector de clase refleja el filtro de columna y permite retirarlo con Todas las clases. Limpiar búsqueda conserva filtros y ordenamiento; Limpiar filtros conserva búsqueda y ordenamiento. Las cabeceras permanecen visibles sin coincidencias y la tabla conserva su desplazamiento horizontal en móvil. |
 | Códigos de barras                                 | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). El botón **(?)** junto a la búsqueda abre un diálogo modal con fondo atenuado y las definiciones de Creado en GS1, Verificado en sistema, Activo, Asignado e Inactivo. Se cierra con **X**, **Entendido**, Escape o clic fuera; mientras está abierto bloquea la interacción con la aplicación. **Avisar códigos nuevos** abre un diálogo de selección que muestra los códigos en estado Creado en GS1, todos seleccionados por defecto. Permite seleccionar o deseleccionar códigos individualmente y ofrece una casilla para seleccionar todos; al continuar, el cuerpo del correo incluye solo los códigos seleccionados. Si no hay códigos por verificar, informa el estado y deshabilita la preparación del aviso. Reutiliza el diálogo compartido, las casillas de selección y los estilos existentes. |
 
 Los pasos **Creado en GS1**, **Verificado en sistema**, **Activo** y **Asignado** son botones que aplican una selección exclusiva al filtro existente de la columna Estado GS1/sistema. Conservan la búsqueda, los filtros de otras columnas y el ordenamiento, sin introducir otro mecanismo de filtrado. Su estado `aria-pressed` y resaltado azul reflejan la selección única de esa columna; quitar o limpiar el filtro desactiva el resaltado. El fondo normal es blanco y el hover es gris `#f8fafc`. Inactivo permanece disponible desde el filtro de columna.
 
-En la asignación de una factura existente, las casillas reflejan las asociaciones iniciales. Desmarcar y guardar retira únicamente esa factura del lote o recepción; buscar conserva las selecciones ocultas. Al crear una factura, **Adjuntar documento** reutiliza el formulario de placeholder: clase Factura física y nombre de archivo. El documento se prepara en el borrador, con Reemplazar documento y Quitar documento, y se guarda conjuntamente al confirmar la factura.
+En la asignación de una factura existente, las casillas reflejan las asociaciones iniciales. Desmarcar y guardar retira únicamente esa factura del lote o recepción; buscar conserva las selecciones ocultas. Al crear una factura, **Adjuntar documento** reutiliza el formulario de placeholder: clase Factura física y nombre de archivo. El botón de adjuntar o reemplazar usa 5 px de padding arriba y abajo y altura mínima de 32 px. El documento se prepara en el borrador, con Reemplazar documento y Quitar documento, y se guarda conjuntamente al confirmar la factura.
 
+
+En Documentos, el número de lote de material de la columna Propietario es un enlace a Abastecimiento → Lotes y certificados. Abre directamente el diálogo existente de información relacionada e historial del lote elegido. La pestaña y el lote se identifican en la URL para permitir enlaces directos y recarga; cerrar el diálogo retira la selección y mantiene la tabla de lotes. Los propietarios de factura y orden conservan sus enlaces y Global permanece como texto.
 
 ### Códigos de barras: vigencia y asignación
 
-Directriz obligatoria: reutilizar los badges existentes, sin una nueva paleta. Los cinco estados tienen colores distintos: Creado en GS1 usa ámbar (`creado_gs1`), Verificado en sistema naranja (`verificado_sistema`), Activo verde (variante `validado`), Asignado azul (`asignado`) e Inactivo rojo (`inactivo`). Conservar texto visible, bordes y densidad; contrastar texto/fondo ≥ 4,5:1. `Badge` aplica la variante verde solo al contexto de códigos mediante su variante visual.
+Directriz obligatoria: reutilizar los badges existentes. Los cinco estados tienen colores distintos: Creado en GS1 usa ámbar (`creado_gs1`), Verificado en sistema azul (`verificado_sistema`: texto `#2455B2`, borde `#D8E5FE`, fondo `#EFF5FF`), Activo verde (variante `validado`), Asignado azul claro / verde azulado (`asignado`: texto `#0F766E`, borde `#BCEFF1`, fondo `#ECFEFF`) e Inactivo rojo (`inactivo`). Conservar texto visible, bordes y densidad; contrastar texto/fondo ≥ 4,5:1. `Badge` aplica la variante verde solo al contexto de códigos mediante su variante visual.
 
 Activo y Asignado son estados distintos del mismo enum y ambos indican vigencia. Solo un Asignado por producto se utiliza en nuevas órdenes. Asociar un código verificado lo convierte automáticamente en Asignado y el anterior en Activo; «Asignar código» permite recuperar cualquiera de los activos del mismo producto. Confirmar mostrando ambos códigos. Desactivar el asignado advierte que el producto quedará sin código para nuevas órdenes; no elegir sustitutos automáticamente. Historial e impresión conservan el código de cada renglón.
 
-En Códigos, mostrar una fila por código, con producto, estado, fecha y acciones. Mantener búsqueda por código o producto, filtros de columna y ordenamiento. En móvil, permitir desplazamiento horizontal interno, nunca de la página.
+En Códigos, mostrar una fila por código, con producto, estado, fecha y acciones agrupadas horizontalmente como botones compactos de solo icono (`icon-btn`), con nombre accesible y tooltip compartido. Mantener búsqueda por código o producto, filtros de columna y ordenamiento. En móvil, permitir desplazamiento horizontal interno, nunca de la página.
+
+Cada acción habilitada aplica al hacer hover el texto, borde y fondo de su badge de referencia:
+
+| Acción / tooltip | Icono Lucide | Color de hover |
+| --- | --- | --- |
+| Confirmar verificación en el sistema | `BadgeCheck` | Azul de Verificado en sistema |
+| Asignar a producto | `PackagePlus` | Verde de Activo |
+| Asignar código activo | `Barcode` | Verde azulado de Asignado |
+| Inactivar | `Ban` | Rojo de Inactivo |
+| Ver órdenes | `History` | Estilo secundario habitual |
+
+La confirmación de **Marcar código inactivo** usa la variante destructiva y el botón **Inactivar código**, sin icono, igual que las confirmaciones de eliminación, anulación y descarte; al hacer hover aplica el mismo rojo de Inactivo.
+
+En **Avisar códigos nuevos**, la casilla **Seleccionar todos** se sitúa debajo de **Códigos por verificar** y encima de la lista, con fuente de 12 px y color secundario `#526179`. Los códigos de la lista usan monospace de 12 px y peso normal, sin negrita.
 
 Confirmaciones usan el diálogo compartido React Aria, bloqueo durante guardado y foco devuelto al disparador. Errores conservan el diálogo y elección; conflictos actualizan el snapshot y exigen «Revisar datos actualizados» antes de confirmar otra vez. Proveedor del producto continúa bloqueado en GS1. No sustituir identificadores por nombres, incluso si coinciden.
 

@@ -795,7 +795,7 @@ export function OrdersPage({
                               <div className="order-row-actions">
                                 <LinkButton
                                   icon={Printer}
-                                  className="icon-btn"
+                                  className="icon-btn table-action"
                                   href={`/ordenes/${o.id}/imprimir?returnTo=${encodeURIComponent(returnTo)}`}
                                   onClick={capturePrintReturnPosition}
                                   aria-label={`Imprimir ${reference}`}
@@ -804,7 +804,7 @@ export function OrdersPage({
                                 {signedOrder ? (
                                   <LinkButton
                                     icon={FileCheck2}
-                                    className="icon-btn"
+                                    className="icon-btn table-action"
                                     variant="primary"
                                     href={`/api/documents/${signedOrder.id}/content`}
                                     target="_blank"
@@ -822,7 +822,7 @@ export function OrdersPage({
                                     renderAddTrigger={(open) => (
                                       <Button
                                         icon={FilePlus2}
-                                        className="icon-btn"
+                                        className="icon-btn table-action"
                                         aria-label={`Agregar orden firmada para ${reference}`}
                                         title="Agregar orden firmada"
                                         onClick={open}
@@ -1011,6 +1011,8 @@ export function OrderDetail({
       if (
         !(await confirmAction(
           `¿Anular este ${orderItemLabel(o!.tipo_orden)}? La orden conservará su número.`,
+          undefined,
+          true,
         ))
       )
         return;
@@ -1552,7 +1554,7 @@ export function OrderDetail({
                                             >
                                               <div className="inline">
                                                 <Button
-                                                  className="icon-btn"
+                                                  className="icon-btn table-action"
                                                   icon={Pencil}
                                                   disabled={!authorized}
                                                   aria-label={
@@ -1568,7 +1570,7 @@ export function OrderDetail({
                                                   }
                                                 />
                                                 <Button
-                                                  className="icon-btn delete-action"
+                                                  className="icon-btn table-action delete-action"
                                                   icon={Trash2}
                                                   disabled={!authorized}
                                                   aria-label={`Eliminar lote ${b.numero_lote ?? `sin número ${lotIndex + 1}`} del producto ${l.posicion}`}

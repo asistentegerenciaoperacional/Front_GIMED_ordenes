@@ -29,6 +29,7 @@ import {
 } from "./components/controls";
 import { DateInput } from "./components/date-control";
 import {
+  ActionTooltip,
   CancelAction,
   Dialog,
   DialogScope,
@@ -194,15 +195,26 @@ export function Button({
   icon?: LucideIcon;
   variant?: string;
 }) {
-  return (
+  const tooltip =
+    props.title ??
+    props["aria-label"] ??
+    (typeof children === "string" ? children : undefined);
+  const isTableAction = className.split(/\s+/).includes("table-action");
+  const button = (
     <Action
       type="button"
       {...props}
+      title={isTableAction ? undefined : props.title}
       className={"btn " + variant + " " + className}
     >
       {Icon && <Icon size={16} aria-hidden="true" />}
       {children}
     </Action>
+  );
+  return isTableAction && tooltip ? (
+    <ActionTooltip content={tooltip}>{button}</ActionTooltip>
+  ) : (
+    button
   );
 }
 export function CancelButton({
@@ -251,11 +263,25 @@ export function LinkButton({
   icon?: LucideIcon;
   variant?: string;
 }) {
-  return (
-    <ControlLink {...props} className={"btn " + variant + " " + className}>
+  const tooltip =
+    props.title ??
+    props["aria-label"] ??
+    (typeof children === "string" ? children : undefined);
+  const isTableAction = className.split(/\s+/).includes("table-action");
+  const link = (
+    <ControlLink
+      {...props}
+      title={isTableAction ? undefined : props.title}
+      className={"btn " + variant + " " + className}
+    >
       {Icon && <Icon size={16} aria-hidden="true" />}
       {children}
     </ControlLink>
+  );
+  return isTableAction && tooltip ? (
+    <ActionTooltip content={tooltip}>{link}</ActionTooltip>
+  ) : (
+    link
   );
 }
 export function Empty({
@@ -704,7 +730,7 @@ export function RowLink({
 }) {
   return (
     <LinkButton
-      className="icon-btn"
+      className="icon-btn table-action"
       aria-label={label}
       icon={ChevronRight}
       href={href}

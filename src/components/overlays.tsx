@@ -282,7 +282,7 @@ export function ActionTooltip({
       {children}
       <Tooltip
         data-react-aria-top-layer=""
-        className="field-tooltip barcode-action-tooltip"
+        className="field-tooltip table-action-tooltip"
         placement="top"
         offset={6}
       >

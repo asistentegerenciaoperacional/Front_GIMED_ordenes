@@ -6,6 +6,7 @@ import {
   Check,
   ChevronRight,
   CircleHelp,
+  Download,
   FileText,
   History,
   Info,
@@ -14,6 +15,7 @@ import {
   Plus,
   Search,
   Send,
+  Settings2,
 } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
 import type { codigos_barras } from "../shared/models";
@@ -42,8 +44,12 @@ import {
   TableRow,
   TableRows,
 } from "./components/data-table";
-import { ActionTooltip } from "./components/overlays";
 import { Documents, InvoiceForm, MailForm, receipts } from "./forms";
+import {
+  buildDocumentRows,
+  documentColumns,
+  type DocumentColumnKey,
+} from "./document-table";
 import {
   buildInvoiceRows,
   invoiceColumns,
@@ -97,7 +103,7 @@ import {
 
 export function SupplyPage({ params }: { params: URLSearchParams }) {
   const { db } = useApp();
-  const [tab, setTab] = useState<"vinculos" | "lotes">("vinculos");
+  const tab = params.get("tab") === "lotes" ? "lotes" : "vinculos";
   const [openedColumn, setOpenedColumn] = useState<SupplyColumnKey | null>(
     null,
   );
@@ -162,7 +168,12 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
       />
       <Tabs
         value={tab}
-        onChange={(value) => setTab(value as "vinculos" | "lotes")}
+        onChange={(value) => {
+          const next = new URLSearchParams(params);
+          value === "lotes" ? next.set("tab", "lotes") : next.delete("tab");
+          next.delete("lote");
+          replaceRoute(`abastecimiento${next.size ? `?${next}` : ""}`);
+        }}
         label="Vistas de abastecimiento"
         className="catalog-tabs"
         items={[
@@ -171,7 +182,15 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
         ]}
       >
         {tab === "lotes" ? (
-          <CatalogTable entity="lote_material" />
+          <CatalogTable
+            entity="lote_material"
+            detailsId={params.get("lote")}
+            onDetailsChange={(id) => {
+              const next = new URLSearchParams(params);
+              id ? next.set("lote", id) : next.delete("lote");
+              replaceRoute(`abastecimiento?${next}`);
+            }}
+          />
         ) : (
           <section className="panel">
             <div
@@ -579,7 +598,7 @@ export function InvoicesPage({
                     </TableCell>
                     <TableCell>
                       <LinkButton
-                        className="icon-btn"
+                        className="icon-btn table-action"
                         icon={ChevronRight}
                         aria-label={`Ver factura ${f.numero_factura}`}
                         href={`/facturas/${f.id}`}
@@ -962,55 +981,45 @@ export function CodesPage() {
                     <TableCell>
                       <div className="inline">
                         {c.estado === "creado_gs1" && (
-                          <ActionTooltip content="Confirmar verificación en el sistema">
-                            <Button
-                              className="icon-btn barcode-action-verify"
-                              icon={BadgeCheck}
-                              aria-label="Confirmar verificación en el sistema"
-                              onClick={() =>
-                                openAction(c, "verificado_sistema")
-                              }
-                            />
-                          </ActionTooltip>
+                          <Button
+                            className="icon-btn table-action barcode-action-verify"
+                            icon={BadgeCheck}
+                            aria-label="Confirmar verificación en el sistema"
+                            onClick={() =>
+                              openAction(c, "verificado_sistema")
+                            }
+                          />
                         )}
                         {c.estado === "verificado_sistema" && (
-                          <ActionTooltip content="Asignar a producto">
-                            <Button
-                              className="icon-btn barcode-action-assign-product"
-                              icon={PackagePlus}
-                              aria-label="Asignar a producto"
-                              onClick={() => openAction(c, "asignado")}
-                            />
-                          </ActionTooltip>
+                          <Button
+                            className="icon-btn table-action barcode-action-assign-product"
+                            icon={PackagePlus}
+                            aria-label="Asignar a producto"
+                            onClick={() => openAction(c, "asignado")}
+                          />
                         )}
                         {c.estado === "activo" && (
-                          <ActionTooltip content="Asignar código activo">
-                            <Button
-                              className="icon-btn barcode-action-assign-code"
-                              icon={Barcode}
-                              aria-label="Asignar código activo"
-                              onClick={() => openAction(c, "asignado")}
-                            />
-                          </ActionTooltip>
+                          <Button
+                            className="icon-btn table-action barcode-action-assign-code"
+                            icon={Barcode}
+                            aria-label="Asignar código activo"
+                            onClick={() => openAction(c, "asignado")}
+                          />
                         )}
                         {(c.estado === "asignado" || c.estado === "activo") && (
-                          <ActionTooltip content="Inactivar">
-                            <Button
-                              className="icon-btn barcode-action-inactivate"
-                              icon={Ban}
-                              aria-label="Inactivar"
-                              onClick={() => openAction(c, "inactivo")}
-                            />
-                          </ActionTooltip>
-                        )}
-                        <ActionTooltip content="Ver órdenes">
-                          <LinkButton
-                            className="icon-btn"
-                            href={`/ordenes?q=${encodeURIComponent(c.codigo)}`}
-                            icon={History}
-                            aria-label="Ver órdenes"
+                          <Button
+                            className="icon-btn table-action barcode-action-inactivate"
+                            icon={Ban}
+                            aria-label="Inactivar"
+                            onClick={() => openAction(c, "inactivo")}
                           />
-                        </ActionTooltip>
+                        )}
+                        <LinkButton
+                          className="icon-btn table-action"
+                          href={`/ordenes?q=${encodeURIComponent(c.codigo)}`}
+                          icon={History}
+                          aria-label="Ver órdenes"
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -1308,8 +1317,11 @@ export function CodesPage() {
               Cancelar
             </CancelButton>
             <Button
-              variant="primary"
-              icon={Check}
+              variant={action.next === "inactivo" ? "danger" : "primary"}
+              className={
+                action.next === "inactivo" ? "destructive-confirm" : ""
+              }
+              icon={action.next === "inactivo" ? undefined : Check}
               disabled={
                 busy ||
                 action.needsReview ||
@@ -1324,7 +1336,7 @@ export function CodesPage() {
               }
               onClick={() => void advance()}
             >
-              Confirmar
+              {action.next === "inactivo" ? "Inactivar código" : "Confirmar"}
             </Button>
           </div>
         </Dialog>
@@ -1565,18 +1577,68 @@ export function SettingsPage() {
 }
 
 export function DocumentsPage() {
-  const { db, navigate } = useApp();
+  const { db } = useApp();
   const [query, setQuery] = useState(""),
-    [kind, setKind] = useState(""),
     [selected, setSelected] = useState<Row | null>(null);
-  const rows = db.documento.filter(
-    (d) =>
-      (!kind || d.tipo_documento === kind) &&
-      [d.nombre_archivo, text(d.tipo_documento)]
-        .join(" ")
-        .toLowerCase()
-        .includes(query.toLowerCase()),
+  const [tableState, setTableState] = useState<TableState<DocumentColumnKey>>({
+    filters: {},
+  });
+  const [openedColumn, setOpenedColumn] = useState<DocumentColumnKey | null>(
+    null,
   );
+  const allRows = useMemo(() => buildDocumentRows(db), [db]);
+  const searchedRows = useMemo(
+    () =>
+      allRows.filter((row) =>
+        row.searchText.includes(query.toLocaleLowerCase("es-CO")),
+      ),
+    [allRows, query],
+  );
+  const rows = useMemo(
+    () =>
+      sortTableRows(
+        filterTableRows(searchedRows, documentColumns, tableState.filters),
+        documentColumns,
+        tableState.sort,
+      ),
+    [searchedRows, tableState],
+  );
+  const openedOptions = useMemo(() => {
+    const column = documentColumns.find((item) => item.key === openedColumn);
+    if (!column) return [];
+    const options = columnOptions(
+      filterTableRows(
+        searchedRows,
+        documentColumns,
+        tableState.filters,
+        column.key,
+      ),
+      column,
+    );
+    const available = new Map(
+      columnOptions(allRows, column).map((option) => [option.key, option]),
+    );
+    for (const key of tableState.filters[column.key]?.selected ?? [])
+      if (!options.some((option) => option.key === key))
+        options.push(
+          available.get(key) ?? {
+            key,
+            label: "Valor no disponible",
+            value: null,
+          },
+        );
+    return options;
+  }, [allRows, searchedRows, openedColumn, tableState]);
+  const filterCount = documentColumns.filter((column) =>
+    hasFilter(tableState.filters[column.key]),
+  ).length;
+  const kind =
+    tableState.filters.clase?.selected?.length === 1 &&
+    !tableState.filters.clase.operator
+      ? tableState.filters.clase.selected[0]
+      : hasFilter(tableState.filters.clase)
+        ? "__column_filter__"
+        : "";
   return (
     <>
       <PageHeading
@@ -1584,67 +1646,94 @@ export function DocumentsPage() {
         description="Archivos de demostración asociados a facturas, órdenes y lotes de material."
       />
       <section className="panel">
-        <div className="toolbar">
+        <div
+          className="toolbar documents-toolbar"
+          role="search"
+          aria-label="Búsqueda de documentos"
+        >
           <div className="search">
             <Search size={16} aria-hidden="true" />
             <ControlInput
               className="control"
               aria-label="Buscar documentos"
+              type="search"
               placeholder="Buscar nombre o clase de documento…"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-          <ControlSelect
-            className="control filter-select"
-            aria-label="Filtrar clase de documento"
-            value={kind}
-            onChange={(e) => setKind(e.target.value)}
-          >
-            <option value="">Todas las clases</option>
-            {[
-              "factura_fisica",
-              "orden_compra_escaneada",
-              "certificado_calidad",
-              "certificado_liberacion",
-              "plantilla_certificado_liberacion",
-            ].map((t) => (
-              <option key={t} value={t}>
-                {text(t)}
-              </option>
-            ))}
-          </ControlSelect>
+          <div className="filter-actions">
+            {query && (
+              <Button variant="link" onClick={() => setQuery("")}>
+                Limpiar búsqueda
+              </Button>
+            )}
+            <ControlSelect
+              className="control filter-select"
+              aria-label="Filtrar clase de documento"
+              value={kind}
+              onChange={(e) => {
+                const value = e.target.value;
+                setTableState((current) => ({
+                  ...current,
+                  filters: {
+                    ...current.filters,
+                    clase: value ? { selected: [value] } : undefined,
+                  },
+                }));
+              }}
+            >
+              <option value="">Todas las clases</option>
+              {kind === "__column_filter__" && (
+                <option value="__column_filter__" disabled>
+                  Filtro de columna aplicado
+                </option>
+              )}
+              {[
+                "factura_fisica",
+                "orden_compra_escaneada",
+                "certificado_calidad",
+                "certificado_liberacion",
+                "plantilla_certificado_liberacion",
+              ].map((t) => (
+                <option key={t} value={t}>
+                  {text(t)}
+                </option>
+              ))}
+            </ControlSelect>
+          </div>
         </div>
-        {rows.length ? (
-          <div className="table-scroll">
-            <DataTable className="data-table catalog-table">
-              <TableHead>
-                <TableRow>
-                  <TableColumn>Documento</TableColumn>
-                  <TableColumn>Propietario</TableColumn>
-                  <TableColumn>Clase</TableColumn>
-                  <TableColumn>Cargado</TableColumn>
-                  <TableColumn>Acciones</TableColumn>
-                </TableRow>
-              </TableHead>
-              <TableRows>
-                {rows.map((d) => {
-                  const order =
-                    d.tipo_entidad === "orden_compra"
-                      ? db.orden_compra.find((o) => o.id === d.id_entidad)
-                      : undefined;
-                  const owner =
-                    d.tipo_entidad === "factura"
-                      ? db.factura.find((f) => f.id === d.id_entidad)
-                          ?.numero_factura
-                      : d.tipo_entidad === "orden_compra"
-                        ? order
-                          ? orderReference(order.tipo_orden, order.no_orden)
-                          : "Orden no disponible"
-                        : d.tipo_entidad === "lote_material"
-                          ? db.lote_material.find((l) => l.id === d.id_entidad)
-                              ?.numero_lote
-                          : "Global";
+        <div className="table-scroll">
+          <DataTable className="data-table catalog-table">
+            <TableHead>
+              <TableRow>
+                {documentColumns.map((column) => (
+                  <ColumnHeader
+                    key={column.key}
+                    column={column}
+                    options={openedColumn === column.key ? openedOptions : []}
+                    filter={tableState.filters[column.key]}
+                    sort={tableState.sort}
+                    open={openedColumn === column.key}
+                    onOpen={() => setOpenedColumn(column.key)}
+                    onClose={() => setOpenedColumn(null)}
+                    onFilter={(filter) =>
+                      setTableState((current) => ({
+                        ...current,
+                        filters: { ...current.filters, [column.key]: filter },
+                      }))
+                    }
+                    onSort={(sort) =>
+                      setTableState((current) => ({ ...current, sort }))
+                    }
+                  />
+                ))}
+                <TableColumn>Acciones</TableColumn>
+              </TableRow>
+            </TableHead>
+            <TableRows>
+              {rows.length ? (
+                rows.map(({ document: d, owner }) => {
                   return (
                     <TableRow key={d.id}>
                       <TableCell>
@@ -1671,6 +1760,13 @@ export function DocumentsPage() {
                           >
                             {owner}
                           </LinkButton>
+                        ) : d.tipo_entidad === "lote_material" && d.id_entidad ? (
+                          <LinkButton
+                            variant="link"
+                            href={`/abastecimiento?${new URLSearchParams({ tab: "lotes", lote: d.id_entidad })}`}
+                          >
+                            {owner}
+                          </LinkButton>
                         ) : (
                           owner
                         )}
@@ -1679,31 +1775,55 @@ export function DocumentsPage() {
                       <TableCell>{shortDate(d.fecha_carga)}</TableCell>
                       <TableCell>
                         <div className="inline">
-                          <ControlLink
+                          <LinkButton
                             href={`/api/documents/${d.id}/content?download=1`}
-                            style={{ fontSize: 11 }}
-                          >
-                            Descargar
-                          </ControlLink>
+                            className="icon-btn table-action"
+                            icon={Download}
+                            aria-label={`Descargar ${d.nombre_archivo}`}
+                          />
                           <Button
-                            className="small"
+                            className="icon-btn table-action"
+                            icon={Settings2}
+                            aria-label={`Gestionar ${d.nombre_archivo}`}
                             onClick={() => setSelected(d)}
-                          >
-                            Gestionar
-                          </Button>
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
                   );
-                })}
-              </TableRows>
-            </DataTable>
-          </div>
-        ) : (
-          <Empty />
-        )}
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5}>
+                    <Empty
+                      title={
+                        db.documento.length
+                          ? "Sin documentos coincidentes"
+                          : "Sin documentos"
+                      }
+                      description="Ajusta la búsqueda o los filtros de columna para consultar los documentos disponibles."
+                    />
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableRows>
+          </DataTable>
+        </div>
         <div className="table-footer">
           <span>{rows.length} documentos</span>
+          {filterCount > 0 && (
+            <Button
+              variant="link"
+              onClick={() =>
+                setTableState((current) => ({
+                  filters: {},
+                  sort: current.sort,
+                }))
+              }
+            >
+              Limpiar filtros ({filterCount})
+            </Button>
+          )}
         </div>
       </section>
       {selected && (

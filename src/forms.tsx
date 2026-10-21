@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Check,
   ChevronRight,
+  FileText,
   Info,
   Paperclip,
   Plus,
@@ -652,7 +653,28 @@ export function InvoiceForm({
             </Field>
           </div>
           {!invoice && (
-            <div className="invoice-draft-document">
+            <div
+              className={`invoice-draft-document${documentDraft ? " has-document" : ""}`}
+            >
+              {documentDraft && (
+                <span className="invoice-draft-document-label">
+                  Documento adjunto
+                </span>
+              )}
+              <div className="invoice-draft-document-row">
+                <span className="invoice-draft-document-icon">
+                  <FileText size={20} aria-hidden="true" />
+                </span>
+                {documentDraft ? (
+                  <strong className="invoice-draft-document-name">
+                    {documentDraft.nombre_archivo}
+                  </strong>
+                ) : (
+                  <div className="invoice-draft-document-empty">
+                    <strong>Ningún documento seleccionado</strong>
+                    <small>Adjunta una factura en PDF, imagen o HTML.</small>
+                  </div>
+                )}
               <Documents
                 owner="factura"
                 ownerId={null}
@@ -666,24 +688,27 @@ export function InvoiceForm({
                     disabled={busy}
                     onClick={open}
                   >
-                    {documentDraft
-                      ? "Reemplazar documento"
-                      : "Adjuntar documento"}
+                    {documentDraft ? "Reemplazar" : "Seleccionar documento"}
                   </Button>
                 )}
               />
               {documentDraft && (
-                <div className="inline">
-                  <span>{documentDraft.nombre_archivo}</span>
+                <>
+                  <span
+                    className="invoice-draft-document-divider"
+                    aria-hidden="true"
+                  />
                   <Button
                     variant="link"
+                    className="invoice-draft-document-remove"
                     disabled={busy}
                     onClick={() => setDocumentDraft(null)}
                   >
                     Quitar documento
                   </Button>
-                </div>
+                </>
               )}
+              </div>
             </div>
           )}
           <h3>Recepciones opcionales</h3>

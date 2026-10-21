@@ -403,3 +403,36 @@ Reproducción:
 - La referencia inicial tenía 155/156 pruebas correctas: una diferencia previa entre descripciones de filtros y `../filtros.md`; se sincronizó la documentación con el texto vigente sin cambiar su lógica.
 
 Reportes y capturas: [tests/evidence/barcodes](tests/evidence/barcodes). Recuperación, hashes, demo y comparación de rendimiento: [CODIGOS-BARRAS.md](CODIGOS-BARRAS.md).
+## Filtros de la tabla de Documentos — 21 de octubre de 2026
+
+Compilación correcta y 43 comprobaciones de Chromium aprobadas con una base
+temporal. Se verificaron filtros de Documento, Propietario, Clase y Cargado;
+condiciones de texto y fecha, selección múltiple, combinaciones entre columnas,
+sincronización del selector de clase, búsqueda y ambas limpiezas conservando
+el ordenamiento. Los estados sin resultados mantienen cabeceras y valores
+seleccionados. Descargar y Gestionar siguen operativos.
+
+Revisión visual a 375/862/1440 px, con selector de clase legible, desplazamiento
+horizontal limitado a la tabla, cierre con Escape y devolución del foco.
+Sin errores ni advertencias de React/React Aria.
+
+[Reporte](tests/evidence/aria/chromium-documents-filters.browser.json).
+Reproducción:
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/documents-filters.browser.js chromium
+
+## Navegación de Documentos al historial del lote — 21 de octubre de 2026
+
+Compilación correcta y 39 comprobaciones de Chromium con datos temporales.
+Desde los certificados de calidad y liberación, el número de lote abre la
+pestaña Lotes y certificados y su diálogo existente con recepciones y documentos.
+Se comprobaron enlaces por identificador, cierre con X/Escape, reapertura desde
+la tabla, recarga, Atrás, cambio de pestaña y enlace a un lote inexistente.
+Revisión visual a 375/862/1440 px y sin avisos ni errores de React/React Aria.
+
+[Reporte de navegación](tests/evidence/aria/chromium-document-lot-navigation.browser.json).
+Reproducción:
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/document-lot-navigation.browser.js chromium
