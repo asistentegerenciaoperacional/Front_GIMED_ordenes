@@ -1568,7 +1568,7 @@ export function OrderDetail({
                                                   }
                                                 />
                                                 <Button
-                                                  className="icon-btn"
+                                                  className="icon-btn delete-action"
                                                   icon={Trash2}
                                                   disabled={!authorized}
                                                   aria-label={`Eliminar lote ${b.numero_lote ?? `sin número ${lotIndex + 1}`} del producto ${l.posicion}`}
@@ -1820,6 +1820,10 @@ export function OrderDetail({
           onConfirm={confirmLotAction}
           onClose={() => setPendingAction(null)}
           busy={actionBusy}
+          destructive={
+            pendingAction.kind === "delete" ||
+            pendingAction.kind === "anular"
+          }
           error={actionError}
         >
           {pendingAction.kind === "delete" ? (

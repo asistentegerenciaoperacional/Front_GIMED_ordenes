@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-20T20:14:33.267Z",
+  "recoveryCommit": "068cae7a43f13fd2e3aa0323998eb2faba259087",
+  "backups": [
+    {
+      "path": "data/database-before-barcodes-20261020.bak",
+      "sha256": "53ee9f787dcd4785368309455acc877d9b734be04e9ac8c55085abb96daa9170"
+    },
+    {
+      "path": "data/schema-before-barcodes-20261020.md.bak",
+      "sha256": "745b745dc7890cb1c294fb6e9ea3f2c83c23cd6b83c29c3e68bec07d23457aba"
+    },
+    {
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\database.json.before-reset-1792526000021.bak",
+      "sha256": "69dfe094ba2210945f586612021951a78253f7afe1f15a97729a806e9e87a374"
+    }
+  ],
+  "schemaSha256": "bcab1dc4247a56eece6544dd536a8dfe58711dae4122378dfba7ac8ade868553",
+  "originalDatabaseConversion": {
+    "codes": 11,
+    "demoted": [
+      "00000000000000000000005f"
+    ],
+    "idempotent": true
+  },
+  "demoReset": {
+    "date": "2026-10-20T19:53:20.023Z",
+    "file": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\database.json",
+    "backup": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\database.json.before-reset-1792526000021.bak",
+    "previousSha256": "69dfe094ba2210945f586612021951a78253f7afe1f15a97729a806e9e87a374",
+    "restoredSha256": "ca537945e32dab393fdbc61891c18308e9f497a9c48ca6d8e3fe385638318c42",
+    "collections": {
+      "productos": 6,
+      "codigos_barras": 10,
+      "proveedor": 5,
+      "direccion_proveedor": 5,
+      "contacto": 5,
+      "categorias": 2,
+      "costos_maquila": 4,
+      "tipos_materiales": 6,
+      "materiales": 7,
+      "materiales_asociados": 7,
+      "producto_corrugado": 4,
+      "proveedores_favoritos": 7,
+      "orden_compra": 10,
+      "orden_producto": 7,
+      "lote_producto": 7,
+      "orden_material": 5,
+      "lote_material": 1,
+      "orden_otro": 1,
+      "abastecimiento_material": 4,
+      "factura": 3,
+      "documento": 5,
+      "parametros_seguimiento": 1,
+      "consecutivo_orden": 2,
+      "contacto_interno": 5,
+      "destinatario_evento": 6,
+      "adjunto_evento": 3,
+      "correo_enviado": 1,
+      "correo_enviado_destinatario": 1
+    },
+    "statuses": {
+      "asignado": 4,
+      "inactivo": 1,
+      "creado_gs1": 1,
+      "verificado_sistema": 1,
+      "activo": 3
+    }
+  },
+  "tests": {
+    "initial": {
+      "passed": 155,
+      "failed": 1,
+      "reason": "Descripciones de filtros y su documentación no estaban sincronizadas antes del cambio."
+    },
+    "final": {
+      "passed": 167,
+      "failed": 0
+    },
+    "browsers": {
+      "chromium": {
+        "checks": 34,
+        "badgeStyles": {
+          "Activo": {
+            "color": "rgb(20, 117, 65)",
+            "background": "rgb(239, 250, 244)"
+          },
+          "Verificado en sistema": {
+            "color": "rgb(155, 75, 24)",
+            "background": "rgb(255, 245, 237)"
+          },
+          "Creado en GS1": {
+            "color": "rgb(136, 89, 19)",
+            "background": "rgb(255, 249, 237)"
+          },
+          "Asignado": {
+            "color": "rgb(36, 85, 178)",
+            "background": "rgb(239, 245, 255)"
+          },
+          "Inactivo": {
+            "color": "rgb(161, 57, 57)",
+            "background": "rgb(255, 242, 242)"
+          }
+        }
+      },
+      "firefox": {
+        "checks": 34,
+        "badgeStyles": {
+          "Activo": {
+            "color": "rgb(20, 117, 65)",
+            "background": "rgb(239, 250, 244)"
+          },
+          "Verificado en sistema": {
+            "color": "rgb(155, 75, 24)",
+            "background": "rgb(255, 245, 237)"
+          },
+          "Creado en GS1": {
+            "color": "rgb(136, 89, 19)",
+            "background": "rgb(255, 249, 237)"
+          },
+          "Asignado": {
+            "color": "rgb(36, 85, 178)",
+            "background": "rgb(239, 245, 255)"
+          },
+          "Inactivo": {
+            "color": "rgb(161, 57, 57)",
+            "background": "rgb(255, 242, 242)"
+          }
+        }
+      },
+      "webkit": {
+        "checks": 34,
+        "badgeStyles": {
+          "Activo": {
+            "color": "rgb(20, 117, 65)",
+            "background": "rgb(239, 250, 244)"
+          },
+          "Verificado en sistema": {
+            "color": "rgb(155, 75, 24)",
+            "background": "rgb(255, 245, 237)"
+          },
+          "Creado en GS1": {
+            "color": "rgb(136, 89, 19)",
+            "background": "rgb(255, 249, 237)"
+          },
+          "Asignado": {
+            "color": "rgb(36, 85, 178)",
+            "background": "rgb(239, 245, 255)"
+          },
+          "Inactivo": {
+            "color": "rgb(161, 57, 57)",
+            "background": "rgb(255, 242, 242)"
+          }
+        }
+      }
+    },
+    "fullJourney": 598,
+    "favoriteRegression": 71,
+    "filters": 41,
+    "portable": 23,
+    "persistenceCollections": 28
+  },
+  "performance": {
+    "historical": true,
+    "note": "Mediciones previas a la simplificación de la vista de códigos; no repetidas tras su retirada.",
+    "passed": true,
+    "budgets": 39,
+    "initialComparison": "comparison-initial.json",
+    "finalComparison": "comparison.json",
+    "pairedLargeCase": "after-large-performance.json"
+  },
+  "portable": {
+    "file": "tests/.tmp/barcodes-portable.zip",
+    "sha256": "45167ffd5fc8c4aa6884b304ba9dac7e501cb489b224b55d8837153d096f1942"
+  },
+  "screenshots": [
+    "list-375.png",
+    "list-768.png",
+    "list-1024.png",
+    "list-1440.png"
+  ]
+}

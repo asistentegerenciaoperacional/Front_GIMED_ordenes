@@ -229,11 +229,17 @@ export function CancelButton({
 export function Badge({
   value,
   children,
+  tone,
 }: {
   value: string;
   children?: ReactNode;
+  tone?: string;
 }) {
-  return <span className={`badge ${value}`}>{children ?? text(value)}</span>;
+  return (
+    <span className={`badge ${value}${tone ? ` ${tone}` : ""}`}>
+      {children ?? text(value)}
+    </span>
+  );
 }
 export function LinkButton({
   children,
@@ -527,6 +533,7 @@ export function ConfirmationDialog({
   onConfirm,
   onClose,
   busy = false,
+  destructive = false,
   error,
 }: {
   title: string;
@@ -535,6 +542,7 @@ export function ConfirmationDialog({
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
   busy?: boolean;
+  destructive?: boolean;
   error?: string;
 }) {
   return (
@@ -554,6 +562,7 @@ export function ConfirmationDialog({
         <Button
           type="button"
           variant="danger"
+          className={destructive ? "destructive-confirm" : ""}
           disabled={busy}
           onClick={() => void onConfirm()}
         >

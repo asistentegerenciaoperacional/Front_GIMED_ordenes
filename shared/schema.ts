@@ -230,12 +230,10 @@ export function orderStateFromLines(order: Row, lines: Row[]): string {
     ? "autorizada"
     : "no_autorizada";
 }
-export function latestBarcode(db: Database, product: string) {
-  return db.codigos_barras
-    .filter((c) => c.id_producto === product && c.estado === "asignado")
-    .sort((a, b) =>
-      (b.fecha_creacion ?? "").localeCompare(a.fecha_creacion ?? ""),
-    )[0];
+export function assignedBarcode(db: Database, product: string) {
+  return db.codigos_barras.find(
+    (c) => c.id_producto === product && c.estado === "asignado",
+  );
 }
 export function currentCost(
   db: Database,
@@ -435,6 +433,7 @@ export const words: Record<string, string> = {
   rechazada: "Rechazada",
   creado_gs1: "Creado en GS1",
   verificado_sistema: "Verificado en sistema",
+  activo: "Activo",
   asignado: "Asignado",
   inactivo: "Inactivo",
   producto: "Producto",

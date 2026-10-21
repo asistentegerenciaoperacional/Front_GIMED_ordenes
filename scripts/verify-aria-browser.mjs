@@ -86,14 +86,14 @@ try {
     "return (" + source.trim().replace(/;\s*$/, "") + ")",
   )();
   const result = await journey(
-    ariaPage(page, { autoConfirm: !file.includes("aria-controls") && !file.includes("favorites") }),
+    ariaPage(page, { autoConfirm: !file.includes("aria-controls") && !file.includes("favorites") && !file.includes("barcodes") }),
   );
   assert.deepEqual(
     consoleMessages,
     [],
     "Sin errores ni advertencias de React o React Aria",
   );
-  const evidence = file.includes("favorites") ? "tests/evidence/favorites" : "tests/evidence/aria";
+  const evidence = file.includes("barcodes") ? "tests/evidence/barcodes" : file.includes("favorites") ? "tests/evidence/favorites" : "tests/evidence/aria";
   await mkdir(evidence, { recursive: true });
   const report =
     evidence + "/" +

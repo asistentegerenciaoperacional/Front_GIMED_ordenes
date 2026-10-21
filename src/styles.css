@@ -102,6 +102,9 @@ small {
   font-family: ui-monospace, Consolas, monospace;
   font-size: 12px;
 }
+.barcode-number {
+  font-size: 13px;
+}
 .muted {
   color: var(--muted);
 }
@@ -499,6 +502,28 @@ small {
   width: 34px;
   height: 34px;
   min-height: 34px;
+}
+.btn.barcode-action-verify:hover:not(:disabled) {
+  color: #2455b2;
+  border-color: #d8e5fe;
+  background: #eff5ff;
+}
+.btn.barcode-action-assign-product:hover:not(:disabled) {
+  color: #147541;
+  border-color: #ccebd8;
+  background: #effaf4;
+}
+.btn.barcode-action-assign-code:hover:not(:disabled) {
+  color: #0f766e;
+  border-color: #bceff1;
+  background: #ecfeff;
+}
+.btn.barcode-action-inactivate:hover:not(:disabled),
+.btn.delete-action:hover:not(:disabled),
+.btn.destructive-confirm:hover:not(:disabled) {
+  color: #a13939;
+  border-color: #f4d5d5;
+  background: #fff2f2;
 }
 .btn.small {
   font-size: 11px;
@@ -1100,11 +1125,16 @@ th.right .column-heading {
   background: #f8fafc;
 }
 .badge.autorizada,
-.badge.asignado,
+.badge.verificado_sistema,
 .badge.en_seguimiento {
   background: #eff5ff;
   border-color: #d8e5fe;
   color: #2455b2;
+}
+.badge.asignado {
+  background: #ecfeff;
+  border-color: #bceff1;
+  color: #0f766e;
 }
 .badge.no_autorizada,
 .badge.pendiente,
@@ -1131,8 +1161,7 @@ th.right .column-heading {
   background: #fff2f2;
   border-color: #f4d5d5;
 }
-.badge.parcialmente_anulada,
-.badge.verificado_sistema {
+.badge.parcialmente_anulada {
   color: #9b4b18;
   background: #fff5ed;
   border-color: #f4ddca;
@@ -1324,6 +1353,10 @@ textarea.control {
   box-shadow: 0 5px 18px #0f172a26;
   overflow-wrap: anywhere;
 }
+.barcode-action-tooltip {
+  width: max-content;
+  max-width: min(280px, calc(100vw - 24px));
+}
 .full-span {
   grid-column: 1/-1;
 }
@@ -1359,6 +1392,11 @@ textarea.control {
 .dialog-heading p {
   font-size: 12px;
   margin-top: 5px;
+}
+.dialog-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .dialog-body {
   padding: 24px;
@@ -1885,6 +1923,10 @@ textarea.control {
   gap: 8px;
   margin: 18px 0 24px;
 }
+.invoice-draft-document .invoice-attach-button {
+  min-height: 32px;
+  padding-block: 5px;
+}
 .invoice-draft-document .inline {
   max-width: 100%;
   flex-wrap: wrap;
@@ -2075,6 +2117,19 @@ textarea.control {
   border: 1px solid var(--border);
   border-radius: 7px;
   padding: 8px 14px;
+}
+.barcode-mail-selection {
+  display: grid;
+  gap: 12px;
+}
+.barcode-mail-selection .aria-checkbox {
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.barcode-mail-selection .aria-check-indicator {
+  margin-top: 0;
 }
 .check-list label {
   display: flex;

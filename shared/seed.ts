@@ -191,6 +191,32 @@ export function makeSeed(): Database {
     fecha_creacion: d("2026-10-01"),
     fecha_act: d("2026-10-01"),
   });
+  for (const [id, product, codigo] of [
+    [360, 70, "770100000007"],
+    [361, 70, "770100000008"],
+    [362, 74, "770100000009"],
+  ] as const)
+    add("codigos_barras", id, {
+      codigo,
+      id_producto: sid(product),
+      estado: "activo",
+      fecha_creacion: d("2026-10-02"),
+      fecha_act: d("2026-10-03"),
+    });
+  add("productos", 74, {
+    nombre_producto: "Sérum facial · 30 ml",
+    id_maquilador: sid(1),
+    id_categoria: sid(30),
+    unidades_lote: 2000,
+    activo: true,
+  });
+  add("productos", 75, {
+    nombre_producto: "Jabón líquido · 300 ml",
+    id_maquilador: sid(2),
+    id_categoria: sid(30),
+    unidades_lote: 3000,
+    activo: true,
+  });
   const header = (
     n: number,
     type: string,

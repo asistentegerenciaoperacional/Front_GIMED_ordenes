@@ -1,16 +1,23 @@
 import {
   ArrowLeft,
+  BadgeCheck,
+  Ban,
+  Barcode,
   Check,
   ChevronRight,
   CircleHelp,
   FileText,
+  History,
   Info,
   Paperclip,
+  PackagePlus,
   Plus,
   Search,
   Send,
 } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
+import type { codigos_barras } from "../shared/models";
+import { assignedBarcode } from "../shared/schema";
 import {
   orderReference,
   tolerance,
@@ -35,6 +42,7 @@ import {
   TableRow,
   TableRows,
 } from "./components/data-table";
+import { ActionTooltip } from "./components/overlays";
 import { Documents, InvoiceForm, MailForm, receipts } from "./forms";
 import {
   buildInvoiceRows,
@@ -66,6 +74,7 @@ import {
   type SupplyColumnKey,
 } from "./supply-table";
 import {
+  ApiError,
   Badge,
   Button,
   CancelButton,
@@ -617,18 +626,19 @@ export function InvoicesPage({
 const barcodeColumns: Column<string>[] = [
   { key: "codigo", label: "Código", kind: "text" },
   { key: "producto", label: "Producto", kind: "text" },
-  { key: "estado", label: "Estado GS1 / sistema", kind: "enum" },
+  { key: "estado", label: "Estados", kind: "enum" },
   { key: "creacion", label: "Creación", kind: "date" },
 ];
 
 const barcodeSteps = [
   { status: "creado_gs1", label: "Creado en GS1" },
   { status: "verificado_sistema", label: "Verificado en sistema" },
-  { status: "asignado", label: "Asignado al producto" },
+  { status: "activo", label: "Activo" },
+  { status: "asignado", label: "Asignado" },
 ];
 
 type BarcodeFilterRow = ColumnRow<string> & {
-  barcode: Row;
+  barcode: codigos_barras;
   searchText: string;
 };
 
@@ -644,7 +654,7 @@ function barcodeFilterCell(
 }
 
 export function CodesPage() {
-  const { db, run, navigate } = useApp();
+  const { db, run } = useApp();
   const [query, setQuery] = useState(""),
     [creating, setCreating] = useState(false),
     [code, setCode] = useState(""),
@@ -745,6 +755,20 @@ export function CodesPage() {
   const filterCount = barcodeColumns.filter((column) =>
     hasFilter(tableState.filters[column.key]),
   ).length;
+  function openAction(
+    barcode: codigos_barras,
+    next: "verificado_sistema" | "asignado" | "inactivo",
+  ) {
+    setError(null);
+    setProduct(barcode.estado === "activo" ? barcode.id_producto! : "");
+    setAction({
+      ...barcode,
+      next,
+      expectedAssignedId: barcode.id_producto
+        ? (assignedBarcode(db, barcode.id_producto)?.id ?? null)
+        : null,
+    });
+  }
   const pendingVerificationCodes = db.codigos_barras.filter(
     (barcode) => barcode.estado === "creado_gs1",
   );
@@ -767,9 +791,13 @@ export function CodesPage() {
     setBusy(true);
     try {
       await run(
-        "advanceBarcode",
+        action!.estado === "activo" && action!.next === "asignado"
+          ? "setAssignedBarcode"
+          : "advanceBarcode",
         {
           id: action!.id,
+          expectedEstado: action!.estado,
+          expectedAssignedId: action!.expectedAssignedId,
           estado: action!.next,
           id_producto: product,
           confirm: true,
@@ -779,6 +807,11 @@ export function CodesPage() {
       setAction(null);
     } catch (e) {
       catchError(e);
+      if (e instanceof ApiError && e.code === "BARCODE_CHANGED") {
+        setAction((current) =>
+          current ? { ...current, needsReview: true } : current,
+        );
+      }
     } finally {
       setBusy(false);
     }
@@ -816,7 +849,11 @@ export function CodesPage() {
         {barcodeSteps.map((step, index) => (
           <Fragment key={step.status}>
             {index > 0 && (
-              <ChevronRight size={16} className="flow-arrow" aria-hidden="true" />
+              <ChevronRight
+                size={16}
+                className="flow-arrow"
+                aria-hidden="true"
+              />
             )}
             <Button
               className="code-step"
@@ -840,7 +877,7 @@ export function CodesPage() {
           </Fragment>
         ))}
       </div>
-      <section className="panel">
+      <section className="panel barcode-panel">
         <div className="toolbar">
           <div className="search">
             <Search size={16} aria-hidden="true" />
@@ -909,58 +946,71 @@ export function CodesPage() {
                 rows.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="mono">
-                      <strong>{c.codigo}</strong>
+                      <span className="barcode-number">{c.codigo}</span>
                     </TableCell>
                     <TableCell>
                       {db.productos.find((p) => p.id === c.id_producto)
                         ?.nombre_producto ?? "Sin producto asignado"}
                     </TableCell>
                     <TableCell>
-                      <Badge value={c.estado} />
+                      <Badge
+                        value={c.estado}
+                        tone={c.estado === "activo" ? "validado" : undefined}
+                      />
                     </TableCell>
                     <TableCell>{shortDate(c.fecha_creacion)}</TableCell>
                     <TableCell>
                       <div className="inline">
                         {c.estado === "creado_gs1" && (
-                          <Button
-                            className="small"
-                            onClick={() => {
-                              setError(null);
-                              setAction({ ...c, next: "verificado_sistema" });
-                            }}
-                          >
-                            Confirmar disponibilidad
-                          </Button>
+                          <ActionTooltip content="Confirmar verificación en el sistema">
+                            <Button
+                              className="icon-btn barcode-action-verify"
+                              icon={BadgeCheck}
+                              aria-label="Confirmar verificación en el sistema"
+                              onClick={() =>
+                                openAction(c, "verificado_sistema")
+                              }
+                            />
+                          </ActionTooltip>
                         )}
                         {c.estado === "verificado_sistema" && (
-                          <Button
-                            className="small"
-                            onClick={() => {
-                              setError(null);
-                              setProduct("");
-                              setAction({ ...c, next: "asignado" });
-                            }}
-                          >
-                            Asignar producto
-                          </Button>
+                          <ActionTooltip content="Asignar a producto">
+                            <Button
+                              className="icon-btn barcode-action-assign-product"
+                              icon={PackagePlus}
+                              aria-label="Asignar a producto"
+                              onClick={() => openAction(c, "asignado")}
+                            />
+                          </ActionTooltip>
                         )}
-                        {c.estado === "asignado" && (
-                          <Button
-                            className="small"
-                            onClick={() => {
-                              setError(null);
-                              setAction({ ...c, next: "inactivo" });
-                            }}
-                          >
-                            Marcar inactivo
-                          </Button>
+                        {c.estado === "activo" && (
+                          <ActionTooltip content="Asignar código activo">
+                            <Button
+                              className="icon-btn barcode-action-assign-code"
+                              icon={Barcode}
+                              aria-label="Asignar código activo"
+                              onClick={() => openAction(c, "asignado")}
+                            />
+                          </ActionTooltip>
                         )}
-                        <LinkButton
-                          variant="link"
-                          href={`/ordenes?q=${c.codigo}`}
-                        >
-                          Ver órdenes
-                        </LinkButton>
+                        {(c.estado === "asignado" || c.estado === "activo") && (
+                          <ActionTooltip content="Inactivar">
+                            <Button
+                              className="icon-btn barcode-action-inactivate"
+                              icon={Ban}
+                              aria-label="Inactivar"
+                              onClick={() => openAction(c, "inactivo")}
+                            />
+                          </ActionTooltip>
+                        )}
+                        <ActionTooltip content="Ver órdenes">
+                          <LinkButton
+                            className="icon-btn"
+                            href={`/ordenes?q=${encodeURIComponent(c.codigo)}`}
+                            icon={History}
+                            aria-label="Ver órdenes"
+                          />
+                        </ActionTooltip>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -984,9 +1034,6 @@ export function CodesPage() {
         </div>
         <div className="table-footer">
           <span>{rows.length} códigos</span>
-          <span>
-            La selección para nuevas órdenes usa el código activo más reciente.
-          </span>
         </div>
       </section>
       {statusHelpOpen && (
@@ -1012,10 +1059,18 @@ export function CodesPage() {
                 </dd>
               </div>
               <div className="filter-help-entry">
+                <dt>Activo</dt>
+                <dd>
+                  Es un código vigente asociado al producto. Puede elegirse como
+                  Asignado para nuevas órdenes.
+                </dd>
+              </div>
+              <div className="filter-help-entry">
                 <dt>Asignado</dt>
                 <dd>
-                  El código está asociado a un producto y puede usarse en nuevas
-                  órdenes como su código activo.
+                  Es el único código seleccionado para emitir nuevas órdenes del
+                  producto. Asociar un código nuevo sustituye al asignado
+                  anterior, que queda Activo.
                 </dd>
               </div>
               <div className="filter-help-entry">
@@ -1041,7 +1096,7 @@ export function CodesPage() {
           <div className="dialog-body">
             {pendingVerificationCodes.length ? (
               <>
-                <div className="spread">
+                <div className="barcode-mail-selection">
                   <strong>
                     Códigos por verificar ({mailCodeIds.length} de{" "}
                     {pendingVerificationCodes.length})
@@ -1074,9 +1129,7 @@ export function CodesPage() {
                 >
                   {pendingVerificationCodes.map((item) => (
                     <CheckChoice key={item.id} value={item.id}>
-                      <span className="mono">
-                        <strong>{item.codigo}</strong>
-                      </span>
+                      <span className="mono">{item.codigo}</span>
                     </CheckChoice>
                   ))}
                 </ChoiceGroup>
@@ -1106,7 +1159,7 @@ export function CodesPage() {
                 setMail(true);
               }}
             >
-              Preparar aviso
+              Preparar correo
             </Button>
           </div>
         </Dialog>
@@ -1153,16 +1206,42 @@ export function CodesPage() {
         <Dialog
           title={
             action.next === "asignado"
-              ? "Asignar código a producto"
+              ? action.estado === "activo"
+                ? "Cambiar código asignado"
+                : "Asignar código a producto"
               : action.next === "inactivo"
                 ? "Marcar código inactivo"
                 : "Confirmar disponibilidad"
           }
           subtitle={`Código ${action.codigo}`}
           onClose={() => setAction(null)}
+          busy={busy}
         >
           <div className="dialog-body">
             <ErrorNotice error={error} />
+            {action.needsReview && (
+              <Button
+                onClick={() => {
+                  const updated = db.codigos_barras.find(
+                    (c) => c.id === action.id,
+                  );
+                  if (updated)
+                    setAction({
+                      ...updated,
+                      next: action.next,
+                      expectedAssignedId:
+                        assignedBarcode(
+                          db,
+                          product || updated.id_producto || "",
+                        )?.id ?? null,
+                      needsReview: false,
+                    });
+                  setError(null);
+                }}
+              >
+                Revisar datos actualizados
+              </Button>
+            )}
             {action.next === "asignado" ? (
               <>
                 <Field id="field-id_producto" label="Producto" required>
@@ -1170,7 +1249,19 @@ export function CodesPage() {
                     id="field-id_producto"
                     value={product}
                     products={db.productos}
-                    onChange={setProduct}
+                    disabled={action.estado === "activo"}
+                    onChange={(id) => {
+                      setProduct(id);
+                      setAction((current) =>
+                        current
+                          ? {
+                              ...current,
+                              expectedAssignedId:
+                                assignedBarcode(db, id)?.id ?? null,
+                            }
+                          : current,
+                      );
+                    }}
                   />
                 </Field>
                 <Field id="field-proveedor_producto" label="Proveedor" required>
@@ -1194,11 +1285,20 @@ export function CodesPage() {
                     readOnly
                   />
                 </Field>
+                {product && (
+                  <p className="compact-note">
+                    Código asignado actual:{" "}
+                    {assignedBarcode(db, product)?.codigo ??
+                      "Sin código asignado"}
+                    . Se asignará {action.codigo}; el anterior conservará el
+                    estado Activo.
+                  </p>
+                )}
               </>
             ) : (
               <p>
                 {action.next === "inactivo"
-                  ? "Confirma que el código está inactivo en GS1. Las órdenes históricas conservarán el código utilizado."
+                  ? `Confirma que el código está inactivo en GS1. Las órdenes históricas conservarán el código utilizado.${action.estado === "asignado" ? " El producto quedará sin código asignado y no se podrán emitir nuevas órdenes hasta asignar otro." : ""}`
                   : "Confirma que se comprobó la disponibilidad del código en el sistema."}
               </p>
             )}
@@ -1210,7 +1310,18 @@ export function CodesPage() {
             <Button
               variant="primary"
               icon={Check}
-              disabled={busy || (action.next === "asignado" && !product)}
+              disabled={
+                busy ||
+                action.needsReview ||
+                (action.next === "asignado" &&
+                  (!product ||
+                    !["activo", "verificado_sistema"].includes(
+                      action.estado,
+                    ))) ||
+                (action.next === "verificado_sistema" &&
+                  action.estado !== "creado_gs1") ||
+                (action.next === "inactivo" && action.estado === "inactivo")
+              }
               onClick={() => void advance()}
             >
               Confirmar
@@ -1593,9 +1704,6 @@ export function DocumentsPage() {
         )}
         <div className="table-footer">
           <span>{rows.length} documentos</span>
-          <span>
-            Los certificados vigentes se sustituyen sin historial de versiones.
-          </span>
         </div>
       </section>
       {selected && (

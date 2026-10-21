@@ -391,3 +391,15 @@ Reproducción:
 
     npm run build
     node scripts/verify-aria-browser.mjs tests/barcode-steps.browser.js chromium
+
+
+### Códigos de barras: vigencia y asignación · 20 de octubre de 2026
+
+- 167 pruebas automatizadas: esquema, estados, selección explícita, errores, conflictos, transacción atómica, historial, conversión por fecha UTC e idempotencia.
+- Referencia del recorrido integral anterior: 598 comprobaciones en Chromium; el reinicio conservó las 28 colecciones. Tras simplificar la vista se repiten los recorridos de códigos, filtros y favoritos, y el portable.
+- Códigos: 34 comprobaciones por navegador de la tabla en Chromium, Firefox y WebKit, con 375/768/1024/1440 px. Comprueba búsqueda, errores, revisión de conflictos, cancelación y retorno del foco. Cinco colores existentes y contraste ≥4,5:1. El informe de cada navegador registra el total de comprobaciones.
+- Filtros/ordenamiento de estados: 41 comprobaciones; favoritos: 71 comprobaciones de regresión del componente agrupado compartido.
+- Portable nuevo: 23 comprobaciones, incluida conversión de códigos antiguos, respaldo exacto y segundo reinicio sin otra migración.
+- La referencia inicial tenía 155/156 pruebas correctas: una diferencia previa entre descripciones de filtros y `../filtros.md`; se sincronizó la documentación con el texto vigente sin cambiar su lógica.
+
+Reportes y capturas: [tests/evidence/barcodes](tests/evidence/barcodes). Recuperación, hashes, demo y comparación de rendimiento: [CODIGOS-BARRAS.md](CODIGOS-BARRAS.md).

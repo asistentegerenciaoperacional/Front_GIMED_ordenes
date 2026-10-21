@@ -16,6 +16,7 @@ import { Action, FieldEditContext } from "./controls";
 type Confirmation = {
   message: string;
   confirmLabel: string;
+  destructive: boolean;
   resolve: (answer: boolean) => void;
 };
 const confirmEvent = "prototipo:confirmation";
@@ -33,11 +34,12 @@ export function shouldCloseOnInteractOutside(_element: Element) {
 export function confirmAction(
   message: string,
   confirmLabel = "Confirmar",
+  destructive = false,
 ): Promise<boolean> {
   return new Promise((resolve) =>
     window.dispatchEvent(
       new CustomEvent<Confirmation>(confirmEvent, {
-        detail: { message, confirmLabel, resolve },
+        detail: { message, confirmLabel, destructive, resolve },
       }),
     ),
   );
@@ -91,7 +93,13 @@ export function ConfirmationProvider({ children }: { children: ReactNode }) {
                 >
                   Cancelar
                 </Action>
-                <Action className="btn danger" onClick={() => answer(true)}>
+                <Action
+                  className={
+                    "btn danger " +
+                    (current.destructive ? "destructive-confirm" : "")
+                  }
+                  onClick={() => answer(true)}
+                >
                   {current.confirmLabel}
                 </Action>
               </div>
@@ -123,11 +131,13 @@ export function Dialog({
   subtitle,
   children,
   onClose,
+  titleAction,
   wide = false,
   dirty = false,
   busy = false,
 }: {
   title: string;
+  titleAction?: ReactNode;
   subtitle?: string;
   children: ReactNode;
   onClose: () => void;
@@ -152,6 +162,7 @@ export function Dialog({
     (await confirmAction(
       "Hay cambios sin guardar. ¿Cerrar el formulario?",
       "Descartar cambios",
+      true,
     ));
   const close = async () => {
     if (busy) return;
@@ -200,9 +211,12 @@ export function Dialog({
           >
             <div className="dialog-heading">
               <div>
+                <div className="dialog-title-row">
                 <Heading slot="title" level={2} id={titleId}>
                   {title}
                 </Heading>
+                  {titleAction}
+                </div>
                 {subtitle && <p>{subtitle}</p>}
               </div>
               <Action
@@ -230,18 +244,45 @@ export function Dialog({
 export function TooltipHelp({
   label,
   content,
+  buttonLabel,
 }: {
   label: string;
   content: string;
+  buttonLabel?: string;
 }) {
   return (
     <TooltipTrigger delay={500} closeDelay={80}>
-      <Action className="field-help" aria-label={"Cómo se calcula " + label}>
+      <Action
+        className="field-help"
+        aria-label={buttonLabel ?? "Cómo se calcula " + label}
+      >
         <CircleHelp size={14} aria-hidden="true" />
       </Action>
       <Tooltip
         data-react-aria-top-layer=""
         className="field-tooltip"
+        placement="top"
+        offset={6}
+      >
+        {content}
+      </Tooltip>
+    </TooltipTrigger>
+  );
+}
+
+export function ActionTooltip({
+  content,
+  children,
+}: {
+  content: string;
+  children: ReactNode;
+}) {
+  return (
+    <TooltipTrigger delay={400} closeDelay={80}>
+      {children}
+      <Tooltip
+        data-react-aria-top-layer=""
+        className="field-tooltip barcode-action-tooltip"
         placement="top"
         offset={6}
       >

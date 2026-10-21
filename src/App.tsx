@@ -301,6 +301,7 @@ export function App() {
           error instanceof ApiError &&
           (error.code === "CONSECUTIVE_CHANGED" ||
             error.code === "FAVORITES_CHANGED" ||
+            error.code === "BARCODE_CHANGED" ||
             (["createOrder", "editOrder"].includes(name) &&
               Object.keys(error.fields).some((field) =>
                 /^lines\.\d+\.id_producto$/.test(field),

@@ -1952,7 +1952,7 @@ async (page) => {
   await acceptSupplier();
   check(await dialog().getByRole('textbox', { name: 'Entrega solicitada', exact: true }).inputValue() === '' &&
     await dialog().locator('.order-form-line').count() === 1 &&
-    await optionsFor(dialog().getByRole('combobox', { name: 'Producto', exact: true })).then(options=>options.length>0&&options.every(option=>option.includes('Loción')||option.includes('Bálsamo'))) &&
+    await optionsFor(dialog().getByRole('combobox', { name: 'Producto', exact: true })).then(options=>options.length>0&&options.every(option=>beforeReplacement.productos.filter(p=>p.id_maquilador===sid(2)&&p.activo).some(p=>option.includes(p.nombre_producto)))) &&
     await dialog().getByRole('spinbutton', { name: 'Cantidad solicitada', exact: true }).inputValue() === '6000',
     'Aceptar prepara productos activos del nuevo proveedor, cantidades nuevas y entrega vacía obligatoria');
   await dialog().getByRole('combobox', { name: 'Proveedor', exact: true }).selectOption(sid(1));

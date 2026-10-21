@@ -519,7 +519,9 @@ test("R08/R09: sugerencias resueltas por área normalizada, internos activos y p
 });
 test("el aviso de códigos incluye solo los códigos pendientes seleccionados", () => {
   const db = makeSeed();
-  const pending = db.codigos_barras.find((code) => code.estado === "creado_gs1")!;
+  const pending = db.codigos_barras.find(
+    (code) => code.estado === "creado_gs1",
+  )!;
   const verified = db.codigos_barras.find(
     (code) => code.estado === "verificado_sistema",
   )!;
@@ -800,17 +802,23 @@ test("cierre: solo lotes cerrados, por producto, advertencia confirmable y toler
     estado: "cerrada",
   });
 });
-test("código más reciente, no numéricamente mayor; condiciones históricas conservadas al editar", async (t) => {
+test("código elegido explícitamente, no numéricamente mayor; condiciones históricas conservadas al editar", async (t) => {
   const store = await fixture(t);
   await store.transaction((db) => {
     db.codigos_barras.push({
       id: sid(300),
       codigo: "100000000000",
       id_producto: sid(70),
-      estado: "asignado",
+      estado: "activo",
       fecha_creacion: "2026-10-05T12:00:00.000Z",
       fecha_act: null,
     });
+  });
+  await execute(store, "setAssignedBarcode", {
+    id: sid(300),
+    id_producto: sid(70),
+    expectedAssignedId: sid(90),
+    confirm: true,
   });
   const result = await execute(store, "createOrder", product());
   const db = store.snapshot();

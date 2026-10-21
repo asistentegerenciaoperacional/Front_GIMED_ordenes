@@ -22,7 +22,7 @@ import {
   increasedQuantity,
   isInitialProductLot,
   labels,
-  latestBarcode,
+  assignedBarcode,
   materialKind,
   materialCodeRequired,
   meta,
@@ -53,6 +53,7 @@ import {
   SuggestionList,
 } from "./components/controls";
 import { Documents } from "./document-controls";
+import { TooltipHelp } from "./components/overlays";
 import {
   entityValidation,
   validEntityField,
@@ -94,13 +95,39 @@ export function CatalogForm({
     ...blankRow(entity),
     ...record,
   }));
+  const [providerNit, setProviderNit] = useState(() => {
+    if (entity !== "proveedor") return "";
+    const nit = record?.nit ?? "";
+    const verificationDigit = record?.digito_verf ?? "";
+    return nit
+      ? `${nit}${verificationDigit ? `-${verificationDigit}` : ""}`
+      : "";
+  });
   const [busy, setBusy] = useState(false);
   const { error, catchError } = useErrors(
-    entityValidation(entity, values, db, record),
+    entity === "proveedor"
+      ? {
+          ...entityValidation(entity, values, db, record),
+          valid: (field) =>
+            field === "nit"
+              ? providerNit === "" || /^\d+-\d$/.test(providerNit)
+              : validEntityField(entity, field, values, db, record),
+        }
+      : entityValidation(entity, values, db, record),
   );
   const [dirty, setDirty] = useState(false);
   const update = (field: string, value: any) => {
     setValues({ ...values, [field]: value });
+    setDirty(true);
+  };
+  const updateProviderNit = (value: string) => {
+    const match = /^(\d+)-(\d)$/.exec(value);
+    setProviderNit(value);
+    setValues({
+      ...values,
+      nit: match?.[1] ?? value,
+      digito_verf: match?.[2] ?? "",
+    });
     setDirty(true);
   };
   async function submit(e: React.FormEvent) {
@@ -108,6 +135,19 @@ export function CatalogForm({
     setBusy(true);
     try {
       const row: Row = { ...values };
+      if (entity === "proveedor") {
+        const nitParts =
+          providerNit === "" ? null : /^(\d+)-(\d)$/.exec(providerNit);
+        if (providerNit && !nitParts)
+          throw new ApiError({
+            message: "Revisa el formato del NIT.",
+            fields: {
+              nit: "Ingresa el NIT sin puntos, seguido de un guion y un único dígito de verificación.",
+            },
+          });
+        row.nit = nitParts?.[1] ?? null;
+        row.digito_verf = nitParts?.[2] ?? null;
+      }
       for (const [field, spec] of Object.entries(meta.tables[entity].fields)) {
         if (field === "id") continue;
         const raw = row[field];
@@ -187,6 +227,15 @@ export function CatalogForm({
   return (
     <Dialog
       title={`${record ? "Editar" : "Agregar"} · ${titles[entity]}`}
+      titleAction={
+        entity === "proveedor" ? (
+          <TooltipHelp
+            label="NIT"
+            buttonLabel="Cómo ingresar el NIT"
+            content="Ingresa el NIT sin puntos y escribe un guion seguido de un solo dígito de verificación. Ejemplo: 900123404-5."
+          />
+        ) : undefined
+      }
       subtitle="Los cambios se guardan en los archivos locales del prototipo."
       onClose={onClose}
       dirty={dirty}
@@ -196,7 +245,11 @@ export function CatalogForm({
           <ErrorNotice error={error} />
           <div className="form-grid">
             {Object.entries(meta.tables[entity].fields)
-              .filter(([name]) => name !== "id")
+              .filter(
+                ([name]) =>
+                  name !== "id" &&
+                  !(entity === "proveedor" && name === "digito_verf"),
+              )
               .map(([field, spec]) => {
                 const id = `field-${field}`,
                   ref = meta.refs.find(
@@ -204,7 +257,20 @@ export function CatalogForm({
                   ),
                   value = values[field];
                 let control;
-                if (ref && ref.target === "productos")
+                if (entity === "proveedor" && field === "nit")
+                  control = (
+                    <ControlInput
+                      id={id}
+                      value={providerNit}
+                      inputMode="text"
+                      autoComplete="off"
+                      placeholder="900123404-5"
+                      onChange={(event) =>
+                        updateProviderNit(event.target.value)
+                      }
+                    />
+                  );
+                else if (ref && ref.target === "productos")
                   control = (
                     <ProductPicker
                       products={db.productos}
@@ -594,7 +660,12 @@ export function InvoiceForm({
                 draft={documentDraft ?? undefined}
                 onDraftSave={setDocumentDraft}
                 renderAddTrigger={(open) => (
-                  <Button icon={Paperclip} disabled={busy} onClick={open}>
+                  <Button
+                    icon={Paperclip}
+                    className="invoice-attach-button"
+                    disabled={busy}
+                    onClick={open}
+                  >
                     {documentDraft
                       ? "Reemplazar documento"
                       : "Adjuntar documento"}
@@ -612,9 +683,6 @@ export function InvoiceForm({
                     Quitar documento
                   </Button>
                 </div>
-              )}
-              {documentDraft && (
-                <small>Se adjuntará al guardar la factura.</small>
               )}
             </div>
           )}
@@ -1224,7 +1292,7 @@ export function OrderForm({
                 row.id === line.id_producto &&
                 row.activo === true &&
                 row.id_maquilador === supplier,
-            ) && Boolean(latestBarcode(db, line.id_producto))
+            ) && Boolean(assignedBarcode(db, line.id_producto))
           );
         }
         const entity =
@@ -1366,9 +1434,9 @@ export function OrderForm({
       lines.forEach((l, i) => {
         if (type === "producto" && !l.id_producto)
           issues[`lines.${i}.id_producto`] = "Selecciona un producto.";
-        if (type === "producto" && !latestBarcode(db, l.id_producto) && !l.id)
+        if (type === "producto" && !assignedBarcode(db, l.id_producto) && !l.id)
           issues[`lines.${i}.id_producto`] =
-            "El producto no tiene código activo.";
+            "El producto no tiene código asignado.";
         if (type === "producto" && l.id_producto) {
           const original =
             order &&
@@ -1663,7 +1731,7 @@ export function OrderForm({
                     );
                   const barcode = l.id
                     ? db.codigos_barras.find((c) => c.id === l.id_codigo_barras)
-                    : latestBarcode(db, l.id_producto);
+                    : assignedBarcode(db, l.id_producto);
                   const key = (f: string) => `field-lines.${i}.${f}`;
                   return (
                     <div className="order-form-line" key={i}>
@@ -1839,7 +1907,7 @@ export function OrderForm({
                                 <span className="mono">{barcode.codigo}</span>
                               ) : (
                                 <Badge value="pendiente">
-                                  Sin código activo
+                                  Sin código asignado
                                 </Badge>
                               )}
                               {selectedProduct &&
@@ -2351,11 +2419,7 @@ export function MailForm({
               Sin sugerencias. Puedes agregar cualquier dirección válida.
             </p>
           )}
-          <Field
-            id="field-body"
-            label="Contenido del correo"
-            hint="El cuerpo se usa en la simulación y no se conserva en el historial."
-          >
+          <Field id="field-body" label="Contenido del correo">
             <ControlTextArea
               id="field-body"
               rows={7}
@@ -2367,7 +2431,7 @@ export function MailForm({
             />
           </Field>
           <div>
-            <h3>Adjuntos resueltos</h3>
+            <h3>Documentos adjuntos</h3>
             {preview?.documents.length ? (
               preview.documents.map((d: Row) => (
                 <div key={d.id} className="inline" style={{ marginTop: 8 }}>

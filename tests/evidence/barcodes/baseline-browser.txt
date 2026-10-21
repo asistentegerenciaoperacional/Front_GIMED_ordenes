@@ -1,0 +1,17 @@
+page.goto: net::ERR_NETWORK_ACCESS_DENIED at http://127.0.0.1:50949/
+Call log:
+  - navigating to "http://127.0.0.1:50949/", waiting until "load"
+
+    at C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\scripts\verify-aria-browser.mjs:79:21
+URL: about:blank
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.evaluate: Execution context was destroyed, most likely because of a navigation
+    at C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\scripts\verify-aria-browser.mjs:122:20 {
+  log: [],
+  name: 'Error'
+}
+
+Node.js v24.17.0

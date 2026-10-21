@@ -12,7 +12,7 @@ import {
   orderLines,
   orderItemLabel,
   recommendations,
-  latestBarcode,
+  assignedBarcode,
   tolerance,
   deviation,
   isInitialProductLot,
@@ -163,27 +163,45 @@ function createInitialProductLot(db: Database, line: Row): Row {
   });
 }
 function selectBarcode(db: Database, product: string): string {
-  const codes = db.codigos_barras.filter(
-    (c) => c.id_producto === product && c.estado === "asignado",
-  );
-  const code = latestBarcode(db, product);
+  const code = assignedBarcode(db, product);
   check(
     code,
-    "El producto necesita un código de barras activo antes de emitir la orden.",
+    "Asigna un código de barras al producto antes de emitir una nueva orden.",
     "BARCODE",
-    { id_producto: "Sin código de barras activo." },
-  );
-  check(
-    codes.length === 1 ||
-      (codes.every((c) => c.fecha_creacion) &&
-        !codes.some(
-          (c) => c.id !== code.id && c.fecha_creacion === code.fecha_creacion,
-        )),
-    "No se puede determinar el código más reciente: revisa las fechas de creación.",
-    "BARCODE",
-    { id_producto: "Fecha de código ausente o ambigua." },
+    {
+      id_producto:
+        "El producto no tiene un código asignado para nuevas órdenes.",
+    },
   );
   return code.id;
+}
+function expectBarcodeAssignment(
+  db: Database,
+  product: string,
+  expected: unknown,
+) {
+  const current = assignedBarcode(db, product)?.id ?? null;
+  check(
+    expected === current,
+    "La asignación del producto cambió. Revisa el código actual antes de confirmar nuevamente.",
+    "BARCODE_CHANGED",
+    {},
+    { assignedId: current },
+  );
+}
+function assignBarcode(
+  db: Database,
+  code: Database["codigos_barras"][number],
+  product: string,
+) {
+  const previous = assignedBarcode(db, product);
+  if (previous && previous.id !== code.id) {
+    previous.estado = "activo";
+    previous.fecha_act = now();
+  }
+  code.id_producto = product;
+  code.estado = "asignado";
+  code.fecha_act = now();
 }
 function saveOrder(db: Database, p: Row, edit = false): Row {
   check(
@@ -348,7 +366,7 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
           { id_producto: "El producto pertenece a otro maquilador." },
         );
       }
-      // Only new emissions resolve the latest code. Existing lines retain their historical code.
+      // Only new emissions resolve the assigned code. Existing lines retain their historical code.
       const code =
         old && old.id_producto === raw.id_producto
           ? old.id_codigo_barras
@@ -1014,8 +1032,15 @@ export async function command(
         }),
       };
     case "advanceBarcode": {
-      const c = findRecord(db, "codigos_barras", { id: p.id });
+      const c = findRecord(db, "codigos_barras", {
+        id: p.id,
+      }) as Database["codigos_barras"][number];
       check(p.confirm === true, "Confirma el avance del código.");
+      check(
+        c.estado === p.expectedEstado,
+        "El estado del código cambió. Revisa los datos actualizados antes de confirmar nuevamente.",
+        "BARCODE_CHANGED",
+      );
       if (p.estado === "verificado_sistema")
         check(c.estado === "creado_gs1", "El código debe estar creado en GS1.");
       else if (p.estado === "asignado") {
@@ -1024,14 +1049,43 @@ export async function command(
           "Verifica el código antes de asignarlo.",
         );
         findRecord(db, "productos", { id: p.id_producto });
-        c.id_producto = p.id_producto;
-      } else
+        expectBarcodeAssignment(db, p.id_producto, p.expectedAssignedId);
+        assignBarcode(db, c, p.id_producto);
+        return {};
+      } else {
         check(
           p.estado === "inactivo" && c.estado !== "inactivo",
           "Estado de código inválido.",
         );
+        if (c.id_producto)
+          expectBarcodeAssignment(db, c.id_producto, p.expectedAssignedId);
+      }
       c.estado = p.estado;
       c.fecha_act = now();
+      return {};
+    }
+    case "setAssignedBarcode": {
+      check(
+        p.confirm === true,
+        "Confirma el cambio del código para nuevas órdenes.",
+      );
+      findRecord(db, "productos", { id: p.id_producto });
+      const c = findRecord(db, "codigos_barras", {
+        id: p.id,
+      }) as Database["codigos_barras"][number];
+      if (p.expectedEstado !== undefined)
+        check(
+          c.estado === p.expectedEstado,
+          "El estado del código cambió. Revisa los datos actualizados antes de confirmar nuevamente.",
+          "BARCODE_CHANGED",
+        );
+      expectBarcodeAssignment(db, p.id_producto, p.expectedAssignedId);
+      check(
+        c.estado === "activo" && c.id_producto === p.id_producto,
+        "Selecciona un código activo asociado a este producto.",
+        "BARCODE",
+      );
+      assignBarcode(db, c, p.id_producto);
       return {};
     }
     case "setTolerance": {

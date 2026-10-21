@@ -1,0 +1,252 @@
+npm notice run gimed-ordenes-prototipo@1.0.0 test
+npm notice run tsx --test tests/*.test.ts
+✔ La interfaz utiliza controles compartidos de React Aria en todas las pantallas (172.7366ms)
+✔ cada OC y OCM admite una orden escaneada; reemplazar conserva identidad, propietario y cantidad de registros (161.011ms)
+✔ dos adjuntos simultáneos al mismo propietario guardan exactamente uno y rechazan el otro (31.5985ms)
+✔ el documento incluido al crear factura es su único vigente y se puede reemplazar (33.0139ms)
+✔ reemplazar rechaza cambiar propietario o clase y conserva estado y archivo completos (26.1733ms)
+✔ modelo y validación en vivo identifican duplicados por propietario, incluyendo la plantilla global (10.085ms)
+✔ consecutivo mostrado: material y otros comparten número; una previsualización obsoleta revierte la operación (79.6256ms)
+✔ el lote inicial toma batch estimado de la cabecera y conserva su fecha después de autorizar (46.9281ms)
+✔ el estado inicial tiene las 28 colecciones y conserva tipos, históricos y decimales exactos (7.8381ms)
+✔ materiales y otros heredan la entrega de cabecera al crear; editar conserva la fecha de seguimiento (60.0058ms)
+✔ sticker por producto: porcentajes independientes, redondeo y cantidades finales editables sin atributos nuevos persistidos (17.5814ms)
+✔ sticker por producto: un porcentaje inválido revierte la orden, lotes y consecutivos (31.9214ms)
+✔ R01: solicitudes simultáneas reservan números únicos en el grupo material/otros (99.6009ms)
+✔ R01: número automático y grupos independientes; no admite un número manual (33.1557ms)
+✔ R02: máximo siete productos, materiales o conceptos, posiciones y compatibilidad; fallos no consumen consecutivos (16.3678ms)
+✔ R03: factura normalizada, ceros/signos interiores y unicidad por proveedor (21.3134ms)
+✔ R03: proveedor incompatible de factura revierte todas las asociaciones (11.7495ms)
+✔ R04: lote de material compartido mantiene recepciones independientes (16.1449ms)
+✔ R05: enlaces entre productos y materiales de órdenes existentes, sin cantidad asignada (11.9526ms)
+✔ R06: clase/propietario, referencia polimórfica y plantilla global (16.0719ms)
+✔ R07: certificados, plantilla y factura únicos; reemplazo del registro vigente (21.8639ms)
+✔ R08/R09: sugerencias resueltas por área normalizada, internos activos y proveedor del contexto (1.2463ms)
+✔ el aviso de códigos incluye solo los códigos pendientes seleccionados (1.0484ms)
+✔ R09: cargos equivalentes no duplican configuración; sin configuración se permite envío manual (18.0671ms)
+✔ R10: falta de archivo impide confirmar envío; códigos nuevos no necesitan adjuntos (10.9719ms)
+✔ R10: certificados deduplicados y liberación con material, maquilador, direcciones y contactos (0.7301ms)
+✔ R11: duplicados entre Para/CC rechazados; mensaje y destinatarios se guardan tras confirmación (19.4077ms)
+✔ R12: código MAIA de tres dígitos, único y opcional (16.2359ms)
+✔ R13: exclusión al asociar materiales y al cambiar el tipo; no basta validar una fila (14.4599ms)
+✔ autorización irreversible y seguimiento habilitado solo por orden de compra autorizada (15.9686ms)
+✔ lote precarga batch record desde la entrega de la cabecera; cantidad no provoca cierre (16.1711ms)
+✔ cierre: solo lotes cerrados, por producto, advertencia confirmable y tolerancia histórica (38.5411ms)
+✔ código más reciente, no numéricamente mayor; condiciones históricas conservadas al editar (21.8574ms)
+✔ cantidades finales de producto y empaque con redondeo hacia arriba (13.5901ms)
+✔ emisión de varios productos conserva materiales, vínculos y su consecutivo; guarda un lote inicial por producto (12.4158ms)
+✔ facturas: desasignar un lote conserva los demás, la factura y sus documentos (13.356ms)
+✔ facturas: desasignar otro propietario o una selección contradictoria rechaza la operación completa (12.1974ms)
+✔ facturas: fallo posterior de proveedor revierte también las desasignaciones (10.2314ms)
+✔ facturas: desasignar recepciones de material y otros conserva sus datos (26.0456ms)
+✔ facturas: desasignación bloqueada sin autorización (7.433ms)
+✔ facturas: adjunto preparado se guarda con propietario y asociaciones en la misma operación (11.4622ms)
+✔ facturas: adjunto inválido o recepción incompatible no deja factura ni documento huérfano (10.7492ms)
+✔ persistencia al reabrir y rollback conserva el archivo; un JSON dañado no se reemplaza con la semilla (18.7858ms)
+✔ favoritos: ocho relaciones por material se convierten en siete por tipo sin mutar la entrada (39.1461ms)
+✔ favoritos: conversión idempotente y colecciones vacías válidas (1.9763ms)
+✔ favoritos: formato mixto reúne pares anteriores y nuevos y elimina duplicados (1.0914ms)
+✔ favoritos: material inexistente aborta sin modificar el archivo (30.9832ms)
+✔ favoritos: tipo inexistente aborta sin modificar el archivo (15.2914ms)
+✔ favoritos: proveedor inexistente aborta sin modificar el archivo (9.0431ms)
+✔ favoritos: campos contradictorios aborta sin modificar el archivo (9.7378ms)
+✔ favoritos: migración persistida con copia exacta, segunda apertura sin escritura ni segundo respaldo (27.5542ms)
+✔ favoritos: un error en otra colección impide persistir la migración (8.1343ms)
+✔ favoritos: fallo al escribir el respaldo no recrea ni sustituye los datos (13.5479ms)
+✔ favoritos: selección conjunta normaliza duplicados y conserva los demás tipos (4.2003ms)
+✔ favoritos: selección vacía elimina relaciones, no elimina el tipo (0.8344ms)
+✔ favoritos: conflictos conservan la selección guardada y los reintentos idénticos son idempotentes (3.0638ms)
+✔ favoritos: fallo de un proveedor revierte todo el guardado y el archivo (12.6461ms)
+✔ favoritos: no admite cambios individuales por la API genérica (0.7135ms)
+✔ favoritos: tipos y proveedores referenciados quedan protegidos por integridad (4.4895ms)
+✔ favoritos: agrupación por IDs conserva homónimos, unión de tipos y otros proveedores elegibles (10.9694ms)
+✔ fechas digitadas: formato colombiano e ISO, bisiestos y rechazo de días inexistentes o parciales (1.3916ms)
+✔ rutas de órdenes: la entrada principal abre productos y los enlaces antiguos mantienen el grupo (0.4867ms)
+✔ fechas: separadores y avance automáticos, pegado ISO y edición sin desplazar los otros segmentos (1.495ms)
+✔ facturas: búsqueda normalizada por número, proveedor y datos de lotes asociados (9.9379ms)
+✔ facturas: búsqueda y filtros comparten resultados, conservando ordenamiento numérico (2.7618ms)
+✔ facturas: columnas basadas en proveedor, día visible, recepciones y documento propio (2.176ms)
+✔ facturas: texto normalizado conserva ceros y signos y permite consultar proveedor por NIT (1.5736ms)
+✔ facturas: fechas comparadas por día de Bogotá con límites inclusivos (1.6775ms)
+✔ facturas: recepciones admite cero y condiciones de enteros (1.2436ms)
+✔ facturas: selección múltiple y filtros de distintas columnas se combinan (1.0867ms)
+✔ facturas: ordenamiento de texto, fechas y números, sin modificar las filas de origen (1.0564ms)
+✔ facturas: URL recupera filtros y ordenamiento válidos y limita Documentos a presencia (0.8846ms)
+✔ facturas: opciones de columna consideran las demás condiciones y agrupan valores repetidos (1.1374ms)
+✔ corregir un campo elimina solo los errores cuyo valor ya es válido (4.9446ms)
+✔ fechas y cantidades parcialmente corregidas conservan sus errores (6.3176ms)
+✔ precios corregidos usan la precisión permitida y tolerancia usa su tipo declarado (0.7672ms)
+✔ un valor con formato correcto que todavía está duplicado no retira el error (3.5791ms)
+✔ la corrección respeta relaciones, proveedor de factura y exclusión sticker/cinta (1.9639ms)
+✔ errores de campos desconocidos se conservan y las firmas distinguen cambios anidados (0.4241ms)
+✔ corrugados: crear con código sin informar o null y editar conserva null al reiniciar (98.5895ms)
+✔ solo Corrugado admite crear materiales sin código; rechazar no altera el archivo (45.9944ms)
+✔ cambiar un corrugado sin código a otro tipo exige MAIA; cero y códigos únicos siguen admitidos (22.3365ms)
+✔ corrugados con código mantienen las restricciones de rango y unicidad (14.4782ms)
+✔ validación en vivo: cambiar a Corrugado retira el error de código vacío, sin aceptar formatos inválidos (2.1532ms)
+✖ catálogo: trece filtros, diecisiete variantes y descripciones iguales a filtros.md (18.8468ms)
+✔ URL: solo variantes conocidas y compatibles con el grupo (1.4366ms)
+✔ documento de orden: propietario y clase exactos, mapa reutilizable y legado más reciente (3.2906ms)
+✔ recepción física y cantidad registrada se distinguen en los cinco casos acordados (4.6588ms)
+✔ recepciones sin factura no confunde lote inicial ni factura de otro lote (1.1362ms)
+✔ vencimientos: día de Bogotá, estrictamente anterior a hoy y sin fechas vacías (1.5174ms)
+✔ próximas entregas incluyen hoy y los extremos 7/15/30 y respetan cambio de mes (1.7552ms)
+✔ inspecciones usan fechas, admiten solapamiento y son independientes del estado (1.0424ms)
+✔ condiciones de recepción y fechas documentales pertenecen al mismo lote (0.9495ms)
+✔ anulados no generan pendientes; cerrados sí pueden conservar pendientes documentales (1.2732ms)
+✔ seguimiento por cerrar requiere lotes efectivos, todos cerrados en un renglón abierto (1.0501ms)
+✔ OCM compartida: solo aparece la OC cuyo renglón vinculado está pendiente (1.0925ms)
+✔ materiales y otros consultan su recepción directa, nunca el catálogo de lotes de material (1.5198ms)
+✔ índices: equivalencia del estado comercial, importes exactos y ninguna mutación del snapshot (2.5121ms)
+✔ cada actualización de datos recalcula indicadores y los vencimientos cambian sin recorrer lotes (1.6181ms)
+✔ paginación de cincuenta: extremos, URL inválida, vacíos y página fuera de rango (0.648ms)
+✔ reloj de Bogotá: cambio de día a las 05 UTC y temporizador hasta medianoche (0.4174ms)
+✔ reabrir orden_material cerrado o anulado conserva recepción, factura, documentos y vínculos (98.7096ms)
+✔ reabrir orden_material requiere autorización y un rechazo conserva todos los datos (23.4339ms)
+✔ reabrir orden_otro cerrado o anulado conserva recepción, factura, documentos y vínculos (53.4896ms)
+✔ reabrir orden_otro requiere autorización y un rechazo conserva todos los datos (18.3004ms)
+✔ número automático e inmutable en creación y edición, antes y después de autorizar, para los tres tipos (94.2889ms)
+✔ proveedor bloqueado después de autorizar en producto, material y otros, incluso con confirmación (50.9351ms)
+✔ reemplazo completo: elimina todos los registros anteriores de la OC y conserva OCM, recepciones, documentos y enlaces compartidos íntegramente (67.6846ms)
+✔ reemplazo rechazado sin confirmación, con productos de A, renglones antiguos, proveedor incorrecto o fecha vacía: archivo y consecutivos intactos (105.7067ms)
+✔ fallo tras crear el primer renglón de reemplazo revierte borrados, lotes, archivo y consecutivos (47.3596ms)
+✔ autorizar durante la revisión impide reemplazar al guardar, aun con confirmación, sin eliminar información (49.6135ms)
+✔ deleteLot exige autorización y confirmación; permite eliminar lotes cerrados, recibidos, facturados, anulados y sin número conservando las facturas (49.6416ms)
+✔ borrar un lote conserva el estado cerrado del producto mientras queden otros; borrar el último lo anula (16.3977ms)
+✔ anular elimina todos los lotes con confirmación, conserva renglón y abastecimiento; reabrir crea un único lote nuevo con fecha actual (24.0289ms)
+✔ reabrir un producto anulado heredado exige confirmación para reemplazar sus lotes; reabrir cerrado conserva sus lotes (17.0662ms)
+✔ semilla: productos anulados sin lotes; cargar datos heredados conserva todos los registros hasta una operación confirmada (14.1049ms)
+✔ volver recupera el origen de la orden; abandonar la vista descarta filtros y scroll (3.4048ms)
+✔ Los índices se reutilizan al navegar y se invalidan al recibir otro snapshot (1.091ms)
+✔ emisión: productos inactivos o sin estado activo rechazan la operación completa, incluso tras una fila válida (79.4328ms)
+✔ edición: no permite agregar ni sustituir por un producto inactivo; conserva el producto histórico que se desactivó (34.7734ms)
+✔ producto, material y otros exigen fecha solicitada válida antes de reservar números o guardar órdenes (62.4821ms)
+✔ editar una orden no permite vaciar la entrega ni modifica las fechas de seguimiento tras un rechazo (36.0222ms)
+✔ cerrar, anular y reabrir seguimiento requiere autorización en los tres tipos de orden, incluso con confirmación (98.2859ms)
+✔ un lote de una orden sin autorizar no puede cerrarse ni anularse mediante guardado directo (15.5996ms)
+✔ selección de valores: unión dentro de la columna e intersección entre columnas (3.0387ms)
+✔ productos: se filtran todos los renglones y las condiciones negativas excluyen cualquier coincidencia (0.6501ms)
+✔ proveedor: nombres y NIT disponibles para condiciones, sin afectar la búsqueda global (0.2168ms)
+✔ importe: centavos y rangos inclusivos se comparan exactamente incluso fuera del entero seguro (0.7084ms)
+✔ fechas: día visible en Bogotá, intervalo inclusivo y valores sin fecha (0.908ms)
+✔ condiciones: se rechazan fechas inexistentes, números inválidos e intervalos invertidos (0.3577ms)
+✔ opciones: valores únicos, orden numérico y fechas vacías al final (0.4266ms)
+✔ opciones disponibles: respetan otras columnas y omiten el filtro de la propia columna (0.3646ms)
+✔ ordenamiento: números de OC, importes exactos y desempate estable sin mutar la lista (0.4594ms)
+✔ ordenamiento: fechas cronológicas y vacíos al final en ambas direcciones; texto según español (0.3871ms)
+✔ URL: conserva selección, condiciones y ordenamiento; acepta enlaces de estado anteriores (0.7609ms)
+✔ URL inválida: no bloquea la tabla ni permite operadores impropios; conserva selecciones válidas (0.4221ms)
+✔ la visualización monetaria conserva decimales y el signo de importes menores a uno (0.8983ms)
+✔ redondeo exacto: resultados enteros no ganan una unidad por error de punto flotante (2.0633ms)
+✔ ISO con desfase se normaliza a UTC antes de determinar el código más reciente (23.7479ms)
+✔ producto de otro maquilador rechazado; cambiar el catálogo no altera el proveedor histórico (5.3125ms)
+✔ precio inválido de un material produce un error de campo, no un error interno (0.908ms)
+✔ el simulador recibe contenido y adjuntos efímeros; el cuerpo no se guarda (1.0929ms)
+✔ cada uno de los 1–7 renglones se guarda con un único lote inicial sin datos inventados (78.4068ms)
+✔ editar la entrega sin autorizar propaga la estimación, y agregar un renglón crea solo su lote (32.0353ms)
+✔ quitar un producto sin autorizar elimina su lote y vínculos, conservando íntegramente los materiales (35.5767ms)
+✔ una orden autorizada rechaza agregar, quitar, sustituir o repetir renglones incluso con la misma cantidad (38.3541ms)
+✔ modificar o agregar lotes exige autorización; completar el inicial conserva su ID y permite fechas independientes (39.1735ms)
+✔ el número es obligatorio para datos de seguimiento y cierre, pero una entrega prevista puede anularse sin número (69.6682ms)
+✔ asociar una factura a un lote sin número rechaza la operación completa (23.6677ms)
+✔ el número faltante mantiene su error mientras hay seguimiento y lo retira al corregir la causa (16.0504ms)
+✔ Compartir cadenas del snapshot conserva íntegramente valores e identidades de los registros (5.1497ms)
+✔ vínculos: filtros numéricos separados para OC y OCM, combinables sin perder relaciones (8.3744ms)
+✔ vínculos: búsqueda por número y prefijo distingue OC y OCM sin modificar datos (2.7636ms)
+✔ vínculos: la búsqueda se combina con columnas y ordenamiento sobre el mismo vínculo (1.9132ms)
+✔ vínculos: texto de producto, material, maquilador y proveedor; estado y selección múltiple (2.3724ms)
+✔ vínculos: ordenamiento numérico y URL conservan las columnas y rechazan condiciones de otro tipo (2.0643ms)
+ℹ tests 156
+ℹ suites 0
+ℹ pass 155
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3376.7539
+
+✖ failing tests:
+
+test at tests\order-filters.test.ts:73:1
+✖ catálogo: trece filtros, diecisiete variantes y descripciones iguales a filtros.md (18.8468ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      [
+        'Documento de la orden',
+  +     'Órdenes con o sin orden escaneada adjunta.'
+  -     'Órdenes con o sin documento escaneado adjunto.'
+      ],
+      [
+        'Recepciones sin factura',
+  +     'Alguna recepción física sin factura asociada.'
+  -     'Órdenes con lotes recibidos sin factura adjunta.'
+      ],
+      [
+        'Entrega solicitada vencida',
+  +     'Entrega de cabecera anterior a hoy y algún renglón en seguimiento.'
+  -     'Órdenes con productos/materiales pendientes y fecha de entrega vencida a día de hoy.'
+      ],
+      [
+        'Próximas entregas',
+  +     'Entrega de cabecera entre hoy y hoy más 7, 15 o 30 días, incluidos ambos extremos.'
+  -     'Órdenes con fecha solicitada de entrega en los próximos 7, 15 o 30 días.'
+      ],
+      [
+        'Sin recepciones registradas',
+  +     'Ninguna cantidad recibida registrada en sus renglones o lotes efectivos. Una fecha sin cantidad permite aparecer aquí.'
+  -     'Órdenes sin ningún producto o material recibido.'
+      ],
+      [
+        'Batch record vencido',
+  +     'Algún lote con estimación anterior a hoy y sin fecha de recepción del batch record; no exige recepción física.'
+  -     'Órdenes con lotes sin recibir y cuya fecha estimada de batch record está vencida a día de hoy.'
+      ],
+      [
+        'Producto recibido sin batch record',
+  +     'Algún lote recibido físicamente sin fecha de recepción del batch record.'
+  -     'Órdenes con lotes que tienen cantidad recibida pero sin fecha de recepción del batch record.'
+      ],
+      [
+        'Inspección pendiente',
+  +     'Algún lote con fecha de recepción del batch record y sin fecha de inspección.'
+  -     'Órdenes con lotes que tienen fecha de recepción de batch record pero sin fecha de inspección.'
+      ],
+      [
+        'Recibidos sin inspección',
+  +     'Algún lote recibido físicamente sin fecha de inspección. Puede coincidir con Inspección pendiente.'
+  -     'Órdenes con lotes recibidos sin fecha de inspección.'
+      ],
+      [
+        'Confirmación pendiente',
+  +     'Algún lote recibido físicamente sin fecha de confirmación.'
+  -     'Órdenes con lotes recibidos sin fecha de confirmación.'
+      ],
+      [
+        'Seguimiento por cerrar',
+  +     'Algún renglón en seguimiento con al menos un lote no anulado y todos sus lotes efectivos cerrados.'
+  -     'Órdenes con productos aún en seguimiento pero que todos sus lotes ya fueron cerrados.'
+      ],
+      [
+        'Vínculos de abastecimiento',
+  +     'Con o sin relaciones existentes, en cualquiera de las dos direcciones, independientemente de sus estados.'
+  -     'Órdenes que tienen OCM/OC vinculadas.'
+      ],
+      [
+        'OCM vinculadas pendientes',
+  +     'Algún renglón de material efectivamente vinculado a la OC permanece en seguimiento. No cuentan otros renglones de esa OCM.'
+  -     'Órdenes con productos que tienen materiales vinculados pendientes por entregar.'
+      ]
+    ]
+  
+      at TestContext.<anonymous> (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\tests\order-filters.test.ts:93:10)
+      at async Test.run (node:internal/test_runner/test:1313:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ [ 'Documento de la orden', 'Órdenes con o sin orden escaneada adjunta.' ], [ 'Recepciones sin factura', 'Alguna recepción física sin factura asociada.' ], [ 'Entrega solicitada vencida', 'Entrega de cabecera anterior a hoy y algún renglón en seguimiento.' ], [ 'Próximas entregas', 'Entrega de cabecera entre hoy y hoy más 7, 15 o 30 días, incluidos ambos extremos.' ], [ 'Sin recepciones registradas', 'Ninguna cantidad recibida registrada en sus renglones o lotes efectivos. Una fecha sin cantidad permite aparecer aquí.' ], [ 'Batch record vencido', 'Algún lote con estimación anterior a hoy y sin fecha de recepción del batch record; no exige recepción física.' ], [ 'Producto recibido sin batch record', 'Algún lote recibido físicamente sin fecha de recepción del batch record.' ], [ 'Inspección pendiente', 'Algún lote con fecha de recepción del batch record y sin fecha de inspección.' ], [ 'Recibidos sin inspección', 'Algún lote recibido físicamente sin fecha de inspección. Puede coincidir con Inspección pendiente.' ], [ 'Confirmación pendiente', 'Algún lote recibido físicamente sin fecha de confirmación.' ], [ 'Seguimiento por cerrar', 'Algún renglón en seguimiento con al menos un lote no anulado y todos sus lotes efectivos cerrados.' ], [ 'Vínculos de abastecimiento', 'Con o sin relaciones existentes, en cualquiera de las dos direcciones, independientemente de sus estados.' ], [ 'OCM vinculadas pendientes', 'Algún renglón de material efectivamente vinculado a la OC permanece en seguimiento. No cuentan otros renglones de esa OCM.' ] ],
+    expected: [ [ 'Documento de la orden', 'Órdenes con o sin documento escaneado adjunto.' ], [ 'Recepciones sin factura', 'Órdenes con lotes recibidos sin factura adjunta.' ], [ 'Entrega solicitada vencida', 'Órdenes con productos/materiales pendientes y fecha de entrega vencida a día de hoy.' ], [ 'Próximas entregas', 'Órdenes con fecha solicitada de entrega en los próximos 7, 15 o 30 días.' ], [ 'Sin recepciones registradas', 'Órdenes sin ningún producto o material recibido.' ], [ 'Batch record vencido', 'Órdenes con lotes sin recibir y cuya fecha estimada de batch record está vencida a día de hoy.' ], [ 'Producto recibido sin batch record', 'Órdenes con lotes que tienen cantidad recibida pero sin fecha de recepción del batch record.' ], [ 'Inspección pendiente', 'Órdenes con lotes que tienen fecha de recepción de batch record pero sin fecha de inspección.' ], [ 'Recibidos sin inspección', 'Órdenes con lotes recibidos sin fecha de inspección.' ], [ 'Confirmación pendiente', 'Órdenes con lotes recibidos sin fecha de confirmación.' ], [ 'Seguimiento por cerrar', 'Órdenes con productos aún en seguimiento pero que todos sus lotes ya fueron cerrados.' ], [ 'Vínculos de abastecimiento', 'Órdenes que tienen OCM/OC vinculadas.' ], [ 'OCM vinculadas pendientes', 'Órdenes con productos que tienen materiales vinculados pendientes por entregar.' ] ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

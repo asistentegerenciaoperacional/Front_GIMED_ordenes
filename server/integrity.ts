@@ -90,6 +90,25 @@ export function validateDatabase(
           { [ref.field]: "Selecciona un registro existente." },
         );
     }
+  const assignedProducts = new Set<string>();
+  for (const code of db.codigos_barras) {
+    if (code.estado === "activo" || code.estado === "asignado")
+      check(
+        code.id_producto !== null,
+        "El código vigente necesita un producto asociado.",
+        "BARCODE",
+        { id_producto: "Selecciona un producto." },
+      );
+    if (code.estado === "asignado") {
+      check(
+        !assignedProducts.has(code.id_producto!),
+        "Solo puede haber un código asignado por producto.",
+        "BARCODE",
+        { estado: "El producto ya tiene un código asignado." },
+      );
+      assignedProducts.add(code.id_producto!);
+    }
+  }
   const numbers = new Set<string>();
   for (const o of db.orden_compra) {
     const key = `${groupOf(o.tipo_orden)}:${o.no_orden}`;

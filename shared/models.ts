@@ -12,7 +12,7 @@ export interface codigos_barras {
   id: string;
   codigo: string;
   id_producto: string | null;
-  estado: "creado_gs1" | "verificado_sistema" | "asignado" | "inactivo";
+  estado: "creado_gs1" | "verificado_sistema" | "activo" | "//" | "Vigente," | "asociado" | "y" | "disponible" | "como" | "alternativa" | "asignado" | "//" | "Único" | "por" | "producto;" | "utilizado" | "para" | "nuevas" | "órdenes" | "inactivo";
   fecha_creacion: string | null;
   fecha_act: string | null;
 }

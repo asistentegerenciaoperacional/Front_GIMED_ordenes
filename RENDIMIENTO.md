@@ -357,3 +357,22 @@ Ensayo prolongado: 630 ciclos adicionales, con muestras de heap y nodos DOM tras
 
 El [ensayo CPU 4×](tests/evidence/favorites/after-stress-performance.json) es informativo y no modifica los criterios de aceptación acordados. Reproducir con <code>npm run benchmark:favorites</code> y <code>npx tsx scripts/measure-favorites.ts</code>; añadir <code>--soak</code> para la secuencia prolongada.
 <!-- favorites-results-end -->
+
+
+## Códigos de barras · 20 de octubre de 2026
+
+Referencia: commit de recuperación `068cae7a43f13fd2e3aa0323998eb2faba259087`, compilaciones de producción y Chrome 155.0.8059.85. Ambas versiones usan las mismas colecciones deterministas, verificadas por hash, de 6.000 y 60.000 lotes. Los eventos se cronometran dentro del navegador hasta el resultado visible, fuera del tiempo de automatización.
+
+Las **39 comparaciones cumplen** los límites acordados en equipo actual: P95 interacción +máx(15 %,20 ms), carga +máx(15 %,100 ms), memoria estable +máx(15 %,5 MB).
+
+| Caso | Carga P95 antes → después | Heap estable antes → después |
+| --- | --- | --- |
+| 6.000 lotes / 1440 px | 162,5 → 145,7 ms | 17.530.568 → 17.592.224 bytes |
+| 6.000 lotes / 375 px | 143,8 → 150,4 ms | 16.397.808 → 16.424.436 bytes |
+| 60.000 lotes / 1440 px, par consecutivo | 1.185,0 → 707,0 ms | 41.120.036 → 39.968.296 bytes |
+
+La primera ejecución de 60.000 lotes mostró cuatro interacciones fuera del margen. Se conservaron sus informes `*-initial.json` y se repitió ese caso consecutivamente con las dos compilaciones, sin cambios de código ni de límites; la diferencia no se reprodujo. Estos valores son mediciones de la ejecución, no una atribución causal de mejora al cambio de códigos.
+
+Reproducción: `npm run build`, `node scripts/benchmark-barcodes.mjs`. El caso grande también puede contrastarse con `node scripts/recheck-barcodes-large.mjs`, conservando el primer informe. Compilación de referencia en `tests/.tmp/barcodes-baseline/dist`; guard de datos respaldado, nunca base usada como fixture. [Comparación](tests/evidence/barcodes/comparison.json), [informe completo](tests/evidence/barcodes/delivery-report.json).
+
+Estas mediciones son una referencia histórica previa a la simplificación de la vista de códigos. No se han vuelto a medir después de retirarla; se repiten compilación y recorridos funcionales.

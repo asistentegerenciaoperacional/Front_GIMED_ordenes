@@ -11,6 +11,10 @@
     "Selección exclusiva: verificado_sistema",
     "El filtro de columna refleja el paso: verificado_sistema",
     "Una sola casilla de estado seleccionada: verificado_sistema",
+    "Paso activo: activo",
+    "Selección exclusiva: activo",
+    "El filtro de columna refleja el paso: activo",
+    "Una sola casilla de estado seleccionada: activo",
     "Paso activo: asignado",
     "Selección exclusiva: asignado",
     "El filtro de columna refleja el paso: asignado",
@@ -39,5 +43,5 @@
     "Pasos dentro del ancho disponible a 375px"
   ],
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-IyPJ0D\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-7M9jYm\\database.json"
 }

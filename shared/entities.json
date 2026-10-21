@@ -37,7 +37,23 @@
     "estado_codigo": [
       "creado_gs1",
       "verificado_sistema",
+      "activo",
+      "//",
+      "Vigente,",
+      "asociado",
+      "y",
+      "disponible",
+      "como",
+      "alternativa",
       "asignado",
+      "//",
+      "Único",
+      "por",
+      "producto;",
+      "utilizado",
+      "para",
+      "nuevas",
+      "órdenes",
       "inactivo"
     ],
     "tipo_entidad_documento": [

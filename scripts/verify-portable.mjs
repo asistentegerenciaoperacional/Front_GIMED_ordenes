@@ -338,6 +338,30 @@ try {
   await stop(process4);
   assert.equal((await readdir(resolve(root, "data"))).filter(name => name.endsWith(".bak")).length, 1);
   check(true, "Segundo reinicio portable conserva la migración sin otro respaldo");
+  // Upgrade old barcode selection independently of the favorite-supplier conversion.
+  const legacyBarcodes = structuredClone(migrated);
+  const alternative = legacyBarcodes.codigos_barras.find(code => code.estado === "activo" && legacyBarcodes.codigos_barras.some(current => current.estado === "asignado" && current.id_producto === code.id_producto));
+  assert.ok(alternative);
+  const previousAssigned = legacyBarcodes.codigos_barras.find(code => code.estado === "asignado" && code.id_producto === alternative.id_producto);
+  alternative.estado = "asignado";
+  alternative.fecha_creacion = "2026-10-20T12:00:00.000Z";
+  const oldBarcodeBody = JSON.stringify(legacyBarcodes, null, 2) + "\n";
+  await writeFile(portableData, oldBarcodeBody);
+  const process5 = start(); await waitReady(process5);
+  const convertedBarcodes = await (await fetch(url + "/api/state")).json();
+  assert.equal(convertedBarcodes.codigos_barras.find(code => code.id === alternative.id).estado, "asignado");
+  assert.equal(convertedBarcodes.codigos_barras.find(code => code.id === previousAssigned.id).estado, "activo");
+  assert.deepEqual(convertedBarcodes.orden_producto, legacyBarcodes.orden_producto);
+  await stop(process5);
+  const barcodeBackups = (await readdir(resolve(root, "data"))).filter(name => name.includes(".barcodes-") && name.endsWith(".bak"));
+  assert.equal(barcodeBackups.length, 1);
+  assert.equal(await readFile(resolve(root, "data", barcodeBackups[0]), "utf8"), oldBarcodeBody);
+  check(true, "Portable convierte asignados anteriores, conserva órdenes y respalda el archivo exacto");
+  const process6 = start(); await waitReady(process6);
+  assert.deepEqual(await (await fetch(url + "/api/state")).json(), convertedBarcodes);
+  await stop(process6);
+  assert.equal((await readdir(resolve(root, "data"))).filter(name => name.endsWith(".bak")).length, 2);
+  check(true, "Segundo reinicio de códigos mantiene la asignación sin repetir migración ni respaldo");
   const finalOriginalHash = (await present(originalFile))
     ? sha(await readFile(originalFile))
     : null;

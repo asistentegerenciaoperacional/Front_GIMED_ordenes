@@ -1,0 +1,62 @@
+{
+  "checks": [
+    "Los cinco estados tienen etiqueta visible",
+    "Los cinco estados reutilizan colores diferentes",
+    "Contraste de Activo ≥ 4,5:1",
+    "Contraste de Verificado en sistema ≥ 4,5:1",
+    "Contraste de Creado en GS1 ≥ 4,5:1",
+    "Contraste de Asignado ≥ 4,5:1",
+    "Contraste de Inactivo ≥ 4,5:1",
+    "La tabla muestra una fila por código",
+    "Confirmación muestra código anterior y nuevo",
+    "Cancelar conserva la asignación",
+    "Cancelar devuelve el foco al botón",
+    "Sustitución intercambia Activo/Asignado",
+    "Comando completado: createOrder",
+    "Nueva orden usa el asignado elegido",
+    "Órdenes anteriores conservan sus códigos",
+    "Comando completado: setAssignedBarcode",
+    "Conflicto conserva diálogo e impide sobreescribir sin revisar",
+    "Revisión muestra la asignación concurrente",
+    "Reintento revisado guarda la selección original",
+    "Error de servicio conserva la selección y muestra el mensaje",
+    "Desactivar asignado advierte del bloqueo de emisión",
+    "Desactivación deja el producto sin asignado",
+    "Buscar código muestra la fila coincidente",
+    "Búsqueda sin coincidencias informa estado vacío",
+    "Proveedor de GS1 permanece bloqueado",
+    "Asociación nueva asigna automáticamente y conserva el anterior activo",
+    "Página contenida a 375px",
+    "Confirmación contenida a 375px",
+    "Página contenida a 768px",
+    "Confirmación contenida a 768px",
+    "Página contenida a 1024px",
+    "Confirmación contenida a 1024px",
+    "Página contenida a 1440px",
+    "Confirmación contenida a 1440px"
+  ],
+  "badgeStyles": {
+    "Activo": {
+      "color": "rgb(20, 117, 65)",
+      "background": "rgb(239, 250, 244)"
+    },
+    "Verificado en sistema": {
+      "color": "rgb(155, 75, 24)",
+      "background": "rgb(255, 245, 237)"
+    },
+    "Creado en GS1": {
+      "color": "rgb(136, 89, 19)",
+      "background": "rgb(255, 249, 237)"
+    },
+    "Asignado": {
+      "color": "rgb(36, 85, 178)",
+      "background": "rgb(239, 245, 255)"
+    },
+    "Inactivo": {
+      "color": "rgb(161, 57, 57)",
+      "background": "rgb(255, 242, 242)"
+    }
+  },
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-x1sugn\\database.json"
+}

@@ -10,7 +10,8 @@ async (page) => {
   const steps = [
     ["creado_gs1", "01 Creado en GS1"],
     ["verificado_sistema", "02 Verificado en sistema"],
-    ["asignado", "03 Asignado al producto"],
+    ["activo", "03 Activo"],
+    ["asignado", "04 Asignado"],
   ];
   const codes = () => page.locator(".data-table tbody tr td:first-child strong").allTextContents();
   const expected = (status) => db.codigos_barras
@@ -46,26 +47,26 @@ async (page) => {
     await sameCodes(expected(status));
     check(await button.getAttribute("aria-pressed") === "true", "Paso activo: " + status);
     check(await page.locator('.code-step[aria-pressed="true"]').count() === 1, "Selección exclusiva: " + status);
-    const panel = await open("Estado GS1 / sistema");
+    const panel = await open("Estados");
     const label = status === "asignado" ? "Asignado" : name.slice(3);
     check(await panel.getByRole("checkbox", { name: label, exact: true }).isChecked(), "El filtro de columna refleja el paso: " + status);
     check(await panel.locator('.column-value-list input:checked').count() === 1, "Una sola casilla de estado seleccionada: " + status);
     await panel.getByRole("button", { name: "Cancelar", exact: true }).click();
   }
-  await selectOnly(await open("Estado GS1 / sistema"), "Inactivo");
+  await selectOnly(await open("Estados"), "Inactivo");
   await sameCodes(expected("inactivo"));
   check(await page.locator('.code-step[aria-pressed="true"]').count() === 0, "Inactivo sigue disponible en el filtro y desactiva los pasos");
   await page.getByRole("button", { name: "Limpiar filtros (1)", exact: true }).click();
   await sameCodes(expected());
   check(await page.locator('.code-step[aria-pressed="true"]').count() === 0, "Limpiar filtros restablece los pasos y todas las filas");
 
-  await page.getByRole("button", { name: steps[2][1], exact: true }).click();
+  await page.getByRole("button", { name: steps[3][1], exact: true }).click();
   await (await open("Código")).getByRole("button", { name: "De Z a A", exact: true }).click();
   await sameCodes(expected("asignado"));
   const descending = expected("asignado").sort().reverse();
   check(JSON.stringify(await codes()) === JSON.stringify(descending), "Ordenamiento descendente aplicado");
   await page.getByRole("button", { name: steps[0][1], exact: true }).click();
-  await page.getByRole("button", { name: steps[2][1], exact: true }).click();
+  await page.getByRole("button", { name: steps[3][1], exact: true }).click();
   await sameCodes(descending);
   check(JSON.stringify(await codes()) === JSON.stringify(descending), "Cambiar de paso conserva el ordenamiento");
 
@@ -75,7 +76,7 @@ async (page) => {
   await page.getByRole("button", { name: steps[1][1], exact: true }).click();
   await sameCodes([]);
   check(await search.inputValue() === descending[0], "Cambiar estado conserva la búsqueda incluso sin coincidencias");
-  await page.getByRole("button", { name: steps[2][1], exact: true }).click();
+  await page.getByRole("button", { name: steps[3][1], exact: true }).click();
   await sameCodes([descending[0]]);
   await page.getByRole("button", { name: "Limpiar búsqueda", exact: true }).click();
   await sameCodes(descending);
@@ -86,17 +87,17 @@ async (page) => {
   await page.getByRole("button", { name: steps[0][1], exact: true }).click();
   await sameCodes([]);
   check(await page.getByRole("button", { name: "Limpiar filtros (2)", exact: true }).count() === 1, "El paso conserva el filtro de otra columna");
-  await page.getByRole("button", { name: steps[2][1], exact: true }).click();
+  await page.getByRole("button", { name: steps[3][1], exact: true }).click();
   await sameCodes([descending[0]]);
   await page.getByRole("button", { name: "Limpiar filtros (2)", exact: true }).click();
   await sameCodes(expected());
   check(JSON.stringify(await codes()) === JSON.stringify(expected().sort().reverse()), "Limpiar filtros conserva el ordenamiento");
 
-  const panel = await open("Estado GS1 / sistema");
+  const panel = await open("Estados");
   await selectOnly(panel, "Verificado en sistema");
   await sameCodes(expected("verificado_sistema"));
   check(await page.getByRole("button", { name: steps[1][1], exact: true }).getAttribute("aria-pressed") === "true", "Cambiar el estado desde la columna sincroniza el paso activo");
-  await (await open("Estado GS1 / sistema")).getByRole("button", { name: "Quitar filtro", exact: true }).click();
+  await (await open("Estados")).getByRole("button", { name: "Quitar filtro", exact: true }).click();
   await sameCodes(expected());
   check(await page.locator('.code-step[aria-pressed="true"]').count() === 0, "Quitar el filtro desde la columna desactiva los pasos");
 

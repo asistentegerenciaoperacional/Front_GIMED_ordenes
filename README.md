@@ -55,12 +55,12 @@ Cada tabla de datos indicada aquí debe ofrecer un botón de filtro en las cabec
 | Órdenes de compra → Materiales y Otros       | Orden/tipo (entero), proveedor (texto), materiales o conceptos (texto), fecha de elaboración (fecha), entrega solicitada (fecha), estado (enumeración) y total (importe). |
 | Facturas                                     | Número de factura y proveedor (texto), registro (fecha), recepciones (entero) y documentos (únicamente Con documento / Sin documento).                                    |
 | Abastecimiento → Vínculos entre órdenes      | Orden de producto y orden de material (entero), producto/maquilador y material/proveedor (texto), estado del material (enumeración).                                      |
-| Catálogos → Productos → Lista de productos   | Producto, maquilador, categoría, maquila/IVA y código activo (texto); unidades por lote (entero); activo (enumeración Sí/No).                                             |
+| Catálogos → Productos → Lista de productos   | Producto, maquilador, categoría, maquila/IVA y código asignado (texto); unidades por lote (entero); activo (enumeración Sí/No).                                             |
 | Catálogos → Materiales → Lista de materiales | Código MAIA, material y tipo de material (texto). El código conserva sus ceros iniciales.                                                                                 |
 | Proveedores → Proveedores                    | Nombre completo, nombre resumido y NIT (texto); proveedor de maquila, proveedor de materiales y activo (enumeraciones Sí/No).                                             |
 | Proveedores → Direcciones de proveedor       | Proveedor, nombre de bodega, ciudad, dirección y complemento (texto).                                                                                                     |
 | Proveedores → Contactos de proveedor         | Proveedor, nombre, cargo o área, correo y celular (texto).                                                                                                                |
-| Códigos de barras                            | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). La explicación de los cuatro estados se abre desde el botón **(?)** junto a la búsqueda.   |
+| Códigos de barras                            | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). La explicación de los cinco estados se abre desde el botón **(?)** junto a la búsqueda.   |
 
 La búsqueda y los filtros se pueden limpiar por separado. Al filtrar, se mantienen las cabeceras y controles para ajustar los criterios aunque la tabla no tenga coincidencias.
 
@@ -219,3 +219,6 @@ La arquitectura y el stack de producción continúan pendientes. También perman
 ## Migración a React Aria
 
 La directriz obligatoria de componentes está en [MASTER.md](design-system/MASTER.md). El inventario, el commit de recuperación y el estado de las pruebas se mantienen en [MIGRACION-ARIA.md](MIGRACION-ARIA.md). Las cifras de las verificaciones anteriores son referencias históricas, no el resultado de la migración.
+
+
+Los códigos de barras distinguen Activo (alternativa vigente) y Asignado (único código usado al emitir). Asociar uno nuevo asigna y deja el anterior activo; los cambios no alteran las órdenes históricas. La tabla muestra una fila por código, con filtros y acciones. Se reutilizan cinco badges de colores distintos. Flujo, recuperación y pruebas: [CODIGOS-BARRAS.md](CODIGOS-BARRAS.md).

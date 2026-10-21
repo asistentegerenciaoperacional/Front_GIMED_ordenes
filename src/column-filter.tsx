@@ -42,10 +42,29 @@ export function ColumnHeader<Key extends string>(
 ) {
   const { column, filter, sort, open, onOpen, onClose } = props;
   const trigger = useRef<HTMLButtonElement>(null);
+  const currentOpen = useRef(open);
+  const scrolling = useRef(false);
+  currentOpen.current = open;
   const sorted = !column.selectionOnly && sort?.column === column.key;
   const filtered = hasFilter(filter);
   const menuLabel =
     (column.selectionOnly ? "Filtrar " : "Filtrar y ordenar ") + column.label;
+  useEffect(() => {
+    let scrollTimer: number | undefined;
+    const onScroll = () => {
+      if (!currentOpen.current) return;
+      scrolling.current = true;
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        scrolling.current = false;
+      }, 0);
+    };
+    window.addEventListener("scroll", onScroll, true);
+    return () => {
+      window.removeEventListener("scroll", onScroll, true);
+      window.clearTimeout(scrollTimer);
+    };
+  }, []);
   const content = (
     <>
       <div className="column-heading">
@@ -79,7 +98,10 @@ export function ColumnHeader<Key extends string>(
           isNonModal
           triggerRef={trigger}
           isOpen={open}
-          onOpenChange={(next) => (next ? onOpen() : onClose())}
+          onOpenChange={(next) => {
+            if (next) onOpen();
+            else if (!scrolling.current) onClose();
+          }}
           placement="bottom end"
           offset={6}
           containerPadding={8}

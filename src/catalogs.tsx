@@ -3,7 +3,7 @@ import { useDeferredValue, useMemo, useState } from "react";
 import {
   currentCost,
   labels,
-  latestBarcode,
+  assignedBarcode,
   meta,
   orderReference,
   primaryKey,
@@ -66,7 +66,7 @@ const productFilterColumns: Column<string>[] = [
   { key: "id_categoria", label: "Categoría", kind: "text" },
   { key: "activo", label: "Activo", kind: "enum" },
   { key: "maquila_iva", label: "Maquila / IVA", kind: "text" },
-  { key: "codigo_activo", label: "Código activo", kind: "text" },
+  { key: "codigo_activo", label: "Código asignado", kind: "text" },
 ];
 
 const materialFilterColumns: Column<string>[] = [
@@ -107,6 +107,17 @@ const catalogCell = (
   };
 };
 
+function catalogDisplayValue(
+  db: ReturnType<typeof useApp>["db"],
+  entity: Entity,
+  record: Row,
+  field: string,
+) {
+  const value = displayField(db, entity, field, record[field]);
+  if (entity !== "proveedor" || field !== "nit" || !record.nit) return value;
+  return `${value}${record.digito_verf ? `-${record.digito_verf}` : ""}`;
+}
+
 function buildCatalogFilterRows(
   db: ReturnType<typeof useApp>["db"],
   entity: Entity,
@@ -114,7 +125,7 @@ function buildCatalogFilterRows(
 ): CatalogFilterRow[] {
   return (db[entity] as Row[]).map((record) => {
     const visibleFields = fields.map((field) =>
-      displayField(db, entity, field, record[field]),
+      catalogDisplayValue(db, entity, record, field),
     );
     const historicalCodes =
       entity === "productos"
@@ -135,7 +146,7 @@ function buildCatalogFilterRows(
         db.categorias.find((category) => category.id === record.id_categoria)
           ?.iva ?? null;
       const maquilaIva = `${hasAssociatedMaterials ? "PARCIAL" : "FULL"} · IVA ${iva ?? "—"} %`;
-      const barcode = latestBarcode(db, record.id)?.codigo ?? null;
+      const barcode = assignedBarcode(db, record.id)?.codigo ?? null;
       const active = record.activo == null ? null : Boolean(record.activo);
       const activeLabel = active === null ? "Sin valor" : active ? "Sí" : "No";
       cells.nombre_producto = catalogCell(
@@ -163,9 +174,10 @@ function buildCatalogFilterRows(
       cells.codigo_activo = catalogCell(barcode, barcode ?? "Sin código");
     } else {
       for (const field of fields) {
+        const value = catalogDisplayValue(db, entity, record, field);
         cells[field] = catalogCell(
-          displayField(db, entity, field, record[field]),
-          displayField(db, entity, field, record[field]),
+          value,
+          value,
           undefined,
           record[field],
         );
@@ -258,7 +270,7 @@ export function CatalogTable({ entity }: { entity: Entity }) {
     : (db[entity] as Row[]).filter((record) =>
         [
           ...fields.map((field) =>
-            displayField(db, entity, field, record[field]),
+            catalogDisplayValue(db, entity, record, field),
           ),
           ...(entity === "productos"
             ? db.codigos_barras
@@ -395,7 +407,7 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                               {row[f] ? "Sí" : "No"}
                             </Badge>
                           ) : (
-                            displayField(db, entity, f, row[f])
+                            catalogDisplayValue(db, entity, row, f)
                           )}
                         </TableCell>
                       ))}
@@ -418,7 +430,7 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                             </small>
                           </TableCell>
                           <TableCell className="mono">
-                            {latestBarcode(db, row.id)?.codigo ?? "Sin código"}
+                            {assignedBarcode(db, row.id)?.codigo ?? "Sin código"}
                           </TableCell>
                         </>
                       )}
@@ -443,13 +455,15 @@ export function CatalogTable({ entity }: { entity: Entity }) {
                             />
                           )}
                           <Button
-                            className="icon-btn"
+                            className="icon-btn delete-action"
                             icon={Trash2}
                             aria-label={`Eliminar ${recordName(db, entity, row)}`}
                             onClick={async () => {
                               if (
                                 await confirmAction(
                                   "¿Eliminar este registro? Solo se eliminará si no deja referencias pendientes.",
+                                  "Eliminar registro",
+                                  true,
                                 )
                               )
                                 void run(

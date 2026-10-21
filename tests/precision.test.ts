@@ -4,7 +4,7 @@ import { makeSeed, sid } from "../shared/seed";
 import {
   recommendations,
   increasedQuantity,
-  latestBarcode,
+  assignedBarcode,
   type Row,
 } from "../shared/schema";
 import { validateDatabase, BusinessError } from "../server/integrity";
@@ -22,20 +22,24 @@ test("redondeo exacto: resultados enteros no ganan una unidad por error de punto
   assert.equal(recommendations(db, sid(70), 5000, 5.5).cantidad_sticker, 10550);
   assert.equal(recommendations(db, sid(71), 4001).cantidad_cinta, 2);
 });
-test("ISO con desfase se normaliza a UTC antes de determinar el código más reciente", () => {
+test("ISO con desfase se normaliza a UTC y la emisión conserva la selección explícita", () => {
   const db = makeSeed();
   db.codigos_barras.find((c) => c.id === sid(90))!.fecha_creacion =
     "2026-10-05T12:00:00+03:00";
   db.codigos_barras.push({
     id: sid(350),
     codigo: "123456",
-    estado: "asignado",
+    estado: "activo",
     id_producto: sid(70),
     fecha_creacion: "2026-10-05T11:00:00Z",
     fecha_act: null,
   });
   const checked = validateDatabase(db);
-  assert.equal(latestBarcode(checked, sid(70))!.id, sid(350));
+  assert.equal(
+    checked.codigos_barras.find((c) => c.id === sid(90))!.fecha_creacion,
+    "2026-10-05T09:00:00.000Z",
+  );
+  assert.equal(assignedBarcode(checked, sid(70))!.id, sid(90));
 });
 test("producto de otro maquilador rechazado; cambiar el catálogo no altera el proveedor histórico", async () => {
   const db = makeSeed();
