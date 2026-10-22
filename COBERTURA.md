@@ -98,3 +98,9 @@ Se mantienen contratos del servicio, validación Zod, selección por ID, importe
 ### Códigos de barras · 20 de octubre de 2026
 
 Cinco estados de color distinto, Asignado único por producto, asociación inicial automática y sustitución atómica por cualquier Activo del mismo producto. Conflictos conservan la selección y exigen revisión; desactivar el asignado bloquea emisiones futuras hasta elegir otro. Historial/impresión conservan su código. La tabla muestra una fila por código, con búsqueda, filtros, ordenamiento y acciones. Conserva códigos sin producto, selección por ID y proveedor GS1 bloqueado. Conversión idempotente de bases antiguas y restablecimiento autorizado de toda la demo con respaldo. [Especificación y evidencia](CODIGOS-BARRAS.md).
+
+### Costos de maquila · 22 de octubre de 2026
+
+Alta y edición exigen producto, importe entero positivo e inicio. La integridad transaccional impide periodos solapados, extremos compartidos y más de un periodo abierto por producto. Fechas inclusivas en America/Bogota; el costo futuro no se anticipa y las órdenes conservan sus precios.
+
+Lista agrupada compartida con favoritos, filtro Con costos/Todos los productos junto a Agregar, búsqueda por producto/importe/fechas e historial completo. El + bloquea el producto del alta. Lápiz y papelera aparecen con hover o foco; en táctil permanecen visibles. Se conservan borrador, confirmaciones, foco y scroll. [Especificación y recuperación](COSTOS-MAQUILA.md).

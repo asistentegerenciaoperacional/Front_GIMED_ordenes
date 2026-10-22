@@ -2,6 +2,7 @@ import { z } from "zod";
 z.config(z.locales.es());
 import metadata from "./entities.json";
 import type { Database } from "./models";
+import { costDay } from "./maquila-costs";
 export type Entity = keyof Database;
 export type Row = Record<string, any>;
 export type FieldSpec = {
@@ -104,6 +105,12 @@ export const schemas = Object.fromEntries(
           .string()
           .trim()
           .min(1, "Escribe un número de lote o deja el campo vacío.");
+      if (name === "costos_maquila" && field === "costo")
+        type = z
+          .number({ error: "Ingresa un costo entero mayor que cero." })
+          .int("Ingresa un costo entero mayor que cero.")
+          .positive("Ingresa un costo entero mayor que cero.")
+          .refine(Number.isSafeInteger, "Entero fuera de rango.");
       shape[field] = spec.required ? type : type.nullable();
     }
     const schema = z.strictObject(shape);
@@ -240,16 +247,14 @@ export function currentCost(
   product: string,
   at = new Date().toISOString(),
 ) {
-  return db.costos_maquila
-    .filter(
-      (c) =>
-        c.id_producto === product &&
-        (!c.fecha_inicio || c.fecha_inicio <= at) &&
-        (!c.fecha_fin || c.fecha_fin >= at),
-    )
-    .sort((a, b) =>
-      (b.fecha_inicio ?? "").localeCompare(a.fecha_inicio ?? ""),
-    )[0];
+  const day = costDay(at);
+  if (!day) return undefined;
+  return db.costos_maquila.find(
+    (c) =>
+      c.id_producto === product &&
+      costDay(c.fecha_inicio)! <= day &&
+      (!c.fecha_fin || costDay(c.fecha_fin)! >= day),
+  );
 }
 export function materialKind(db: Database, id: string): string {
   const m = db.materiales.find((m) => m.id === id);

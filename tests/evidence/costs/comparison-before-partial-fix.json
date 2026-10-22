@@ -1,0 +1,652 @@
+{
+  "acceptance": "Equipo actual sin limitación de CPU; ensayo CPU 4x separado por confirmación del usuario",
+  "stressReport": null,
+  "browser": "155.0.8059.85",
+  "date": "2026-10-22T16:26:14.563Z",
+  "baselineCommit": "62410899848934140d0c2543962afe6c84169b7a",
+  "dataHash": "24d35b39004e5162127b4775b483d0173e39c21601d11b256a14211b88406f6c",
+  "memoryAllowanceBytes": 5000000,
+  "passed": true,
+  "measurements": [
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 145.89999997615814,
+      "after": 145.69999998807907,
+      "limit": 245.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 55.10000002384186,
+      "after": 54.40000003576279,
+      "limit": 75.10000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 60.60000002384186,
+      "after": 60.19999998807907,
+      "limit": 80.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 38.80000001192093,
+      "after": 42.19999998807907,
+      "limit": 58.80000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 56.700000047683716,
+      "after": 46,
+      "limit": 76.70000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 44.90000003576279,
+      "after": 47,
+      "limit": 64.90000003576279,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 42.69999998807907,
+      "after": 44.30000001192093,
+      "limit": 62.69999998807907,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 44.19999998807907,
+      "after": 46,
+      "limit": 64.19999998807907,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 44.09999996423721,
+      "after": 44.89999997615814,
+      "limit": 64.09999996423721,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 50.90000003576279,
+      "after": 44.80000001192093,
+      "limit": 70.90000003576279,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 42.80000001192093,
+      "after": 40.59999996423721,
+      "limit": 62.80000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 46.30000001192093,
+      "after": 45,
+      "limit": 66.30000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 17944964,
+      "after": 17934964,
+      "limit": 22944964,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 131.19999998807907,
+      "after": 145.80000001192093,
+      "limit": 231.19999998807907,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 55.10000002384186,
+      "after": 54.30000001192093,
+      "limit": 75.10000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 68.89999997615814,
+      "after": 61,
+      "limit": 88.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 42.59999996423721,
+      "after": 40.59999996423721,
+      "limit": 62.59999996423721,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 45.60000002384186,
+      "after": 52.19999998807907,
+      "limit": 65.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 45.30000001192093,
+      "after": 44.19999998807907,
+      "limit": 65.30000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 43.69999998807907,
+      "after": 43.5,
+      "limit": 63.69999998807907,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 44,
+      "after": 44.90000003576279,
+      "limit": 64,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 43.60000002384186,
+      "after": 44.5,
+      "limit": 63.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 45.200000047683716,
+      "after": 45.5,
+      "limit": 65.20000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 36.39999997615814,
+      "after": 51,
+      "limit": 56.39999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 46.69999998807907,
+      "after": 46.39999997615814,
+      "limit": 66.69999998807907,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 16623392,
+      "after": 16625480,
+      "limit": 21623392,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 726.8999999761581,
+      "after": 710.3000000119209,
+      "limit": 835.9349999725819,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 55.90000003576279,
+      "after": 55.40000003576279,
+      "limit": 75.90000003576279,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 71.70000004768372,
+      "after": 72.09999996423721,
+      "limit": 91.70000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 42.200000047683716,
+      "after": 40.89999997615814,
+      "limit": 62.200000047683716,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 46,
+      "after": 45.80000001192093,
+      "limit": 66,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 46.09999996423721,
+      "after": 45.69999998807907,
+      "limit": 66.09999996423721,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 42,
+      "after": 43,
+      "limit": 62,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 45.30000001192093,
+      "after": 45.5,
+      "limit": 65.30000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 45.59999996423721,
+      "after": 45,
+      "limit": 65.59999996423721,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 45.40000003576279,
+      "after": 45.5,
+      "limit": 65.40000003576279,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 41.80000001192093,
+      "after": 52.60000002384186,
+      "limit": 61.80000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 46.09999996423721,
+      "after": 45.59999996423721,
+      "limit": 66.09999996423721,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 40268512,
+      "after": 40271544,
+      "limit": 46308788.8,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 440.2000000476837,
+      "after": 427.0999999642372,
+      "limit": 540.2000000476837,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 55.200000047683716,
+      "after": 51.90000003576279,
+      "limit": 75.20000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 64.59999996423721,
+      "after": 69.10000002384186,
+      "limit": 84.59999996423721,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 1440px / CPU 1x",
+      "metric": "editor-open P95 ms",
+      "before": 41.799999952316284,
+      "after": 44,
+      "limit": 61.799999952316284,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 1440px / CPU 1x",
+      "metric": "editor-close P95 ms",
+      "before": 46.60000002384186,
+      "after": 46.799999952316284,
+      "limit": 66.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 12007284,
+      "after": 12269328,
+      "limit": 17007284,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 1440px / CPU 1x",
+      "metric": "heap after 30 editor/search/disclosure cycles",
+      "before": 8024576,
+      "after": 12269328,
+      "limit": 13024576,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 375px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 427.69999998807907,
+      "after": 412.69999998807907,
+      "limit": 527.6999999880791,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 375px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 57.30000001192093,
+      "after": 51.200000047683716,
+      "limit": 77.30000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 375px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 61.69999998807907,
+      "after": 60.69999998807907,
+      "limit": 81.69999998807907,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 375px / CPU 1x",
+      "metric": "editor-open P95 ms",
+      "before": 39.80000001192093,
+      "after": 43.89999997615814,
+      "limit": 59.80000001192093,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 375px / CPU 1x",
+      "metric": "editor-close P95 ms",
+      "before": 46,
+      "after": 46.700000047683716,
+      "limit": 66,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 375px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 11969744,
+      "after": 12280452,
+      "limit": 16969744,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 6000 lotes / 375px / CPU 1x",
+      "metric": "heap after 30 editor/search/disclosure cycles",
+      "before": 8026276,
+      "after": 12280452,
+      "limit": 13026276,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 60000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 841.5,
+      "after": 747.0999999642372,
+      "limit": 967.725,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 60000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 55.5,
+      "after": 52.5,
+      "limit": 75.5,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 60000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 61.700000047683716,
+      "after": 67,
+      "limit": 81.70000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 60000 lotes / 1440px / CPU 1x",
+      "metric": "editor-open P95 ms",
+      "before": 40.90000003576279,
+      "after": 43,
+      "limit": 60.90000003576279,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 60000 lotes / 1440px / CPU 1x",
+      "metric": "editor-close P95 ms",
+      "before": 45.60000002384186,
+      "after": 46.09999996423721,
+      "limit": 65.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 60000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 29174276,
+      "after": 27994832,
+      "limit": 34174276,
+      "passed": true
+    },
+    {
+      "scenario": "Costos: 60000 lotes / 1440px / CPU 1x",
+      "metric": "heap after 30 editor/search/disclosure cycles",
+      "before": 23692256,
+      "after": 27994832,
+      "limit": 28692256,
+      "passed": true
+    }
+  ],
+  "downloads": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "beforeBytes": 838531,
+      "afterBytes": 841071
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "beforeBytes": 838531,
+      "afterBytes": 841071
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "beforeBytes": 838531,
+      "afterBytes": 841071
+    }
+  ],
+  "cycles": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "beforeGrowth": 642788,
+      "afterGrowth": 606160,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 17328804
+        },
+        {
+          "cycles": 10,
+          "usedSize": 17811232
+        },
+        {
+          "cycles": 20,
+          "usedSize": 17864112
+        },
+        {
+          "cycles": 30,
+          "usedSize": 17877700
+        },
+        {
+          "cycles": 40,
+          "usedSize": 17903644
+        },
+        {
+          "cycles": 50,
+          "usedSize": 17934964
+        }
+      ]
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "beforeGrowth": 576644,
+      "afterGrowth": 576180,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 16049300
+        },
+        {
+          "cycles": 10,
+          "usedSize": 16491028
+        },
+        {
+          "cycles": 20,
+          "usedSize": 16549552
+        },
+        {
+          "cycles": 30,
+          "usedSize": 16564704
+        },
+        {
+          "cycles": 40,
+          "usedSize": 16588444
+        },
+        {
+          "cycles": 50,
+          "usedSize": 16625480
+        }
+      ]
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "beforeGrowth": 608436,
+      "afterGrowth": 600588,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 39670956
+        },
+        {
+          "cycles": 10,
+          "usedSize": 40162564
+        },
+        {
+          "cycles": 20,
+          "usedSize": 40205056
+        },
+        {
+          "cycles": 30,
+          "usedSize": 40216224
+        },
+        {
+          "cycles": 40,
+          "usedSize": 40250536
+        },
+        {
+          "cycles": 50,
+          "usedSize": 40271544
+        }
+      ]
+    }
+  ],
+  "longTasks": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "before": [
+        60,
+        52,
+        61,
+        57
+      ],
+      "after": [
+        58
+      ]
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "before": [],
+      "after": []
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "before": [
+        56,
+        84,
+        255,
+        51
+      ],
+      "after": [
+        56,
+        57,
+        85,
+        262
+      ]
+    }
+  ],
+  "costComponents": {
+    "before": "baseline-cost-components.json",
+    "after": "after-cost-components.json"
+  },
+  "stressNote": "CPU 4× es un ensayo separado; no se ejecutó para este cambio."
+}

@@ -55,6 +55,8 @@ Catálogos separa la navegación con pestañas principales **Productos**, **Mate
 
 Usar `GroupedRelationsTable` cuando varias relaciones compartan una entidad principal: una fila por entidad, conteo, expansión accesible (`aria-expanded`/`aria-controls`) y detalle a todo el ancho. Incluir entidades sin relaciones; bloquear solo su despliegue y mantener el lápiz de edición habilitado. Buscar por principal o relacionados; abrir los grupos coincidentes y permitir cerrarlos. Si todas las entidades ya están representadas, no añadir Agregar global.
 
+Las tablas internas de los grupos usan `table-layout: fixed`: encabezados y celdas conservan las mismas posiciones entre grupos, independientemente de sus textos, fechas vacías o número de filas. Sus encabezados son transparentes, sin borde superior ni banner gris; solo la cabecera de la tabla principal conserva su fondo. En costos, reservar 96 px para la columna de acciones desde el encabezado. Mantener el mínimo de 520 px del historial más la sangría y los márgenes en la tabla agrupada exterior: en móvil hay un único scroll horizontal compartido, sin desplazar un panel por separado al enfocar sus botones. No cambiar la lista simple de proveedores favoritos.
+
 En favoritos, las filas de tipos de material conservan las medidas comunes de las tablas con **2 px adicionales de altura total**, repartidos en 1 px arriba y 1 px abajo. El padding superior e inferior es de 18 px; desde 1600 px de ancho de ventana, de 21 px. El padding horizontal es de 18 px y pasa a 14 px hasta 1190 px de ancho. La altura sigue adaptándose al contenido y a los controles; la compactación del detalle de proveedores se aplica por separado.
 
 El tipo conserva el énfasis y sus proveedores usan peso 400 con sangría de 24 px respecto al nombre del tipo. Cada proveedor tiene 6 px de padding arriba y abajo. El detalle no añade padding a la celda ni arriba de la lista y deja 4 px abajo, sin tarjeta de fondo. El botón de desplegar/ocultar conserva la variante ghost y presenta un borde gris de 1 px `#CBD5E1`, visible también sin hover, con radio de 7 px. Mide 34 × 34 px y pasa a 40 × 40 px hasta 600 px de ancho de ventana; mantiene foco visible y nombre accesible.
@@ -76,6 +78,16 @@ Proveedores y materiales de los diálogos reutilizan el mismo autocompletado y e
 El drawer fijado ocupa una columna propia y permanece visible al navegar y desplazar la página. Al desfijarlo, la columna se libera y el panel permanece abierto de forma flotante, con todo el ancho disponible para el contenido. Al cambiar entre fijado y flotante se cancelan las animaciones del panel para evitar repetir su entrada; la apertura habitual conserva su animación. El cambio de ancho utiliza una transición de 180 ms, desactivada con movimiento reducido. La fijación está disponible desde 1024 px de ancho de ventana. Por debajo, el botón desaparece y el panel fijado pasa automáticamente a flotante, liberando su columna y enfocando el cierre. Ampliar la ventana conserva el modo flotante hasta una nueva fijación.
 
 La cabecera conserva el botón de fijar/desfijar en los anchos permitidos; el cierre aparece en el modo flotante. Los destinos tienen desplazamiento interno y las tablas tienen desplazamiento horizontal propio cuando no caben. Las columnas de formularios se reducen a una por debajo de 600 px.
+
+## Costos de maquila agrupados por producto
+
+Usar exclusivamente los componentes compartidos React Aria y `GroupedRelationsTable`, con una acción de grupo configurable: + en costos y lápiz en favoritos. No duplicar la implementación del despliegue ni modificar el comportamiento de favoritos. Los productos muestran nombre y conteo; el historial conserva peso normal, sangría, densidad, animación y movimiento reducido existentes. Distinguir homónimos por maquilador e ID.
+
+El selector **Filtro personalizado de costos** se coloca inmediatamente antes de **Agregar**, con **Con costos** por defecto y **Todos los productos** como alternativa. Mantenerlos en la misma fila y adaptar el conjunto a móvil. Los productos sin costos mantienen el + y deshabilitan el despliegue. Buscar por producto, importe o fecha abre el grupo con su historial completo.
+
+El lápiz y la papelera de cada costo aparecen solo con hover de fila o `focus-within`; reservar su ancho para no mover columnas. En `hover: none` o `pointer: coarse` permanecen visibles. Conservar nombres accesibles, foco visible, tooltip compartido y hover destructivo existente. El + del producto permanece visible.
+
+El alta desde + bloquea el producto; el alta general permite seleccionarlo. Importe e inicio son obligatorios y el costo es entero positivo. Mostrar errores de periodo junto a las fechas, identificando el costo incompatible; conservar el borrador y no cerrar fechas automáticamente. Guardar mantiene abierto el producto y cerrar recupera foco/scroll; si desaparece el grupo, enfocar Agregar. Usar la confirmación compartida para descarte y eliminación, y bloquear cierre/envíos durante el guardado. Reglas, recuperación y pruebas: [COSTOS-MAQUILA.md](../COSTOS-MAQUILA.md).
 
 ## Estados e interacción
 

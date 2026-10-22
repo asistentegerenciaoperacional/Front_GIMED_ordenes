@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Database } from "../shared/models";
+import { costIssue } from "../shared/maquila-costs";
 import {
   blankRow,
   schemas,
@@ -713,6 +714,16 @@ export async function command(
           "R12",
           { codigo_material: "Introduce exactamente tres dígitos." },
         );
+      if (table === "costos_maquila") {
+        const issue = costIssue(parsed.data, db.costos_maquila);
+        if (issue)
+          throw new BusinessError(
+            "Revisa el periodo del costo de maquila.",
+            "COST_PERIOD_CONFLICT",
+            issue.fields,
+            issue,
+          );
+      }
       if (old)
         (db[table] as Row[])[(db[table] as Row[]).indexOf(old)] = parsed.data;
       else (db[table] as Row[]).push(parsed.data);

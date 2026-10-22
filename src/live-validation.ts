@@ -1,4 +1,5 @@
 import type { Database } from "../shared/models";
+import { costIssue } from "../shared/maquila-costs";
 import {
   canonical,
   decimal,
@@ -71,6 +72,19 @@ export function validEntityField(
   const value = normalizedField(entity, field, raw);
   if (spec.required && typeof value === "string" && !value.trim()) return false;
   if (!schemas[entity].shape[field].safeParse(value).success) return false;
+  if (entity === "costos_maquila" && db) {
+    const normalized = Object.fromEntries(
+      Object.entries(values).map(([name, raw]) => [
+        name,
+        normalizedField(entity, name, raw),
+      ]),
+    );
+    const issue = costIssue(
+      { ...normalized, id: record?.id },
+      db.costos_maquila,
+    );
+    if (issue?.fields[field]) return false;
+  }
   if (
     entity === "lote_producto" &&
     field === "numero_lote" &&

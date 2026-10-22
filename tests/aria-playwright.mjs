@@ -73,6 +73,11 @@ export function ariaPage(page, { autoConfirm = true } = {}) {
             if (kind === "SELECT") return object.selectOption(requested);
             const currentPage = object.page();
             if (kind === "INPUT") {
+              if (wanted === "") {
+                await object.fill("");
+                await object.press("Tab");
+                return [""];
+              }
               if (byLabel) await object.fill(wanted);
               else {
                 await object.fill("");

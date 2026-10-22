@@ -295,11 +295,11 @@
         },
         "costo": {
           "type": "integer",
-          "required": false
+          "required": true
         },
         "fecha_inicio": {
           "type": "datetime",
-          "required": false
+          "required": true
         },
         "fecha_fin": {
           "type": "datetime",

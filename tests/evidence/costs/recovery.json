@@ -1,0 +1,16 @@
+{
+  "commit": "62410899848934140d0c2543962afe6c84169b7a",
+  "date": "2026-10-22T15:32:04.7375936Z",
+  "backups": [
+    {
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\costs-recovery-20261022T153204555Z\\database.json.bak",
+      "source": "data/database.json",
+      "sha256": "24D35B39004E5162127B4775B483D0173E39C21601D11B256A14211B88406F6C"
+    },
+    {
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\costs-recovery-20261022T153204555Z\\db.md.bak",
+      "source": "../Planeacion/db.md",
+      "sha256": "BCAB1DC4247A56EECE6544DD536A8DFE58711DAE4122378DFBA7AC8ADE868553"
+    }
+  ]
+}

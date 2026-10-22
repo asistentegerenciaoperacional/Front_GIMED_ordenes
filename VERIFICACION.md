@@ -551,3 +551,38 @@ Reproducción:
     node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js chromium
     npm run test:calendar
     npm test
+
+### Costos de maquila · 22 de octubre de 2026
+
+- Referencia inicial: 167/167 pruebas. Resultado: 180/180, incluidos importe obligatorio, fechas y límites inclusivos, todos los solapamientos, cierre antes del siguiente abierto, concurrencia, historial, persistencia y corrección autorizada del archivo.
+- Playwright: 66 comprobaciones de costos por navegador en Chromium, Firefox y WebKit, a 375/768/1024/1440 px y contexto táctil. Incluye búsqueda, filtro por teclado, escritura continua y parcial de fechas, acciones contextuales, errores, borrador, descarte, foco, scroll y cierre bloqueado durante guardado.
+- Regresiones: 71 comprobaciones de favoritos, 195 de formularios y 598 del recorrido integral; sin errores de consola. Se adaptaron las etiquetas actuales de adjuntos/códigos y la automatización del borrado de ComboBox sin retirar comprobaciones de negocio.
+- Portable nuevo en archivo temporal: 23 comprobaciones. La base local conserva las otras 27 colecciones y todos los demás costos; el único registro retirado figura en el informe con hashes.
+
+Reproducción: `npm test`, `npm run build`, `node scripts/verify-aria-browser.mjs tests/maquila-costs.browser.js chromium` (también Firefox y WebKit). El ensayo de rendimiento es `node scripts/benchmark-costs.mjs` después de compilar. [Informes y capturas](tests/evidence/costs), [reglas y recuperación](COSTOS-MAQUILA.md).
+
+### Alineación de tablas agrupadas · 22 de octubre de 2026
+
+Se reprodujo la desalineación de los historiales en Chromium antes de corregir
+los estilos. Las tablas internas ahora distribuyen sus columnas con ancho fijo,
+reservan la columna de acciones desde el encabezado y no llevan fondo gris ni
+borde superior. La cabecera principal conserva su estilo. El mínimo exterior
+incluye la sangría del historial: el foco en una acción no desplaza únicamente
+su panel en móvil; el scroll horizontal pertenece al conjunto.
+
+La prueba `tests/maquila-costs-layout.browser.js` mide las posiciones y anchos
+de todos los encabezados y sus celdas entre productos a 375/768/1024/1440/1680
+px, con historiales distintos y fechas de fin vacías o informadas. Comprueba
+hover, foco, cierre/reapertura, ausencia del banner, contención horizontal y
+que favoritos mantenga su lista y despliegue. No modifica registros.
+Pasaron las 49 comprobaciones de navegador, las 180 pruebas unitarias y la
+compilación de producción.
+
+[Reporte de alineación](tests/evidence/costs/chromium-maquila-costs-layout.browser.json)
+y capturas `aligned-groups-375.png`, `aligned-groups-1024.png` y
+`aligned-groups-1440.png` en `tests/evidence/costs/`.
+
+Reproducción:
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/maquila-costs-layout.browser.js chromium

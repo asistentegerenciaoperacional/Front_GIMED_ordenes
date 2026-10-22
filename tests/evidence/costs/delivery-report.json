@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-22T17:03:58.301Z",
+  "recoveryCommit": "62410899848934140d0c2543962afe6c84169b7a",
+  "backups": [
+    {
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\costs-recovery-20261022T153204555Z\\database.json.bak",
+      "source": "data/database.json",
+      "sha256": "24D35B39004E5162127B4775B483D0173E39C21601D11B256A14211B88406F6C"
+    },
+    {
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\costs-recovery-20261022T153204555Z\\db.md.bak",
+      "source": "../Planeacion/db.md",
+      "sha256": "BCAB1DC4247A56EECE6544DD536A8DFE58711DAE4122378DFBA7AC8ADE868553"
+    }
+  ],
+  "schemaSha256": "c17b5bba0df4dd20abb0b72a594415754f2759fcb63850d7e0f573ecbe5bfc93",
+  "dataCorrection": {
+    "date": "2026-10-22T15:37:39.962Z",
+    "backup": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\costs-recovery-20261022T153204555Z\\database.json.bak",
+    "file": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\database.json",
+    "beforeSha256": "24d35b39004e5162127b4775b483d0173e39c21601d11b256a14211b88406f6c",
+    "afterSha256": "c0fbc23dd7ed81c8f4b9f1c8cf8c41483a6da02515c36ecafd9ea5433d811ef7",
+    "removed": {
+      "id": "e86e766ec339006bdbb45239",
+      "id_producto": "000000000000000000000046",
+      "costo": 2000,
+      "fecha_inicio": "2025-11-01T12:00:00.000Z",
+      "fecha_fin": "2026-11-01T12:00:00.000Z"
+    },
+    "before": 5,
+    "after": 4,
+    "unchangedCollections": [
+      "productos",
+      "codigos_barras",
+      "proveedor",
+      "direccion_proveedor",
+      "contacto",
+      "categorias",
+      "tipos_materiales",
+      "materiales",
+      "materiales_asociados",
+      "producto_corrugado",
+      "proveedores_favoritos",
+      "orden_compra",
+      "orden_producto",
+      "lote_producto",
+      "orden_material",
+      "lote_material",
+      "orden_otro",
+      "abastecimiento_material",
+      "factura",
+      "documento",
+      "parametros_seguimiento",
+      "consecutivo_orden",
+      "contacto_interno",
+      "destinatario_evento",
+      "adjunto_evento",
+      "correo_enviado",
+      "correo_enviado_destinatario"
+    ],
+    "otherCostsPreserved": true
+  },
+  "preservation": {
+    "unchangedCollections": 27,
+    "otherCostsPreserved": true,
+    "currentDatabaseSha256": "c0fbc23dd7ed81c8f4b9f1c8cf8c41483a6da02515c36ecafd9ea5433d811ef7",
+    "changedSinceCorrection": false
+  },
+  "tests": {
+    "baseline": {
+      "passed": 167,
+      "failed": 0
+    },
+    "final": {
+      "passed": 180,
+      "failed": 0
+    },
+    "browsers": {
+      "chromium": {
+        "checks": 66,
+        "errors": 0,
+        "consoleMessages": 0
+      },
+      "firefox": {
+        "checks": 66,
+        "errors": 0,
+        "consoleMessages": 0
+      },
+      "webkit": {
+        "checks": 66,
+        "errors": 0,
+        "consoleMessages": 0
+      }
+    },
+    "fullJourney": 598,
+    "formValidation": 195,
+    "favorites": 71,
+    "portable": 23
+  },
+  "performance": {
+    "passed": true,
+    "budgets": 60,
+    "report": "comparison.json",
+    "cpu": "Equipo actual, CPU 1×; sin ensayo CPU 4×"
+  },
+  "portable": {
+    "path": "tests/.tmp/costs-portable.zip",
+    "sha256": "13a41dbc5d68b2e7e7a1745e85a7f7868d22b483df51720e2d12bcba04c41ae9"
+  },
+  "screenshots": [
+    "current-groups-375.png",
+    "current-add-375.png",
+    "current-groups-768.png",
+    "current-add-768.png",
+    "current-groups-1024.png",
+    "current-add-1024.png",
+    "current-groups-1440.png",
+    "current-add-1440.png"
+  ]
+}

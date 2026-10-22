@@ -302,6 +302,7 @@ export function App() {
           (error.code === "CONSECUTIVE_CHANGED" ||
             error.code === "FAVORITES_CHANGED" ||
             error.code === "BARCODE_CHANGED" ||
+            error.code === "COST_PERIOD_CONFLICT" ||
             (["createOrder", "editOrder"].includes(name) &&
               Object.keys(error.fields).some((field) =>
                 /^lines\.\d+\.id_producto$/.test(field),

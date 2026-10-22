@@ -23,6 +23,7 @@ import {
 import { confirmAction } from "./components/overlays";
 import { CatalogForm, Documents } from "./forms";
 import { FavoriteSuppliersTable } from "./favorite-suppliers";
+import { MaquilaCostsTable } from "./maquila-costs";
 import { ProductHistory } from "./product-history";
 import {
   columnOptions,
@@ -175,12 +176,7 @@ function buildCatalogFilterRows(
     } else {
       for (const field of fields) {
         const value = catalogDisplayValue(db, entity, record, field);
-        cells[field] = catalogCell(
-          value,
-          value,
-          undefined,
-          record[field],
-        );
+        cells[field] = catalogCell(value, value, undefined, record[field]);
       }
     }
 
@@ -243,7 +239,7 @@ export function CatalogTable({
   const details =
     detailsId === undefined
       ? localDetails
-      : (db[entity] as Row[]).find((row) => row.id === detailsId) ?? null;
+      : ((db[entity] as Row[]).find((row) => row.id === detailsId) ?? null);
   const setDetails = (row: Row | null) => {
     if (detailsId === undefined) setLocalDetails(row);
     onDetailsChange?.(row?.id ?? null);
@@ -446,7 +442,8 @@ export function CatalogTable({
                             </small>
                           </TableCell>
                           <TableCell className="catalog-assigned-barcode">
-                            {assignedBarcode(db, row.id)?.codigo ?? "Sin código"}
+                            {assignedBarcode(db, row.id)?.codigo ??
+                              "Sin código"}
                           </TableCell>
                         </>
                       )}
@@ -526,7 +523,9 @@ export function CatalogTable({
           title={recordName(db, entity, details)}
           subtitle="Información relacionada e historial"
           onClose={() => setDetails(null)}
-          className={entity === "productos" ? "product-history-dialog" : undefined}
+          className={
+            entity === "productos" ? "product-history-dialog" : undefined
+          }
           wide
         >
           <div
@@ -732,6 +731,8 @@ export function CatalogPage({
     >
       {entity === "proveedores_favoritos" ? (
         <FavoriteSuppliersTable />
+      ) : entity === "costos_maquila" ? (
+        <MaquilaCostsTable />
       ) : (
         <CatalogTable key={entity} entity={entity} />
       )}

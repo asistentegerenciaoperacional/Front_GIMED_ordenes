@@ -55,8 +55,8 @@ export interface categorias {
 export interface costos_maquila {
   id: string;
   id_producto: string;
-  costo: number | null;
-  fecha_inicio: string | null;
+  costo: number;
+  fecha_inicio: string;
   fecha_fin: string | null;
 }
 

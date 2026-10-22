@@ -4,6 +4,7 @@ dist/
 data/database.json
 data/*.tmp
 data/*.bak
+data/costs-recovery-*/
 .playwright-cli/
 .playwright/
 tests/.tmp/

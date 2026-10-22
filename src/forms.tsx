@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { costDay, costIssue } from "../shared/maquila-costs";
 import {
   materialSupplierGroups,
   suggestedMaterial,
@@ -87,14 +88,21 @@ export function CatalogForm({
   entity,
   record,
   onClose,
+  initialValues,
+  readOnlyFields = [],
+  onSaved,
 }: {
   entity: Entity;
   record?: Row;
   onClose: () => void;
+  initialValues?: Row;
+  readOnlyFields?: readonly string[];
+  onSaved?: (row: Row) => void;
 }) {
   const { db, run } = useApp();
   const [values, setValues] = useState<Row>(() => ({
     ...blankRow(entity),
+    ...initialValues,
     ...record,
   }));
   const [providerNit, setProviderNit] = useState(() => {
@@ -106,6 +114,7 @@ export function CatalogForm({
       : "";
   });
   const [busy, setBusy] = useState(false);
+  const submitting = useRef(false);
   const { error, catchError } = useErrors(
     entity === "proveedor"
       ? {
@@ -134,6 +143,8 @@ export function CatalogForm({
   };
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     try {
       const row: Row = { ...values };
@@ -206,7 +217,19 @@ export function CatalogForm({
             parsed.error.issues.map((e) => [e.path.join("."), e.message]),
           ),
         });
-      await run(
+      if (entity === "costos_maquila") {
+        const issue = costIssue(
+          { ...parsed.data, id: record?.id },
+          db.costos_maquila,
+        );
+        if (issue)
+          throw new ApiError({
+            message: "Revisa el periodo del costo de maquila.",
+            code: "COST_PERIOD_CONFLICT",
+            fields: issue.fields,
+          });
+      }
+      const result = await run(
         "saveEntity",
         {
           entity,
@@ -219,10 +242,12 @@ export function CatalogForm({
         },
         "Registro guardado",
       );
+      onSaved?.(result.row);
       onClose();
     } catch (e) {
       catchError(e);
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }
@@ -241,9 +266,10 @@ export function CatalogForm({
       subtitle="Los cambios se guardan en los archivos locales del prototipo."
       onClose={onClose}
       dirty={dirty}
+      busy={busy}
     >
       <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
-        <div className="dialog-body">
+        <div className="dialog-body" inert={busy}>
           <ErrorNotice error={error} />
           <div className="form-grid">
             {Object.entries(meta.tables[entity].fields)
@@ -275,7 +301,9 @@ export function CatalogForm({
                 else if (ref && ref.target === "productos")
                   control = (
                     <ProductPicker
+                      id={id}
                       products={db.productos}
+                      disabled={busy || readOnlyFields.includes(field)}
                       value={String(value ?? "")}
                       onChange={(id) => update(field, id || null)}
                     />
@@ -354,7 +382,13 @@ export function CatalogForm({
                   control = (
                     <DateInput
                       id={id}
-                      value={value ? String(value).slice(0, 10) : ""}
+                      value={
+                        value
+                          ? entity === "costos_maquila"
+                            ? (costDay(value) ?? String(value))
+                            : String(value).slice(0, 10)
+                          : ""
+                      }
                       onChange={(value) => update(field, value)}
                     />
                   );
@@ -430,7 +464,9 @@ export function CatalogForm({
           )}
         </div>
         <div className="dialog-footer">
-          <CancelButton onClick={onClose}>Cancelar</CancelButton>
+          <CancelButton onClick={onClose} disabled={busy}>
+            Cancelar
+          </CancelButton>
           <Button type="submit" variant="primary" disabled={busy}>
             {busy ? "Guardando…" : "Guardar registro"}
           </Button>

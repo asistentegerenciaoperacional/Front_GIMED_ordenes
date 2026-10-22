@@ -1,4 +1,5 @@
 import type { Database } from "../shared/models";
+import { costScheduleIssue } from "../shared/maquila-costs";
 import {
   schemas,
   entities,
@@ -90,6 +91,14 @@ export function validateDatabase(
           { [ref.field]: "Selecciona un registro existente." },
         );
     }
+  const costConflict = costScheduleIssue(db.costos_maquila);
+  if (costConflict)
+    throw new BusinessError(
+      "Revisa los periodos de costos de maquila.",
+      "COST_PERIOD_CONFLICT",
+      costConflict.fields,
+      costConflict,
+    );
   const assignedProducts = new Set<string>();
   for (const code of db.codigos_barras) {
     if (code.estado === "activo" || code.estado === "asignado")

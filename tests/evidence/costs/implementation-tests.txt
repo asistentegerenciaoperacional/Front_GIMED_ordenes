@@ -1,0 +1,255 @@
+npm notice run gimed-ordenes-prototipo@1.0.0 test
+npm notice run tsx --test tests/*.test.ts
+✔ La interfaz utiliza controles compartidos de React Aria en todas las pantallas (232.1648ms)
+✔ semilla: cinco estados, alternativas, producto sin asignado y producto sin códigos (34.5287ms)
+✔ integridad: exige producto en Activo/Asignado y un solo asignado por producto (16.1458ms)
+✔ asociar código nuevo lo asigna y convierte el anterior en Activo de forma atómica (39.733ms)
+✔ cambiar entre activos permite volver a un código antiguo sin cambiar fechas de creación (35.4918ms)
+✔ selección por ID distingue productos con nombres repetidos y rechaza códigos ajenos/inactivos (41.3575ms)
+✔ dos cambios simultáneos: uno guarda, otro recibe conflicto y no produce guardado parcial (74.6676ms)
+✔ estado o asignación obsoletos impiden asociación y desactivación (30.7421ms)
+✔ sin Asignado, Activo no habilita emisión; desactivación conserva órdenes existentes (38.3149ms)
+✔ una alternativa desactivada mientras estaba abierta la confirmación exige revisar (20.3302ms)
+✔ migración antigua: conserva selección por fecha UTC, otras colecciones e idempotencia (32.7975ms)
+✔ migración ambigua, sin fechas o referencia inválida conserva archivo original (26.6429ms)
+✔ cada OC y OCM admite una orden escaneada; reemplazar conserva identidad, propietario y cantidad de registros (166.1834ms)
+✔ dos adjuntos simultáneos al mismo propietario guardan exactamente uno y rechazan el otro (51.2076ms)
+✔ el documento incluido al crear factura es su único vigente y se puede reemplazar (57.9962ms)
+✔ reemplazar rechaza cambiar propietario o clase y conserva estado y archivo completos (49.8925ms)
+✔ modelo y validación en vivo identifican duplicados por propietario, incluyendo la plantilla global (15.0884ms)
+✔ consecutivo mostrado: material y otros comparten número; una previsualización obsoleta revierte la operación (99.7744ms)
+✔ el lote inicial toma batch estimado de la cabecera y conserva su fecha después de autorizar (73.6374ms)
+✔ el estado inicial tiene las 28 colecciones y conserva tipos, históricos y decimales exactos (16.0313ms)
+✔ materiales y otros heredan la entrega de cabecera al crear; editar conserva la fecha de seguimiento (139.8447ms)
+✔ sticker por producto: porcentajes independientes, redondeo y cantidades finales editables sin atributos nuevos persistidos (29.0873ms)
+✔ sticker por producto: un porcentaje inválido revierte la orden, lotes y consecutivos (50.6022ms)
+✔ R01: solicitudes simultáneas reservan números únicos en el grupo material/otros (87.8056ms)
+✔ R01: número automático y grupos independientes; no admite un número manual (29.2056ms)
+✔ R02: máximo siete productos, materiales o conceptos, posiciones y compatibilidad; fallos no consumen consecutivos (17.8784ms)
+✔ R03: factura normalizada, ceros/signos interiores y unicidad por proveedor (21.4884ms)
+✔ R03: proveedor incompatible de factura revierte todas las asociaciones (13.3392ms)
+✔ R04: lote de material compartido mantiene recepciones independientes (16.0714ms)
+✔ R05: enlaces entre productos y materiales de órdenes existentes, sin cantidad asignada (14.6857ms)
+✔ R06: clase/propietario, referencia polimórfica y plantilla global (18.8806ms)
+✔ R07: certificados, plantilla y factura únicos; reemplazo del registro vigente (38.1287ms)
+✔ R08/R09: sugerencias resueltas por área normalizada, internos activos y proveedor del contexto (2.1032ms)
+✔ el aviso de códigos incluye solo los códigos pendientes seleccionados (1.0867ms)
+✔ R09: cargos equivalentes no duplican configuración; sin configuración se permite envío manual (18.0756ms)
+✔ R10: falta de archivo impide confirmar envío; códigos nuevos no necesitan adjuntos (10.2699ms)
+✔ R10: certificados deduplicados y liberación con material, maquilador, direcciones y contactos (1.2079ms)
+✔ R11: duplicados entre Para/CC rechazados; mensaje y destinatarios se guardan tras confirmación (20.7398ms)
+✔ R12: código MAIA de tres dígitos, único y opcional (19.5527ms)
+✔ R13: exclusión al asociar materiales y al cambiar el tipo; no basta validar una fila (12.5846ms)
+✔ autorización irreversible y seguimiento habilitado solo por orden de compra autorizada (16.1296ms)
+✔ lote precarga batch record desde la entrega de la cabecera; cantidad no provoca cierre (14.3427ms)
+✔ cierre: solo lotes cerrados, por producto, advertencia confirmable y tolerancia histórica (24.9073ms)
+✔ código elegido explícitamente, no numéricamente mayor; condiciones históricas conservadas al editar (20.9599ms)
+✔ cantidades finales de producto y empaque con redondeo hacia arriba (11.5724ms)
+✔ emisión de varios productos conserva materiales, vínculos y su consecutivo; guarda un lote inicial por producto (12.8384ms)
+✔ facturas: desasignar un lote conserva los demás, la factura y sus documentos (14.9744ms)
+✔ facturas: desasignar otro propietario o una selección contradictoria rechaza la operación completa (12.1549ms)
+✔ facturas: fallo posterior de proveedor revierte también las desasignaciones (14.4627ms)
+✔ facturas: desasignar recepciones de material y otros conserva sus datos (32.8543ms)
+✔ facturas: desasignación bloqueada sin autorización (8.2309ms)
+✔ facturas: adjunto preparado se guarda con propietario y asociaciones en la misma operación (15.0203ms)
+✔ facturas: adjunto inválido o recepción incompatible no deja factura ni documento huérfano (10.7724ms)
+✔ persistencia al reabrir y rollback conserva el archivo; un JSON dañado no se reemplaza con la semilla (20.2075ms)
+✔ favoritos: ocho relaciones por material se convierten en siete por tipo sin mutar la entrada (43.2974ms)
+✔ favoritos: conversión idempotente y colecciones vacías válidas (5.0144ms)
+✔ favoritos: formato mixto reúne pares anteriores y nuevos y elimina duplicados (3.1854ms)
+✔ favoritos: material inexistente aborta sin modificar el archivo (43.5049ms)
+✔ favoritos: tipo inexistente aborta sin modificar el archivo (47.0387ms)
+✔ favoritos: proveedor inexistente aborta sin modificar el archivo (23.5522ms)
+✔ favoritos: campos contradictorios aborta sin modificar el archivo (12.3313ms)
+✔ favoritos: migración persistida con copia exacta, segunda apertura sin escritura ni segundo respaldo (55.7811ms)
+✔ favoritos: un error en otra colección impide persistir la migración (8.4853ms)
+✔ favoritos: fallo al escribir el respaldo no recrea ni sustituye los datos (12.3447ms)
+✔ favoritos: selección conjunta normaliza duplicados y conserva los demás tipos (4.4169ms)
+✔ favoritos: selección vacía elimina relaciones, no elimina el tipo (1.0194ms)
+✔ favoritos: conflictos conservan la selección guardada y los reintentos idénticos son idempotentes (3.268ms)
+✔ favoritos: fallo de un proveedor revierte todo el guardado y el archivo (12.2666ms)
+✔ favoritos: no admite cambios individuales por la API genérica (1.3166ms)
+✔ favoritos: tipos y proveedores referenciados quedan protegidos por integridad (6.7005ms)
+✔ favoritos: agrupación por IDs conserva homónimos, unión de tipos y otros proveedores elegibles (1.6183ms)
+✔ fechas digitadas: formato colombiano e ISO, bisiestos y rechazo de días inexistentes o parciales (3.6589ms)
+✔ rutas de órdenes: la entrada principal abre productos y los enlaces antiguos mantienen el grupo (0.5355ms)
+✔ fechas: separadores y avance automáticos, pegado ISO y edición sin desplazar los otros segmentos (1.8342ms)
+✔ facturas: búsqueda normalizada por número, proveedor y datos de lotes asociados (7.7263ms)
+✔ facturas: búsqueda y filtros comparten resultados, conservando ordenamiento numérico (4.4427ms)
+✔ facturas: columnas basadas en proveedor, día visible, recepciones y documento propio (2.1791ms)
+✔ facturas: texto normalizado conserva ceros y signos y permite consultar proveedor por NIT (1.4532ms)
+✔ facturas: fechas comparadas por día de Bogotá con límites inclusivos (0.9432ms)
+✔ facturas: recepciones admite cero y condiciones de enteros (1.0348ms)
+✔ facturas: selección múltiple y filtros de distintas columnas se combinan (1.4004ms)
+✔ facturas: ordenamiento de texto, fechas y números, sin modificar las filas de origen (1.2888ms)
+✔ facturas: URL recupera filtros y ordenamiento válidos y limita Documentos a presencia (0.9409ms)
+✔ facturas: opciones de columna consideran las demás condiciones y agrupan valores repetidos (1.4624ms)
+✔ corregir un campo elimina solo los errores cuyo valor ya es válido (8.3871ms)
+✔ fechas y cantidades parcialmente corregidas conservan sus errores (3.1928ms)
+✔ precios corregidos usan la precisión permitida y tolerancia usa su tipo declarado (0.9166ms)
+✔ un valor con formato correcto que todavía está duplicado no retira el error (5.2863ms)
+✔ la corrección respeta relaciones, proveedor de factura y exclusión sticker/cinta (2.3569ms)
+✔ errores de campos desconocidos se conservan y las firmas distinguen cambios anidados (0.4396ms)
+✔ maquila: costo e inicio obligatorios; importe entero positivo y seguro (12.5017ms)
+✔ maquila: días de Bogotá y fechas de calendario inválidas (0.6522ms)
+✔ maquila: todas las formas de solapamiento y extremos inclusivos (1.6326ms)
+✔ maquila: periodos adyacentes, huecos, un día y exclusión del mismo registro (0.5222ms)
+✔ maquila: solo un periodo abierto, después de todos los cerrados (3.5851ms)
+✔ maquila: productos independientes y validación completa de bases antiguas (28.3846ms)
+✔ maquila: el costo cerrado cubre todo su último día y el futuro no se anticipa (7.796ms)
+✔ maquila: corregir dependencias limpia errores locales sin ocultar otros (2.9556ms)
+✖ maquila: API rechaza vacíos, solapamientos y segundo abierto sin escribir parcialmente (1659.3599ms)
+✖ maquila: cerrar antes de otro abierto, editar y eliminar conserva precios históricos (1604.7517ms)
+✖ maquila: dos solicitudes concurrentes no crean dos periodos abiertos (1634.5172ms)
+✔ maquila: corrección autorizada retira solo el registro identificado (4.4963ms)
+✖ maquila: corrección de archivo exige respaldo exacto y valida antes del reemplazo (12.9216ms)
+✔ corrugados: crear con código sin informar o null y editar conserva null al reiniciar (125.7209ms)
+✔ solo Corrugado admite crear materiales sin código; rechazar no altera el archivo (58.2075ms)
+✔ cambiar un corrugado sin código a otro tipo exige MAIA; cero y códigos únicos siguen admitidos (29.2467ms)
+✔ corrugados con código mantienen las restricciones de rango y unicidad (19.4474ms)
+✔ validación en vivo: cambiar a Corrugado retira el error de código vacío, sin aceptar formatos inválidos (2.6427ms)
+✔ catálogo: trece filtros, diecisiete variantes y descripciones iguales a filtros.md (18.2435ms)
+✔ URL: solo variantes conocidas y compatibles con el grupo (0.4815ms)
+✔ documento de orden: propietario y clase exactos, mapa reutilizable y legado más reciente (5.099ms)
+✔ recepción física y cantidad registrada se distinguen en los cinco casos acordados (5.4597ms)
+✔ recepciones sin factura no confunde lote inicial ni factura de otro lote (0.9351ms)
+✔ vencimientos: día de Bogotá, estrictamente anterior a hoy y sin fechas vacías (1.1644ms)
+✔ próximas entregas incluyen hoy y los extremos 7/15/30 y respetan cambio de mes (1.8119ms)
+✔ inspecciones usan fechas, admiten solapamiento y son independientes del estado (1.0927ms)
+✔ condiciones de recepción y fechas documentales pertenecen al mismo lote (1.1008ms)
+✔ anulados no generan pendientes; cerrados sí pueden conservar pendientes documentales (1.4097ms)
+✔ seguimiento por cerrar requiere lotes efectivos, todos cerrados en un renglón abierto (1.1213ms)
+✔ OCM compartida: solo aparece la OC cuyo renglón vinculado está pendiente (1.4657ms)
+✔ materiales y otros consultan su recepción directa, nunca el catálogo de lotes de material (12.9539ms)
+✔ índices: equivalencia del estado comercial, importes exactos y ninguna mutación del snapshot (2.8331ms)
+✔ cada actualización de datos recalcula indicadores y los vencimientos cambian sin recorrer lotes (1.7566ms)
+✔ paginación de cincuenta: extremos, URL inválida, vacíos y página fuera de rango (0.581ms)
+✔ reloj de Bogotá: cambio de día a las 05 UTC y temporizador hasta medianoche (0.3911ms)
+✔ reabrir orden_material cerrado o anulado conserva recepción, factura, documentos y vínculos (159.8058ms)
+✔ reabrir orden_material requiere autorización y un rechazo conserva todos los datos (31.1085ms)
+✔ reabrir orden_otro cerrado o anulado conserva recepción, factura, documentos y vínculos (69.4722ms)
+✔ reabrir orden_otro requiere autorización y un rechazo conserva todos los datos (24.326ms)
+✔ número automático e inmutable en creación y edición, antes y después de autorizar, para los tres tipos (130.089ms)
+✔ proveedor bloqueado después de autorizar en producto, material y otros, incluso con confirmación (52.6176ms)
+✔ reemplazo completo: elimina todos los registros anteriores de la OC y conserva OCM, recepciones, documentos y enlaces compartidos íntegramente (73.9413ms)
+✔ reemplazo rechazado sin confirmación, con productos de A, renglones antiguos, proveedor incorrecto o fecha vacía: archivo y consecutivos intactos (77.5852ms)
+✔ fallo tras crear el primer renglón de reemplazo revierte borrados, lotes, archivo y consecutivos (68.281ms)
+✔ autorizar durante la revisión impide reemplazar al guardar, aun con confirmación, sin eliminar información (58.5934ms)
+✔ deleteLot exige autorización y confirmación; permite eliminar lotes cerrados, recibidos, facturados, anulados y sin número conservando las facturas (43.4433ms)
+✔ borrar un lote conserva el estado cerrado del producto mientras queden otros; borrar el último lo anula (16.3215ms)
+✔ anular elimina todos los lotes con confirmación, conserva renglón y abastecimiento; reabrir crea un único lote nuevo con fecha actual (23.5673ms)
+✔ reabrir un producto anulado heredado exige confirmación para reemplazar sus lotes; reabrir cerrado conserva sus lotes (15.4527ms)
+✔ semilla: productos anulados sin lotes; cargar datos heredados conserva todos los registros hasta una operación confirmada (12.7454ms)
+✔ volver recupera el origen de la orden; abandonar la vista descarta filtros y scroll (3.7263ms)
+✔ Los índices se reutilizan al navegar y se invalidan al recibir otro snapshot (1.3533ms)
+✔ emisión: productos inactivos o sin estado activo rechazan la operación completa, incluso tras una fila válida (106.7392ms)
+✔ edición: no permite agregar ni sustituir por un producto inactivo; conserva el producto histórico que se desactivó (46.2713ms)
+✔ producto, material y otros exigen fecha solicitada válida antes de reservar números o guardar órdenes (75.7348ms)
+✔ editar una orden no permite vaciar la entrega ni modifica las fechas de seguimiento tras un rechazo (48.7169ms)
+✔ cerrar, anular y reabrir seguimiento requiere autorización en los tres tipos de orden, incluso con confirmación (124.4579ms)
+✔ un lote de una orden sin autorizar no puede cerrarse ni anularse mediante guardado directo (16.2415ms)
+✔ selección de valores: unión dentro de la columna e intersección entre columnas (2.68ms)
+✔ productos: se filtran todos los renglones y las condiciones negativas excluyen cualquier coincidencia (0.7574ms)
+✔ proveedor: nombres y NIT disponibles para condiciones, sin afectar la búsqueda global (0.2884ms)
+✔ importe: centavos y rangos inclusivos se comparan exactamente incluso fuera del entero seguro (1.4297ms)
+✔ fechas: día visible en Bogotá, intervalo inclusivo y valores sin fecha (1.3794ms)
+✔ condiciones: se rechazan fechas inexistentes, números inválidos e intervalos invertidos (0.4686ms)
+✔ opciones: valores únicos, orden numérico y fechas vacías al final (0.4518ms)
+✔ opciones disponibles: respetan otras columnas y omiten el filtro de la propia columna (0.3644ms)
+✔ ordenamiento: números de OC, importes exactos y desempate estable sin mutar la lista (0.4836ms)
+✔ ordenamiento: fechas cronológicas y vacíos al final en ambas direcciones; texto según español (0.3925ms)
+✔ URL: conserva selección, condiciones y ordenamiento; acepta enlaces de estado anteriores (0.8469ms)
+✔ URL inválida: no bloquea la tabla ni permite operadores impropios; conserva selecciones válidas (0.5517ms)
+✔ la visualización monetaria conserva decimales y el signo de importes menores a uno (0.6399ms)
+✔ redondeo exacto: resultados enteros no ganan una unidad por error de punto flotante (1.6022ms)
+✔ ISO con desfase se normaliza a UTC y la emisión conserva la selección explícita (12.9101ms)
+✔ producto de otro maquilador rechazado; cambiar el catálogo no altera el proveedor histórico (3.6308ms)
+✔ precio inválido de un material produce un error de campo, no un error interno (0.5432ms)
+✔ el simulador recibe contenido y adjuntos efímeros; el cuerpo no se guarda (0.8353ms)
+✔ cada uno de los 1–7 renglones se guarda con un único lote inicial sin datos inventados (98.8292ms)
+✔ editar la entrega sin autorizar propaga la estimación, y agregar un renglón crea solo su lote (37.7933ms)
+✔ quitar un producto sin autorizar elimina su lote y vínculos, conservando íntegramente los materiales (38.2143ms)
+✔ una orden autorizada rechaza agregar, quitar, sustituir o repetir renglones incluso con la misma cantidad (43.985ms)
+✔ modificar o agregar lotes exige autorización; completar el inicial conserva su ID y permite fechas independientes (52.9598ms)
+✔ el número es obligatorio para datos de seguimiento y cierre, pero una entrega prevista puede anularse sin número (91.227ms)
+✔ asociar una factura a un lote sin número rechaza la operación completa (23.0013ms)
+✔ el número faltante mantiene su error mientras hay seguimiento y lo retira al corregir la causa (12.9851ms)
+✔ Compartir cadenas del snapshot conserva íntegramente valores e identidades de los registros (6.3179ms)
+✔ vínculos: filtros numéricos separados para OC y OCM, combinables sin perder relaciones (7.7762ms)
+✔ vínculos: búsqueda por número y prefijo distingue OC y OCM sin modificar datos (2.9759ms)
+✔ vínculos: la búsqueda se combina con columnas y ordenamiento sobre el mismo vínculo (1.4904ms)
+✔ vínculos: texto de producto, material, maquilador y proveedor; estado y selección múltiple (1.1158ms)
+✔ vínculos: ordenamiento numérico y URL conservan las columnas y rechazan condiciones de otro tipo (1.6633ms)
+ℹ tests 180
+ℹ suites 0
+ℹ pass 176
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6375.4562
+
+✖ failing tests:
+
+test at tests\maquila-costs.test.ts:93:1
+✖ maquila: API rechaza vacíos, solapamientos y segundo abierto sin escribir parcialmente (1659.3599ms)
+  Error: EPERM: operation not permitted, rename 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-686R0J\database.json.41ed2fa6-6fe8-4fe0-912e-3a7b10fcb0ac.tmp' -> 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-686R0J\database.json'
+      at async rename (node:internal/fs/promises:785:10)
+      at async JsonStore.persist (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\server\store.ts:61:11)
+      at async JsonStore.open (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\server\store.ts:25:7)
+      at async TestContext.<anonymous> (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\tests\maquila-costs.test.ts:96:17)
+      at async Test.run (node:internal/test_runner/test:1313:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'rename',
+    path: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-686R0J\\database.json.41ed2fa6-6fe8-4fe0-912e-3a7b10fcb0ac.tmp',
+    dest: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-686R0J\\database.json'
+  }
+
+test at tests\maquila-costs.test.ts:103:1
+✖ maquila: cerrar antes de otro abierto, editar y eliminar conserva precios históricos (1604.7517ms)
+  Error: EPERM: operation not permitted, rename 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-aNbeuK\database.json.06848fad-e56b-413a-8628-d6bbbf882b24.tmp' -> 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-aNbeuK\database.json'
+      at async rename (node:internal/fs/promises:785:10)
+      at async JsonStore.persist (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\server\store.ts:61:11)
+      at async JsonStore.open (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\server\store.ts:25:7)
+      at async TestContext.<anonymous> (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\tests\maquila-costs.test.ts:105:17)
+      at async Test.run (node:internal/test_runner/test:1313:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'rename',
+    path: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-aNbeuK\\database.json.06848fad-e56b-413a-8628-d6bbbf882b24.tmp',
+    dest: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-aNbeuK\\database.json'
+  }
+
+test at tests\maquila-costs.test.ts:115:1
+✖ maquila: dos solicitudes concurrentes no crean dos periodos abiertos (1634.5172ms)
+  Error: EPERM: operation not permitted, rename 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-MhnpmW\database.json.7337af54-b721-4fb0-8c0c-f57e2a07ef75.tmp' -> 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-MhnpmW\database.json'
+      at async rename (node:internal/fs/promises:785:10)
+      at async JsonStore.persist (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\server\store.ts:61:11)
+      at async JsonStore.open (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\server\store.ts:25:7)
+      at async TestContext.<anonymous> (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\tests\maquila-costs.test.ts:117:17)
+      at async Test.run (node:internal/test_runner/test:1313:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'rename',
+    path: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-MhnpmW\\database.json.7337af54-b721-4fb0-8c0c-f57e2a07ef75.tmp',
+    dest: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-MhnpmW\\database.json'
+  }
+
+test at tests\maquila-costs.test.ts:139:1
+✖ maquila: corrección de archivo exige respaldo exacto y valida antes del reemplazo (12.9216ms)
+  Error: EPERM: operation not permitted, rename 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-FfS0vQ\database.json.costs-f72f2432-93fe-49a2-aa3b-27ebbbd0d112.tmp' -> 'C:\Users\USER\AppData\Local\Packages\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\AC\Temp\gimed-maquila-FfS0vQ\database.json'
+      at async rename (node:internal/fs/promises:785:10)
+      at async correctCostFile (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\scripts\correct-maquila-cost.ts:55:5)
+      at async TestContext.<anonymous> (C:\Users\USER\OneDrive - gimed.com.co\Documentos\Proyectos GIMED\Seguimiento ordenes de compra\prototipo\tests\maquila-costs.test.ts:143:3)
+      at async Test.run (node:internal/test_runner/test:1313:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:897:7) {
+    errno: -4048,
+    code: 'EPERM',
+    syscall: 'rename',
+    path: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-FfS0vQ\\database.json.costs-f72f2432-93fe-49a2-aa3b-27ebbbd0d112.tmp',
+    dest: 'C:\\Users\\USER\\AppData\\Local\\Packages\\sandbox.{7c4c880f-5245-4970-84a9-710a07bd9067}\\AC\\Temp\\gimed-maquila-FfS0vQ\\database.json'
+  }

@@ -73,10 +73,82 @@
     );
   border-bottom: 1px solid var(--border);
 }
+.grouped-relations .relation-details .data-table {
+  table-layout: fixed;
+}
+.grouped-relations .relation-details .data-table thead th {
+  background: transparent;
+  border-top: 0;
+}
 .relation-provider-list {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.maquila-costs-panel {
+  --relation-table-min-width: 520px;
+}
+.maquila-costs-panel .grouped-relations {
+  min-width: calc(
+    var(--relation-table-min-width) + var(--relation-cell-inset) +
+      var(--relation-cell-inset) + var(--relation-toggle-size) +
+      var(--relation-label-gap) + 24px
+  );
+}
+.maquila-costs-panel .maquila-cost-heading-actions {
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  justify-content: flex-end;
+}
+.maquila-costs-panel .maquila-cost-heading-actions .aria-select-control {
+  min-width: 160px;
+  width: 190px;
+}
+.maquila-costs-panel .relation-group-label {
+  flex-wrap: nowrap;
+}
+.maquila-costs-panel .relation-group-label strong {
+  min-width: 0;
+}
+.maquila-costs-panel .maquila-cost-history {
+  min-width: var(--relation-table-min-width);
+}
+.maquila-costs-panel .maquila-cost-history th,
+.maquila-costs-panel .maquila-cost-history td {
+  padding: 8px 10px;
+  font-weight: 400;
+}
+.maquila-costs-panel .maquila-cost-history th:last-child,
+.maquila-costs-panel .maquila-cost-history td:last-child {
+  width: 96px;
+}
+.maquila-cost-actions {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+.maquila-cost-row:hover .maquila-cost-actions,
+.maquila-cost-row:focus-within .maquila-cost-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: none), (pointer: coarse) {
+  .maquila-cost-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+@media (max-width: 600px) {
+  .maquila-costs-panel .section-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .maquila-cost-heading-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 .relation-provider-list li {
   display: flex;

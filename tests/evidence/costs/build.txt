@@ -1,0 +1,20 @@
+npm notice run gimed-ordenes-prototipo@1.0.0 build
+npm notice run tsc --noEmit && vite build
+vite v8.3.2 building client environment for production...
+transforming...
+✓ 2336 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                             0.47 kB │ gzip:   0.33 kB
+dist/assets/index-DPcpAyxn.css             53.21 kB │ gzip:  11.14 kB
+dist/assets/catalogs-BAr3yq1B.js           31.14 kB │ gzip:   8.87 kB
+dist/assets/flows-CBPgkVKd.js              37.62 kB │ gzip:  10.04 kB
+dist/assets/calendar-content-DFVOVh8R.js   48.75 kB │ gzip:  16.36 kB
+dist/assets/index-uVj-8vo-.js             841.17 kB │ gzip: 244.49 kB
+
+✓ built in 366ms
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

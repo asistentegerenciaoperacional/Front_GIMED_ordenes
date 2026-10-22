@@ -68,6 +68,7 @@ function GroupedRelationsTableView({
   collapsed,
   onToggle,
   onEdit,
+  renderAction,
   empty,
   groupLabel = "Tipo de material",
   tableLabel = "Proveedores favoritos por tipo",
@@ -81,7 +82,8 @@ function GroupedRelationsTableView({
   expanded: Set<string>;
   collapsed: Set<string>;
   onToggle: (id: string) => void;
-  onEdit: (id: string) => void;
+  onEdit?: (id: string) => void;
+  renderAction?: (group: RelationGroup) => ReactNode;
   empty: ReactNode;
   groupLabel?: string;
   tableLabel?: string;
@@ -144,12 +146,16 @@ function GroupedRelationsTableView({
                     </TableCell>
                     <TableCell>{countLabel(group.count)}</TableCell>
                     <TableCell>
-                      <Button
-                        className="icon-btn table-action"
-                        icon={Pencil}
-                        aria-label={`Editar ${relationName} de ${group.label}`}
-                        onClick={() => onEdit(group.id)}
-                      />
+                      {renderAction
+                        ? renderAction(group)
+                        : onEdit && (
+                            <Button
+                              className="icon-btn table-action"
+                              icon={Pencil}
+                              aria-label={`Editar ${relationName} de ${group.label}`}
+                              onClick={() => onEdit(group.id)}
+                            />
+                          )}
                     </TableCell>
                   </TableRow>
                   {disclosure.present.has(group.id) && (

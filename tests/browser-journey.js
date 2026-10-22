@@ -835,14 +835,14 @@ async (page) => {
     "Identificadores de controles únicos en diálogos simultáneos",
   );
   const beforeDraftAttachment = await state();
-  await dialog().getByRole('button', {name:'Adjuntar documento', exact:true}).click();
+  await dialog().getByRole('button', {name:'Seleccionar documento', exact:true}).click();
   await dialog().getByRole('heading', {name:'Agregar placeholder', exact:true}).waitFor();
   check(await page.locator('form form').count() === 0, 'Adjuntar documento a una factura conserva formularios separados');
   await dialog().getByRole('textbox', {name:'Nombre del archivo', exact:true}).fill('Factura-CLI-adjunta.html');
   await shot('52-factura-adjunto-placeholder');
   await dialog().getByRole('button', {name:'Guardar placeholder', exact:true}).click();
   await page.getByRole('heading', {name:'Agregar placeholder',exact:true}).waitFor({state:'hidden'});
-  check(await dialog().getByRole('button', {name:'Reemplazar documento',exact:true}).isVisible() &&
+  check(await dialog().getByRole('button', {name:'Reemplazar',exact:true}).isVisible() &&
     await dialog().getByText('Factura-CLI-adjunta.html',{exact:true}).isVisible(),
     'El placeholder queda preparado dentro del formulario de factura');
   const afterDraftAttachment = await state();
@@ -1508,14 +1508,14 @@ async (page) => {
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   const codeRow = page.getByRole("row").filter({ hasText: "770100000099" });
   await codeRow
-    .getByRole("button", { name: "Confirmar disponibilidad", exact: true })
+    .getByRole("button", { name: "Confirmar verificación en el sistema", exact: true })
     .click();
   await dialog()
     .getByRole("button", { name: "Confirmar", exact: true })
     .click();
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   await codeRow
-    .getByRole("button", { name: "Asignar producto", exact: true })
+    .getByRole("button", { name: "Asignar a producto", exact: true })
     .click();
   await dialog()
     .getByRole("combobox", { name: "Producto", exact: true })
@@ -1938,7 +1938,7 @@ async (page) => {
   check((await dialog().innerText()).includes('documentos propios') && (await dialog().innerText()).includes('Las OCM anteriores'),
     'Advertencia inmediata explica productos, lotes, documentos y conservación de las OCM');
   await dialog().getByRole('button', { name: 'Cancelar', exact: true }).click();
-  check(await dialog().getByRole('combobox', { name: 'Proveedor', exact: true }).inputValue() === sid(1) &&
+  check(await dialog().getByRole('combobox', { name: 'Proveedor', exact: true }).inputValue() === beforeReplacement.proveedor.find(provider => provider.id === sid(1)).nombre_largo &&
     await dialog().getByRole('spinbutton', { name: 'Cantidad solicitada', exact: true }).first().inputValue() === '333' &&
     await dialog().locator('.order-form-line').count() === 2,
     'Cancelar la advertencia restaura el proveedor y conserva el borrador');
@@ -2087,7 +2087,7 @@ async (page) => {
   await dialog().getByRole('textbox', { name: 'Número de factura', exact: true }).fill('FACT-RECEPCIONES-UI');
   for (const width of [375, 708, 1440]) {
     await page.setViewportSize({ width, height: 668 });
-    check((await dialog().locator('.btn').allTextContents()).map((value) => value.trim()).filter(Boolean).join('|') === 'Adjuntar documento|Cancelar|Guardar factura',
+    check((await dialog().locator('.btn').allTextContents()).map((value) => value.trim()).filter(Boolean).join('|') === 'Seleccionar documento|Cancelar|Guardar factura',
       'Acciones del formulario de factura a ' + width + ' px');
     check(await dialog().evaluate((element) => element.scrollWidth <= element.clientWidth + 1), 'Factura sin desborde a ' + width + ' px');
     if (width === 708) await shot('39-factura-formulario');

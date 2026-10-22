@@ -376,3 +376,23 @@ La primera ejecución de 60.000 lotes mostró cuatro interacciones fuera del mar
 Reproducción: `npm run build`, `node scripts/benchmark-barcodes.mjs`. El caso grande también puede contrastarse con `node scripts/recheck-barcodes-large.mjs`, conservando el primer informe. Compilación de referencia en `tests/.tmp/barcodes-baseline/dist`; guard de datos respaldado, nunca base usada como fixture. [Comparación](tests/evidence/barcodes/comparison.json), [informe completo](tests/evidence/barcodes/delivery-report.json).
 
 Estas mediciones son una referencia histórica previa a la simplificación de la vista de códigos. No se han vuelto a medir después de retirarla; se repiten compilación y recorridos funcionales.
+
+## Costos de maquila · 22 de octubre de 2026
+
+Comparación de producción con Chrome 155.0.8059.85, equipo actual sin limitación de CPU y referencia `62410899848934140d0c2543962afe6c84169b7a`. Las mismas colecciones deterministas de 6.000/60.000 lotes coinciden por hash. Los tiempos empiezan en eventos reales y terminan después de pintar el resultado visible, excluyendo la automatización.
+
+**60/60 límites correctos**: 39 de la aplicación general, 18 de carga/interacciones/memoria de costos y tres controles del crecimiento de heap tras 30 ciclos. P95 de interacción +máx(15 %,20 ms), carga +máx(15 %,100 ms), memoria estable +máx(15 %,5 MB), sin ampliar tolerancias.
+
+| Escenario | Carga general P95 antes → después | Carga de costos P95 antes → después | Apertura del editor de costos P95 antes → después |
+| --- | --- | --- | --- |
+| 6.000 lotes / 1440 px | 145,9 → 158,4 ms | 440,2 → 422,5 ms | 41,8 → 43,0 ms |
+| 6.000 lotes / 375 px | 131,2 → 139,4 ms | 427,7 → 429,7 ms | 39,8 → 43,9 ms |
+| 60.000 lotes / 1440 px, par consecutivo | 824,4 → 760,8 ms | 841,5 → 745,4 ms | 40,9 → 43,2 ms |
+
+Heap estable de la aplicación general: 17.944.964 → 17.913.404 bytes, 16.623.392 → 16.616.964 bytes y 40.979.592 → 40.270.148 bytes, respectivamente. La pantalla de costos también cumple su comparación de heap estable; el incremento entre su carga inicial y 30 ciclos, incluida la inicialización diferida del editor, fue de 4.180.936/4.241.944/4.294.516 bytes, dentro de 5 MB.
+
+En la primera medición de esta compilación, la navegación al detalle con 60.000 lotes dio 41,8 → 79,7 ms, fuera del límite. Se conservaron los informes `*-before-large-recheck.json` y se midieron ambas compilaciones consecutivamente, sin cambios de código ni tolerancias. El contraste dio 42,2 → 49,9 ms y el exceso no se reprodujo; ese resultado también queda por debajo del límite original de 61,8 ms. Los archivos `*-large-performance.json` conservan las muestras del par. Reproducir este contraste con `node scripts/recheck-costs-large.mjs`.
+
+Expansión y colapso son acciones nuevas sin equivalente en la tabla plana: P95 aproximado de 260 y 240 ms. Incluyen la animación compartida de 180 ms, su preparación y la confirmación del pintado; no representan únicamente CPU. Se mantienen movimiento reducido y desmontaje del detalle al cerrar. Los informes generales registran además JavaScript descargado y tareas largas. Las diferencias observadas son resultados de esta ejecución, no una atribución causal de mejora.
+
+Reproducir con `npm run build` y `node scripts/benchmark-costs.mjs`. [Comparación completa](tests/evidence/costs/comparison.json), [referencia de componentes](tests/evidence/costs/baseline-cost-components.json), [componentes implementados](tests/evidence/costs/after-cost-components.json). CPU 4× no se ejecutó en este cambio y continúa siendo un ensayo separado.
