@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-16T21:43:58.164Z",
+  "date": "2026-10-22T13:47:44.436Z",
   "checks": [
     "Orden muestra fecha, cantidad y precio inválidos",
     "Otra cantidad decimal conserva el error",
@@ -41,13 +41,21 @@
     "Factura duplicada tras normalizar conserva el error",
     "Factura válida y disponible conserva el foco",
     "Factura válida y disponible retira la descripción del error",
+    "Recepción de otros marca el borde rojo",
+    "Recepción de otros muestra mensajes solo en el resumen",
+    "Recepción de otros corregida conserva el foco",
+    "Recepción de otros corregida retira la descripción del error",
     "Intervalo de filtro que sigue invertido conserva el error",
     "Intervalo corregido oculta el error y conserva el foco",
+    "Resumen de fecha del filtro enfoca el control por su ID",
+    "Filtro de fecha inválida muestra borde rojo",
+    "Filtro de fecha muestra solo el aviso superior",
+    "Corregir fecha del filtro elimina el aviso sin perder foco",
     "Sin errores JavaScript en las correcciones"
   ],
   "errors": [],
   "isolatedFixtures": true,
   "savedRecords": 0,
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-56FM4B\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-KTBNnQ\\database.json"
 }

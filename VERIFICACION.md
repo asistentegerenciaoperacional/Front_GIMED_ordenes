@@ -461,3 +461,93 @@ Reproducción:
     node scripts/verify-aria-browser.mjs tests/favorites-autocomplete.browser.js chromium
     node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js chromium
     node scripts/verify-aria-browser.mjs tests/favorites.browser.js chromium
+
+## Calendario: pantalla en blanco por caché compartida — 22 de octubre de 2026
+
+Se reprodujo el fallo en el navegador del servidor de desarrollo al abrir el
+calendario dentro de Nueva orden. React Aria lanzó `Invalid slot "previous".
+Valid slot names are "close".` y desmontó la página. Los recursos cargados
+incluían dos módulos Button/contextos de React Aria de distintas optimizaciones.
+
+Se probaron copias exportadas de `ad31384`, `7e1b342` y `d05be98`, sin cambiar
+el checkout ni los datos. Las tres versiones abren el calendario, seleccionan
+25/10/2026 con teclado, navegan entre meses y cierran con Escape conservando el
+formulario cuando usan cachés independientes. El lockfile es idéntico en las
+tres. Por tanto, `d05be98` también es estable con caché limpia; no se necesita
+revertir el componente ni los cambios visuales.
+
+La causa era el uso de `node_modules/.vite` tanto por desarrollo como por los
+servidores de fixtures con otra configuración de optimización. Al ejecutar
+pruebas se reemplazaban dependencias que un formulario abierto todavía usaba;
+la carga diferida del calendario mezclaba contextos incompatibles. Una prueba
+aislada con caché compartida también produjo pantalla en blanco por un recurso
+optimizado eliminado (404).
+
+Reparación: desarrollo utiliza `node_modules/.vite-dev`; ambos ejecutores de
+fixtures reutilizan `createFixtureVite` con una caché temporal por ejecución.
+La regresión automatizada abre primero el formulario de desarrollo, ejecuta y
+cierra un segundo servidor de fixtures y solo entonces carga su calendario.
+Comprueba selección, navegación mensual, Escape, conservación del formulario y
+ausencia de errores en Chromium a 375 y 1440 px, incluyendo reapertura.
+
+Además se verificaron los dos calendarios del formulario real Nueva orden en
+el servidor de desarrollo a 375/1440 px después de ejecutar la suite de
+controles: sin pantalla en blanco ni errores y con un solo módulo Button.
+Pasaron las 56 comprobaciones de controles compartidos, las 167 pruebas
+unitarias y la compilación de producción (con el aviso de tamaño de chunk ya
+existente).
+
+[Comparación de commits](tests/evidence/calendar/history-comparison.json) y
+[reporte de regresión de cachés](tests/evidence/calendar/cache-regression.json).
+Reproducción:
+
+    npm run test:calendar
+    node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js chromium
+    npm test
+    npm run build
+
+## Validación uniforme de formularios — 22 de octubre de 2026
+
+Los mensajes de error se presentan visualmente solo en `ErrorNotice`, encima
+de los campos. Se conservan descripciones ocultas para lectores de pantalla,
+enlaces al campo y foco tras enviar un formulario inválido. `ControlForm`
+comparte `fieldErrors` con `Field` y los controles: los catálogos generados,
+que antes mostraban el resumen sin marcar sus campos, ahora aplican el borde
+rojo. Los errores nativos de formato, incluidas las fechas inexistentes y el
+correo, se incorporan al aviso superior sin globos de validación del navegador.
+Los filtros de columna siguen el mismo patrón. Corregir un valor retira su
+error, conserva los pendientes y no desplaza el foco.
+
+La auditoría nueva recorrió en Chromium los 14 tipos de formulario de catálogo
+y directorio (incluidos configuración y lotes de material), nuevas órdenes de
+producto/material/otros, facturas, documentos anidados, registro GS1 y
+tolerancia a 375/1440 px. También comprobó edición de los tres tipos de orden,
+lotes de producto, recepción de material, fechas inexistentes y correo.
+Pasaron 195 comprobaciones de borde rojo, aviso único, descripción accesible,
+foco y aislamiento de formularios. El estado final de la base temporal coincide
+exactamente con el inicial: no se guardaron registros.
+
+Además pasaron 51 comprobaciones de corrección en vivo (incluidas recepción de
+otros y fecha de filtro), 56 de controles compartidos, 5 escenarios del
+calendario con cachés aisladas, las 167 pruebas unitarias y la compilación.
+Se revisaron capturas de productos y órdenes en escritorio/móvil, y se probó
+manualmente un correo inválido en el servidor de desarrollo: aviso superior,
+borde rojo y envío bloqueado, sin guardar mensajes.
+
+El recorrido legado `tests/browser-journey.js` se detuvo en el escenario de
+documento de factura porque todavía busca «Adjuntar documento», mientras la
+interfaz ya usa «Seleccionar documento». No se modificó esa prueba ajena a la
+validación. Antes de ese punto recorrió guardados válidos de órdenes y lotes;
+el escenario actual del documento está cubierto por la auditoría nueva.
+
+Reportes: [auditoría de formularios](tests/evidence/aria/chromium-form-validation.browser.json),
+[corrección en vivo](tests/evidence/aria/chromium-live-errors.browser.json) y
+[controles](tests/evidence/aria/chromium-aria-controls.browser.json).
+Reproducción:
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/form-validation.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/live-errors.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js chromium
+    npm run test:calendar
+    npm test

@@ -9,6 +9,7 @@ import {
   useId,
   useMemo,
   useRef,
+  useState,
   useSyncExternalStore,
   type ReactElement,
   type ReactNode,
@@ -42,6 +43,12 @@ import { TextArea } from "react-aria-components/TextArea";
 import { TextField } from "react-aria-components/TextField";
 import { ToggleButton } from "react-aria-components/ToggleButton";
 export const FieldEditContext = createContext<() => void>(() => {});
+export const FormErrorsContext = createContext<{
+  id?: string;
+  fields: Record<string, string>;
+  constraints: Record<string, string>;
+  focusKey?: object;
+}>({ fields: {}, constraints: {} });
 
 export function Action({
   disabled,
@@ -74,14 +81,93 @@ export function ControlLink(props: React.ComponentPropsWithRef<"a">) {
     />
   );
 }
-export function ControlForm(props: React.ComponentPropsWithRef<"form">) {
+export function ControlForm({
+  fieldErrors = {},
+  ref,
+  onSubmitCapture,
+  onBlurCapture,
+  children,
+  ...props
+}: React.ComponentPropsWithRef<"form"> & {
+  fieldErrors?: Record<string, string>;
+}) {
+  const form = useRef<HTMLFormElement>(null);
+  const id = useId();
+  const [constraints, setConstraints] = useState<Record<string, string>>({});
+  const [focusKey, setFocusKey] = useState<object>();
+  const invalidFields = () =>
+    Object.fromEntries(
+      Array.from(
+        form.current?.querySelectorAll<
+          HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >("input,textarea,select") ?? [],
+      )
+        .filter((control) => control.willValidate && !control.validity.valid)
+        .map((control) => [
+          control.dataset.fieldPath || control.name || control.id,
+          control.validationMessage,
+        ])
+        .filter(([path]) => Boolean(path)),
+    );
+  useEffect(() => {
+    if (!Object.keys(constraints).length) return;
+    const pending = invalidFields();
+    const remaining = Object.fromEntries(
+      Object.keys(constraints)
+        .filter((path) => pending[path])
+        .map((path) => [path, pending[path]]),
+    );
+    if (JSON.stringify(remaining) !== JSON.stringify(constraints))
+      setConstraints(remaining);
+  });
+  const formProps: React.ComponentPropsWithRef<"form"> = {
+    ...props,
+    ref: (node) => {
+      form.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref) ref.current = node;
+    },
+    noValidate: true,
+    onSubmitCapture: (event) => {
+      onSubmitCapture?.(event);
+      if (event.defaultPrevented) return;
+      const invalid = invalidFields();
+      setConstraints(invalid);
+      if (Object.keys(invalid).length) {
+        event.preventDefault();
+        event.stopPropagation();
+        setFocusKey({});
+      }
+    },
+    onBlurCapture: (event) => {
+      onBlurCapture?.(event);
+      const control = event.target;
+      if (
+        control instanceof HTMLInputElement &&
+        control.classList.contains("date-input-text") &&
+        control.validity.customError
+      )
+        setConstraints(invalidFields());
+    },
+  };
   return (
-    <FormContext.Provider value={null}>
-      <AriaForm
-        {...(props as unknown as React.ComponentProps<typeof AriaForm>)}
-        validationBehavior="aria"
-      />
-    </FormContext.Provider>
+    <FormErrorsContext.Provider
+      value={{
+        id,
+        fields: { ...constraints, ...fieldErrors },
+        constraints,
+        focusKey,
+      }}
+    >
+      <FormContext.Provider value={null}>
+        <AriaForm
+          {...(formProps as unknown as React.ComponentProps<typeof AriaForm>)}
+          validationBehavior="aria"
+        >
+          {children}
+        </AriaForm>
+      </FormContext.Provider>
+    </FormErrorsContext.Provider>
   );
 }
 export function ControlLabel({
@@ -125,7 +211,7 @@ export function ControlError({
       }}
     >
       <TextContext.Provider value={null}>
-        <FieldError id={id} className="field-error">
+        <FieldError id={id} className="field-error visually-hidden">
           {message}
         </FieldError>
       </TextContext.Provider>
@@ -158,6 +244,24 @@ function labelProps(props: {
     "aria-labelledby":
       props["aria-labelledby"] ??
       (!props["aria-label"] && props.id ? props.id + "-label" : undefined),
+  };
+}
+function useControlValidation<
+  Props extends {
+    name?: string;
+    "aria-invalid"?: React.AriaAttributes["aria-invalid"];
+    "aria-describedby"?: string;
+  },
+>(props: Props): Props {
+  const validation = useContext(FormErrorsContext);
+  const path =
+    (props as Record<string, unknown>)["data-field-path"] ?? props.name;
+  if (typeof path !== "string" || !validation.fields[path]) return props;
+  return {
+    ...props,
+    "aria-invalid": true,
+    "aria-describedby":
+      props["aria-describedby"] ?? `${validation.id}summary-${path}-error`,
   };
 }
 export type Choice = {
@@ -219,6 +323,7 @@ export function ControlSelect({
   name,
   ...props
 }: React.ComponentPropsWithoutRef<"select">) {
+  props = useControlValidation({ ...props, name });
   const edited = useContext(FieldEditContext);
   const options = useMemo(() => readChoices(children), [children]);
   const selection = String(value ?? "");
@@ -256,6 +361,7 @@ export function ControlSelect({
         id={id}
         className={"control aria-select-control " + (className ?? "")}
         aria-labelledby={accessibleLabel}
+        aria-invalid={props["aria-invalid"]}
         aria-describedby={props["aria-describedby"]}
         data-field-path={(props as Record<string, unknown>)["data-field-path"]}
         data-value={selection}
@@ -351,6 +457,7 @@ export function ChoiceCombo({
   allowsCustomValue = false,
   inputProps = {},
 }: ComboProps) {
+  inputProps = useControlValidation(inputProps);
   const edited = useContext(FieldEditContext);
   type Section = { id: string; label: string; children: Choice[] };
   const items = useMemo<(Choice | Section)[]>(() => {
@@ -517,6 +624,7 @@ function NumericInput({
   );
 }
 export function ControlInput(props: React.ComponentPropsWithRef<"input">) {
+  props = useControlValidation(props);
   if (props.list) return <FreeTextInput {...props} list={props.list} />;
   if (
     props.type === "number" &&
@@ -552,6 +660,7 @@ export function ControlTextArea({
   defaultValue,
   ...props
 }: React.ComponentPropsWithRef<"textarea">) {
+  props = useControlValidation(props);
   return (
     <TextField
       className="aria-text-root"

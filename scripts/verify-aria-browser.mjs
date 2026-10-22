@@ -5,8 +5,7 @@ import { resolve, join } from "node:path";
 import { createServer } from "node:net";
 import { chromium, firefox, webkit } from "playwright-core";
 import { ariaPage } from "../tests/aria-playwright.mjs";
-import { createServer as createViteServer } from "vite";
-import react from "@vitejs/plugin-react";
+import { createFixtureVite } from "./fixture-vite.mjs";
 
 const file = process.argv[2] ?? "tests/browser-journey.js";
 const engine = process.argv[3] ?? "chromium";
@@ -64,16 +63,7 @@ try {
       consoleMessages.push({ type: message.type(), text: message.text() });
   });
   if (file.includes("live-errors") || file.includes("aria-controls")) {
-    vite = await createViteServer({
-      configFile: false,
-      plugins: [react()],
-      server: {
-        host: "127.0.0.1",
-        port: 0,
-        watch: { ignored: ["**/.playwright/**", "**/tests/.tmp/**"] },
-      },
-      logLevel: "error",
-    });
+    vite = await createFixtureVite({ temporary });
     await vite.listen();
     await page.goto(vite.resolvedUrls.local[0] + "tests/live-errors.html");
   } else await page.goto(`http://127.0.0.1:${port}`);

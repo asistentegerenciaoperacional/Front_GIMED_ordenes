@@ -264,7 +264,7 @@ function FavoriteSuppliersEditor({
       onClose={onClose}
     >
       <FieldEditContext.Provider value={() => {}}>
-        <ControlForm onSubmit={submit}>
+        <ControlForm onSubmit={submit} fieldErrors={error?.fields}>
           <div className="dialog-body">
             <ErrorNotice error={error} />
             {error?.code === "FAVORITES_CHANGED" && (

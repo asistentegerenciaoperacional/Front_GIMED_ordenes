@@ -9,6 +9,7 @@
     "start": "tsx server/index.ts",
     "test": "tsx --test tests/*.test.ts",
     "test:browser": "npm run build && node scripts/verify-aria-browser.mjs && node scripts/verify-persistence.mjs",
+    "test:calendar": "node scripts/verify-calendar-cache.mjs",
     "inventory:aria": "tsx scripts/inventory-aria.ts",
     "benchmark:aria": "node scripts/prepare-aria-baseline.mjs && npm run build && tsx scripts/measure-aria.ts baseline && tsx scripts/measure-aria.ts after && node scripts/compare-aria.mjs",
     "benchmark:favorites": "npm run build && node scripts/benchmark-favorites.mjs",

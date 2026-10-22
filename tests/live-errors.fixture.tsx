@@ -11,7 +11,13 @@ import {
   type Row,
 } from "../shared/schema";
 import { ApiError, AppContext } from "../src/ui";
-import { CatalogForm, InvoiceForm, LotForm, OrderForm } from "../src/forms";
+import {
+  CatalogForm,
+  InvoiceForm,
+  LotForm,
+  OrderForm,
+  ReceiptForm,
+} from "../src/forms";
 import { ColumnHeader } from "../src/column-filter";
 import { orderColumns } from "../src/order-table";
 import "../src/styles.css";
@@ -25,6 +31,19 @@ function Fixture() {
   const fixture = new URL(location.href).searchParams.get("fixture") ?? "order";
   // These operations only produce validation responses; no state file or real service is used.
   const run = async (name: string, payload: Row): Promise<Row> => {
+    if (name === "saveReceipt") {
+      const parsed = schemas.orden_otro.safeParse(payload.row);
+      if (!parsed.success)
+        throw new ApiError({
+          message: "Revisa la recepción.",
+          fields: Object.fromEntries(
+            parsed.error.issues.map((issue) => [
+              issue.path.join("."),
+              issue.message,
+            ]),
+          ),
+        });
+    }
     if (name === "saveLot") {
       const parsed = schemas.lote_producto.safeParse({
         ...blankRow("lote_producto"),
@@ -69,6 +88,8 @@ function Fixture() {
     >
       {fixture==='aria' ? <AriaControlsFixture/> : closed ? (
         <p>Formulario cerrado</p>
+      ) : fixture === "receipt-other" ? (
+        <ReceiptForm entity="orden_otro" line={db.orden_otro[0]} onClose={close} />
       ) : fixture === "contact" ? (
         <CatalogForm entity="contacto_interno" onClose={close} />
       ) : fixture === "maia" ? (
@@ -80,12 +101,16 @@ function Fixture() {
         />
       ) : fixture === "invoice" ? (
         <InvoiceForm onClose={close} />
-      ) : fixture === "filter" ? (
+      ) : fixture.startsWith("filter") ? (
         <DataTable>
           <TableHead>
             <TableRow>
               <ColumnHeader
-                column={orderColumns.find((column) => column.key === "total")!}
+                column={orderColumns.find((column) =>
+                  fixture === "filter-date"
+                    ? column.kind === "date"
+                    : column.key === "total",
+                )!}
                 options={[
                   { key: "100.00", label: "$ 100,00", value: "100.00" },
                 ]}

@@ -1177,7 +1177,7 @@ export function CodesPage() {
           subtitle="La creación en GS1 ocurre fuera de la aplicación."
           onClose={() => setCreating(false)}
         >
-          <ControlForm onSubmit={create}>
+          <ControlForm onSubmit={create} fieldErrors={error?.fields}>
             <div className="dialog-body">
               <ErrorNotice error={error} />
               <Field
@@ -1251,7 +1251,12 @@ export function CodesPage() {
             )}
             {action.next === "asignado" ? (
               <>
-                <Field id="field-id_producto" label="Producto" required>
+                <Field
+                  id="field-id_producto"
+                  label="Producto"
+                  required
+                  error={error?.fields.id_producto}
+                >
                   <ProductPicker
                     id="field-id_producto"
                     value={product}
@@ -1507,7 +1512,7 @@ export function SettingsPage() {
                 </div>
                 <Badge value="autorizada">±{tolerance(db)} % vigente</Badge>
               </div>
-              <ControlForm onSubmit={submit}>
+              <ControlForm onSubmit={submit} fieldErrors={error?.fields}>
                 <div className="panel-body stack">
                   <ErrorNotice error={error} />
                   <Field

@@ -109,6 +109,16 @@ async (page) => {
   await corrected(field('numero_factura'),'Factura válida y disponible');
   await page.getByRole('alert').waitFor({state:'hidden'});
 
+  await visit('receipt-other');
+  await field('cantidad_recibida').fill('1.5');
+  await page.getByRole('button',{name:'Guardar recepción',exact:true}).click();
+  await page.getByRole('alert').waitFor();
+  check(await field('cantidad_recibida').evaluate((control) => getComputedStyle(control).borderColor === 'rgb(220, 38, 38)'), 'Recepción de otros marca el borde rojo');
+  check(await page.locator('.field-error:not(.visually-hidden)').count()===0, 'Recepción de otros muestra mensajes solo en el resumen');
+  await field('cantidad_recibida').fill('2');
+  await corrected(field('cantidad_recibida'),'Recepción de otros corregida');
+  await page.getByRole('alert').waitFor({state:'hidden'});
+
   await visit('filter', false);
   await page.getByRole('button',{name:'Filtrar y ordenar Total',exact:true}).click();
   const panel=page.locator('.column-filter-panel');
@@ -123,6 +133,22 @@ async (page) => {
   await end.fill('20');
   await panel.getByRole('alert').waitFor({state:'hidden'});
   check(await end.evaluate((element) => element === document.activeElement),'Intervalo corregido oculta el error y conserva el foco');
+  await visit('filter-date', false);
+  await page.getByRole('button',{name:/^Filtrar y ordenar/}).click();
+  const datePanel=page.locator('.column-filter-panel');
+  await datePanel.getByRole('combobox',{name:'Condición',exact:true}).selectOption('between');
+  const startDate=datePanel.getByRole('textbox',{name:'Desde',exact:true});
+  await startDate.fill('31/02/2026');
+  await datePanel.getByRole('textbox',{name:'Hasta',exact:true}).fill('24/10/2026');
+  await datePanel.getByRole('button',{name:'Aplicar',exact:true}).click();
+  await datePanel.getByRole('alert').waitFor();
+  await datePanel.getByRole('alert').getByRole('link').click();
+  check(await startDate.evaluate((control) => control===document.activeElement), 'Resumen de fecha del filtro enfoca el control por su ID');
+  check(await startDate.evaluate((control) => getComputedStyle(control).borderColor==='rgb(220, 38, 38)'), 'Filtro de fecha inválida muestra borde rojo');
+  check(await datePanel.locator('.field-error:not(.visually-hidden)').count()===0, 'Filtro de fecha muestra solo el aviso superior');
+  await startDate.fill('23/10/2026');
+  await datePanel.getByRole('alert').waitFor({state:'hidden'});
+  check(await startDate.evaluate((control) => control===document.activeElement), 'Corregir fecha del filtro elimina el aviso sin perder foco');
   check(errors.length===0,'Sin errores JavaScript en las correcciones');
   return { date:new Date().toISOString(), checks, errors, isolatedFixtures:true, savedRecords:0 };
 }

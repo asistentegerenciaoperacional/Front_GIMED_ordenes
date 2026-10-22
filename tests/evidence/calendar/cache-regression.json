@@ -1,0 +1,42 @@
+{
+  "checks": [
+    {
+      "page": "fixture",
+      "width": 1440,
+      "selected": "25/10/2026",
+      "monthNavigation": true,
+      "parentFormPreserved": true
+    },
+    {
+      "page": "fixture",
+      "width": 375,
+      "selected": "25/10/2026",
+      "monthNavigation": true,
+      "parentFormPreserved": true
+    },
+    {
+      "page": "development-after-fixture",
+      "width": 1440,
+      "selected": "25/10/2026",
+      "monthNavigation": true,
+      "parentFormPreserved": true
+    },
+    {
+      "page": "development-after-fixture",
+      "width": 375,
+      "selected": "25/10/2026",
+      "monthNavigation": true,
+      "parentFormPreserved": true
+    },
+    {
+      "page": "development-after-fixture",
+      "width": 1440,
+      "selected": "25/10/2026",
+      "monthNavigation": true,
+      "parentFormPreserved": true
+    }
+  ],
+  "errors": [],
+  "cacheIsolation": true,
+  "temporary": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\calendar-cache-N6rkQq"
+}

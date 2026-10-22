@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-22",
+  "method": "Exported Git snapshots; isolated Vite caches; Chromium calendar inside a parent form dialog",
+  "checks": [
+    "Open calendar",
+    "Select 25/10/2026 with keyboard",
+    "Navigate to next and previous month",
+    "Escape closes calendar without closing parent form"
+  ],
+  "versions": [
+    {
+      "commit": "ad31384",
+      "stable": true,
+      "selected": "25/10/2026",
+      "lockHash": "4a89cbb789de77f424d570a836fb3cec3690e1ec7bed46de556ee8ffcdeffd77"
+    },
+    {
+      "commit": "7e1b342",
+      "stable": true,
+      "selected": "25/10/2026",
+      "lockHash": "4a89cbb789de77f424d570a836fb3cec3690e1ec7bed46de556ee8ffcdeffd77"
+    },
+    {
+      "commit": "d05be98",
+      "stable": true,
+      "selected": "25/10/2026",
+      "lockHash": "4a89cbb789de77f424d570a836fb3cec3690e1ec7bed46de556ee8ffcdeffd77"
+    }
+  ],
+  "sharedCacheCollision": {
+    "blankPage": true,
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  "originalDevelopmentFailure": {
+    "blankPage": true,
+    "error": "Invalid slot \"previous\". Valid slot names are \"close\".",
+    "observation": "Two different optimized React Aria Button modules were loaded in the same page"
+  }
+}

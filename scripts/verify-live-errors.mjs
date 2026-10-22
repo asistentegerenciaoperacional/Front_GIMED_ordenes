@@ -1,21 +1,14 @@
 import { spawn } from "node:child_process";
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, mkdtemp } from "node:fs/promises";
 import { resolve } from "node:path";
-import { createServer } from "vite";
-import react from "@vitejs/plugin-react";
+import { createFixtureVite } from "./fixture-vite.mjs";
 import {ariaBrowserFile} from "./aria-browser-source.mjs";
 
-const server = await createServer({
-  configFile: false,
-  root: resolve("."),
-  plugins: [react()],
-  server: {
-    host: "127.0.0.1",
-    port: 5184,
-    strictPort: true,
-    watch: { ignored: ["**/.playwright/**", "**/tests/.tmp/**"] },
-  },
-  logLevel: "error",
+await mkdir(resolve("tests/.tmp"), { recursive: true });
+const temporary = await mkdtemp(resolve("tests/.tmp/live-errors-"));
+const server = await createFixtureVite({
+  temporary,
+  server: { port: 5184, strictPort: true },
 });
 const session = "gimed-live-errors-side";
 async function cli(args) {

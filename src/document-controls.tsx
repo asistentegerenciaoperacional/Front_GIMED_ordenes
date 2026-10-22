@@ -216,7 +216,7 @@ export function Documents({
           subtitle="El contenido será ficticio. Se conserva la relación con su propietario."
           onClose={() => setEditing(undefined)}
         >
-          <ControlForm onSubmit={save}>
+          <ControlForm onSubmit={save} fieldErrors={error?.fields}>
             <div className="dialog-body">
               <ErrorNotice error={error} />
               <Field

@@ -194,22 +194,6 @@ export function Dialog({
               if ((event.target as HTMLInputElement).name) setEdited(true);
             }}
             onSubmit={(event) => event.stopPropagation()}
-            onSubmitCapture={(event) => {
-              const invalid = Array.from(
-                (
-                  event.target as HTMLFormElement
-                ).querySelectorAll<HTMLInputElement>(".date-input-text"),
-              ).find(
-                (field) =>
-                  !field.checkValidity() && !field.validity.valueMissing,
-              );
-              if (invalid) {
-                event.preventDefault();
-                event.stopPropagation();
-                invalid.focus();
-                invalid.reportValidity();
-              }
-            }}
           >
             <div className="dialog-heading">
               <div>

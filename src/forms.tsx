@@ -242,7 +242,7 @@ export function CatalogForm({
       onClose={onClose}
       dirty={dirty}
     >
-      <ControlForm onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid">
@@ -614,7 +614,7 @@ export function InvoiceForm({
         !!documentDraft
       }
     >
-      <ControlForm onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           {error?.details.existingId && onSaved && (
@@ -953,7 +953,7 @@ export function LotForm({
       wide
       dirty={dirty}
     >
-      <ControlForm onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid three">
@@ -1082,7 +1082,7 @@ export function ReceiptForm({
       onClose={onClose}
       dirty={JSON.stringify(row) !== JSON.stringify(line)}
     >
-      <ControlForm onSubmit={submit}>
+      <ControlForm onSubmit={submit} fieldErrors={error?.fields}>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid">
@@ -1624,7 +1624,7 @@ export function OrderForm({
       onClose={onClose}
       dirty={dirty}
     >
-      <ControlForm onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           {replacement && (
@@ -2305,7 +2305,7 @@ export function MailForm({
       onClose={onClose}
       dirty={changed}
     >
-      <ControlForm onSubmit={submit} noValidate>
+      <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
           <div className="form-grid three">
@@ -2376,10 +2376,19 @@ export function MailForm({
             </Button>
           </div>
           {recipients.map((r, i) => (
-            <div className="recipient" key={i}>
+            <div
+              className={`recipient ${error?.fields.recipients ? "invalid" : ""}`}
+              key={i}
+            >
               <ControlSelect
                 className="control"
                 aria-label={`Tipo de destinatario ${i + 1}`}
+                name={`recipients.${i}.type`}
+                data-field-path={`recipients.${i}.type`}
+                aria-invalid={error?.fields.recipients ? true : undefined}
+                aria-describedby={
+                  error?.fields.recipients ? "mail-recipients-error" : undefined
+                }
                 value={r.type}
                 onChange={(e) => {
                   setRecipients(
@@ -2401,6 +2410,12 @@ export function MailForm({
                 type="email"
                 list="correo-directorio"
                 aria-label={`Dirección de destinatario ${i + 1}`}
+                name={`recipients.${i}.address`}
+                data-field-path={`recipients.${i}.address`}
+                aria-invalid={error?.fields.recipients ? true : undefined}
+                aria-describedby={
+                  error?.fields.recipients ? "mail-recipients-error" : undefined
+                }
                 autoComplete="email"
                 value={r.address}
                 placeholder="correo@ejemplo.com"
@@ -2424,6 +2439,11 @@ export function MailForm({
               />
             </div>
           ))}
+          {error?.fields.recipients && (
+            <span id="mail-recipients-error" className="visually-hidden">
+              {error.fields.recipients}
+            </span>
+          )}
           <SuggestionList id="correo-directorio">
             {manualContacts.map((c) => (
               <option key={c.id} value={c.correo!}>

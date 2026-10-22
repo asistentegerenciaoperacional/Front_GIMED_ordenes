@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, Filter, Search, X } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Group } from "react-aria-components/Group";
 import { Popover } from "react-aria-components/Popover";
 import {
@@ -23,7 +23,7 @@ import {
   type ColumnValue,
   type Operator,
 } from "./order-table";
-import { Button, CancelButton, DateInput } from "./ui";
+import { ApiError, Button, CancelButton, DateInput, ErrorNotice } from "./ui";
 
 type HeaderProps<Key extends string> = {
   column: Column<Key>;
@@ -167,7 +167,10 @@ function FilterPanel<Key extends string>({
     )
       setError("");
   }, [column, error, operator, value, end]);
-  const errorRef = useRef<HTMLParagraphElement>(null);
+  const notice = useMemo(
+    () => (error ? new ApiError({ message: error }) : null),
+    [error],
+  );
 
   const allChecked =
     options.length > 0 && options.every((v) => selected.has(v.key));
@@ -200,6 +203,7 @@ function FilterPanel<Key extends string>({
           value={current}
           onChange={change}
           required
+          aria-invalid={error ? true : undefined}
           aria-describedby={error ? `${id}-error` : undefined}
         />
       ) : column.kind === "enum" ? (
@@ -209,6 +213,8 @@ function FilterPanel<Key extends string>({
           value={current}
           onChange={(event) => change(event.target.value)}
           required
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
         >
           <option value="">Seleccionar…</option>
           {options.map((v) => (
@@ -264,7 +270,6 @@ function FilterPanel<Key extends string>({
         const problem = filterProblem(column, draft);
         if (problem) {
           setError(problem);
-          requestAnimationFrame(() => errorRef.current?.focus());
           return;
         }
         onFilter(hasFilter(draft) ? draft : undefined);
@@ -283,6 +288,7 @@ function FilterPanel<Key extends string>({
         </Action>
       </div>
       <div className="column-filter-content">
+        <ErrorNotice id={`${id}-error`} error={notice} />
         {!column.selectionOnly && (
           <div className="column-sort-actions" aria-label="Ordenamiento">
             {(["asc", "desc"] as const).map((direction, index) => (
@@ -355,17 +361,6 @@ function FilterPanel<Key extends string>({
                   setEnd(v);
                 })}
             </div>
-          )}
-          {error && (
-            <p
-              id={`${id}-error`}
-              className="field-error"
-              role="alert"
-              tabIndex={-1}
-              ref={errorRef}
-            >
-              {error}
-            </p>
           )}
           <fieldset className="column-value-set">
             <legend>Valores</legend>

@@ -24,6 +24,7 @@ import {
   Action,
   ChoiceCombo,
   ControlError,
+  FormErrorsContext,
   ControlLabel,
   ControlLink,
   type Choice,
@@ -316,7 +317,7 @@ export function Loading() {
 export function Field({
   label,
   children,
-  error,
+  error: suppliedError,
   hint,
   tooltip,
   id,
@@ -332,6 +333,8 @@ export function Field({
 }) {
   const scope = useContext(FieldScope),
     actualId = scope + id;
+  const { fields } = useContext(FormErrorsContext);
+  const error = suppliedError ?? fields[id.replace(/^field-/, "")];
   const attributes = {
     id: actualId,
     name: id.replace(/^field-/, ""),
@@ -580,21 +583,35 @@ export function useErrors(validation?: LiveValidation) {
     catchError,
   };
 }
-export function ErrorNotice({ error }: { error: ApiError | null }) {
+export function ErrorNotice({
+  error,
+  id,
+}: {
+  error: ApiError | null;
+  id?: string;
+}) {
   const ref = useRef<HTMLDivElement>(null);
+  const scope = useContext(FieldScope);
+  const validation = useContext(FormErrorsContext);
+  const fields = { ...validation.constraints, ...error?.fields };
   useEffect(() => {
     if (error) ref.current?.focus();
   }, [error?.focusKey]);
-  return error ? (
-    <div className="error-notice" role="alert" tabIndex={-1} ref={ref}>
+  useEffect(() => {
+    if (validation.focusKey && Object.keys(validation.constraints).length)
+      ref.current?.focus();
+  }, [validation.focusKey]);
+  return error || Object.keys(fields).length ? (
+    <div id={id} className="error-notice" role="alert" tabIndex={-1} ref={ref}>
       <AlertCircle size={18} aria-hidden="true" />
       <div>
-        <strong>{error.message}</strong>
-        {Object.keys(error.fields).length > 0 && (
+        <strong>{error?.message ?? "Revisa los campos indicados."}</strong>
+        {Object.keys(fields).length > 0 && (
           <ul>
-            {Object.entries(error.fields).map(([field, msg]) => (
+            {Object.entries(fields).map(([field, msg]) => (
               <li key={field}>
                 <ControlLink
+                  id={`${validation.id ?? scope}summary-${field}-error`}
                   href={`#field-${field}`}
                   onClick={(e) => {
                     e.preventDefault();
@@ -607,6 +624,12 @@ export function ErrorNotice({ error }: { error: ApiError | null }) {
                       ) ??
                       form?.querySelector<HTMLElement>(
                         `[data-field-path$=".${CSS.escape(field)}"]`,
+                      ) ??
+                      form?.querySelector<HTMLElement>(
+                        `[data-field-path^="${CSS.escape(field)}."]`,
+                      ) ??
+                      form?.querySelector<HTMLElement>(
+                        `[id="${CSS.escape(field)}"],[name="${CSS.escape(field)}"]`,
                       );
                     if (target) {
                       e.preventDefault();

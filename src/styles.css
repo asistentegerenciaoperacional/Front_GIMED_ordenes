@@ -1361,6 +1361,10 @@ textarea.control {
 .field.invalid textarea {
   border-color: #dc2626;
 }
+.control[aria-invalid="true"],
+.aria-select-root[data-invalid] .aria-select-control {
+  border-color: #dc2626;
+}
 .field-error {
   color: #b91c1c !important;
 }
