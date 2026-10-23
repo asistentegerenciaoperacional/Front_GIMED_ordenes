@@ -2,6 +2,14 @@ import { randomBytes, randomUUID } from "node:crypto";
 import type { Database } from "../shared/models";
 import { costIssue } from "../shared/maquila-costs";
 import {
+  materialCatalogIssue,
+  normalizeProductMaterialConfig,
+  productMaterialConfig,
+  productMaterialConfigIssue,
+  productMaterialConfigShapeIssue,
+  type ProductMaterialConfig,
+} from "../shared/product-materials";
+import {
   blankRow,
   schemas,
   orderDeliverySchema,
@@ -641,6 +649,68 @@ export async function command(
   transport: MailTransport = simulatedTransport,
 ): Promise<Row> {
   switch (name) {
+    case "setProductMaterials": {
+      const desired = {
+        id_materiales: p.id_materiales,
+        corrugado: p.corrugado,
+      };
+      for (const value of [desired, p.expected]) {
+        const issue = productMaterialConfigShapeIssue(value);
+        if (issue)
+          throw new BusinessError(
+            issue.message,
+            issue.code,
+            issue.fields,
+            issue.details,
+          );
+      }
+      check(
+        db.productos.some((row) => row.id === p.id_producto),
+        "El producto ya no existe.",
+        "FOREIGN_KEY",
+        { id_producto: "El producto ya no existe." },
+      );
+      const current = productMaterialConfig(db, p.id_producto);
+      const expected = normalizeProductMaterialConfig(
+        p.expected as ProductMaterialConfig,
+      );
+      check(
+        JSON.stringify(expected) === JSON.stringify(current),
+        "Los materiales de este producto cambiaron. Revisa la configuración actualizada antes de guardar.",
+        "PRODUCT_MATERIALS_CHANGED",
+        {},
+        { current },
+      );
+      const issue = productMaterialConfigIssue(db, p.id_producto, desired);
+      if (issue)
+        throw new BusinessError(
+          issue.message,
+          issue.code,
+          issue.fields,
+          issue.details,
+        );
+      const config = normalizeProductMaterialConfig(
+        desired as ProductMaterialConfig,
+      );
+      db.materiales_asociados = db.materiales_asociados.filter(
+        (row) => row.id_producto !== p.id_producto,
+      );
+      db.materiales_asociados.push(
+        ...config.id_materiales.map((id_material) => ({
+          id_producto: p.id_producto,
+          id_material,
+        })),
+      );
+      db.producto_corrugado = db.producto_corrugado.filter(
+        (row) => row.id_producto !== p.id_producto,
+      );
+      if (config.corrugado)
+        db.producto_corrugado.push({
+          id_producto: p.id_producto,
+          ...config.corrugado,
+        });
+      return { config: productMaterialConfig(db, p.id_producto) };
+    }
     case "setFavoriteSuppliers": {
       findRecord(db, "tipos_materiales", { id: p.id_tipo_material });
       const ids = (value: unknown): string[] => {
@@ -714,6 +784,16 @@ export async function command(
           "R12",
           { codigo_material: "Introduce exactamente tres dígitos." },
         );
+      if (table === "materiales" || table === "tipos_materiales") {
+        const issue = materialCatalogIssue(db, table, parsed.data);
+        if (issue)
+          throw new BusinessError(
+            issue.message,
+            issue.code,
+            issue.fields,
+            issue.details,
+          );
+      }
       if (table === "costos_maquila") {
         const issue = costIssue(parsed.data, db.costos_maquila);
         if (issue)

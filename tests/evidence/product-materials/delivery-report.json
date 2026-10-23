@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-23T16:54:57.658Z",
+  "recoveryCommit": "9f685bfb2c0ea30d50de79f0ab7d49d2a36a670f",
+  "backups": [
+    {
+      "sha256": "5B189AB0CCFF3D47C583DA86A4640DBA21072269BFDF465BE6DC2A06082F8F6A",
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\database-before-product-materials-20261023T161744Z.bak",
+      "source": "data/database.json"
+    },
+    {
+      "sha256": "C17B5BBA0DF4DD20ABB0B72A594415754F2759FCB63850D7E0F573ECBE5BFC93",
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\dbml-before-product-materials-20261023T161744Z.bak",
+      "source": "../Planeacion/db.md"
+    },
+    {
+      "path": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\material-rules-before-product-materials-20261023.bak",
+      "sha256": "5A893B18AC7F107C0AC2ED2F3BC1B9934DE331D2B3EA98002A3F480E778B9554",
+      "source": "../Planeacion/restricciones-fuera-dbml.md"
+    }
+  ],
+  "schemaSha256": "494b4c653fc5e9929e9ec8023b7f3756671b229669fd1a916c46b72f4625e475",
+  "database": {
+    "sha256": "5b189ab0ccff3d47c583da86a4640dba21072269bfdf465be6dc2a06082f8f6a",
+    "unchangedSinceRecovery": true,
+    "automaticMigrations": 0
+  },
+  "tests": {
+    "baseline": 180,
+    "final": 199,
+    "browsers": {
+      "chromium": 63,
+      "firefox": 63,
+      "webkit": 63
+    },
+    "regressions": {
+      "favorites-regression": 71,
+      "favorites-disclosure-regression": 45,
+      "costs-regression": 66,
+      "costs-layout-regression": 87,
+      "form-validation-regression": 195,
+      "full-journey": 598,
+      "portable-report": 23
+    }
+  },
+  "performance": {
+    "passed": true,
+    "budgets": 60,
+    "comparison": "comparison.json",
+    "cpu": "Equipo actual, CPU 1×; estrés CPU 4× separado y no ejecutado"
+  },
+  "portable": {
+    "path": "tests/.tmp/product-materials-portable.zip",
+    "sha256": "6193854951a5ea7968e6a082f9786ebc22a793a89054146db5cc5b6f9ff921d2"
+  },
+  "screenshots": [
+    "current-groups-375.png",
+    "current-editor-375.png",
+    "current-groups-768.png",
+    "current-editor-768.png",
+    "current-groups-1024.png",
+    "current-editor-1024.png",
+    "current-groups-1440.png",
+    "current-editor-1440.png",
+    "current-selection-375.png"
+  ]
+}

@@ -2,7 +2,7 @@
 
 Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
 
-Actualizado el 22 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+Actualizado el 23 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
 
 ## Bases
 
@@ -49,7 +49,7 @@ Los estados sin materiales, códigos o costos se indican explícitamente. Si el 
 
 Órdenes es la pantalla inicial. La navegación lateral agrupa los procesos y reserva Configuración al final. Se presenta como un drawer cerrado inicialmente en todos los tamaños de pantalla; el botón de menú lo abre sobre el contenido, con un fondo atenuado. Su icono de fijación cambia entre panel flotante y navegación permanente. El contenido usa título, acción principal, filtros y tabla. El detalle mantiene la información de la orden de compra, sus productos, materiales o conceptos y los documentos vinculados. Los diálogos separan captura y revisión antes del guardado.
 
-Catálogos separa la navegación con pestañas principales **Productos**, **Materiales** y **Productos & materiales**, siguiendo el estilo de grupos de Órdenes. Debajo, los botones secundarios conservan el diseño actual: Productos contiene Lista de productos, Categorías y Costos de maquila; Materiales, Lista de materiales, Tipos de material y Proveedores favoritos por tipo; Productos & materiales, Materiales por producto y Corrugado por producto.
+Catálogos separa la navegación con pestañas principales **Productos**, **Materiales** y **Productos & materiales**, siguiendo el estilo de grupos de Órdenes. Debajo, los botones secundarios conservan el diseño actual: Productos contiene Lista de productos, Categorías y Costos de maquila; Materiales, Lista de materiales, Tipos de material y Proveedores favoritos por tipo. Productos & materiales muestra directamente la lista agrupada por producto, sin pestañas secundarias ni Agregar global.
 
 ### Relaciones agrupadas y selección múltiple
 
@@ -78,6 +78,16 @@ Proveedores y materiales de los diálogos reutilizan el mismo autocompletado y e
 El drawer fijado ocupa una columna propia y permanece visible al navegar y desplazar la página. Al desfijarlo, la columna se libera y el panel permanece abierto de forma flotante, con todo el ancho disponible para el contenido. Al cambiar entre fijado y flotante se cancelan las animaciones del panel para evitar repetir su entrada; la apertura habitual conserva su animación. El cambio de ancho utiliza una transición de 180 ms, desactivada con movimiento reducido. La fijación está disponible desde 1024 px de ancho de ventana. Por debajo, el botón desaparece y el panel fijado pasa automáticamente a flotante, liberando su columna y enfocando el cierre. Ampliar la ventana conserva el modo flotante hasta una nueva fijación.
 
 La cabecera conserva el botón de fijar/desfijar en los anchos permitidos; el cierre aparece en el modo flotante. Los destinos tienen desplazamiento interno y las tablas tienen desplazamiento horizontal propio cuando no caben. Las columnas de formularios se reducen a una por debajo de 600 px.
+
+## Materiales agrupados por producto
+
+Reutilizar `GroupedRelationsTable` y el lápiz del grupo para configurar todos los productos, incluidos los vacíos. Conservar sangría, medidas, animación, encabezados transparentes y columnas internas alineadas de favoritos. El detalle tiene Tipo de material, Material y Código MAIA; Corrugado aparece primero con su capacidad en una segunda línea del material. No agregar una columna de capacidad ni acciones por fila. Un corrugado ausente se muestra como Sin asignar cuando hay otros materiales; no cuenta como relación.
+
+El filtro personalizado usa el Select compartido con Todos los productos, Con materiales, Sin materiales, Maquila full, Maquila parcial, Con cinta, Con sticker y Sin corrugado asignado; una condición por vez combinada con la búsqueda. Con materiales muestra grupos con conteo mayor que cero, incluido el corrugado; Sin materiales muestra grupos con conteo cero. La búsqueda abre grupos coincidentes completos. Mantener el lápiz habilitado en los grupos vacíos y distinguir productos homónimos mediante maquilador e ID.
+
+El diálogo empieza con Producto bloqueado, referencia/capacidad de corrugado y casillas excluyentes Sticker/Cinta. Ambas vacías significa ninguno; cada casilla resuelve el material único de su rol. La capacidad exige un entero positivo seguro cuando hay referencia. Debajo usar `MultiRelationPicker`: materiales generales disponibles y selección final persistente, con búsqueda por nombre/tipo/MAIA y altas/bajas antes de guardar. Excluir de esas listas los tres roles especiales. Conservar errores y borrador, confirmación de descarte, bloqueo durante envío, retorno de foco y scroll. Apilar campos/listas en móvil y mantener un único scroll horizontal de la tabla. Ver [PRODUCTOS-MATERIALES.md](../PRODUCTOS-MATERIALES.md).
+
+En este editor, separar bloques por 16 px y títulos de empaque de sus campos por 8 px. Mantener títulos de sección de 15 px, casillas de 12 px y descripciones de 11 px. La papelera Quitar corrugado usa el botón secundario de solo icono con tooltip y hover destructivo, alineado abajo con los campos, en una columna siempre reservada de 38 px. Sin referencia permanece deshabilitada; seleccionarla o quitarla no altera la grilla. Hasta 600 px, colocar referencia arriba y capacidad con papelera de 40 px debajo. No sumar el margen superior propio del selector múltiple al espaciado entre bloques. La búsqueda de corrugado confirma solo al seleccionar y restaura la referencia anterior al salir sin elegir.
 
 ## Costos de maquila agrupados por producto
 

@@ -396,3 +396,21 @@ En la primera medición de esta compilación, la navegación al detalle con 60.0
 Expansión y colapso son acciones nuevas sin equivalente en la tabla plana: P95 aproximado de 260 y 240 ms. Incluyen la animación compartida de 180 ms, su preparación y la confirmación del pintado; no representan únicamente CPU. Se mantienen movimiento reducido y desmontaje del detalle al cerrar. Los informes generales registran además JavaScript descargado y tareas largas. Las diferencias observadas son resultados de esta ejecución, no una atribución causal de mejora.
 
 Reproducir con `npm run build` y `node scripts/benchmark-costs.mjs`. [Comparación completa](tests/evidence/costs/comparison.json), [referencia de componentes](tests/evidence/costs/baseline-cost-components.json), [componentes implementados](tests/evidence/costs/after-cost-components.json). CPU 4× no se ejecutó en este cambio y continúa siendo un ensayo separado.
+
+## Productos y materiales · 23 de octubre de 2026
+
+Referencia de producción: recuperación `9f685bfb2c0ea30d50de79f0ab7d49d2a36a670f`, mismo equipo y Chrome 155.0.8059.85, CPU sin limitar. Los fixtures deterministas de 6.000/60.000 lotes coinciden por hash. Los tiempos comienzan en eventos reales y terminan tras pintar el resultado; no incluyen el tiempo de automatización.
+
+**60/60 límites cumplidos**, sin repetir casos ni ampliar tolerancias: 39 comparaciones generales, 18 de carga/búsqueda/apertura/cierre/memoria del catálogo y tres controles de crecimiento de heap después de 30 ciclos. Límites: interacción P95 +máx(15 %,20 ms), carga +máx(15 %,100 ms), memoria estable +máx(15 %,5 MB).
+
+| Escenario | Carga general P95 antes → después | Carga de materiales P95 antes → después | Apertura del editor P95 antes → después |
+| --- | --- | --- | --- |
+| 6.000 lotes / 1440 px | 146,0 → 158,5 ms | 428,1 → 424,1 ms | 40,8 → 42,5 ms |
+| 6.000 lotes / 375 px | 131,3 → 143,0 ms | 428,6 → 429,2 ms | 41,1 → 42,5 ms |
+| 60.000 lotes / 1440 px | 677,1 → 662,1 ms | 730,4 → 762,5 ms | 39,2 → 39,2 ms |
+
+Heap estable general: 17.899.004 → 17.927.040 bytes; 16.578.484 → 16.622.540; 41.626.288 → 40.505.264. El incremento del catálogo entre la carga fría y 30 ciclos, incluida la inicialización diferida del editor, fue 4.507.612/4.573.388/4.543.460 bytes, dentro de 5 MB. La comparación entre los heaps estables de ambas versiones también cumple. Los informes generales conservan JavaScript descargado, tareas largas y muestras de memoria tras ciclos repetidos.
+
+Expandir/colapsar grupos son acciones nuevas sin equivalente en la tabla plana y se registran por separado, incluida la animación compartida de 180 ms. Las diferencias de la tabla son mediciones de esta ejecución y no una atribución causal de mejora.
+
+Reproducir con `npm run build` y `node scripts/benchmark-product-materials.mjs`. [Comparación](tests/evidence/product-materials/comparison.json), [componentes antes](tests/evidence/product-materials/baseline-material-components.json), [componentes después](tests/evidence/product-materials/after-material-components.json). CPU 4× no se ejecutó; permanece como ensayo de estrés separado.

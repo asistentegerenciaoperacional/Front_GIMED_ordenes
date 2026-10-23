@@ -12,6 +12,10 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { costDay, costIssue } from "../shared/maquila-costs";
 import {
+  materialCatalogIssue,
+  materialRole,
+} from "../shared/product-materials";
+import {
   materialSupplierGroups,
   suggestedMaterial,
 } from "../shared/favorite-suppliers";
@@ -24,7 +28,6 @@ import {
   isInitialProductLot,
   labels,
   assignedBarcode,
-  materialKind,
   materialCodeRequired,
   meta,
   nextOrderNumber,
@@ -217,6 +220,13 @@ export function CatalogForm({
             parsed.error.issues.map((e) => [e.path.join("."), e.message]),
           ),
         });
+      if (entity === "materiales" || entity === "tipos_materiales") {
+        const issue = materialCatalogIssue(db, entity, {
+          ...parsed.data,
+          id: record?.id ?? parsed.data.id,
+        });
+        if (issue) throw new ApiError(issue);
+      }
       if (entity === "costos_maquila") {
         const issue = costIssue(
           { ...parsed.data, id: record?.id },
@@ -1400,7 +1410,7 @@ export function OrderForm({
       db.materiales_asociados.some(
         (a) =>
           a.id_producto === line.id_producto &&
-          materialKind(db, a.id_material).includes("sticker"),
+          materialRole(db, a.id_material) === "sticker",
       )
     );
   }

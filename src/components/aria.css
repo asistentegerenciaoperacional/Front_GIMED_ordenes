@@ -95,6 +95,115 @@
 .favorite-suppliers-panel {
   --relation-table-min-width: 360px;
 }
+.product-materials-panel {
+  --relation-table-min-width: 520px;
+}
+.product-materials-panel .grouped-relations {
+  min-width: calc(
+    var(--relation-table-min-width) + var(--relation-cell-inset) * 2 +
+      var(--relation-toggle-size) + var(--relation-label-gap) + 24px
+  );
+}
+.product-material-history th:first-child {
+  width: 28%;
+}
+.product-material-history th:last-child {
+  width: 18%;
+}
+.product-material-history small {
+  display: block;
+  color: var(--muted);
+}
+.product-materials-toolbar .aria-select-control.control {
+  width: 230px;
+  min-width: 230px;
+}
+.dialog-body.product-materials-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.product-materials-editor > .field {
+  margin: 0;
+}
+.product-materials-editor > section[aria-label="Cinta o sticker"] {
+  padding-top: 2px;
+}
+.product-materials-editor > section h3 {
+  margin: 0 0 8px;
+}
+.product-materials-editor > .relation-picker {
+  margin-top: 0;
+}
+.product-materials-divider {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.product-materials-corrugado {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) 38px;
+  gap: 12px;
+  align-items: end;
+}
+.product-materials-corrugado > .field {
+  margin: 0;
+}
+.product-materials-corrugado .btn.product-materials-remove {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+}
+.product-materials-specials {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+}
+.product-materials-choice {
+  min-width: 0;
+  min-height: 40px;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.product-materials-specials small {
+  display: block;
+  color: var(--muted);
+  margin-top: 2px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.product-materials-editor section > small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  font-size: 11px;
+}
+.product-materials-changes p {
+  margin: 6px 0;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .product-materials-corrugado {
+    grid-template-columns: minmax(0, 1fr) 40px;
+    gap: 8px 12px;
+  }
+  .product-materials-corrugado > .field:first-child {
+    grid-column: 1 / -1;
+  }
+  .product-materials-corrugado .btn.product-materials-remove {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+  .product-materials-specials {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product-materials-toolbar .aria-select-control.control {
+    width: 100%;
+  }
+}
 .maquila-costs-panel .grouped-relations,
 .favorite-suppliers-panel .grouped-relations {
   min-width: calc(

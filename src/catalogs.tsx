@@ -24,6 +24,7 @@ import { confirmAction } from "./components/overlays";
 import { CatalogForm, Documents } from "./forms";
 import { FavoriteSuppliersTable } from "./favorite-suppliers";
 import { MaquilaCostsTable } from "./maquila-costs";
+import { ProductMaterialsTable } from "./product-materials";
 import { ProductHistory } from "./product-history";
 import {
   columnOptions,
@@ -677,14 +678,18 @@ export function CatalogPage({
   const catalogGroups: Record<CatalogGroup, Entity[]> = {
     productos: ["productos", "costos_maquila", "categorias"],
     materiales: ["materiales", "tipos_materiales", "proveedores_favoritos"],
-    relacionados: ["materiales_asociados", "producto_corrugado"],
+    relacionados: ["materiales_asociados"],
   };
   const providerList: Entity[] = [
     "proveedor",
     "direccion_proveedor",
     "contacto",
   ];
-  const initial = params.get("tab") as Entity;
+  const initial = (
+    params.get("tab") === "producto_corrugado"
+      ? "materiales_asociados"
+      : params.get("tab")
+  ) as Entity;
   const catalogEntityList: Entity[] = Object.values(catalogGroups).flat();
   const [entity, setEntity] = useState<Entity>(() =>
     group === "proveedores"
@@ -714,30 +719,33 @@ export function CatalogPage({
     materiales_asociados: "Materiales por producto",
     producto_corrugado: "Corrugado por producto",
   };
-  const content = (
-    <Tabs
-      items={childTabs.map((id) => ({
-        id,
-        label: childLabel[id] ?? titles[id],
-      }))}
-      value={entity}
-      onChange={(value) => setEntity(value as Entity)}
-      className="catalog-tabs"
-      label={
-        group === "proveedores"
-          ? "Apartados de proveedores"
-          : "Apartados del catálogo"
-      }
-    >
-      {entity === "proveedores_favoritos" ? (
-        <FavoriteSuppliersTable />
-      ) : entity === "costos_maquila" ? (
-        <MaquilaCostsTable />
-      ) : (
-        <CatalogTable key={entity} entity={entity} />
-      )}
-    </Tabs>
-  );
+  const content =
+    catalogGroup === "relacionados" && group !== "proveedores" ? (
+      <ProductMaterialsTable />
+    ) : (
+      <Tabs
+        items={childTabs.map((id) => ({
+          id,
+          label: childLabel[id] ?? titles[id],
+        }))}
+        value={entity}
+        onChange={(value) => setEntity(value as Entity)}
+        className="catalog-tabs"
+        label={
+          group === "proveedores"
+            ? "Apartados de proveedores"
+            : "Apartados del catálogo"
+        }
+      >
+        {entity === "proveedores_favoritos" ? (
+          <FavoriteSuppliersTable />
+        ) : entity === "costos_maquila" ? (
+          <MaquilaCostsTable />
+        ) : (
+          <CatalogTable key={entity} entity={entity} />
+        )}
+      </Tabs>
+    );
   return (
     <>
       <PageHeading

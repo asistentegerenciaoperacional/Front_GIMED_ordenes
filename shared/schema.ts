@@ -3,6 +3,7 @@ z.config(z.locales.es());
 import metadata from "./entities.json";
 import type { Database } from "./models";
 import { costDay } from "./maquila-costs";
+import { materialRole } from "./product-materials";
 export type Entity = keyof Database;
 export type Row = Record<string, any>;
 export type FieldSpec = {
@@ -276,17 +277,17 @@ export function recommendations(
   const box = db.producto_corrugado.find((c) => c.id_producto === productId);
   const kinds = db.materiales_asociados
     .filter((a) => a.id_producto === productId)
-    .map((a) => materialKind(db, a.id_material));
+    .map((a) => materialRole(db, a.id_material));
   return {
     ref_corrugado: box?.id_material ?? null,
     cantidad_corrugado:
       box && box.unidades_por_corrugado !== 0
         ? ceilRatio(BigInt(quantity), BigInt(box.unidades_por_corrugado)) + 5
         : null,
-    cantidad_sticker: kinds.some((k) => k.includes("sticker"))
+    cantidad_sticker: kinds.includes("sticker")
       ? increasedQuantity(BigInt(quantity) * 2n, stickerPct)
       : null,
-    cantidad_cinta: kinds.some((k) => k.includes("cinta"))
+    cantidad_cinta: kinds.includes("cinta")
       ? ceilRatio(BigInt(quantity), 4000n)
       : null,
   };

@@ -301,6 +301,7 @@ export function App() {
           error instanceof ApiError &&
           (error.code === "CONSECUTIVE_CHANGED" ||
             error.code === "FAVORITES_CHANGED" ||
+            error.code === "PRODUCT_MATERIALS_CHANGED" ||
             error.code === "BARCODE_CHANGED" ||
             error.code === "COST_PERIOD_CONFLICT" ||
             (["createOrder", "editOrder"].includes(name) &&

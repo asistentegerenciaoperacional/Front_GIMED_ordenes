@@ -1,5 +1,6 @@
 import type { Database } from "../shared/models";
 import { costIssue } from "../shared/maquila-costs";
+import { materialCatalogIssue } from "../shared/product-materials";
 import {
   canonical,
   decimal,
@@ -104,6 +105,13 @@ export function validEntityField(
   )
     return false;
   if (!db) return true;
+  if (entity === "materiales" || entity === "tipos_materiales") {
+    const issue = materialCatalogIssue(db, entity, {
+      ...values,
+      id: record?.id ?? values.id,
+    });
+    if (issue?.fields[field]) return false;
+  }
   if (
     entity === "materiales" &&
     field === "codigo_material" &&

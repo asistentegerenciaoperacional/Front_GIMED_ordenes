@@ -462,6 +462,15 @@ Reproducción:
     node scripts/verify-aria-browser.mjs tests/aria-controls.browser.js chromium
     node scripts/verify-aria-browser.mjs tests/favorites.browser.js chromium
 
+### Productos y materiales · 23 de octubre de 2026
+
+- Referencia inicial: 180/180 pruebas. Resultado: 199/199; las 19 nuevas cubren guardado conjunto, unicidad global, referencias, capacidades, exclusión, reclasificaciones, conflictos, concurrencia, rollback, persistencia y archivos incompatibles intactos.
+- Playwright: 63 comprobaciones nuevas por navegador en Chromium, Firefox y WebKit, a 375/768/1024/1440 px. Incluye filtro por teclado, selección final con búsqueda, casillas excluyentes, errores, revisión de conflictos, descarte, foco, scroll, homónimos y un contexto táctil sin material especial disponible.
+- Regresiones: 71 de favoritos, 45 de su despliegue, 66 de costos, 87 de alineación compartida, 195 de formularios y 598 del recorrido integral. Se adaptó la auditoría de los formularios antiguos al editor unificado: capacidad obligatoria con corrugado e inválida fraccionaria. Se conservan las comprobaciones de bordes, resumen y foco.
+- Portable temporal: 23 comprobaciones. La base local no se modificó; respaldos y hashes figuran en el informe. Las capturas `current-*` se generaron en modo de solo lectura, comprobando que no hubiera escrituras a la API.
+
+Reproducir con `npm test`, `npm run build` y `node scripts/verify-aria-browser.mjs tests/product-materials.browser.js chromium` (también Firefox y WebKit). Rendimiento: `node scripts/benchmark-product-materials.mjs`. [Informes y capturas](tests/evidence/product-materials), [especificación](PRODUCTOS-MATERIALES.md).
+
 ## Calendario: pantalla en blanco por caché compartida — 22 de octubre de 2026
 
 Se reprodujo el fallo en el navegador del servidor de desarrollo al abrir el

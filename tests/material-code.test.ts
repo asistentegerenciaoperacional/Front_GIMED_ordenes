@@ -72,7 +72,13 @@ test("solo Corrugado admite crear materiales sin código; rechazar no altera el 
 
 test("cambiar un corrugado sin código a otro tipo exige MAIA; cero y códigos únicos siguen admitidos", async (t) => {
   const store = await fixture(t);
-  const box = store.snapshot().materiales.find((row) => row.id === sid(53))!;
+  // MAIA conversion is exercised on an unused box; used boxes retain their semantic role.
+  const box = (
+    await save(store, {
+      id_tipo_material: sid(43),
+      nombre_material: "Corrugado sin uso",
+    })
+  ).row;
   await assert.rejects(
     save(store, { ...box, id_tipo_material: sid(40) }, { id: box.id }),
     (error: unknown) => error instanceof BusinessError && error.code === "R12",

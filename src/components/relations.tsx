@@ -12,6 +12,7 @@ import {
   CheckChoice,
   ChoiceGroup,
   ControlInput,
+  ControlError,
   type Choice,
 } from "./controls";
 import {
@@ -205,6 +206,7 @@ export function MultiRelationPicker({
   onQueryChange,
   disabled = false,
   labels: overrides,
+  error,
 }: {
   options: Choice[];
   selected: string[];
@@ -213,6 +215,7 @@ export function MultiRelationPicker({
   query: string;
   onQueryChange: (query: string) => void;
   disabled?: boolean;
+  error?: string;
   labels?: Partial<{
     available: string;
     selected: string;
@@ -223,6 +226,7 @@ export function MultiRelationPicker({
     empty: string;
   }>;
 }) {
+  const errorId = useId();
   const labels = {
     available: "Proveedores disponibles",
     selected: "Proveedores seleccionados",
@@ -263,6 +267,8 @@ export function MultiRelationPicker({
         />
         <ChoiceGroup
           aria-label={labels.choices}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
           value={selected}
           isDisabled={disabled}
           onChange={(ids) =>
@@ -315,6 +321,7 @@ export function MultiRelationPicker({
           {!selected.length && <p>{labels.empty}</p>}
         </div>
       </section>
+      {error && <ControlError id={errorId} message={error} />}
     </div>
   );
 }

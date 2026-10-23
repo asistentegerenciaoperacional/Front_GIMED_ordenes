@@ -104,3 +104,7 @@ Cinco estados de color distinto, Asignado único por producto, asociación inici
 Alta y edición exigen producto, importe entero positivo e inicio. La integridad transaccional impide periodos solapados, extremos compartidos y más de un periodo abierto por producto. Fechas inclusivas en America/Bogota; el costo futuro no se anticipa y las órdenes conservan sus precios.
 
 Lista agrupada compartida con favoritos, filtro Con costos/Todos los productos junto a Agregar, búsqueda por producto/importe/fechas e historial completo. El + bloquea el producto del alta. Lápiz y papelera aparecen con hover o foco; en táctil permanecen visibles. Se conservan borrador, confirmaciones, foco y scroll. [Especificación y recuperación](COSTOS-MAQUILA.md).
+
+### Productos y materiales · 23 de octubre de 2026
+
+Lista única por producto, sin Agregar global ni pestañas secundarias. Búsqueda, cinco filtros y detalle de tres columnas con capacidad bajo el corrugado. El lápiz configura corrugado, adhesivo y selección múltiple general; los productos vacíos siguen accesibles. El guardado es transaccional y compara la selección original, conserva borrador ante fallos y exige revisar conflictos. Cinta y Sticker son únicos globalmente y excluyentes por producto; se controlan también reclasificaciones y referencias. FULL/PARCIAL y órdenes históricas conservan su significado. [Contrato, reglas y recuperación](PRODUCTOS-MATERIALES.md).

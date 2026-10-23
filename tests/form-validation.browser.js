@@ -121,6 +121,13 @@ async (page) => {
     for (const [entity, route, invalidPath, value, tab] of catalogCases) {
       await visit(route, width);
       if (tab) await page.getByRole("tab", { name: tab, exact: true }).click();
+      if (entity === "materiales_asociados" || entity === "producto_corrugado") {
+        await page.getByRole("button", { name: "Editar materiales de " + initial.productos[0].nombre_producto, exact: true }).click();
+        await field("corrugado.unidades_por_corrugado").fill(entity === "materiales_asociados" ? "" : "1.5");
+        await dialog().getByRole("button", { name: "Guardar cambios", exact: true }).click();
+        await audit(`${entity} ${width}`);
+        continue;
+      }
       const add = page.getByRole("button", { name: "Agregar", exact: true });
       if (await add.count()) await add.first().click();
       else

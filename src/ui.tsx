@@ -473,7 +473,10 @@ export function MaterialPicker({
   materials,
   placeholder = "Buscar material…",
   ...props
-}: PickerProps & { materials: Database["materiales"] }) {
+}: PickerProps & {
+  materials: Database["materiales"];
+  commitOnSelection?: boolean;
+}) {
   const { db } = useApp();
   const options = useMemo(
     () =>

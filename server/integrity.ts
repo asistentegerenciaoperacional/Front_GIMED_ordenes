@@ -1,5 +1,6 @@
 import type { Database } from "../shared/models";
 import { costScheduleIssue } from "../shared/maquila-costs";
+import { productMaterialsDatabaseIssue } from "../shared/product-materials";
 import {
   schemas,
   entities,
@@ -9,7 +10,6 @@ import {
   lineTable,
   orderItemLabel,
   canonical,
-  materialKind,
   normalizeInvoice,
   type Entity,
   type Row,
@@ -98,6 +98,14 @@ export function validateDatabase(
       "COST_PERIOD_CONFLICT",
       costConflict.fields,
       costConflict,
+    );
+  const materialsConflict = productMaterialsDatabaseIssue(db, previous);
+  if (materialsConflict)
+    throw new BusinessError(
+      materialsConflict.message,
+      materialsConflict.code,
+      materialsConflict.fields,
+      materialsConflict.details,
     );
   const assignedProducts = new Set<string>();
   for (const code of db.codigos_barras) {
@@ -258,20 +266,6 @@ export function validateDatabase(
       "R12",
       { codigo_material: "Introduce tres dígitos." },
     );
-  for (const p of db.productos) {
-    const kinds = db.materiales_asociados
-      .filter((a) => a.id_producto === p.id)
-      .map((a) => materialKind(db, a.id_material));
-    check(
-      !(
-        kinds.some((k) => k.includes("sticker")) &&
-        kinds.some((k) => k.includes("cinta"))
-      ),
-      "Un producto puede llevar sticker o cinta, pero no ambos.",
-      "R13",
-      { id_material: "Este producto ya tiene el material excluyente." },
-    );
-  }
   for (const l of db.orden_producto)
     check(
       l.cantidad_sticker === null || l.cantidad_cinta === null,
