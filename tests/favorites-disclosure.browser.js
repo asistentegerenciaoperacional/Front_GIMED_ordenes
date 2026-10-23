@@ -41,7 +41,7 @@ async (page) => {
     const geometry = await panel.evaluate((el) => {
       const type = el.closest("tr").previousElementSibling.querySelector("strong").getBoundingClientRect();
       const name = el.querySelector(".relation-provider-name");
-      const list = el.querySelector("li");
+      const list = el.querySelector(".relation-provider-list tbody tr td");
       const cell = el.closest("td,th");
       const details = el.querySelector(".relation-details");
       return { indent: name.getBoundingClientRect().left - type.left,
@@ -51,9 +51,9 @@ async (page) => {
         bottom: getComputedStyle(details).paddingBottom,
         background: getComputedStyle(details).backgroundColor };
     });
-    check(Math.abs(geometry.indent - 24) < 1, `Proveedores sangrados 24px respecto al tipo a ${width}px`);
+    check(Math.abs(geometry.indent - 34) < 1, `Proveedores comparten sangría y padding de costos a ${width}px`);
     check(geometry.weight === "400", `Nombres sin negrita a ${width}px`);
-    check(geometry.rowPadding === "6px" && geometry.cellPadding === "0px" && geometry.bottom === "4px", `Separación vertical compacta a ${width}px`);
+    check(geometry.rowPadding === "8px" && geometry.cellPadding === "0px" && geometry.bottom === "4px", `Separación vertical igual a costos a ${width}px`);
     check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Sin desbordamiento horizontal a ${width}px`);
     await page.screenshot({ path: `tests/evidence/favorites/compact-expanded-${width}.png`, fullPage: true });
     await toggle().click();

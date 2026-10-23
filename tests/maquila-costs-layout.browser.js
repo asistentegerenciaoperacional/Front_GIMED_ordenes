@@ -11,6 +11,29 @@ async (page) => {
   const state = async () =>
     (await page.request.get(origin + "/api/state")).json();
   const initial = await state();
+  const appearances = new Map();
+  const appearance = (selector) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((table) => {
+        const style = (cell) => {
+          const computed = getComputedStyle(cell);
+          return [
+            computed.paddingBlock,
+            computed.paddingInline,
+            computed.fontFamily,
+            computed.fontSize,
+            computed.fontWeight,
+            computed.color,
+          ];
+        };
+        return {
+          header: style(table.tHead.rows[0].cells[0]),
+          row: style(table.tBodies[0].rows[0].cells[0]),
+          height: table.tBodies[0].rows[0].getBoundingClientRect().height,
+        };
+      });
   const panel = () => page.locator(".maquila-costs-panel");
   const settle = async () => {
     await page.waitForFunction(() =>
@@ -87,6 +110,7 @@ async (page) => {
     );
     await settle();
     const tables = await measure();
+    appearances.set(width, await appearance(".maquila-cost-history"));
     check(
       tables.length === groups,
       `Todos los historiales desplegados a ${width}px`,
@@ -144,19 +168,105 @@ async (page) => {
         fullPage: true,
       });
   }
-  await page.goto(origin + "/catalogos?tab=proveedores_favoritos");
-  const favorites = page.locator(".grouped-relations");
-  await favorites.waitFor();
-  await favorites.locator(".relation-toggle:not([disabled])").first().click();
-  await page.locator(".relation-provider-list").first().waitFor();
-  check(
-    (await favorites.locator(".relation-provider-list li").count()) > 0,
-    "Favoritos conserva su lista y despliegue",
-  );
-  check(
-    (await favorites.locator("table").count()) === 0,
-    "Favoritos no adquiere una tabla interna ni estilos ajenos",
-  );
+  for (const width of [375, 768, 1024, 1440, 1680]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(origin + "/catalogos?tab=proveedores_favoritos");
+    const favorites = page.locator(".favorite-suppliers-panel");
+    const toggles = favorites.locator(".relation-toggle:not([disabled])");
+    await toggles.first().waitFor();
+    const count = await toggles.count();
+    for (let index = 0; index < count; index++)
+      await toggles.nth(index).click();
+    await page.waitForFunction(
+      (count) =>
+        document.querySelectorAll(".relation-provider-list").length === count,
+      count,
+    );
+    await settle();
+    const suppliers = favorites.locator(".relation-provider-list");
+    check(
+      (
+        await suppliers.first().getByRole("columnheader").allTextContents()
+      ).join("|") === "Proveedor|NIT",
+      `Favoritos muestra encabezados Proveedor y NIT a ${width}px`,
+    );
+    const supplierAppearance = await appearance(".relation-provider-list");
+    check(
+      JSON.stringify(supplierAppearance) ===
+        JSON.stringify(appearances.get(width)),
+      `Tipografía, padding y alto de filas iguales a costos a ${width}px`,
+    );
+    const geometry = await suppliers.evaluateAll((tables) =>
+      tables.map((table) => ({
+        headers: [...table.tHead.rows[0].cells].map((cell) => ({
+          x: cell.getBoundingClientRect().x,
+          width: cell.getBoundingClientRect().width,
+          background: getComputedStyle(cell).backgroundColor,
+        })),
+        rows: [...table.tBodies[0].rows].map((row) =>
+          [...row.cells].map((cell) => cell.getBoundingClientRect().x),
+        ),
+      })),
+    );
+    check(
+      geometry.every((table) =>
+        table.headers.every(
+          (header, column) =>
+            Math.abs(header.x - geometry[0].headers[column].x) < 1 &&
+            Math.abs(header.width - geometry[0].headers[column].width) < 1 &&
+            table.rows.every((row) => Math.abs(row[column] - header.x) < 1),
+        ),
+      ),
+      `Columnas de favoritos alineadas entre tipos a ${width}px`,
+    );
+    check(
+      geometry.every((table) =>
+        table.headers.every(
+          (header) => header.background === "rgba(0, 0, 0, 0)",
+        ),
+      ),
+      `Encabezados blancos sin banner en favoritos a ${width}px`,
+    );
+    await suppliers.first().locator("tbody tr").first().hover();
+    check(
+      (await suppliers.locator("button,a").count()) === 0,
+      `Sin editar ni eliminar proveedores al hacer hover a ${width}px`,
+    );
+    check(
+      (await favorites
+        .getByRole("button", { name: /^Editar proveedores de/ })
+        .count()) === initial.tipos_materiales.length,
+      `Se conserva la edición por tipo a ${width}px`,
+    );
+    const supplierIds = initial.proveedores_favoritos
+      .filter(
+        (favorite) =>
+          favorite.id_tipo_material ===
+          initial.tipos_materiales.find(
+            (type) => type.tipo_material === "Cinta",
+          ).id,
+      )
+      .map((favorite) => favorite.id_proveedor);
+    const supplier = initial.proveedor.find((provider) =>
+      supplierIds.includes(provider.id),
+    );
+    const nit = `${supplier.nit}${supplier.digito_verf ? `-${supplier.digito_verf}` : ""}`;
+    check(
+      (await suppliers.getByText(nit, { exact: true }).count()) > 0,
+      `Se conserva NIT-DV a ${width}px`,
+    );
+    check(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+      `Favoritos no desborda la página a ${width}px`,
+    );
+    if ([375, 1440].includes(width))
+      await page.screenshot({
+        path: `tests/evidence/costs/aligned-favorites-${width}.png`,
+        fullPage: true,
+      });
+  }
   check(errors.length === 0, "Sin errores JavaScript");
   check(
     JSON.stringify(await state()) === JSON.stringify(initial),

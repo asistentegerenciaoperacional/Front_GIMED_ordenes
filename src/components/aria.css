@@ -39,7 +39,7 @@
 .relation-toggle[aria-expanded="true"] svg {
   transform: rotate(90deg);
 }
-.grouped-relations td:last-child {
+.grouped-relations > tbody > .relation-group-row > td:last-child {
   width: 74px;
   text-align: right;
 }
@@ -75,20 +75,28 @@
 }
 .grouped-relations .relation-details .data-table {
   table-layout: fixed;
+  min-width: var(--relation-table-min-width);
+}
+.grouped-relations .relation-details .data-table th,
+.grouped-relations .relation-details .data-table td {
+  padding: 8px 10px;
+  font-weight: 400;
+}
+.grouped-relations .relation-details .data-table td {
+  height: calc(var(--relation-toggle-size) + 17px);
 }
 .grouped-relations .relation-details .data-table thead th {
   background: transparent;
   border-top: 0;
 }
-.relation-provider-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
 .maquila-costs-panel {
   --relation-table-min-width: 520px;
 }
-.maquila-costs-panel .grouped-relations {
+.favorite-suppliers-panel {
+  --relation-table-min-width: 360px;
+}
+.maquila-costs-panel .grouped-relations,
+.favorite-suppliers-panel .grouped-relations {
   min-width: calc(
     var(--relation-table-min-width) + var(--relation-cell-inset) +
       var(--relation-cell-inset) + var(--relation-toggle-size) +
@@ -110,17 +118,9 @@
 .maquila-costs-panel .relation-group-label strong {
   min-width: 0;
 }
-.maquila-costs-panel .maquila-cost-history {
-  min-width: var(--relation-table-min-width);
-}
-.maquila-costs-panel .maquila-cost-history th,
-.maquila-costs-panel .maquila-cost-history td {
-  padding: 8px 10px;
-  font-weight: 400;
-}
 .maquila-costs-panel .maquila-cost-history th:last-child,
 .maquila-costs-panel .maquila-cost-history td:last-child {
-  width: 96px;
+  width: calc(var(--relation-toggle-size) + var(--relation-toggle-size) + 28px);
 }
 .maquila-cost-actions {
   justify-content: flex-end;
@@ -150,19 +150,12 @@
     justify-content: space-between;
   }
 }
-.relation-provider-list li {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 2px 12px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
+.relation-provider-list th:first-child {
+  width: 60%;
 }
 .relation-provider-name {
   font-weight: 400;
-}
-.relation-provider-list li:last-child {
-  border-bottom: 0;
+  overflow-wrap: anywhere;
 }
 .relation-picker {
   display: grid;

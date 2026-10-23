@@ -12,6 +12,14 @@ import {
 } from "./components/relations";
 import { confirmAction } from "./components/overlays";
 import {
+  DataTable,
+  TableCell,
+  TableColumn,
+  TableHead,
+  TableRow,
+  TableRows,
+} from "./components/data-table";
+import {
   ApiError,
   Button,
   CancelButton,
@@ -71,19 +79,34 @@ export function FavoriteSuppliersTable() {
             count: suppliers.length,
             autoExpand: providerMatch,
             details: (
-              <ul className="relation-provider-list">
-                {suppliers.map((p) => (
-                  <li key={p.id}>
-                    <span className="relation-provider-name">
-                      {supplierName(p)}
-                    </span>
-                    <small>
-                      NIT {p.nit ?? "Sin registrar"}
-                      {p.activo === false ? " · Inactivo" : ""}
-                    </small>
-                  </li>
-                ))}
-              </ul>
+              <DataTable
+                className="data-table relation-provider-list"
+                aria-label={`Proveedores favoritos de ${label}`}
+              >
+                <TableHead>
+                  <TableRow>
+                    <TableColumn>Proveedor</TableColumn>
+                    <TableColumn>NIT</TableColumn>
+                  </TableRow>
+                </TableHead>
+                <TableRows>
+                  {suppliers.map((provider) => (
+                    <TableRow key={provider.id}>
+                      <TableCell>
+                        <span className="relation-provider-name">
+                          {supplierName(provider)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {provider.nit
+                          ? `${provider.nit}${provider.digito_verf ? `-${provider.digito_verf}` : ""}`
+                          : "Sin registrar"}
+                        {provider.activo === false ? " · Inactivo" : ""}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableRows>
+              </DataTable>
             ),
           },
         ];
@@ -129,7 +152,7 @@ export function FavoriteSuppliersTable() {
   );
   return (
     <>
-      <section className="panel">
+      <section className="panel favorite-suppliers-panel">
         <div className="section-heading">
           <div>
             <h2>Proveedores favoritos por tipo</h2>

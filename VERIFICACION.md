@@ -586,3 +586,29 @@ Reproducción:
 
     npm run build
     node scripts/verify-aria-browser.mjs tests/maquila-costs-layout.browser.js chromium
+
+### Sublistas de favoritos y costos · 22 de octubre de 2026
+
+Se unificaron los encabezados blancos, tipografía, padding y altura de las filas
+internas. Favoritos muestra Proveedor y NIT-DV sin acciones individuales, incluso
+al hacer hover; conserva la edición por tipo y el despliegue accesible. En móvil,
+las acciones de costos permanecen en una sola fila y el scroll sigue siendo
+compartido por todos los grupos.
+
+Pasaron **203 comprobaciones de navegador en Chromium**: 87 de presentación
+compartida a 375/768/1024/1440/1680 px, 45 de despliegue y 71 del editor de
+favoritos. Incluyen alineación entre grupos, igualdad de estilos y altura con
+costos, ausencia de acciones por proveedor, teclado, foco, movimiento reducido,
+búsqueda, cancelación y guardado. Las pruebas usan archivos temporales, sin
+modificar los registros reales. La compilación de producción también pasó.
+
+Reportes: [presentación compartida](tests/evidence/costs/chromium-maquila-costs-layout.browser.json),
+[despliegue](tests/evidence/favorites/chromium-favorites-disclosure.browser.json) y
+[editor](tests/evidence/favorites/chromium-favorites.browser.json).
+
+Reproducción:
+
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/maquila-costs-layout.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/favorites-disclosure.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/favorites.browser.js chromium
