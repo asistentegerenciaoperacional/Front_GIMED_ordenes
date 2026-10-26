@@ -1,0 +1,32 @@
+{
+  "checks": [
+    "Banner usa la OC más próxima al rechazar 15/02/2027 a 1440px",
+    "Fecha marcada inválida para 15/02/2027 a 1440px",
+    "Banner usa la OC más próxima al rechazar 20/02/2027 a 1440px",
+    "Fecha marcada inválida para 20/02/2027 a 1440px",
+    "Banner usa la OC más próxima al rechazar 22/02/2027 a 1440px",
+    "Fecha marcada inválida para 22/02/2027 a 1440px",
+    "El banner recibe foco a 1440px",
+    "Corregir a otra fecha inválida conserva el banner a 1440px",
+    "Fecha anterior permite revisar a 1440px",
+    "API devuelve error del campo de entrega a 1440px",
+    "Error real de API vuelve a captura y aparece en el banner a 1440px",
+    "Rechazo conserva cantidades y borrador a 1440px",
+    "Rechazo conserva órdenes, vínculos y consecutivo a 1440px",
+    "Banner usa la OC más próxima al rechazar 15/02/2027 a 375px",
+    "Fecha marcada inválida para 15/02/2027 a 375px",
+    "Banner usa la OC más próxima al rechazar 20/02/2027 a 375px",
+    "Fecha marcada inválida para 20/02/2027 a 375px",
+    "Banner usa la OC más próxima al rechazar 22/02/2027 a 375px",
+    "Fecha marcada inválida para 22/02/2027 a 375px",
+    "El banner recibe foco a 375px",
+    "Corregir a otra fecha inválida conserva el banner a 375px",
+    "Fecha anterior permite revisar a 375px",
+    "API devuelve error del campo de entrega a 375px",
+    "Error real de API vuelve a captura y aparece en el banner a 375px",
+    "Rechazo conserva cantidades y borrador a 375px",
+    "Rechazo conserva órdenes, vínculos y consecutivo a 375px"
+  ],
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-67owBS\\database.json"
+}

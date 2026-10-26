@@ -4,7 +4,9 @@ import { costIssue } from "../shared/maquila-costs";
 import { isMaterialSupplier } from "../shared/favorite-suppliers";
 import {
   buildMaterialNeeds,
+  earliestMaterialDelivery,
   materialDemandSchema,
+  materialOrderDeliveryIssue,
   materialNeedKey,
   needsInRange,
   type MaterialDemand,
@@ -268,6 +270,7 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
       ),
     );
     const seen = new Set<string>();
+    const sourceDeliveries: string[] = [];
     for (const source of demand.fuentes) {
       const key = materialNeedKey(source.id_orden_producto, source.id_material);
       check(
@@ -285,7 +288,18 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
         "SUPPLY_CHANGED",
         { abastecimiento: "Un origen cambió o ya tiene una compra vigente." },
       );
+      sourceDeliveries.push(saved.fecha_solicitada_entrega);
     }
+    const deliveryIssue = materialOrderDeliveryIssue(
+      typeof p.fecha_solicitada_entrega === "string"
+        ? p.fecha_solicitada_entrega
+        : null,
+      earliestMaterialDelivery(sourceDeliveries),
+    );
+    if (deliveryIssue)
+      throw new BusinessError(deliveryIssue, "VALIDATION", {
+        fecha_solicitada_entrega: deliveryIssue,
+      });
   }
   check(
     p.sticker_pct === undefined ||
@@ -321,6 +335,30 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
       o.tipo_orden === p.tipo_orden,
       "El tipo de una orden existente no puede cambiar.",
     );
+    if (p.tipo_orden === "material") {
+      const materialLineIds = new Set(existing.map((line) => line.id));
+      const sourceLineIds = new Set(
+        db.abastecimiento_material
+          .filter((link) => materialLineIds.has(link.id_orden_material))
+          .map((link) => link.id_orden_producto),
+      );
+      const sourceDeliveries = db.orden_producto
+        .filter((line) => sourceLineIds.has(line.id))
+        .map(
+          (line) =>
+            db.orden_compra.find(
+              (sourceOrder) => sourceOrder.id === line.id_orden_compra,
+            )?.fecha_solicitada_entrega ?? null,
+        );
+      const deliveryIssue = materialOrderDeliveryIssue(
+        delivery,
+        earliestMaterialDelivery(sourceDeliveries),
+      );
+      if (deliveryIssue)
+        throw new BusinessError(deliveryIssue, "VALIDATION", {
+          fecha_solicitada_entrega: deliveryIssue,
+        });
+    }
     check(
       p.no_orden === undefined || p.no_orden === o.no_orden,
       "El número de orden es inmutable.",

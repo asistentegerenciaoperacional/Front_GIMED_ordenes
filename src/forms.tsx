@@ -14,6 +14,8 @@ import { costDay, costIssue } from "../shared/maquila-costs";
 import {
   consolidateMaterialSources,
   demandQuantity,
+  earliestMaterialDelivery,
+  materialOrderDeliveryIssue,
   type MaterialDemand,
 } from "../shared/material-demand";
 import {
@@ -1348,6 +1350,38 @@ export function OrderForm({
     }
     return groups;
   }, [db, abastecimiento]);
+  const earliestSupplyDelivery = useMemo(
+    () =>
+      earliestMaterialDelivery(
+        [...supplyOrigins.values()].flatMap((origins) =>
+          origins.map((origin) => origin.fecha_solicitada_entrega ?? null),
+        ),
+      ),
+    [supplyOrigins],
+  );
+  const earliestLinkedSupplyDelivery = useMemo(() => {
+    if (!order || type !== "material") return null;
+    const materialLineIds = new Set(
+      db.orden_material
+        .filter((line) => line.id_orden_compra === order.id)
+        .map((line) => line.id),
+    );
+    const sourceLineIds = new Set(
+      db.abastecimiento_material
+        .filter((link) => materialLineIds.has(link.id_orden_material))
+        .map((link) => link.id_orden_producto),
+    );
+    const sourceOrderIds = new Set(
+      db.orden_producto
+        .filter((line) => sourceLineIds.has(line.id))
+        .map((line) => line.id_orden_compra),
+    );
+    return earliestMaterialDelivery(
+      db.orden_compra
+        .filter((sourceOrder) => sourceOrderIds.has(sourceOrder.id))
+        .map((sourceOrder) => sourceOrder.fecha_solicitada_entrega ?? null),
+    );
+  }, [db, order?.id, type]);
   const [dirty, setDirty] = useState(false);
   const originalDraft = useRef<{
     date: string;
@@ -1370,7 +1404,14 @@ export function OrderForm({
         return (
           orderDeliverySchema.safeParse(isoDate(delivery)).success &&
           (Boolean(order) ||
-            !orderCreationDeliveryIssue(isoDate(delivery), new Date().toISOString()))
+            !orderCreationDeliveryIssue(isoDate(delivery), new Date().toISOString())) &&
+          (!supplyCreation ||
+            !materialOrderDeliveryIssue(isoDate(delivery), earliestSupplyDelivery)) &&
+          (!order ||
+            !materialOrderDeliveryIssue(
+              isoDate(delivery),
+              earliestLinkedSupplyDelivery,
+            ))
         );
       if (field === "fecha_elaboracion")
         return !date || dateSchema.safeParse(isoDate(date)).success;
@@ -1568,6 +1609,21 @@ export function OrderForm({
           new Date().toISOString(),
         );
         if (issue) issues.fecha_solicitada_entrega = issue;
+        if (!issue && supplyCreation) {
+          const supplyIssue = materialOrderDeliveryIssue(
+            deliveryCheck.data,
+            earliestSupplyDelivery,
+          );
+          if (supplyIssue) issues.fecha_solicitada_entrega = supplyIssue;
+        }
+      }
+      if (deliveryCheck.success && order && type === "material") {
+        const linkedSupplyIssue = materialOrderDeliveryIssue(
+          deliveryCheck.data,
+          earliestLinkedSupplyDelivery,
+        );
+        if (linkedSupplyIssue)
+          issues.fecha_solicitada_entrega = linkedSupplyIssue;
       }
       lines.forEach((l, i) => {
         if (

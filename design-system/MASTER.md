@@ -148,6 +148,15 @@ origen. Conflictos usan `ErrorNotice`, bloqueo del envío y Revisar selección;
 cancelación, foco y guardado pertenecen a la capa compartida. Base y porcentaje
 son temporales. [Reglas y contrato](../ABASTECIMIENTO-OCM.md).
 
+La OCM preparada desde pendientes exige entrega solicitada anterior al día
+más próximo de entrega de sus OC de origen; la igualdad es inválida. El límite
+se calcula con las OC seleccionadas y días de Bogotá, conservando la entrega
+mínima del día de creación. La revisión muestra el error en el banner y marca
+Entrega solicitada; el servicio vuelve a validar antes de guardar con HTTP 422,
+`VALIDATION` y `fields.fecha_solicitada_entrega`. Un error conserva el borrador
+y devuelve a captura; se retira al corregir una fecha compatible con ambos
+límites. No se añade este límite superior a compras sin asociación.
+
 ## Estados e interacción
 
 Autorizada y en seguimiento usan azul; pendientes, ámbar; cerrada/aprobada/validada, verde; anulada/rechazada/inactiva, rojo. Cada estado incluye texto.

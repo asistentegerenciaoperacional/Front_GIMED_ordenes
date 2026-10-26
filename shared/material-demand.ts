@@ -32,6 +32,25 @@ export function materialDemandDay(value: string | null): string | null {
   const part = (type: string) => parts.find((p) => p.type === type)!.value;
   return `${part("year")}-${part("month")}-${part("day")}`;
 }
+export function earliestMaterialDelivery(
+  deliveries: Iterable<string | null>,
+): string | null {
+  let earliest: string | null = null;
+  for (const value of deliveries) {
+    const day = materialDemandDay(value);
+    if (day && (!earliest || day < earliest)) earliest = day;
+  }
+  return earliest;
+}
+export function materialOrderDeliveryIssue(
+  delivery: string | null,
+  earliestSourceDay: string | null,
+): string | null {
+  const day = materialDemandDay(delivery);
+  return day && earliestSourceDay && day >= earliestSourceDay
+    ? `La fecha solicitada de entrega de la OCM debe ser anterior a la fecha de entrega más próxima de las OC asociadas (${earliestSourceDay.split("-").reverse().join("/")}).`
+    : null;
+}
 const daySchema = z.string().refine(validDemandDay, "Indica una fecha válida.");
 export const materialDemandSchema = z
   .object({

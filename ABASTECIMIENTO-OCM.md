@@ -32,6 +32,18 @@ La revisión muestra cantidades finales, precio, subtotal y OC de origen. Se con
 
 ## Contrato y transacción
 
+La entrega solicitada de la OCM debe ser **estrictamente anterior** al menor
+día de entrega solicitada de sus OC asociadas, según Bogotá. La igualdad
+también es inválida; solo cuentan los orígenes seleccionados. Se conserva
+además el límite inferior del día real de creación. La revisión comparte la
+regla con el servicio, que comprueba las fechas de origen vigentes antes de
+reservar el consecutivo o guardar datos. El rechazo responde HTTP 422,
+`VALIDATION` y `fields.fecha_solicitada_entrega`, muestra el banner y vuelve
+a la captura sin perder el borrador. Corregir a otra fecha inválida conserva
+el error; corregir a una fecha válida lo retira. Las compras sin asociaciones
+no tienen este límite superior y las fuentes obsoletas conservan el tratamiento
+`SUPPLY_CHANGED`.
+
 `createOrder` conserva su contrato y respuesta `{ orderId }`. Admite opcionalmente `abastecimiento`:
 
 ```ts

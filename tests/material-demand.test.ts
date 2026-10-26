@@ -6,8 +6,10 @@ import {
   buildMaterialNeeds,
   consolidateMaterialSources,
   demandQuantity,
+  earliestMaterialDelivery,
   materialDemandDay,
   materialDemandSchema,
+  materialOrderDeliveryIssue,
   needsInRange,
   validDemandDay,
   type MaterialDemand,
@@ -448,4 +450,128 @@ test("OCM desde pendientes: una compra anulada permite reemplazo conservando su 
     ),
   );
   assert.equal(needs(after).length, 1);
+});
+
+test("entrega OCM: límite mínimo de los días de Bogotá, con comparación estricta", () => {
+  const earliest = earliestMaterialDelivery([
+    "2027-02-22T12:00:00Z",
+    "2027-02-16T04:30:00Z",
+    "2027-02-15T23:59:00-05:00",
+    null,
+  ]);
+  assert.equal(earliest, "2027-02-15");
+  assert.equal(
+    materialOrderDeliveryIssue("2027-02-15T04:59:59Z", earliest),
+    null,
+  );
+  assert.match(
+    materialOrderDeliveryIssue("2027-02-15T05:00:00Z", earliest)!,
+    /15\/02\/2027/,
+  );
+  assert.ok(materialOrderDeliveryIssue("2027-02-20T12:00:00Z", earliest));
+  assert.equal(earliestMaterialDelivery([]), null);
+});
+
+for (const multiple of [false, true]) {
+  test(`entrega OCM: rechaza fecha igual o posterior con ${multiple ? "varias OC" : "una OC"}, sin guardar ni consumir consecutivo`, async (t) => {
+    t.mock.timers.enable({
+      apis: ["Date"],
+      now: new Date("2026-10-26T12:00:00Z"),
+    });
+    const store = await fixture(t);
+    const before = store.snapshot();
+    const original = await readFile(store.file, "utf8");
+    const demand = selection(before);
+    if (!multiple)
+      demand.fuentes = demand.fuentes.filter(
+        (source) => source.id_orden_producto === sid(2100),
+      );
+    for (const date of [
+      "2027-02-15T05:00:00Z",
+      "2027-02-16T04:59:59Z",
+      "2027-02-20T12:00:00Z",
+      "2027-02-22T12:00:00Z",
+    ]) {
+      await assert.rejects(
+        execute(store, {
+          ...payload(before, demand),
+          fecha_solicitada_entrega: date,
+        }),
+        (error: unknown) => {
+          assert.ok(error instanceof BusinessError);
+          assert.equal(error.code, "VALIDATION");
+          assert.match(error.message, /OCM debe ser anterior.*15\/02\/2027/);
+          assert.equal(error.fields.fecha_solicitada_entrega, error.message);
+          return true;
+        },
+      );
+      assert.deepEqual(store.snapshot(), before);
+      assert.equal(await readFile(store.file, "utf8"), original);
+    }
+    const created = await execute(store, {
+      ...payload(before, demand),
+      fecha_solicitada_entrega: "2027-02-15T04:59:59Z",
+    });
+    assert.ok(
+      store
+        .snapshot()
+        .orden_compra.some((order) => order.id === created.orderId),
+    );
+  });
+}
+
+test("entrega OCM: compara solo OC seleccionadas y permite compras sin asociación", async (t) => {
+  t.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date("2026-10-26T12:00:00Z"),
+  });
+  const store = await fixture(t);
+  const db = store.snapshot();
+  const demand = selection(db);
+  demand.fuentes = demand.fuentes.filter(
+    (source) => source.id_orden_producto === sid(2101),
+  );
+  const associated = await execute(store, {
+    ...payload(db, demand),
+    fecha_solicitada_entrega: "2027-02-20T12:00:00Z",
+  });
+  assert.ok(
+    store
+      .snapshot()
+      .orden_compra.some((order) => order.id === associated.orderId),
+  );
+  const { abastecimiento: _demand, ...unlinked } = payload(db);
+  const free = await execute(store, {
+    ...unlinked,
+    fecha_solicitada_entrega: "2027-02-22T12:00:00Z",
+  });
+  assert.ok(
+    store.snapshot().orden_compra.some((order) => order.id === free.orderId),
+  );
+});
+
+test("entrega OCM: la fecha actual de la OC controla el límite y un origen manipulado no lo evita", async (t) => {
+  t.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date("2026-10-26T12:00:00Z"),
+  });
+  const store = await fixture(t);
+  const stale = payload(store.snapshot());
+  await store.transaction((db) => {
+    db.orden_compra.find(
+      (order) => order.id === sid(2000),
+    )!.fecha_solicitada_entrega = "2027-02-10T12:00:00Z";
+  });
+  const before = store.snapshot();
+  await assert.rejects(execute(store, stale), errorCode("SUPPLY_CHANGED"));
+  const current = {
+    ...payload(before),
+    fecha_solicitada_entrega: "2027-02-12T12:00:00Z",
+  };
+  await assert.rejects(execute(store, current), (error: unknown) => {
+    assert.ok(error instanceof BusinessError);
+    assert.match(error.fields.fecha_solicitada_entrega, /10\/02\/2027/);
+    return true;
+  });
+  assert.deepEqual(store.snapshot(), before);
 });

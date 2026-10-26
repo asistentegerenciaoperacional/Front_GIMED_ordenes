@@ -743,3 +743,24 @@ Reproducción:
     npm test
     node scripts/verify-aria-browser.mjs tests/custom-filter-menus.browser.js chromium
     node scripts/verify-aria-browser.mjs tests/maquila-costs.browser.js chromium
+## Entrega de OCM anterior a sus OC asociadas — 26 de octubre de 2026
+
+Compilación correcta, **231 pruebas unitarias** y **26 comprobaciones de
+Chromium** aprobadas. Las cinco pruebas unitarias nuevas cubren una o varias
+OC, mínimo por día de Bogotá, igualdad, fecha posterior, OC no seleccionadas,
+compras sin asociación y fuentes actualizadas/manipuladas. Los rechazos
+conservan archivo, cabeceras, renglones, vínculos y consecutivos.
+
+El navegador selecciona los orígenes en orden inverso de entrega y verifica
+el mínimo correcto, banner con foco, campo inválido, persistencia del error
+al cambiar a otra fecha inválida y corrección a una anterior. También fuerza
+un rechazo real de API después de la revisión y comprueba HTTP 422,
+`fields.fecha_solicitada_entrega` y conservación del borrador a 375/1440 px.
+Sin avisos ni errores de React/React Aria; capturas revisadas visualmente.
+
+[Reporte](tests/evidence/ocm/chromium-material-demand-delivery.browser.json).
+Reproducción:
+
+    npm test
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/material-demand-delivery.browser.js chromium
