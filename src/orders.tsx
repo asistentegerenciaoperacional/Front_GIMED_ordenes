@@ -1198,6 +1198,23 @@ export function OrderDetail({
                 const lots = db.lote_producto.filter(
                   (b) => b.id_orden_producto === l.id,
                 );
+                const linkedProductLines =
+                  o.tipo_orden === "material"
+                    ? db.abastecimiento_material
+                        .filter((link) => link.id_orden_material === l.id)
+                        .map((link) => {
+                          const line = db.orden_producto.find(
+                            (productLine) =>
+                              productLine.id === link.id_orden_producto,
+                          )!;
+                          return {
+                            line,
+                            order: db.orden_compra.find(
+                              (order) => order.id === line.id_orden_compra,
+                            )!,
+                          };
+                        })
+                    : [];
                 const delta =
                   o.tipo_orden === "producto" ? deviation(db, l) : null;
                 const summaryMetrics = (
@@ -1293,14 +1310,16 @@ export function OrderDetail({
                                 slot="trigger"
                                 icon={ChevronDown}
                                 aria-expanded={expanded}
-                                aria-label={`${expanded ? "Ocultar" : "Desplegar"} ${o.tipo_orden === "producto" ? "lotes" : "documentos"} del ${orderItemLabel(o.tipo_orden)} ${l.posicion}`}
+                                aria-label={`${expanded ? "Ocultar" : "Desplegar"} ${o.tipo_orden === "producto" ? "lotes" : linkedProductLines.length ? "vínculos y documentos" : "documentos"} del ${orderItemLabel(o.tipo_orden)} ${l.posicion}`}
                                 disabled={
                                   o.tipo_orden === "material" &&
-                                  !l.id_lote_material
+                                  !l.id_lote_material &&
+                                  linkedProductLines.length === 0
                                 }
                                 title={
                                   o.tipo_orden === "material" &&
-                                  !l.id_lote_material
+                                  !l.id_lote_material &&
+                                  linkedProductLines.length === 0
                                     ? "Registra un lote de material para gestionar sus documentos"
                                     : undefined
                                 }
@@ -1681,50 +1700,87 @@ export function OrderDetail({
                                 </Button>
                               </div>
                               {o.tipo_orden === "material" &&
-                                l.id_lote_material && (
+                                (l.id_lote_material ||
+                                  linkedProductLines.length > 0) && (
                                   <LineDisclosure expanded={expanded}>
-                                    <div className="line-document-content">
-                                      <Documents
-                                        owner="lote_material"
-                                        ownerId={l.id_lote_material}
-                                        compact
-                                      />
-                                      <div
-                                        className="inline"
-                                        style={{ marginTop: 12 }}
-                                      >
-                                        <Button
-                                          className="small"
-                                          icon={Send}
-                                          onClick={() =>
-                                            setMail({
-                                              event:
-                                                "envio_certificado_calidad",
-                                              orderId: id,
-                                              loteMaterialId:
-                                                l.id_lote_material,
-                                            })
-                                          }
+                                    {l.id_lote_material && (
+                                      <div className="line-document-content">
+                                        <Documents
+                                          owner="lote_material"
+                                          ownerId={l.id_lote_material}
+                                          compact
+                                        />
+                                        <div
+                                          className="inline"
+                                          style={{ marginTop: 12 }}
                                         >
-                                          Enviar calidad
-                                        </Button>
-                                        <Button
-                                          className="small"
-                                          icon={Send}
-                                          onClick={() =>
-                                            setMail({
-                                              event:
-                                                "envio_certificado_liberacion",
-                                              orderId: id,
-                                              loteMaterialId:
-                                                l.id_lote_material,
-                                            })
-                                          }
-                                        >
-                                          Enviar liberación
-                                        </Button>
+                                          <Button
+                                            className="small"
+                                            icon={Send}
+                                            onClick={() =>
+                                              setMail({
+                                                event:
+                                                  "envio_certificado_calidad",
+                                                orderId: id,
+                                                loteMaterialId:
+                                                  l.id_lote_material,
+                                              })
+                                            }
+                                          >
+                                            Enviar calidad
+                                          </Button>
+                                          <Button
+                                            className="small"
+                                            icon={Send}
+                                            onClick={() =>
+                                              setMail({
+                                                event:
+                                                  "envio_certificado_liberacion",
+                                                orderId: id,
+                                                loteMaterialId:
+                                                  l.id_lote_material,
+                                              })
+                                            }
+                                          >
+                                            Enviar liberación
+                                          </Button>
+                                        </div>
                                       </div>
-                                    </div>
+                                    )}
+                                    {linkedProductLines.length > 0 && (
+                                      <div style={{ marginTop: 16 }}>
+                                        <small>Órdenes de producto vinculadas</small>
+                                        <div
+                                          className="inline"
+                                          style={{ marginTop: 7 }}
+                                        >
+                                          {linkedProductLines.map(
+                                            ({ line, order }) => (
+                                              <LinkButton
+                                                key={line.id}
+                                                className="small"
+                                                href={`/ordenes/${order.id}`}
+                                              >
+                                                {orderReference(
+                                                  order.tipo_orden,
+                                                  order.no_orden,
+                                                )}{" "}
+                                                ·{" "}
+                                                {db.productos.find(
+                                                  (product) =>
+                                                    product.id ===
+                                                    line.id_producto,
+                                                )?.nombre_producto ??
+                                                  "Producto"}
+                                                {line.estado === "anulada"
+                                                  ? " · Anulado"
+                                                  : ""}
+                                              </LinkButton>
+                                            ),
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
                                   </LineDisclosure>
                                 )}
                             </>

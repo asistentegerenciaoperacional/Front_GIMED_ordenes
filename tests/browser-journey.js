@@ -812,7 +812,7 @@ async (page) => {
     .getByRole("combobox", { name: "Estado", exact: true })
     .selectOption({ label: "Cerrado" });
   await dialog()
-    .getByRole("textbox", { name: "Buscar número de factura", exact: true })
+    .getByRole("combobox", { name: "Buscar número de factura", exact: true })
     .fill(" cli-0001 ");
   await dialog()
     .getByRole("button", { name: "Agregar factura", exact: true })
@@ -857,7 +857,7 @@ async (page) => {
   check(
     (await dialog()
       .getByRole("combobox", {
-        name: "Seleccionar factura del proveedor",
+        name: "Buscar número de factura",
         exact: true,
       })
       .inputValue()) !== "",
@@ -1320,17 +1320,13 @@ async (page) => {
     .getByRole("textbox", { name: "Entrega recibida", exact: true })
     .fill("2026-10-25");
   await dialog()
-    .getByRole("combobox", {
-      name: "Identidad del lote de material",
-      exact: true,
-    })
-    .selectOption({ label: "MAT-26-041" });
+    .getByRole("combobox", { name: "Lote de material", exact: true })
+    .fill("MAT-26-041");
+  await dialog().getByRole("option", { name: "MAT-26-041", exact: true }).click();
   await dialog()
-    .getByRole("combobox", {
-      name: "Seleccionar factura del proveedor",
-      exact: true,
-    })
-    .selectOption({ label: "ENV-00412" });
+    .getByRole("combobox", { name: "Buscar número de factura", exact: true })
+    .fill("ENV-00412");
+  await dialog().getByRole("option", { name: "ENV-00412", exact: true }).click();
   await dialog()
     .getByRole("button", { name: "Guardar recepción", exact: true })
     .click();
@@ -2017,7 +2013,9 @@ async (page) => {
   await dialog().getByRole('textbox', { name: 'Número de lote', exact: true }).fill('BORRAR-CERRADO');
   await dialog().getByRole('spinbutton', { name: 'Cantidad recibida', exact: true }).fill('234');
   await dialog().getByRole('combobox', { name: 'Estado', exact: true }).selectOption('cerrado');
-  await dialog().getByRole('combobox', { name: 'Seleccionar factura del proveedor', exact: true }).selectOption(sid(152));
+  const selectedInvoiceNumber = initial.factura.find((invoice) => invoice.id === sid(152)).numero_factura;
+  await dialog().getByRole('combobox', { name: 'Buscar número de factura', exact: true }).fill(selectedInvoiceNumber);
+  await dialog().getByRole('option', { name: selectedInvoiceNumber, exact: true }).click();
   await dialog().getByRole('button', { name: 'Guardar lote', exact: true }).click();
   await page.getByRole('dialog').waitFor({ state: 'hidden' });
   await page.getByRole('button', { name: 'Agregar lote', exact: true }).click();

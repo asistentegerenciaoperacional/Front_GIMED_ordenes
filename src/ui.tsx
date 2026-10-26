@@ -398,17 +398,24 @@ type PickerProps = Omit<
 > & {
   value: string;
   onChange: (id: string) => void;
+  onQueryChange?: (query: string) => void;
   "data-field-path"?: string;
 };
 
-function ReferencePicker({
+export function ReferencePicker({
   options,
   value,
   onChange,
+  onQueryChange,
+  clearOptionId,
   commitOnSelection = false,
   onBlur,
   ...inputProps
-}: PickerProps & { options: Choice[]; commitOnSelection?: boolean }) {
+}: PickerProps & {
+  options: Choice[];
+  clearOptionId?: string;
+  commitOnSelection?: boolean;
+}) {
   const selected = options.find((option) => option.id === value);
   const [query, setQuery] = useState(selected?.label ?? "");
   useEffect(() => {
@@ -421,22 +428,27 @@ function ReferencePicker({
       inputValue={query}
       onInputChange={(next) => {
         setQuery(next);
+        onQueryChange?.(next);
         if (!commitOnSelection && next !== selected?.label) onChange("");
       }}
       onSelectionChange={(id) => {
         if (id) {
-          onChange(id);
-          setQuery(
-            commitOnSelection
-              ? (selected?.label ?? "")
-              : (options.find((option) => option.id === id)?.label ?? ""),
-          );
+          const isClearOption = id === clearOptionId;
+          onChange(isClearOption ? "" : id);
+          const next = isClearOption
+            ? ""
+            : (options.find((option) => option.id === id)?.label ?? "");
+          setQuery(next);
+          onQueryChange?.(next);
         }
       }}
       inputProps={{
         ...inputProps,
         onBlur: (event) => {
-          if (commitOnSelection) setQuery(selected?.label ?? "");
+          if (commitOnSelection) {
+            setQuery(selected?.label ?? "");
+            onQueryChange?.(selected?.label ?? "");
+          }
           onBlur?.(event);
         },
       }}

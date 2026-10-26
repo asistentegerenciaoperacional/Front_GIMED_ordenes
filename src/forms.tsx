@@ -87,6 +87,7 @@ import {
   ProductPicker,
   ProviderPicker,
   MaterialPicker,
+  ReferencePicker,
   recordName,
   request,
   text,
@@ -845,11 +846,13 @@ export function InvoicePicker({
   value,
   onChange,
   id = "field-id_factura",
+  layout = "inline",
   ...inputProps
 }: {
   provider: string;
   value: string | null;
   onChange: (id: string | null) => void;
+  layout?: "inline" | "stacked";
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
   const { db } = useApp();
   const chosen = db.factura.find((f) => f.id === value);
@@ -860,11 +863,12 @@ export function InvoicePicker({
     if (value)
       setSearch(db.factura.find((f) => f.id === value)?.numero_factura ?? "");
   }, [value, db.factura]);
-  const matches = db.factura.filter(
-    (f) =>
-      f.id_proveedor === provider &&
-      f.numero_factura.includes(normalizeInvoice(search)),
-  );
+  const options = [
+    { id: "__sin_factura__", label: "Sin factura asociada" },
+    ...db.factura
+      .filter((f) => f.id_proveedor === provider)
+      .map((f) => ({ id: f.id, label: f.numero_factura })),
+  ];
   const doc = chosen
     ? db.documento.find(
         (d) => d.id_entidad === chosen.id && d.tipo_entidad === "factura",
@@ -872,18 +876,20 @@ export function InvoicePicker({
     : null;
   return (
     <>
-      <div className="invoice-picker">
-        <ControlInput
+      <div
+        className={`invoice-picker${layout === "stacked" ? " invoice-picker-stacked" : ""}`}
+      >
+        <ReferencePicker
+          options={options}
+          value={value ?? ""}
+          onChange={(id) => onChange(id || null)}
+          onQueryChange={setSearch}
+          clearOptionId="__sin_factura__"
           {...inputProps}
           id={id}
           aria-label="Buscar número de factura"
-          placeholder="Buscar o agregar factura…"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            onChange(null);
-          }}
-          autoComplete="off"
+          placeholder="Buscar factura..."
+          commitOnSelection
         />
         <Button className="small" icon={Plus} onClick={() => setCreate(true)}>
           Agregar factura
@@ -906,21 +912,6 @@ export function InvoicePicker({
             }
           />
         )}
-        <ControlSelect
-          aria-label="Seleccionar factura del proveedor"
-          value={value ?? ""}
-          onChange={(e) => {
-            onChange(e.target.value || null);
-            if (!e.target.value) setSearch("");
-          }}
-        >
-          <option value="">Sin factura asociada</option>
-          {matches.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.numero_factura}
-            </option>
-          ))}
-        </ControlSelect>
       </div>
       {create && (
         <InvoiceForm
@@ -1184,52 +1175,64 @@ export function ReceiptForm({
               </Field>
             ))}
             {entity === "orden_material" && (
-              <Field
-                id="field-id_lote_material"
-                label="Identidad del lote de material"
-                error={error?.fields.id_lote_material}
-              >
-                <ControlSelect
+              <>
+                <Field
                   id="field-id_lote_material"
-                  value={row.id_lote_material ?? ""}
-                  onChange={(e) =>
-                    update("id_lote_material", e.target.value || null)
-                  }
+                  label="Lote de material"
+                  error={error?.fields.id_lote_material}
                 >
-                  <option value="">Sin lote</option>
-                  {db.lote_material.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.numero_lote}
-                    </option>
-                  ))}
-                </ControlSelect>
-                <Button
-                  className="small"
-                  icon={Plus}
-                  onClick={() => setLotCreate(true)}
+                  <ReferencePicker
+                    id="field-id_lote_material"
+                    aria-label="Lote de material"
+                    options={[
+                      { id: "__sin_lote__", label: "Sin lote" },
+                      ...db.lote_material.map((lot) => ({
+                        id: lot.id,
+                        label: lot.numero_lote,
+                      })),
+                    ]}
+                    value={row.id_lote_material ?? ""}
+                    onChange={(id) => update("id_lote_material", id || null)}
+                    clearOptionId="__sin_lote__"
+                    placeholder="Buscar lote..."
+                    commitOnSelection
+                  />
+                  <Button
+                    className="small"
+                    icon={Plus}
+                    onClick={() => setLotCreate(true)}
+                  >
+                    Agregar identidad de lote
+                  </Button>
+                </Field>
+                <Field
+                  id="field-id_factura"
+                  label="Factura (opcional)"
+                  error={error?.fields.id_factura}
                 >
-                  Agregar identidad de lote
-                </Button>
-              </Field>
+                  <InvoicePicker
+                    layout="stacked"
+                    provider={order.id_proveedor}
+                    value={row.id_factura}
+                    onChange={(id) => update("id_factura", id)}
+                  />
+                </Field>
+              </>
             )}
           </div>
-          <Field
-            id="field-id_factura"
-            label="Factura (opcional)"
-            error={error?.fields.id_factura}
-          >
-            <InvoicePicker
-              provider={order.id_proveedor}
-              value={row.id_factura}
-              onChange={(id) => update("id_factura", id)}
-            />
-          </Field>
-          <div className="notice subtle">
-            <Info size={16} aria-hidden="true" />
-            {entity === "orden_material"
-              ? "Varios materiales de las órdenes pueden compartir el número de lote; cada uno conserva sus propias cantidades y fechas."
-              : "Este concepto conserva sus propias cantidades y fechas."}
-          </div>
+          {entity !== "orden_material" && (
+            <Field
+              id="field-id_factura"
+              label="Factura (opcional)"
+              error={error?.fields.id_factura}
+            >
+              <InvoicePicker
+                provider={order.id_proveedor}
+                value={row.id_factura}
+                onChange={(id) => update("id_factura", id)}
+              />
+            </Field>
+          )}
         </div>
         <div className="dialog-footer">
           <CancelButton onClick={onClose}>Cancelar</CancelButton>
@@ -1404,9 +1407,15 @@ export function OrderForm({
         return (
           orderDeliverySchema.safeParse(isoDate(delivery)).success &&
           (Boolean(order) ||
-            !orderCreationDeliveryIssue(isoDate(delivery), new Date().toISOString())) &&
+            !orderCreationDeliveryIssue(
+              isoDate(delivery),
+              new Date().toISOString(),
+            )) &&
           (!supplyCreation ||
-            !materialOrderDeliveryIssue(isoDate(delivery), earliestSupplyDelivery)) &&
+            !materialOrderDeliveryIssue(
+              isoDate(delivery),
+              earliestSupplyDelivery,
+            )) &&
           (!order ||
             !materialOrderDeliveryIssue(
               isoDate(delivery),
