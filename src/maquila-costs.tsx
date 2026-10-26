@@ -10,7 +10,7 @@ import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import type { costos_maquila } from "../shared/models";
 import type { Row } from "../shared/schema";
 import { costDay } from "../shared/maquila-costs";
-import { ControlInput, ControlSelect } from "./components/controls";
+import { ControlInput, CustomFilterSelect } from "./components/controls";
 import {
   DataTable,
   TableCell,
@@ -297,7 +297,7 @@ export function MaquilaCostsTable() {
             </p>
           </div>
           <div className="inline maquila-cost-heading-actions">
-            <ControlSelect
+            <CustomFilterSelect
               aria-label="Filtro personalizado de costos"
               value={allProducts ? "todos" : "con_costos"}
               onChange={(event) =>
@@ -306,7 +306,7 @@ export function MaquilaCostsTable() {
             >
               <option value="con_costos">Con costos</option>
               <option value="todos">Todos los productos</option>
-            </ControlSelect>
+            </CustomFilterSelect>
             <Button
               ref={addButton}
               icon={Plus}

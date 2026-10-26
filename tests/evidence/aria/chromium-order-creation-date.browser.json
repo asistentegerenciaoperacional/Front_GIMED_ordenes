@@ -1,0 +1,33 @@
+{
+  "checks": [
+    "API rechaza entrega pasada para producto",
+    "API devuelve mensaje y error del campo para producto",
+    "API rechaza entrega pasada para material",
+    "API devuelve mensaje y error del campo para material",
+    "API rechaza entrega pasada para otro",
+    "API devuelve mensaje y error del campo para otro",
+    "Rechazos no modifican órdenes, lotes ni consecutivos",
+    "Fecha de elaboración actual y de solo lectura a 1440px",
+    "La entrega pasada aparece en el banner a 1440px",
+    "El banner recibe foco a 1440px",
+    "Entrega marcada inválida a 1440px",
+    "Otra fecha pasada conserva el error a 1440px",
+    "Corregir al mismo día retira el error a 1440px",
+    "Entrega el mismo día permite revisar a 1440px",
+    "Error real de API vuelve al formulario con banner a 1440px",
+    "El error conserva el borrador a 1440px",
+    "Rechazo final conserva los datos y el consecutivo a 1440px",
+    "Fecha de elaboración actual y de solo lectura a 375px",
+    "La entrega pasada aparece en el banner a 375px",
+    "El banner recibe foco a 375px",
+    "Entrega marcada inválida a 375px",
+    "Otra fecha pasada conserva el error a 375px",
+    "Corregir al mismo día retira el error a 375px",
+    "Entrega el mismo día permite revisar a 375px",
+    "Error real de API vuelve al formulario con banner a 375px",
+    "El error conserva el borrador a 375px",
+    "Rechazo final conserva los datos y el consecutivo a 375px"
+  ],
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-6u5zFg\\database.json"
+}

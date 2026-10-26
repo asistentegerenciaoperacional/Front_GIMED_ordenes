@@ -1,6 +1,6 @@
 import { useCallback, useDeferredValue, useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { supplierName } from "../shared/favorite-suppliers";
+import { isMaterialSupplier, supplierName } from "../shared/favorite-suppliers";
 import {
   ControlForm,
   ControlInput,
@@ -40,7 +40,9 @@ export function FavoriteSuppliersTable() {
   const [collapsed, setCollapsed] = useState(new Set<string>());
   const [editing, setEditing] = useState<string | null>(null);
   const groups = useMemo(() => {
-    const providers = new Map(db.proveedor.map((p) => [p.id, p]));
+    const providers = new Map(
+      db.proveedor.filter(isMaterialSupplier).map((p) => [p.id, p]),
+    );
     const byType = new Map<string, typeof db.proveedor>();
     for (const favorite of db.proveedores_favoritos) {
       const provider = providers.get(favorite.id_proveedor);
@@ -232,6 +234,7 @@ function FavoriteSuppliersEditor({
   const options = useMemo(
     () =>
       [...db.proveedor]
+        .filter(isMaterialSupplier)
         .sort(
           (a, b) =>
             supplierName(a).localeCompare(supplierName(b), "es") ||
@@ -244,6 +247,12 @@ function FavoriteSuppliersEditor({
         })),
     [db.proveedor],
   );
+  const eligibleIds = useMemo(
+    () => new Set(options.map((p) => p.id)),
+    [options],
+  );
+  const eligibleSelected = selected.filter((id) => eligibleIds.has(id));
+  const eligibleOriginal = original.filter((id) => eligibleIds.has(id));
   const added = options.filter(
     (p) => selected.includes(p.id) && !original.includes(p.id),
   );
@@ -261,7 +270,7 @@ function FavoriteSuppliersEditor({
         "setFavoriteSuppliers",
         {
           id_tipo_material: typeId,
-          id_proveedores: selected,
+          id_proveedores: eligibleSelected,
           expected_id_proveedores: original,
         },
         "Proveedores favoritos guardados",
@@ -283,7 +292,7 @@ function FavoriteSuppliersEditor({
       subtitle="Revisa la selección final antes de guardar."
       wide
       busy={busy}
-      dirty={!same(selected, original)}
+      dirty={!same(eligibleSelected, eligibleOriginal)}
       onClose={onClose}
     >
       <FieldEditContext.Provider value={() => {}}>
@@ -324,8 +333,8 @@ function FavoriteSuppliersEditor({
             </Field>
             <MultiRelationPicker
               options={options}
-              selected={selected}
-              original={original}
+              selected={eligibleSelected}
+              original={eligibleOriginal}
               onChange={setSelected}
               query={query}
               onQueryChange={setQuery}

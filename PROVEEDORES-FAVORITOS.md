@@ -23,6 +23,20 @@ Para recuperar el formato anterior, detener la aplicación, conservar aparte el 
 
 ## Guardado y selección
 
+Solo se admiten proveedores con `Es_materiales === true`. La tabla agrupada,
+su búsqueda, las opciones del editor, la selección final y el historial de
+materiales aplican la misma condición. `false` y `null` quedan excluidos;
+un proveedor que además sea de maquila sigue siendo elegible, incluso si su
+bandera Activo es falsa. El servicio revalida la condición antes de escribir
+y antes de devolver un reintento idempotente; un rechazo devuelve HTTP 422,
+`VALIDATION` y `fields.id_proveedores`, sin modificar los datos.
+
+Las relaciones heredadas cuyo proveedor perdió el rol no se muestran.
+El editor conserva la selección completa original para comprobar concurrencia,
+pero envía únicamente proveedores elegibles como selección final. Guardar
+retira las relaciones no elegibles de ese tipo; no modifica otros tipos ni
+reescribe datos al consultar.
+
 El endpoint existente `/api/commands` incorpora `setFavoriteSuppliers`:
 
 ```json

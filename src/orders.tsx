@@ -40,7 +40,7 @@ import {
   CheckChoice,
   ControlInput,
   ControlLink,
-  ControlSelect,
+  CustomFilterSelect,
 } from "./components/controls";
 import {
   DataTable,
@@ -619,7 +619,7 @@ export function OrdersPage({
                   >
                     {group === "materiales" && (
                       <div className="order-type-filter-wrap">
-                        <ControlSelect
+                        <CustomFilterSelect
                           className="control order-type-filter"
                           aria-label="Filtrar tipo de orden"
                           value={type}
@@ -630,12 +630,12 @@ export function OrdersPage({
                           <option value="">Todos los tipos</option>
                           <option value="material">Material</option>
                           <option value="otro">Otros</option>
-                        </ControlSelect>
+                        </CustomFilterSelect>
                       </div>
                     )}
                     <div className="custom-filter-control">
                       <div className="custom-filter-select-wrap">
-                        <ControlSelect
+                        <CustomFilterSelect
                           className="control custom-filter-select"
                           aria-label="Filtro personalizado"
                           value={customFilter}
@@ -658,7 +658,7 @@ export function OrdersPage({
                                 ))}
                               </optgroup>
                             ))}
-                        </ControlSelect>
+                        </CustomFilterSelect>
                       </div>
                       <Button
                         icon={CircleHelp}

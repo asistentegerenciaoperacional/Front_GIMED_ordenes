@@ -14,6 +14,14 @@ export function ariaPage(page, { autoConfirm = true } = {}) {
       ? selector
           .replaceAll("dialog[open]", '[role="dialog"]')
           .replaceAll(
+            '[role="option"]',
+            ':is([role="option"],[role="menuitemradio"])',
+          )
+          .replaceAll(
+            "[role=option]",
+            ':is([role="option"],[role="menuitemradio"])',
+          )
+          .replaceAll(
             "dialog#app-navigation[open]",
             '#app-navigation[data-modal="true"]',
           )
@@ -36,6 +44,10 @@ export function ariaPage(page, { autoConfirm = true } = {}) {
         if (key === "getByRole")
           return (role, options) => {
             const result = object.getByRole(role, options);
+            if (role === "option")
+              return wrap(
+                result.or(object.getByRole("menuitemradio", options)),
+              );
             if (role === "combobox" && options?.name)
               return wrap(result.or(object.getByRole("button", options)));
             if (role === "table")
@@ -87,7 +99,9 @@ export function ariaPage(page, { autoConfirm = true } = {}) {
             let item = byLabel
               ? currentPage.getByRole("option", { name: wanted, exact: true })
               : currentPage.locator(
-                  '[role="option"][data-key=' + JSON.stringify(wanted) + "]",
+                  ':is([role="option"],[role="menuitemradio"])[data-key=' +
+                    JSON.stringify(wanted) +
+                    "]",
                 );
             if (!(await item.count())) {
               const items = currentPage.getByRole("option");

@@ -2,7 +2,7 @@
 
 Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
 
-Actualizado el 23 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+Actualizado el 26 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
 
 ## Bases
 
@@ -15,10 +15,21 @@ Toda interfaz interactiva debe usar la capa compartida basada en **React Aria Co
 - Selección: `Select` para opciones cerradas y `ComboBox` para buscar relaciones existentes. La selección persiste el identificador estable, nunca el texto buscado. Los nombres repetidos muestran contexto para distinguir los registros; una búsqueda sin coincidencias indica «Sin coincidencias». El texto libre solo se admite donde el proceso ya lo permitía.
 - Fechas: campo continuo `dd/mm/aaaa` con separadores automáticos, edición y pegado, más `Popover` y `Calendar`. Conservar fechas parciales hasta que puedan validarse y señalar las inexistentes.
 - Diálogos y navegación flotante: `ModalOverlay`, `Modal` y `Dialog`. React Aria controla foco, cierre, apilamiento y bloqueo del fondo. Las confirmaciones de eliminación, navegación y descarte usan el diálogo compartido. Un diálogo anidado no debe enviar el formulario exterior.
-- Casillas, filtros, ayudas, pestañas y desplegados: `CheckboxGroup`, `Checkbox`, `Popover`, `Tooltip`, `Tabs` y `Disclosure`. Los filtros son no modales y cierran al salir con Tab; los formularios modales retienen el foco. La selección de recepciones debe mantener el desplazamiento.
+- Casillas, filtros, ayudas, pestañas y desplegados: `CheckboxGroup`, `Checkbox`, `Popover`, `Tooltip`, `Tabs` y `Disclosure`. Los filtros de columna son no modales y cierran al salir con Tab; los menús de filtros personalizados usan `MenuTrigger`, `Menu`, `MenuSection` y `MenuItem` con selección exclusiva. Los formularios modales retienen el foco. La selección de recepciones debe mantener el desplazamiento.
 - Tablas: todas las tablas operativas, históricas, de lotes e impresión se componen con `Table`, `TableHeader`, `Column`, `TableBody`, `Row` y `Cell`, mediante `DataTable`. Mantener columnas, ordenamiento, filtros, paginación, acciones agrupadas y formato de impresión. Las flechas recorren filas y celdas según React Aria; Tab permite entrar y salir de la tabla.
 
-Los menús de opciones son compactos: superficie blanca, borde sencillo, separación reducida, selección azul y texto blanco. Comparten tipografía, tamaños y tokens existentes, sin un tema visual distinto por pantalla. Deben mostrarse foco visible, selección, errores, bloqueo y carga. Teclado, cierre y posicionamiento pertenecen a React Aria; no duplicar esos mecanismos con listeners o mediciones propios.
+Los menús de opciones de formularios y autocompletados son compactos: superficie blanca, borde sencillo, separación reducida, selección azul y texto blanco. Los filtros personalizados siguen el estándar específico siguiente. Comparten tipografía, tamaños y tokens existentes, sin un tema visual distinto por pantalla. Deben mostrarse foco visible, selección, errores, bloqueo y carga. Teclado, cierre y posicionamiento pertenecen a React Aria; no duplicar esos mecanismos con listeners o mediciones propios.
+
+### Menús de filtros personalizados
+
+Todos los filtros predefinidos de consulta reutilizan `CustomFilterSelect` en la capa compartida. Se aplica al filtro personalizado de OC y OCM, tipo de orden, costos de maquila, materiales por producto y clase de documento. No duplicar el menú ni sus estilos en cada pantalla; conservar valores, reglas de filtrado, búsqueda, URL y ayuda existentes. Los formularios y los menús de condiciones de columna conservan sus componentes actuales.
+
+- Superficie blanca, borde de 1 px `#E2E8F0`, radio de 12 px y sombra `0 8px 24px #18253B1F`; padding exterior de 6 px y separación de 6 px respecto al disparador. Sin iconos decorativos ni flechas en las categorías.
+- Tipografía Segoe UI de 12 px y altura de línea 1,5. Opciones con padding de 8 × 10 px, separación vertical de 2 px, radio de 7 px y altura mínima de 34 px; en móvil o puntero táctil, mínimo 40 px.
+- Selección única indicada por un círculo de 14 px, texto `#1D4ED8` de peso 600 y fondo `#EFF5FF`. La opción neutra se selecciona igual que las demás; no borrar silenciosamente la selección activa. Hover gris `#F8FAFC`; foco de teclado mediante contorno azul de 2 px. Estados deshabilitados no son seleccionables.
+- Con subcategorías: títulos blancos sin banner, peso 650 y color principal; divisores de 1 px y separación de 8 px entre grupos, con opciones sangradas 12 px. Los grupos permanecen visibles, sin controles de expansión anidados dentro del menú. Sin subcategorías: la misma lista y estados, sin divisores ni títulos vacíos.
+- Ancho mínimo visual de 240 px para listas simples y 360 px para agrupadas, nunca menor que el disparador ni mayor que el espacio de la ventana (margen total de 40 px). Texto largo ajustable y scroll interno con alto máximo de 420 px o 60 % de la ventana; React Aria puede reducirlo según el espacio disponible.
+- React Aria administra apertura, flechas, Inicio/Fin, búsqueda por texto, Enter, Escape, clic fuera y retorno del foco. Elegir una opción cierra el menú y aplica el filtro; Escape permite abandonarlo sin cambiarlo. No introducir animaciones de color ni gestión manual de foco o scroll.
 
 Los botones, enlaces de navegación y tarjetas cambian sus estados de hover sin transiciones de color o sombra: evita retener nodos desmontados en el seguimiento de transiciones de React Aria 3.53.1. Mantener las animaciones de desplegado y del drawer, respetando movimiento reducido.
 
@@ -71,6 +82,14 @@ Los títulos de proveedores disponibles y seleccionados comparten una fila, fuer
 
 Favoritos aplica estos patrones a tipos de material y proveedores. Los materiales heredan los favoritos del tipo. Los selectores de órdenes presentan secciones compactas Favoritos/Otros proveedores sin restringir opciones elegibles ni modificar una selección existente. Especificación, recuperación y pruebas en [PROVEEDORES-FAVORITOS.md](../PROVEEDORES-FAVORITOS.md).
 
+La elegibilidad de favoritos exige `Es_materiales === true`. Tabla, conteos,
+búsquedas, opciones, selección final e historial de materiales excluyen
+proveedores con la bandera en falso o sin informar. Se admiten proveedores
+mixtos y no se añade un requisito sobre Activo. El servicio valida también
+las solicitudes directas y los reintentos; el error se asocia a la selección
+de proveedores. Si el rol cambia, sus relaciones dejan de mostrarse y guardar
+el tipo retira las que ya no son elegibles, conservando los demás tipos.
+
 Los campos para elegir un producto existente usan el `ComboBox` compartido de React Aria: al escribir aparecen coincidencias y la elección guarda el identificador del producto. En órdenes, las sugerencias se limitan a productos activos del proveedor seleccionado y al producto histórico del renglón cuando aplica. En formularios de catálogo y asignación GS1 se muestran las opciones disponibles. Al asignar un código GS1, el proveedor del producto aparece debajo como campo de solo lectura.
 
 Proveedores y materiales de los diálogos reutilizan el mismo autocompletado y estado de selección de productos mediante `ReferencePicker`, `ProviderPicker` y `MaterialPicker`. Se aplica en las referencias del catálogo, el proveedor de factura, el proveedor de orden, los materiales de OCM y la referencia de corrugado de OC. Materiales admite búsqueda por código MAIA y nombre; corrugados sin código siguen disponibles. El proveedor de orden conserva los grupos Favoritos/Otros proveedores y la distinción de homónimos por NIT. Buscar un proveedor no modifica sus renglones: si se abandona sin elegir, se restaura la etiqueta seleccionada; elegir otro proveedor mantiene la confirmación de reemplazo, y cancelarla conserva etiqueta y borrador. Los campos bloqueados siguen deshabilitados. Los selectores múltiples de relaciones conservan su editor específico con búsqueda.
@@ -98,6 +117,36 @@ El selector **Filtro personalizado de costos** se coloca inmediatamente antes de
 El lápiz y la papelera de cada costo aparecen solo con hover de fila o `focus-within`; reservar su ancho para no mover columnas. En `hover: none` o `pointer: coarse` permanecen visibles. Conservar nombres accesibles, foco visible, tooltip compartido y hover destructivo existente. El + del producto permanece visible.
 
 El alta desde + bloquea el producto; el alta general permite seleccionarlo. Importe e inicio son obligatorios y el costo es entero positivo. Mostrar errores de periodo junto a las fechas, identificando el costo incompatible; conservar el borrador y no cerrar fechas automáticamente. Guardar mantiene abierto el producto y cerrar recupera foco/scroll; si desaparece el grupo, enfocar Agregar. Usar la confirmación compartida para descarte y eliminación, y bloquear cierre/envíos durante el guardado. Reglas, recuperación y pruebas: [COSTOS-MAQUILA.md](../COSTOS-MAQUILA.md).
+
+## Materiales pendientes y OCM consolidadas
+
+Abastecimiento muestra las pestañas Vínculos entre órdenes, Materiales pendientes
+y Lotes y certificados, con los controles compartidos existentes. La nueva vista
+es una tabla plana de parejas producto solicitado–material, con selección,
+material/MAIA, OC, producto/maquilador, cantidad y entrega solicitada. Reutiliza
+`DataTable`, filtros de columna, búsqueda y páginas de 50 filas; los parámetros
+propios usan el prefijo `pendientes_`.
+
+Desde y Hasta son campos de fecha compartidos, inicialmente vacíos, con botón
+Consultar. La fecha de cada fila se muestra como día de Bogotá en `dd/mm/aaaa`.
+La tabla mantiene un mínimo interno de 1010 px y desplaza horizontalmente dentro
+de su contenedor, sin ensanchar la página. El panel permite que el resumen inferior
+permanezca adherido al viewport; solo el contenedor de la tabla recorta su scroll.
+
+El resumen conserva materiales seleccionados aunque la búsqueda, filtros o página
+los oculten. Muestra hasta siete materiales distintos, cantidad de vínculos y OC;
+cada material tiene una acción para quitar sus orígenes. Al alcanzar siete, bloquear
+solo materiales nuevos, permitiendo añadir otros orígenes de los existentes. En
+móvil los elementos del resumen se ajustan en varias filas y su lista tiene altura
+limitada; Preparar OCM sigue visible y el foco conserva margen para no quedar tapado.
+
+Preparar OCM abre el diálogo compartido con tipo Material y materiales bloqueados.
+La base y el conteo de orígenes preceden a los campos. Cantidad y adicional de 5–10 %,
+inicialmente 10 %, comparten una fila; porcentaje ocupa 104 px. Cambiar proveedor
+conserva los datos. La revisión presenta cantidad final, precio, subtotal y OC de
+origen. Conflictos usan `ErrorNotice`, bloqueo del envío y Revisar selección;
+cancelación, foco y guardado pertenecen a la capa compartida. Base y porcentaje
+son temporales. [Reglas y contrato](../ABASTECIMIENTO-OCM.md).
 
 ## Estados e interacción
 
@@ -142,6 +191,19 @@ Cada lote tiene una acción de eliminar con nombre accesible, deshabilitada sin 
 Cantidad de sticker y porcentaje comparten fila en escritorio y móvil. El porcentaje ocupa 64 px y ambos campos tienen 8 px de separación. Las fórmulas y límites se muestran en tooltips al pasar el cursor o enfocar el control, con descripciones enlazadas mediante `aria-describedby`. La ayuda se puede leer al mover el cursor sobre ella; Escape la cierra sin cerrar el diálogo. Los errores de validación permanecen visibles junto al campo. El posicionamiento de los tooltips respeta los límites de la ventana y los controles fijos del diálogo.
 
 Solo los productos activos del maquilador seleccionado aparecen como opciones para agregar a la orden. Un producto histórico desactivado mantiene su opción actual bloqueada al editar. Las acciones manuales de seguimiento, incluidos cerrar y anular, aparecen deshabilitadas mientras la cabecera no está autorizada, con una indicación del motivo. Estas comprobaciones visuales acompañan las validaciones del servicio.
+
+### Entrega solicitada al crear órdenes
+
+En la creación de OC, OCM y Otros, la elaboración muestra el día actual de
+Bogotá en solo lectura. El servidor registra el instante real de creación y
+compara los días de Bogotá: una entrega anterior produce un error HTTP 422
+`VALIDATION` con `fields.fecha_solicitada_entrega`; el mismo día es válido.
+La revisión utiliza la misma regla y muestra el mensaje en `ErrorNotice`, con
+el campo marcado y un enlace desde el banner. Cambiar a otra fecha pasada
+conserva el error; corregirlo lo retira. El servicio vuelve a comprobar la
+fecha al guardar, sin confiar en la elaboración del cliente. Un rechazo
+conserva borrador, datos y consecutivos. La edición histórica conserva sus
+reglas anteriores.
 
 ## Proveedores: NIT
 

@@ -17,7 +17,7 @@ import {
   CheckChoice,
   ControlForm,
   ControlInput,
-  ControlSelect,
+  CustomFilterSelect,
   FieldEditContext,
 } from "./components/controls";
 import {
@@ -298,7 +298,7 @@ export function ProductMaterialsTable() {
               }}
             />
           </div>
-          <ControlSelect
+          <CustomFilterSelect
             aria-label="Filtro personalizado de materiales por producto"
             value={filter}
             onChange={(event) => setFilter(event.target.value as Filter)}
@@ -308,7 +308,7 @@ export function ProductMaterialsTable() {
                 {label}
               </option>
             ))}
-          </ControlSelect>
+          </CustomFilterSelect>
           {query && (
             <Button
               variant="link"

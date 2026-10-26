@@ -128,6 +128,7 @@ test("favoritos: fallo al escribir el respaldo no recrea ni sustituye los datos"
 });
 test("favoritos: selección conjunta normaliza duplicados y conserva los demás tipos", async () => {
   const db = makeSeed();
+  db.proveedor.find((p) => p.id === sid(5))!.Es_materiales = true;
   const other = db.proveedores_favoritos.filter(
     (r) => r.id_tipo_material !== sid(40),
   );
@@ -242,4 +243,111 @@ test("favoritos: agrupación por IDs conserva homónimos, unión de tipos y otro
   assert.equal(favoriteSupplierIds(db, [sid(50), sid(56), sid(51)]).size, 2);
   assert.equal(suggestedMaterial(db, sid(3))?.id_tipo_material, sid(40));
   assert.equal(suggestedMaterial(db, sid(999))?.id, db.materiales[0].id);
+});
+
+test("favoritos: rechaza proveedores de maquila, otros y bandera sin informar sin modificar la base", async () => {
+  for (const [id, flag] of [
+    [sid(1), false],
+    [sid(5), false],
+    [sid(5), null],
+  ] as const) {
+    const db = makeSeed();
+    db.proveedor.find((p) => p.id === id)!.Es_materiales = flag;
+    const f = await file(db);
+    const store = await JsonStore.open(f.path);
+    await assert.rejects(
+      store.transaction((next) =>
+        command(next, "setFavoriteSuppliers", {
+          id_tipo_material: sid(40),
+          id_proveedores: [sid(3), id],
+          expected_id_proveedores: [sid(3), sid(4)],
+        }),
+      ),
+      (error: unknown) => {
+        assert.ok(error instanceof BusinessError);
+        assert.equal(error.code, "VALIDATION");
+        assert.match(error.message, /proveedores de materiales/);
+        assert.ok(error.fields.id_proveedores);
+        return true;
+      },
+    );
+    assert.deepEqual(store.snapshot(), db);
+    assert.equal(await readFile(f.path, "utf8"), f.raw);
+  }
+});
+
+test("favoritos: materiales true admite proveedores mixtos e inactivos sin exigir otra bandera", async () => {
+  const db = makeSeed();
+  db.proveedor.find((p) => p.id === sid(1))!.Es_materiales = true;
+  db.proveedor.find((p) => p.id === sid(3))!.activo = false;
+  await command(db, "setFavoriteSuppliers", {
+    id_tipo_material: sid(40),
+    id_proveedores: [sid(1), sid(3)],
+    expected_id_proveedores: [sid(3), sid(4)],
+  });
+  assert.deepEqual([...favoriteSupplierIds(db, [sid(50)])].sort(), [
+    sid(1),
+    sid(3),
+  ]);
+});
+
+test("favoritos: repetir una selección heredada no omite la validación de materiales", async () => {
+  const db = makeSeed();
+  db.proveedor.find((p) => p.id === sid(3))!.Es_materiales = false;
+  const before = structuredClone(db);
+  await assert.rejects(
+    command(db, "setFavoriteSuppliers", {
+      id_tipo_material: sid(40),
+      id_proveedores: [sid(3), sid(4)],
+      expected_id_proveedores: [sid(3), sid(4)],
+    }),
+    code("VALIDATION"),
+  );
+  assert.deepEqual(db, before);
+  assert.deepEqual([...favoriteSupplierIds(db, [sid(50)])], [sid(4)]);
+  assert.ok(
+    !materialSupplierGroups(db, [sid(50)]).favorites.some(
+      (p) => p.id === sid(3),
+    ),
+  );
+  await command(db, "setFavoriteSuppliers", {
+    id_tipo_material: sid(40),
+    id_proveedores: [sid(4)],
+    expected_id_proveedores: [sid(3), sid(4)],
+  });
+  assert.deepEqual(
+    db.proveedores_favoritos
+      .filter((r) => r.id_tipo_material === sid(40))
+      .map((r) => r.id_proveedor),
+    [sid(4)],
+  );
+});
+
+test("favoritos: vuelve a validar la bandera si cambia después de abrir el editor", async () => {
+  const f = await file(makeSeed());
+  const store = await JsonStore.open(f.path);
+  await store.transaction((db) =>
+    command(db, "saveEntity", {
+      entity: "proveedor",
+      key: { id: sid(4) },
+      row: {
+        ...db.proveedor.find((p) => p.id === sid(4)),
+        Es_materiales: null,
+      },
+    }),
+  );
+  const before = store.snapshot();
+  const raw = await readFile(f.path, "utf8");
+  await assert.rejects(
+    store.transaction((db) =>
+      command(db, "setFavoriteSuppliers", {
+        id_tipo_material: sid(40),
+        id_proveedores: [sid(3), sid(4)],
+        expected_id_proveedores: [sid(3), sid(4)],
+      }),
+    ),
+    code("VALIDATION"),
+  );
+  assert.deepEqual(store.snapshot(), before);
+  assert.equal(await readFile(f.path, "utf8"), raw);
 });

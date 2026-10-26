@@ -300,6 +300,7 @@ export function App() {
         if (
           error instanceof ApiError &&
           (error.code === "CONSECUTIVE_CHANGED" ||
+            error.code === "SUPPLY_CHANGED" ||
             error.code === "FAVORITES_CHANGED" ||
             error.code === "PRODUCT_MATERIALS_CHANGED" ||
             error.code === "BARCODE_CHANGED" ||

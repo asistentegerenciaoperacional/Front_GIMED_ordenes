@@ -34,6 +34,12 @@ import {
   ListBoxSection,
 } from "react-aria-components/ListBox";
 import { Header } from "react-aria-components/Header";
+import {
+  Menu,
+  MenuItem,
+  MenuSection,
+  MenuTrigger,
+} from "react-aria-components/Menu";
 import { NumberField } from "react-aria-components/NumberField";
 import { Popover } from "react-aria-components/Popover";
 import { SearchField } from "react-aria-components/SearchField";
@@ -401,6 +407,89 @@ export function ControlSelect({
         </ListBox>
       </Popover>
     </Select>
+  );
+}
+export function CustomFilterSelect({
+  children,
+  value,
+  onChange,
+  disabled,
+  className,
+  id,
+  ...props
+}: React.ComponentPropsWithoutRef<"select">) {
+  const edited = useContext(FieldEditContext);
+  const options = useMemo(() => readChoices(children), [children]);
+  const selection = String(value ?? "");
+  const selected = options.find((option) => option.id === selection);
+  const render = (option: Choice) => (
+    <MenuItem
+      key={option.id}
+      id={option.id}
+      textValue={option.label}
+      isDisabled={option.disabled}
+      className="aria-option custom-filter-option"
+    >
+      <span>{option.label}</span>
+    </MenuItem>
+  );
+  return (
+    <MenuTrigger>
+      <AriaButton
+        {...labelProps({ id, ...props })}
+        className={
+          "control aria-select-control custom-filter-trigger " +
+          (className ?? "")
+        }
+        isDisabled={disabled}
+        autoFocus={props.autoFocus}
+        aria-describedby={props["aria-describedby"]}
+        data-value={selection}
+      >
+        <span>{selected?.label ?? "Seleccionar filtro"}</span>
+        <ChevronDown size={15} aria-hidden="true" />
+      </AriaButton>
+      <Popover
+        className="aria-options custom-filter-options"
+        placement="bottom start"
+        offset={6}
+        data-grouped={options.some((option) => option.section) || undefined}
+      >
+        <Menu
+          className="aria-option-list"
+          selectionMode="single"
+          disallowEmptySelection
+          selectedKeys={[selection]}
+          onSelectionChange={(keys) => {
+            if (keys === "all") return;
+            const next = keys.values().next().value;
+            if (next == null) return;
+            edited();
+            onChange?.(changeEvent<HTMLSelectElement>(String(next)));
+          }}
+        >
+          {[...new Set(options.map((option) => option.section))].map(
+            (section) => {
+              const items = options.filter(
+                (option) => option.section === section,
+              );
+              return section ? (
+                <MenuSection
+                  key={section}
+                  id={section}
+                  className="custom-filter-section"
+                >
+                  <Header className="aria-option-section">{section}</Header>
+                  {items.map(render)}
+                </MenuSection>
+              ) : (
+                items.map(render)
+              );
+            },
+          )}
+        </Menu>
+      </Popover>
+    </MenuTrigger>
   );
 }
 const suggestions = new Map<string, Choice[]>();

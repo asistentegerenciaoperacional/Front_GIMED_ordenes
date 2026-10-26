@@ -41,7 +41,11 @@ test("ISO con desfase se normaliza a UTC y la emisión conserva la selección ex
   );
   assert.equal(assignedBarcode(checked, sid(70))!.id, sid(90));
 });
-test("producto de otro maquilador rechazado; cambiar el catálogo no altera el proveedor histórico", async () => {
+test("producto de otro maquilador rechazado; cambiar el catálogo no altera el proveedor histórico", async (t) => {
+  t.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date("2026-10-10T12:00:00.000Z"),
+  });
   const db = makeSeed();
   await assert.rejects(
     command(db, "createOrder", {
@@ -66,7 +70,11 @@ test("producto de otro maquilador rechazado; cambiar el catálogo no altera el p
     sid(1),
   );
 });
-test("precio inválido de un material produce un error de campo, no un error interno", async () => {
+test("precio inválido de un material produce un error de campo, no un error interno", async (t) => {
+  t.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date("2026-10-10T12:00:00.000Z"),
+  });
   await assert.rejects(
     command(makeSeed(), "createOrder", {
       tipo_orden: "material",

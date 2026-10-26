@@ -38,6 +38,16 @@ export const orderDeliverySchema = z
   .trim()
   .min(1, "Indica la fecha solicitada de entrega.")
   .pipe(dateSchema);
+export function orderCreationDeliveryIssue(
+  delivery: unknown,
+  createdAt: string,
+): string | null {
+  const deliveryDay = costDay(delivery);
+  const creationDay = costDay(createdAt);
+  return deliveryDay && creationDay && deliveryDay < creationDay
+    ? `La fecha solicitada de entrega no puede ser anterior a la fecha de elaboración (${creationDay.split("-").reverse().join("/")}).`
+    : null;
+}
 export const lotNumberRequiredMessage =
   "Indica el número de lote antes de registrar datos de seguimiento o cerrar el lote.";
 export function productLotNeedsNumber(row: Row): boolean {

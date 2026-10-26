@@ -1,4 +1,5 @@
 import { History, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { favoriteSupplierIds } from "../shared/favorite-suppliers";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
   labels,
@@ -249,6 +250,10 @@ export function CatalogTable({
     filters: {},
   });
   const [openedColumn, setOpenedColumn] = useState<string | null>(null);
+  const materialFavorites =
+    entity === "materiales" && details
+      ? favoriteSupplierIds(db, [details.id])
+      : new Set<string>();
   const fields =
     columns[entity] ??
     Object.keys(meta.tables[entity].fields).filter((f) => f !== "id");
@@ -549,21 +554,16 @@ export function CatalogTable({
                   }
                 </h3>
                 <div className="inline">
-                  {db.proveedores_favoritos
-                    .filter(
-                      (v) => v.id_tipo_material === details.id_tipo_material,
-                    )
-                    .map((v) => (
-                      <Badge key={v.id_proveedor} value="producto">
-                        {
-                          db.proveedor.find((p) => p.id === v.id_proveedor)
-                            ?.nombre_largo
-                        }
+                  {db.proveedor
+                    .filter((p) => materialFavorites.has(p.id))
+                    .map((p) => (
+                      <Badge key={p.id} value="producto">
+                        {p.nombre_largo ?? p.nombre_corto}
                       </Badge>
                     ))}
-                  {!db.proveedores_favoritos.some(
-                    (v) => v.id_tipo_material === details.id_tipo_material,
-                  ) && <p>Sin proveedores favoritos para este tipo.</p>}
+                  {materialFavorites.size === 0 && (
+                    <p>Sin proveedores favoritos para este tipo.</p>
+                  )}
                 </div>
                 <h3>Precios conservados en órdenes</h3>
                 <div className="table-scroll">

@@ -414,3 +414,75 @@ Heap estable general: 17.899.004 → 17.927.040 bytes; 16.578.484 → 16.622.540
 Expandir/colapsar grupos son acciones nuevas sin equivalente en la tabla plana y se registran por separado, incluida la animación compartida de 180 ms. Las diferencias de la tabla son mediciones de esta ejecución y no una atribución causal de mejora.
 
 Reproducir con `npm run build` y `node scripts/benchmark-product-materials.mjs`. [Comparación](tests/evidence/product-materials/comparison.json), [componentes antes](tests/evidence/product-materials/baseline-material-components.json), [componentes después](tests/evidence/product-materials/after-material-components.json). CPU 4× no se ejecutó; permanece como ensayo de estrés separado.
+
+## OCM desde materiales pendientes · 26 de octubre de 2026
+
+Referencia: **1.25 estable (`2011bb9038d572f0382ee6deddf15f4680c1cc62`)**,
+sin commit nuevo de respaldo. Se conservó la compilación previa en
+`tests/.tmp/ocm-baseline/dist`. La medición inicial del 23 de octubre queda en
+[planning-baseline-performance.json](tests/evidence/ocm/planning-baseline-performance.json).
+El 26 se midieron las dos compilaciones consecutivamente con Chrome
+**155.0.8059.85**, en el mismo equipo, sin limitación de CPU y con fixtures de
+regresión idénticos por hash.
+
+**39/39 comparaciones generales cumplen** los límites originales: interacción
+P95 +máx(15 %,20 ms), carga +máx(15 %,100 ms), heap estable +máx(15 %,5 MB).
+Se usaron 20 cargas por escenario, las mismas muestras de interacción y 50
+ciclos de apertura/cierre con recuperación de memoria. No se ampliaron tolerancias.
+
+| Escenario | Carga general P95 antes → después | Heap estable antes → después |
+| --- | --- | --- |
+| 6.000 lotes / 1440 px | 161,8 → 145,9 ms | 17,90 → 17,95 MB |
+| 6.000 lotes / 375 px | 143,9 → 159,1 ms | 16,65 → 16,67 MB |
+| 60.000 lotes / 1440 px | 694,6 → 716,6 ms | 41,61 → 40,59 MB |
+
+### Recorrido nuevo
+
+La vista no existía en 1.25, por lo que sus operaciones se miden de forma
+independiente. Se amplió el fixture con materiales específicos compartidos:
+**19.455 parejas pendientes** para 6.000 lotes y **194.365** para 60.000. El DOM
+contiene 50 necesidades por página. Los índices y celdas se preparan por snapshot;
+búsqueda, rango, filtros y selección reutilizan esa preparación.
+
+Cada escenario conserva 20 cargas frías y 30 muestras por interacción, tomadas
+desde el evento real hasta dos cuadros posteriores al resultado. El ensayo
+incluye siete materiales seleccionados y 30 ciclos de su diálogo, con GC y siete
+puntos de memoria. La preparación de la consulta modifica el rango aplicado en
+cada muestra; no se mide un clic sin cambio de consulta.
+
+| Escenario | Carga fría P95 | Consultar | Buscar | Seleccionar | Abrir 7 materiales |
+| --- | --- | --- | --- | --- | --- |
+| 6.000 lotes / 1440 px | 447,0 ms | 61,2 ms | 112,8 ms | 59,1 ms | 97,1 ms |
+| 6.000 lotes / 375 px | 448,7 ms | 61,6 ms | 112,0 ms | 59,1 ms | 110,5 ms |
+| 60.000 lotes / 1440 px | 1.078,4 ms | 101,7 ms | 149,2 ms | 58,3 ms | 114,9 ms |
+
+El P95 máximo de las siete interacciones fue **112,8 / 112,0 / 149,2 ms**.
+Se cumple el objetivo inferior a 200 ms con 6.000 lotes; el volumen mayor,
+registrado por separado, también quedó por debajo en este ensayo. La carga fría
+incluye la descarga del snapshot y la preparación de todas las necesidades;
+no forma parte de ese objetivo de interacción.
+
+El heap pasó de **47,51 → 49,41 MB**, **48,06 → 49,91 MB** y
+**223,77 → 225,12 MB** después de 30 ciclos. Los crecimientos de
+1.897.972 / 1.851.600 / 1.344.940 bytes cumplen el mayor entre 15 % y 5 MB.
+El informe conserva muestras sin redondear, recursos JavaScript descargados,
+tareas largas y hashes de fixtures. Son mediciones locales con API sintética;
+no representan latencia de disco, red ni un teléfono físico.
+
+Evidencias: [comparación general](tests/evidence/ocm/comparison.json),
+[referencia](tests/evidence/ocm/baseline-performance.json),
+[versión actual](tests/evidence/ocm/after-performance.json) y
+[recorrido nuevo](tests/evidence/ocm/material-demand-performance.json).
+
+Reproducción: `npm run benchmark:ocm`. El runner reconstruye 1.25 mediante
+`git archive` si falta la compilación congelada, sin crear commits. Los servicios
+de medición usan datos sintéticos y verifican el hash de `data/database.json`.
+CPU 4× no se ejecutó y conserva su carácter de ensayo separado.
+
+Al incorporar MAIA al resumen para distinguir homónimos se repitieron las
+mediciones de la compilación actual y del recorrido nuevo, conservando la
+referencia y los límites. Los informes anteriores permanecen como
+`after-before-maia-labels-performance.json`, `comparison-before-maia-labels.json`
+y `material-demand-before-maia-labels-performance.json` en la misma carpeta.
+Las tablas anteriores reflejan la compilación final; las diferencias entre
+ejecuciones no se atribuyen causalmente al cambio de etiquetas.

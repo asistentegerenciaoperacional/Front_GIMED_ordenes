@@ -19,7 +19,12 @@ import {
   type Row,
 } from "../shared/schema";
 const base = resolve("tests/.tmp");
+// These historical scenarios use October delivery dates; creation-date rules have their own clock-bound tests.
 async function fixture(t: test.TestContext) {
+  t.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date("2026-10-10T12:00:00.000Z"),
+  });
   await mkdir(base, { recursive: true });
   const dir = await mkdtemp(join(base, "case-"));
   assert.ok(resolve(dir).startsWith(base + sep));

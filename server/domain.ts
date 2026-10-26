@@ -1,6 +1,14 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Database } from "../shared/models";
 import { costIssue } from "../shared/maquila-costs";
+import { isMaterialSupplier } from "../shared/favorite-suppliers";
+import {
+  buildMaterialNeeds,
+  materialDemandSchema,
+  materialNeedKey,
+  needsInRange,
+  type MaterialDemand,
+} from "../shared/material-demand";
 import {
   materialCatalogIssue,
   normalizeProductMaterialConfig,
@@ -13,6 +21,7 @@ import {
   blankRow,
   schemas,
   orderDeliverySchema,
+  orderCreationDeliveryIssue,
   primaryKey,
   normalizeInvoice,
   groupOf,
@@ -135,7 +144,13 @@ function requireOrderProvider(db: Database, p: Row) {
   );
 }
 function header(db: Database, p: Row): Row {
+  const createdAt = now();
   const delivery = requiredOrderDelivery(p.fecha_solicitada_entrega);
+  const deliveryIssue = orderCreationDeliveryIssue(delivery, createdAt);
+  if (deliveryIssue)
+    throw new BusinessError(deliveryIssue, "VALIDATION", {
+      fecha_solicitada_entrega: deliveryIssue,
+    });
   if (p.expected_no_orden !== undefined)
     check(
       p.expected_no_orden === nextOrderNumber(db, p.tipo_orden),
@@ -157,7 +172,7 @@ function header(db: Database, p: Row): Row {
     tipo_orden: p.tipo_orden,
     no_orden: reserveNumber(db, p.tipo_orden),
     id_proveedor: p.id_proveedor,
-    fecha_elaboracion: p.fecha_elaboracion ?? now(),
+    fecha_elaboracion: createdAt,
     fecha_solicitada_entrega: delivery,
     estado_autorizacion: "no_autorizada",
     fecha_autorizacion: null,
@@ -213,6 +228,65 @@ function assignBarcode(
   code.fecha_act = now();
 }
 function saveOrder(db: Database, p: Row, edit = false): Row {
+  let demand: MaterialDemand | undefined;
+  if (p.abastecimiento !== undefined) {
+    check(
+      !edit && p.tipo_orden === "material",
+      "El abastecimiento solo se admite al crear una orden de material.",
+      "VALIDATION",
+    );
+    const parsed = materialDemandSchema.safeParse(p.abastecimiento);
+    check(
+      parsed.success,
+      "Revisa el rango y las fuentes de abastecimiento.",
+      "VALIDATION",
+      {
+        abastecimiento:
+          "La selección de abastecimiento está incompleta o no es válida.",
+      },
+    );
+    demand = parsed.data;
+    const lineMaterials = Array.isArray(p.lines)
+      ? p.lines.map((line: Row) => line.id_material)
+      : [];
+    const sourceMaterials = new Set(
+      demand.fuentes.map((source) => source.id_material),
+    );
+    check(
+      lineMaterials.length >= 1 &&
+        lineMaterials.length <= 7 &&
+        new Set(lineMaterials).size === lineMaterials.length &&
+        sourceMaterials.size === lineMaterials.length &&
+        lineMaterials.every((id: string) => sourceMaterials.has(id)),
+      "Los materiales deben corresponder exactamente a la selección.",
+      "VALIDATION",
+      { lines: "Conserva los materiales seleccionados en abastecimiento." },
+    );
+    const current = new Map(
+      needsInRange(buildMaterialNeeds(db), demand.desde, demand.hasta).map(
+        (need) => [need.key, need.source],
+      ),
+    );
+    const seen = new Set<string>();
+    for (const source of demand.fuentes) {
+      const key = materialNeedKey(source.id_orden_producto, source.id_material);
+      check(
+        !seen.has(key),
+        "La selección contiene un vínculo repetido.",
+        "VALIDATION",
+      );
+      seen.add(key);
+      const saved = current.get(key);
+      check(
+        saved &&
+          saved.cantidad_solicitada === source.cantidad_solicitada &&
+          saved.fecha_solicitada_entrega === source.fecha_solicitada_entrega,
+        "Las necesidades de material cambiaron. Revisa la selección actualizada antes de crear la OCM.",
+        "SUPPLY_CHANGED",
+        { abastecimiento: "Un origen cambió o ya tiene una compra vigente." },
+      );
+    }
+  }
   check(
     p.sticker_pct === undefined ||
       (typeof p.sticker_pct === "number" &&
@@ -427,6 +501,14 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
       const line = push(db, table, values);
       kept.add(line.id);
       if (p.tipo_orden === "producto") createInitialProductLot(db, line);
+      if (demand)
+        for (const source of demand.fuentes) {
+          if (source.id_material === raw.id_material)
+            push(db, "abastecimiento_material", {
+              id_orden_producto: source.id_orden_producto,
+              id_orden_material: line.id,
+            });
+        }
     }
   });
   if (edit) {
@@ -728,6 +810,18 @@ export async function command(
       };
       const desired = ids(p.id_proveedores);
       const expected = ids(p.expected_id_proveedores);
+      for (const id of desired) {
+        const provider = findRecord(db, "proveedor", { id });
+        check(
+          isMaterialSupplier({ Es_materiales: provider.Es_materiales }),
+          "Solo se pueden agregar proveedores de materiales a los favoritos por tipo.",
+          "VALIDATION",
+          {
+            id_proveedores:
+              "Selecciona únicamente proveedores con la bandera de materiales activada.",
+          },
+        );
+      }
       const current = db.proveedores_favoritos
         .filter((r) => r.id_tipo_material === p.id_tipo_material)
         .map((r) => r.id_proveedor)
@@ -741,7 +835,6 @@ export async function command(
         {},
         { id_proveedores: current },
       );
-      desired.forEach((id) => findRecord(db, "proveedor", { id }));
       db.proveedores_favoritos = db.proveedores_favoritos.filter(
         (r) => r.id_tipo_material !== p.id_tipo_material,
       );

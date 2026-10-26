@@ -9,8 +9,13 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { costDay, costIssue } from "../shared/maquila-costs";
+import {
+  consolidateMaterialSources,
+  demandQuantity,
+  type MaterialDemand,
+} from "../shared/material-demand";
 import {
   materialCatalogIssue,
   materialRole,
@@ -33,6 +38,7 @@ import {
   nextOrderNumber,
   normalizeInvoice,
   orderDeliverySchema,
+  orderCreationDeliveryIssue,
   orderItemLabel,
   orderLines,
   orderReference,
@@ -1244,13 +1250,20 @@ export function OrderForm({
   order,
   onClose,
   initialType = "producto",
+  abastecimiento,
+  onReviewSupply,
 }: {
   order?: Row;
   onClose: () => void;
   initialType?: string;
+  abastecimiento?: MaterialDemand;
+  onReviewSupply?: () => void;
 }) {
   const { db, run, navigate } = useApp();
-  const [type, setType] = useState(order?.tipo_orden ?? initialType);
+  const supplyCreation = Boolean(abastecimiento && !order);
+  const [type, setType] = useState(
+    order?.tipo_orden ?? (supplyCreation ? "material" : initialType),
+  );
   const authorized = order?.estado_autorizacion === "autorizada";
   const productsLocked = type === "producto" && authorized;
   const suppliers = (t: string) =>
@@ -1262,7 +1275,9 @@ export function OrderForm({
           : p.Es_maquila === false && p.Es_materiales === false,
     );
   const [supplier, setSupplier] = useState(
-    order?.id_proveedor ?? suppliers(initialType)[0]?.id ?? "",
+    order?.id_proveedor ??
+      suppliers(supplyCreation ? "material" : initialType)[0]?.id ??
+      "",
   );
   const automaticNumber = nextOrderNumber(db, type);
   const number = order?.no_orden ?? automaticNumber;
@@ -1302,10 +1317,12 @@ export function OrderForm({
       precio_unitario: "0.00",
     };
   };
-  const [lines, setLines] = useState<Row[]>(
+  const [lines, setLines] = useState<Row[]>(() =>
     order
       ? orderLines(db, order.id).map((l) => ({ ...l, sticker_pct: 10 }))
-      : [fresh(initialType, suppliers(initialType)[0]?.id ?? "")],
+      : abastecimiento
+        ? consolidateMaterialSources(abastecimiento.fuentes)
+        : [fresh(initialType, suppliers(initialType)[0]?.id ?? "")],
   );
   const [stage, setStage] = useState(1);
   const materialGroups = materialSupplierGroups(
@@ -1313,6 +1330,24 @@ export function OrderForm({
     type === "material" ? lines.map((line) => line.id_material) : [],
   );
   const [busy, setBusy] = useState(false);
+  const submittingOrder = useRef(false);
+  const [supplyConflict, setSupplyConflict] = useState(false);
+  const supplyOrigins = useMemo(() => {
+    const groups = new Map<string, Row[]>();
+    if (!abastecimiento) return groups;
+    const products = new Map(
+      db.orden_producto.map((line) => [line.id, line.id_orden_compra]),
+    );
+    const orders = new Map(db.orden_compra.map((order) => [order.id, order]));
+    for (const source of abastecimiento.fuentes) {
+      const order = orders.get(products.get(source.id_orden_producto) ?? "");
+      if (!order) continue;
+      const group = groups.get(source.id_material) ?? [];
+      if (!group.some((origin) => origin.id === order.id)) group.push(order);
+      groups.set(source.id_material, group);
+    }
+    return groups;
+  }, [db, abastecimiento]);
   const [dirty, setDirty] = useState(false);
   const originalDraft = useRef<{
     date: string;
@@ -1332,7 +1367,11 @@ export function OrderForm({
     },
     valid: (field) => {
       if (field === "fecha_solicitada_entrega")
-        return orderDeliverySchema.safeParse(isoDate(delivery)).success;
+        return (
+          orderDeliverySchema.safeParse(isoDate(delivery)).success &&
+          (Boolean(order) ||
+            !orderCreationDeliveryIssue(isoDate(delivery), new Date().toISOString()))
+        );
       if (field === "fecha_elaboracion")
         return !date || dateSchema.safeParse(isoDate(date)).success;
       if (field === "id_proveedor")
@@ -1352,6 +1391,12 @@ export function OrderForm({
       }
       if (field === "lines") return lines.length >= 1 && lines.length <= 7;
       const validLine = (line: Row, key: string) => {
+        if (key === "adicional_pct")
+          return (
+            Number.isFinite(line.adicional_pct) &&
+            line.adicional_pct >= 5 &&
+            line.adicional_pct <= 10
+          );
         if (key === "precio_unitario") return validPrice(line.precio_unitario);
         if (key === "cantidad_solicitada")
           return Number.isSafeInteger(line.cantidad_solicitada);
@@ -1464,7 +1509,7 @@ export function OrderForm({
       return;
     }
     setSupplier(provider);
-    if (!order) setLines([fresh(type, provider)]);
+    if (!order && !supplyCreation) setLines([fresh(type, provider)]);
     setDirty(true);
   }
   function acceptSupplierChange() {
@@ -1506,6 +1551,7 @@ export function OrderForm({
   }
   function review() {
     try {
+      if (supplyConflict) return;
       setError(null);
       if (!supplier)
         throw new ApiError({
@@ -1516,7 +1562,22 @@ export function OrderForm({
       const deliveryCheck = orderDeliverySchema.safeParse(isoDate(delivery));
       if (!deliveryCheck.success)
         issues.fecha_solicitada_entrega = deliveryCheck.error.issues[0].message;
+      else if (!order) {
+        const issue = orderCreationDeliveryIssue(
+          deliveryCheck.data,
+          new Date().toISOString(),
+        );
+        if (issue) issues.fecha_solicitada_entrega = issue;
+      }
       lines.forEach((l, i) => {
+        if (
+          supplyCreation &&
+          (!Number.isFinite(l.adicional_pct) ||
+            l.adicional_pct < 5 ||
+            l.adicional_pct > 10)
+        )
+          issues[`lines.${i}.adicional_pct`] =
+            "Introduce un adicional entre 5 y 10 %.";
         if (type === "producto" && !l.id_producto)
           issues[`lines.${i}.id_producto`] = "Selecciona un producto.";
         if (type === "producto" && !assignedBarcode(db, l.id_producto) && !l.id)
@@ -1587,10 +1648,12 @@ export function OrderForm({
   }
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (submittingOrder.current || supplyConflict) return;
     if (stage === 1) {
       review();
       return;
     }
+    submittingOrder.current = true;
     setBusy(true);
     try {
       const orderIssues: Record<string, string> = {};
@@ -1619,9 +1682,16 @@ export function OrderForm({
           no_orden: order ? number : undefined,
           confirm: replacement,
           expected_no_orden: order ? undefined : automaticNumber,
-          fecha_elaboracion: isoDate(date),
+          fecha_elaboracion: order ? isoDate(date) : undefined,
           fecha_solicitada_entrega: isoDate(delivery),
-          lines,
+          lines: supplyCreation
+            ? lines.map((line) => ({
+                id_material: line.id_material,
+                cantidad_solicitada: line.cantidad_solicitada,
+                precio_unitario: line.precio_unitario,
+              }))
+            : lines,
+          ...(supplyCreation ? { abastecimiento } : {}),
         },
         order ? "Orden actualizada" : "Orden creada",
       );
@@ -1629,6 +1699,8 @@ export function OrderForm({
       navigate(`ordenes/${result.orderId}`);
     } catch (e) {
       catchError(e);
+      if (e instanceof ApiError && e.code === "SUPPLY_CHANGED")
+        setSupplyConflict(true);
       if (
         e instanceof ApiError &&
         Object.keys(e.fields).some(
@@ -1639,6 +1711,7 @@ export function OrderForm({
       )
         setStage(1);
     } finally {
+      submittingOrder.current = false;
       setBusy(false);
     }
   }
@@ -1669,10 +1742,24 @@ export function OrderForm({
       wide
       onClose={onClose}
       dirty={dirty}
+      busy={busy}
     >
       <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
-        <div className="dialog-body">
+        <div className="dialog-body" inert={busy}>
           <ErrorNotice error={error} />
+          {supplyCreation && (
+            <p className="notice subtle" id="order-supply-locked">
+              Los materiales y sus OC de origen proceden de la selección de
+              abastecimiento. Para cambiarlos, vuelve a la selección.
+            </p>
+          )}
+          {supplyConflict && (
+            <p className="notice" role="status">
+              La selección necesita una revisión. Vuelve a la tabla para
+              consultar las necesidades vigentes antes de preparar otra vez la
+              OCM.
+            </p>
+          )}
           {replacement && (
             <p className="notice" role="status">
               Reemplazo pendiente: al guardar se eliminarán los datos anteriores
@@ -1698,7 +1785,7 @@ export function OrderForm({
                   <ControlSelect
                     id="field-tipo_orden"
                     value={type}
-                    disabled={!!order}
+                    disabled={!!order || supplyCreation}
                     onChange={(e) => switchType(e.target.value)}
                   >
                     {["producto", "material", "otro"].map((t) => (
@@ -1764,7 +1851,8 @@ export function OrderForm({
                 >
                   <DateInput
                     id="field-fecha_elaboracion"
-                    value={date}
+                    value={order ? date : today()}
+                    readOnly={!order}
                     onChange={(value) => {
                       setDate(value);
                       setDirty(true);
@@ -1822,7 +1910,11 @@ export function OrderForm({
                         <Button
                           className="icon-btn"
                           icon={Trash2}
-                          disabled={productsLocked || lines.length === 1}
+                          disabled={
+                            productsLocked ||
+                            supplyCreation ||
+                            lines.length === 1
+                          }
                           aria-describedby={
                             productsLocked ? "order-products-locked" : undefined
                           }
@@ -1833,6 +1925,24 @@ export function OrderForm({
                           }}
                         />
                       </div>
+                      {supplyCreation && (
+                        <p className="order-line-basis demand-line-basis">
+                          <span>
+                            Base según OC:{" "}
+                            <strong className="num">
+                              {count(l.cantidad_base)} unidades
+                            </strong>
+                          </span>
+                          <span>
+                            Orígenes:{" "}
+                            <strong>
+                              {supplyOrigins.get(l.id_material)?.length ?? 0} OC
+                              · {l.fuentes.length}{" "}
+                              {l.fuentes.length === 1 ? "renglón" : "renglones"}
+                            </strong>
+                          </span>
+                        </p>
+                      )}
                       <div className="form-grid three">
                         <Field
                           id={key(
@@ -1886,6 +1996,12 @@ export function OrderForm({
                               id={key("id_material")}
                               materials={db.materiales}
                               value={l.id_material}
+                              disabled={supplyCreation}
+                              aria-describedby={
+                                supplyCreation
+                                  ? "order-supply-locked"
+                                  : undefined
+                              }
                               onChange={(id) => update(i, "id_material", id)}
                             />
                           ) : (
@@ -1910,47 +2026,108 @@ export function OrderForm({
                             </>
                           )}
                         </Field>
-                        <Field
-                          id={key("cantidad_solicitada")}
-                          label="Cantidad solicitada"
-                          required
-                          error={
-                            error?.fields[`lines.${i}.cantidad_solicitada`]
+                        <div
+                          className={
+                            supplyCreation
+                              ? "demand-quantity-fields"
+                              : "order-quantity-fields"
                           }
                         >
-                          <ControlInput
+                          <Field
                             id={key("cantidad_solicitada")}
-                            type="number"
-                            step="1"
-                            value={
-                              Number.isNaN(l.cantidad_solicitada)
-                                ? ""
-                                : l.cantidad_solicitada
+                            label="Cantidad solicitada"
+                            required
+                            error={
+                              error?.fields[`lines.${i}.cantidad_solicitada`]
                             }
-                            onChange={(e) => {
-                              update(
-                                i,
-                                "cantidad_solicitada",
-                                e.target.value === ""
-                                  ? NaN
-                                  : Number(e.target.value),
-                              );
-                              if (type === "producto")
-                                setLines((old) =>
-                                  old.map((l, n) =>
-                                    n !== i
-                                      ? l
-                                      : {
-                                          ...l,
-                                          cantidad_corrugado: null,
-                                          cantidad_sticker: null,
-                                          cantidad_cinta: null,
-                                        },
-                                  ),
+                          >
+                            <ControlInput
+                              id={key("cantidad_solicitada")}
+                              type="number"
+                              step="1"
+                              value={
+                                Number.isNaN(l.cantidad_solicitada)
+                                  ? ""
+                                  : l.cantidad_solicitada
+                              }
+                              onChange={(e) => {
+                                update(
+                                  i,
+                                  "cantidad_solicitada",
+                                  e.target.value === ""
+                                    ? NaN
+                                    : Number(e.target.value),
                                 );
-                            }}
-                          />
-                        </Field>
+                                if (type === "producto")
+                                  setLines((old) =>
+                                    old.map((l, n) =>
+                                      n !== i
+                                        ? l
+                                        : {
+                                            ...l,
+                                            cantidad_corrugado: null,
+                                            cantidad_sticker: null,
+                                            cantidad_cinta: null,
+                                          },
+                                    ),
+                                  );
+                              }}
+                            />
+                          </Field>
+                          {supplyCreation && (
+                            <div className="demand-percent">
+                              <Field
+                                id={key("adicional_pct")}
+                                label="Adicional (%)"
+                                tooltip="Base de las OC seleccionadas × (1 + adicional / 100), redondeada hacia arriba"
+                                error={
+                                  error?.fields[`lines.${i}.adicional_pct`]
+                                }
+                              >
+                                <ControlInput
+                                  id={key("adicional_pct")}
+                                  aria-label={`Adicional del material ${i + 1} (%)`}
+                                  type="number"
+                                  min="5"
+                                  max="10"
+                                  step="any"
+                                  value={
+                                    Number.isFinite(l.adicional_pct)
+                                      ? l.adicional_pct
+                                      : ""
+                                  }
+                                  onChange={(event) => {
+                                    const percent =
+                                      event.target.value === ""
+                                        ? NaN
+                                        : Number(event.target.value);
+                                    setDirty(true);
+                                    setLines((previous) =>
+                                      previous.map((line, index) => {
+                                        if (index !== i) return line;
+                                        try {
+                                          return {
+                                            ...line,
+                                            adicional_pct: percent,
+                                            cantidad_solicitada: demandQuantity(
+                                              line.cantidad_base,
+                                              percent,
+                                            ),
+                                          };
+                                        } catch {
+                                          return {
+                                            ...line,
+                                            adicional_pct: percent,
+                                          };
+                                        }
+                                      }),
+                                    );
+                                  }}
+                                />
+                              </Field>
+                            </div>
+                          )}
+                        </div>
                         <Field
                           id={key("precio_unitario")}
                           label="Precio unitario"
@@ -2011,7 +2188,9 @@ export function OrderForm({
                 })}
                 <Button
                   icon={Plus}
-                  disabled={productsLocked || lines.length === 7}
+                  disabled={
+                    productsLocked || supplyCreation || lines.length === 7
+                  }
                   aria-describedby={
                     productsLocked ? "order-products-locked" : undefined
                   }
@@ -2026,6 +2205,63 @@ export function OrderForm({
             </>
           ) : (
             <>
+              {supplyCreation && (
+                <div
+                  className="demand-review"
+                  aria-label="Revisión de materiales y orígenes"
+                >
+                  {lines.map((line, index) => {
+                    const sources = line.fuentes as MaterialDemand["fuentes"];
+                    const origins = supplyOrigins.get(line.id_material) ?? [];
+                    return (
+                      <div className="order-form-line" key={line.id_material}>
+                        <h3>
+                          {index + 1}.{" "}
+                          {
+                            db.materiales.find(
+                              (material) => material.id === line.id_material,
+                            )?.nombre_material
+                          }
+                        </h3>
+                        <p className="order-line-basis">
+                          <span>
+                            Base: <strong>{count(line.cantidad_base)}</strong>
+                          </span>
+                          <span>
+                            Adicional de referencia:{" "}
+                            <strong>{line.adicional_pct} %</strong>
+                          </span>
+                          <span>
+                            Cantidad final:{" "}
+                            <strong>{count(line.cantidad_solicitada)}</strong>
+                          </span>
+                          <span>
+                            Precio unitario:{" "}
+                            <strong>{money(line.precio_unitario)}</strong>
+                          </span>
+                          <span>
+                            Subtotal: <strong>{total([line])}</strong>
+                          </span>
+                        </p>
+                        <p className="compact-note">
+                          {origins
+                            .slice(0, 10)
+                            .map((origin) =>
+                              orderReference("producto", origin.no_orden),
+                            )
+                            .join(", ")}
+                          {origins.length > 10
+                            ? ` y ${origins.length - 10} OC más`
+                            : ""}{" "}
+                          · {sources.length}{" "}
+                          {sources.length === 1 ? "renglón" : "renglones"} de
+                          producto
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
               {type === "producto" && (
                 <>
                   <h3>Cantidades recomendadas</h3>
@@ -2215,12 +2451,21 @@ export function OrderForm({
               Volver
             </Button>
           )}
-          <CancelButton onClick={onClose}>Cancelar</CancelButton>
+          <CancelButton
+            onClick={supplyConflict ? (onReviewSupply ?? onClose) : onClose}
+            disabled={busy}
+          >
+            {supplyConflict
+              ? "Revisar selección"
+              : supplyCreation
+                ? "Volver a selección"
+                : "Cancelar"}
+          </CancelButton>
           <Button
             type="submit"
             variant="primary"
             icon={stage === 1 ? ChevronRight : Check}
-            disabled={busy}
+            disabled={busy || supplyConflict}
           >
             {busy
               ? "Guardando…"

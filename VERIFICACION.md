@@ -621,3 +621,125 @@ Reproducción:
     node scripts/verify-aria-browser.mjs tests/maquila-costs-layout.browser.js chromium
     node scripts/verify-aria-browser.mjs tests/favorites-disclosure.browser.js chromium
     node scripts/verify-aria-browser.mjs tests/favorites.browser.js chromium
+
+## OCM desde materiales pendientes · 26 de octubre de 2026
+
+Primera iteración sobre **1.25 estable (`2011bb9`)**, sin commit de respaldo ni
+migración. **213 pruebas automatizadas correctas**, incluidas 14 nuevas del
+dominio y la tabla; compilación TypeScript/Vite correcta. [Registro de pruebas](tests/evidence/ocm/unit-tests.txt).
+
+El recorrido completo supera **74 comprobaciones en cada motor**: Chromium,
+Firefox y WebKit, **222 en total**, sin errores ni advertencias de React/React
+Aria. Incluye 375/768/1024/1440 px, rango y fechas, cobertura parcial, límite de
+siete identidades con homónimos, múltiples orígenes, búsqueda y paginación sin
+perder selección, teclado, foco, descarte, cambio de proveedor, cantidad y
+porcentaje, revisión, guardado y conflicto de cantidad concurrente.
+Los homónimos se distinguen por MAIA también en el resumen y sus acciones;
+quitar un material retira todos sus orígenes y libera un espacio. Se verifican
+el descarte confirmado al cambiar de rango y el reintento tras un error temporal.
+
+El servicio se prueba con transacciones temporales: dos solicitudes simultáneas
+crean una compra; un fallo en el último material revierte cabecera, primeros
+renglones, vínculos y consecutivo. Se conserva el vínculo de una compra anulada
+al emitir su reemplazo. La cantidad manual y el precio persisten; base y porcentaje
+no agregan atributos al modelo.
+
+Las capturas permitieron corregir el día mostrado de la entrega sin convertir
+la fecha calendario a medianoche UTC, el estilo del buscador y la visibilidad
+del resumen adherido al viewport. Las comprobaciones de WebKit esperan la
+devolución de foco del menú antes de editar una fecha. Firefox usa la copia
+temporal y el manifiesto SideBySide ya descritos en este documento.
+
+Reportes: [Chromium](tests/evidence/ocm/chromium-material-demand.browser.json),
+[Firefox](tests/evidence/ocm/firefox-material-demand.browser.json) y
+[WebKit](tests/evidence/ocm/webkit-material-demand.browser.json).
+Capturas: [tabla de escritorio](tests/evidence/ocm/chromium-pendientes-1440.png),
+[tabla de 375 px](tests/evidence/ocm/chromium-tabla-375.png) y
+[diálogo de 375 px](tests/evidence/ocm/chromium-dialogo-375.png).
+
+La comparación de producción aprueba **39/39 presupuestos**; las nuevas
+interacciones tienen un P95 máximo de 112,8 ms con 6.000 lotes y 19.455 necesidades,
+y de 149,2 ms con 60.000 lotes y 194.365 necesidades. [Mediciones y límites](RENDIMIENTO.md#ocm-desde-materiales-pendientes--26-de-octubre-de-2026).
+El hash SHA-256 del archivo real se conserva:
+`FC2D3AB09D47F2AE760FE27371203D85D8722BD2CCF11459C34244F203AC2F8D`.
+
+Reproducción:
+
+    npm test
+    npm run test:ocm
+    npm run benchmark:ocm
+
+Reglas y contrato: [ABASTECIMIENTO-OCM.md](ABASTECIMIENTO-OCM.md).
+
+## Entrega solicitada y elaboración al crear — 26 de octubre de 2026
+
+Compilación correcta, **222 pruebas unitarias aprobadas** y **27 comprobaciones
+de Chromium aprobadas**. Las nueve pruebas nuevas de servicio cubren los tres
+tipos, días iguales y posteriores, diferencias entre UTC/Bogotá, medianoche,
+elaboración enviada por el cliente, conservación del archivo y consecutivos,
+y edición de órdenes históricas. Los escenarios históricos de dominio y
+precisión fijan su reloj para mantener sus fechas de prueba reproducibles.
+
+El navegador comprueba el HTTP 422 y los errores del campo en los tres tipos;
+en 375/1440 px comprueba elaboración de solo lectura, banner con foco, marcado
+del campo, conservación del error entre fechas pasadas, corrección al mismo
+día y un rechazo real del servicio después de la revisión. Se conserva el
+borrador y se vuelve a la etapa de captura. Sin errores ni advertencias de
+React/React Aria. Capturas revisadas visualmente.
+
+[Reporte de navegador](tests/evidence/aria/chromium-order-creation-date.browser.json).
+Reproducción:
+
+    npm test
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/order-creation-date.browser.js chromium
+
+## Elegibilidad de proveedores favoritos — 26 de octubre de 2026
+
+Compilación correcta, **226 pruebas unitarias** y **100 comprobaciones de
+Chromium** aprobadas: 29 del recorrido nuevo y 71 de la regresión de favoritos.
+Se comprueban `false`/`null`, proveedores mixtos e inactivos, cambios de rol
+entre apertura y guardado, reintentos idénticos con relaciones heredadas y
+conservación del archivo ante rechazos. La interfaz a 375/1440 px filtra
+tabla, conteos, búsqueda, opciones, selección final e historial de materiales.
+Guardar un tipo con relaciones heredadas no elegibles retira solo esas
+relaciones; los conflictos y el resto del recorrido se conservan.
+
+Sin errores ni advertencias de React/React Aria; capturas revisadas visualmente.
+[Reporte de elegibilidad](tests/evidence/favorites/chromium-favorites-eligibility.browser.json)
+y [regresión de favoritos](tests/evidence/favorites/chromium-favorites.browser.json).
+Reproducción:
+
+    npm test
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/favorites-eligibility.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/favorites.browser.js chromium
+
+### Menús de filtros personalizados · 26 de octubre de 2026
+
+`CustomFilterSelect` comparte presentación y selección exclusiva con o sin
+subcategorías. Se aplica a OC, OCM, tipo de orden, costos de maquila, materiales
+por producto y clase de documento. Las reglas visuales están en el master;
+los selectores de formulario y condiciones de columna no cambian.
+
+Pasaron 215 comprobaciones en Chromium a 375/868/1440 px: superficie, densidad,
+selección, encabezados, ausencia de iconos decorativos, límites y scroll,
+navegación por teclado, Escape, clic fuera, URL, recarga y retirada del filtro.
+El recorrido no modifica registros. También pasaron las 66 comprobaciones del
+editor de costos, las 226 pruebas unitarias y la compilación de producción.
+Las capturas de listas agrupadas y simples se revisaron visualmente.
+
+Reportes: [menús compartidos](tests/evidence/aria/chromium-custom-filter-menus.browser.json)
+y [regresión de costos](tests/evidence/costs/chromium-maquila-costs.browser.json).
+
+La regresión ampliada `scripts/verify-order-filters.ts` se detiene en una
+expectativa previa del texto de ayuda: busca «No cuentan otros renglones de esa
+OCM.», ausente en la definición actual. Esa descripción y esa expectativa no
+se modificaron en este ajuste; no se considera superada la regresión completa.
+
+Reproducción:
+
+    npm run build
+    npm test
+    node scripts/verify-aria-browser.mjs tests/custom-filter-menus.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/maquila-costs.browser.js chromium

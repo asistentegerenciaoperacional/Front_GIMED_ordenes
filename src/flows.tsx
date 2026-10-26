@@ -34,7 +34,7 @@ import {
   ControlForm,
   ControlInput,
   ControlLink,
-  ControlSelect,
+  CustomFilterSelect,
 } from "./components/controls";
 import {
   DataTable,
@@ -73,6 +73,7 @@ import {
   type TableState,
 } from "./order-table";
 import { replaceRoute } from "./routing";
+import { PendingMaterialsPage } from "./pending-materials";
 import {
   buildSupplyRows,
   searchSupplyRows,
@@ -102,8 +103,52 @@ import {
 } from "./ui";
 
 export function SupplyPage({ params }: { params: URLSearchParams }) {
+  const tab = ["lotes", "pendientes"].includes(params.get("tab") ?? "")
+    ? params.get("tab")!
+    : "vinculos";
+  return (
+    <>
+      <PageHeading
+        title="Abastecimiento de materiales"
+        description="Consulta materiales pendientes, vínculos entre órdenes y lotes de material."
+      />
+      <Tabs
+        value={tab}
+        label="Vistas de abastecimiento"
+        className="catalog-tabs"
+        items={[
+          { id: "vinculos", label: "Vínculos entre órdenes" },
+          { id: "pendientes", label: "Materiales pendientes" },
+          { id: "lotes", label: "Lotes y certificados" },
+        ]}
+        onChange={(value) => {
+          const next = new URLSearchParams(params);
+          value === "vinculos" ? next.delete("tab") : next.set("tab", value);
+          if (value !== "lotes") next.delete("lote");
+          replaceRoute(`abastecimiento${next.size ? `?${next}` : ""}`);
+        }}
+      >
+        {tab === "pendientes" ? (
+          <PendingMaterialsPage params={params} />
+        ) : tab === "lotes" ? (
+          <CatalogTable
+            entity="lote_material"
+            detailsId={params.get("lote")}
+            onDetailsChange={(id) => {
+              const next = new URLSearchParams(params);
+              id ? next.set("lote", id) : next.delete("lote");
+              replaceRoute(`abastecimiento?${next}`);
+            }}
+          />
+        ) : (
+          <SupplyLinks params={params} />
+        )}
+      </Tabs>
+    </>
+  );
+}
+function SupplyLinks({ params }: { params: URLSearchParams }) {
   const { db } = useApp();
-  const tab = params.get("tab") === "lotes" ? "lotes" : "vinculos";
   const [openedColumn, setOpenedColumn] = useState<SupplyColumnKey | null>(
     null,
   );
@@ -161,176 +206,138 @@ export function SupplyPage({ params }: { params: URLSearchParams }) {
     hasFilter(tableState.filters[column.key]),
   ).length;
   return (
-    <>
-      <PageHeading
-        title="Abastecimiento de materiales"
-        description="Consulta vínculos entre órdenes y lotes de material."
-      />
-      <Tabs
-        value={tab}
-        onChange={(value) => {
-          const next = new URLSearchParams(params);
-          value === "lotes" ? next.set("tab", "lotes") : next.delete("tab");
-          next.delete("lote");
-          replaceRoute(`abastecimiento${next.size ? `?${next}` : ""}`);
-        }}
-        label="Vistas de abastecimiento"
-        className="catalog-tabs"
-        items={[
-          { id: "vinculos", label: "Vínculos entre órdenes" },
-          { id: "lotes", label: "Lotes y certificados" },
-        ]}
+    <section className="panel">
+      <div
+        className="toolbar"
+        role="search"
+        aria-label="Búsqueda de órdenes en abastecimiento"
       >
-        {tab === "lotes" ? (
-          <CatalogTable
-            entity="lote_material"
-            detailsId={params.get("lote")}
-            onDetailsChange={(id) => {
-              const next = new URLSearchParams(params);
-              id ? next.set("lote", id) : next.delete("lote");
-              replaceRoute(`abastecimiento?${next}`);
-            }}
+        <div className="search">
+          <Search size={16} aria-hidden="true" />
+          <ControlInput
+            className="control"
+            type="search"
+            aria-label="Buscar órdenes de producto o material"
+            placeholder="Buscar por OC de producto u OCM de material…"
+            value={query}
+            onChange={(event) => search(event.target.value)}
           />
-        ) : (
-          <section className="panel">
-            <div
-              className="toolbar"
-              role="search"
-              aria-label="Búsqueda de órdenes en abastecimiento"
+        </div>
+        <div className="filter-actions">
+          {query && (
+            <Button variant="link" onClick={() => search("")}>
+              Limpiar búsqueda
+            </Button>
+          )}
+          {filterCount > 0 && (
+            <Button
+              variant="link"
+              onClick={() => saveTable({ filters: {}, sort: tableState.sort })}
             >
-              <div className="search">
-                <Search size={16} aria-hidden="true" />
-                <ControlInput
-                  className="control"
-                  type="search"
-                  aria-label="Buscar órdenes de producto o material"
-                  placeholder="Buscar por OC de producto u OCM de material…"
-                  value={query}
-                  onChange={(event) => search(event.target.value)}
+              Limpiar filtros ({filterCount})
+            </Button>
+          )}
+        </div>
+      </div>
+      <div className="table-scroll">
+        <DataTable className="data-table catalog-table supply-table">
+          <TableHead>
+            <TableRow>
+              {supplyColumns.map((column) => (
+                <ColumnHeader
+                  key={column.key}
+                  column={column}
+                  options={openedColumn === column.key ? openedOptions : []}
+                  filter={tableState.filters[column.key]}
+                  sort={tableState.sort}
+                  open={openedColumn === column.key}
+                  onOpen={() => setOpenedColumn(column.key)}
+                  onClose={() => setOpenedColumn(null)}
+                  onFilter={(filter) =>
+                    saveTable({
+                      ...tableState,
+                      filters: {
+                        ...tableState.filters,
+                        [column.key]: filter,
+                      },
+                    })
+                  }
+                  onSort={(sort) => saveTable({ ...tableState, sort })}
                 />
-              </div>
-              <div className="filter-actions">
-                {query && (
-                  <Button variant="link" onClick={() => search("")}>
-                    Limpiar búsqueda
-                  </Button>
-                )}
-                {filterCount > 0 && (
-                  <Button
-                    variant="link"
-                    onClick={() =>
-                      saveTable({ filters: {}, sort: tableState.sort })
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableRows>
+            {links.map(({ p, m, po, mo }) => {
+              return (
+                <TableRow key={`${p.id}-${m.id}`}>
+                  <TableCell>
+                    <LinkButton variant="link" href={`/ordenes/${po.id}`}>
+                      {orderReference(po.tipo_orden, po.no_orden)}
+                    </LinkButton>
+                  </TableCell>
+                  <TableCell>
+                    <strong>
+                      {
+                        db.productos.find((x) => x.id === p.id_producto)
+                          ?.nombre_producto
+                      }
+                    </strong>
+                    <small>
+                      {
+                        db.proveedor.find((x) => x.id === po.id_proveedor)
+                          ?.nombre_corto
+                      }
+                    </small>
+                  </TableCell>
+                  <TableCell>
+                    <LinkButton variant="link" href={`/ordenes/${mo.id}`}>
+                      {orderReference(mo.tipo_orden, mo.no_orden)}
+                    </LinkButton>
+                  </TableCell>
+                  <TableCell>
+                    <strong>
+                      {
+                        db.materiales.find((x) => x.id === m.id_material)
+                          ?.nombre_material
+                      }
+                    </strong>
+                    <small>
+                      {
+                        db.proveedor.find((x) => x.id === mo.id_proveedor)
+                          ?.nombre_corto
+                      }
+                    </small>
+                  </TableCell>
+                  <TableCell>
+                    <Badge value={m.estado} />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {!links.length && (
+              <TableRow>
+                <TableCell colSpan={5}>
+                  <Empty
+                    title={
+                      all.length
+                        ? "Sin vínculos coincidentes"
+                        : "Sin vínculos entre órdenes"
                     }
-                  >
-                    Limpiar filtros ({filterCount})
-                  </Button>
-                )}
-              </div>
-            </div>
-            <div className="table-scroll">
-              <DataTable className="data-table catalog-table supply-table">
-                <TableHead>
-                  <TableRow>
-                    {supplyColumns.map((column) => (
-                      <ColumnHeader
-                        key={column.key}
-                        column={column}
-                        options={
-                          openedColumn === column.key ? openedOptions : []
-                        }
-                        filter={tableState.filters[column.key]}
-                        sort={tableState.sort}
-                        open={openedColumn === column.key}
-                        onOpen={() => setOpenedColumn(column.key)}
-                        onClose={() => setOpenedColumn(null)}
-                        onFilter={(filter) =>
-                          saveTable({
-                            ...tableState,
-                            filters: {
-                              ...tableState.filters,
-                              [column.key]: filter,
-                            },
-                          })
-                        }
-                        onSort={(sort) => saveTable({ ...tableState, sort })}
-                      />
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableRows>
-                  {links.map(({ p, m, po, mo }) => {
-                    return (
-                      <TableRow key={`${p.id}-${m.id}`}>
-                        <TableCell>
-                          <LinkButton variant="link" href={`/ordenes/${po.id}`}>
-                            {orderReference(po.tipo_orden, po.no_orden)}
-                          </LinkButton>
-                        </TableCell>
-                        <TableCell>
-                          <strong>
-                            {
-                              db.productos.find((x) => x.id === p.id_producto)
-                                ?.nombre_producto
-                            }
-                          </strong>
-                          <small>
-                            {
-                              db.proveedor.find((x) => x.id === po.id_proveedor)
-                                ?.nombre_corto
-                            }
-                          </small>
-                        </TableCell>
-                        <TableCell>
-                          <LinkButton variant="link" href={`/ordenes/${mo.id}`}>
-                            {orderReference(mo.tipo_orden, mo.no_orden)}
-                          </LinkButton>
-                        </TableCell>
-                        <TableCell>
-                          <strong>
-                            {
-                              db.materiales.find((x) => x.id === m.id_material)
-                                ?.nombre_material
-                            }
-                          </strong>
-                          <small>
-                            {
-                              db.proveedor.find((x) => x.id === mo.id_proveedor)
-                                ?.nombre_corto
-                            }
-                          </small>
-                        </TableCell>
-                        <TableCell>
-                          <Badge value={m.estado} />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                  {!links.length && (
-                    <TableRow>
-                      <TableCell colSpan={5}>
-                        <Empty
-                          title={
-                            all.length
-                              ? "Sin vínculos coincidentes"
-                              : "Sin vínculos entre órdenes"
-                          }
-                          description="Ajusta la búsqueda o los filtros de columna para consultar los vínculos disponibles."
-                        />
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableRows>
-              </DataTable>
-            </div>
-            <div className="table-footer">
-              <div role="status" aria-live="polite">
-                {links.length} {links.length === 1 ? "vínculo" : "vínculos"}
-              </div>
-            </div>
-          </section>
-        )}
-      </Tabs>
-    </>
+                    description="Ajusta la búsqueda o los filtros de columna para consultar los vínculos disponibles."
+                  />
+                </TableCell>
+              </TableRow>
+            )}
+          </TableRows>
+        </DataTable>
+      </div>
+      <div className="table-footer">
+        <div role="status" aria-live="polite">
+          {links.length} {links.length === 1 ? "vínculo" : "vínculos"}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -983,9 +990,7 @@ export function CodesPage() {
                             className="icon-btn table-action barcode-action-verify"
                             icon={BadgeCheck}
                             aria-label="Confirmar verificación en el sistema"
-                            onClick={() =>
-                              openAction(c, "verificado_sistema")
-                            }
+                            onClick={() => openAction(c, "verificado_sistema")}
                           />
                         )}
                         {c.estado === "verificado_sistema" && (
@@ -1671,7 +1676,7 @@ export function DocumentsPage() {
                 Limpiar búsqueda
               </Button>
             )}
-            <ControlSelect
+            <CustomFilterSelect
               className="control filter-select"
               aria-label="Filtrar clase de documento"
               value={kind}
@@ -1703,7 +1708,7 @@ export function DocumentsPage() {
                   {text(t)}
                 </option>
               ))}
-            </ControlSelect>
+            </CustomFilterSelect>
           </div>
         </div>
         <div className="table-scroll">
@@ -1763,7 +1768,8 @@ export function DocumentsPage() {
                           >
                             {owner}
                           </LinkButton>
-                        ) : d.tipo_entidad === "lote_material" && d.id_entidad ? (
+                        ) : d.tipo_entidad === "lote_material" &&
+                          d.id_entidad ? (
                           <LinkButton
                             variant="link"
                             href={`/abastecimiento?${new URLSearchParams({ tab: "lotes", lote: d.id_entidad })}`}

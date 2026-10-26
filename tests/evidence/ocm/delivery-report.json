@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-26T14:07:54.117Z",
+  "baseCommit": "2011bb9038d572f0382ee6deddf15f4680c1cc62",
+  "noBackupCommit": true,
+  "unitTests": 213,
+  "browserChecks": {
+    "chromium": 74,
+    "firefox": 74,
+    "webkit": 74
+  },
+  "browserChecksTotal": 222,
+  "generalBudgets": {
+    "passed": true,
+    "count": 39
+  },
+  "feature": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "pendingPairs": 19455,
+      "coldLoadP95": 447,
+      "maxInteractionP95": 112.79999995231628,
+      "memoryGrowthBytes": 1897972,
+      "interactionPassed": true,
+      "memoryPassed": true
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "pendingPairs": 19455,
+      "coldLoadP95": 448.6999999284744,
+      "maxInteractionP95": 112,
+      "memoryGrowthBytes": 1851600,
+      "interactionPassed": true,
+      "memoryPassed": true
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "pendingPairs": 194365,
+      "coldLoadP95": 1078.3999999761581,
+      "maxInteractionP95": 149.20000004768372,
+      "memoryGrowthBytes": 1344940,
+      "interactionPassed": true,
+      "memoryPassed": true
+    }
+  ],
+  "userData": {
+    "before": "fc2d3ab09d47f2ae760fe27371203d85d8722bd2ccf11459c34244f203ac2f8d",
+    "after": "fc2d3ab09d47f2ae760fe27371203d85d8722bd2ccf11459c34244f203ac2f8d",
+    "preserved": true
+  },
+  "documentation": [
+    "../CONTEXT.md",
+    "../Planeacion/requisitos.md",
+    "../Planeacion/restricciones-fuera-dbml.md",
+    "README.md",
+    "COBERTURA.md",
+    "ABASTECIMIENTO-OCM.md",
+    "design-system/MASTER.md",
+    "VERIFICACION.md",
+    "RENDIMIENTO.md"
+  ],
+  "screenshots": [
+    "tests/evidence/ocm/chromium-pendientes-1440.png",
+    "tests/evidence/ocm/chromium-tabla-375.png",
+    "tests/evidence/ocm/chromium-dialogo-375.png",
+    "tests/evidence/ocm/chromium-tabla-768.png",
+    "tests/evidence/ocm/chromium-dialogo-768.png",
+    "tests/evidence/ocm/chromium-tabla-1024.png",
+    "tests/evidence/ocm/chromium-dialogo-1024.png",
+    "tests/evidence/ocm/chromium-tabla-1440.png",
+    "tests/evidence/ocm/chromium-dialogo-1440.png",
+    "tests/evidence/ocm/firefox-pendientes-1440.png",
+    "tests/evidence/ocm/firefox-tabla-375.png",
+    "tests/evidence/ocm/firefox-dialogo-375.png",
+    "tests/evidence/ocm/firefox-tabla-768.png",
+    "tests/evidence/ocm/firefox-dialogo-768.png",
+    "tests/evidence/ocm/firefox-tabla-1024.png",
+    "tests/evidence/ocm/firefox-dialogo-1024.png",
+    "tests/evidence/ocm/firefox-tabla-1440.png",
+    "tests/evidence/ocm/firefox-dialogo-1440.png",
+    "tests/evidence/ocm/webkit-pendientes-1440.png",
+    "tests/evidence/ocm/webkit-tabla-375.png",
+    "tests/evidence/ocm/webkit-dialogo-375.png",
+    "tests/evidence/ocm/webkit-tabla-768.png",
+    "tests/evidence/ocm/webkit-dialogo-768.png",
+    "tests/evidence/ocm/webkit-tabla-1024.png",
+    "tests/evidence/ocm/webkit-dialogo-1024.png",
+    "tests/evidence/ocm/webkit-tabla-1440.png",
+    "tests/evidence/ocm/webkit-dialogo-1440.png"
+  ],
+  "sourceHashes": {
+    "shared/material-demand.ts": "c187908acf0851c7cb687565d1747e195229469cc949763f29dbebeb83fd5173",
+    "src/material-demand-table.ts": "a4aa83399e793e88a2eb529dac5b8eadb286779dc5c195505cc97f5543c9f93f",
+    "src/pending-materials.tsx": "0406f675321b2d7a3221728d27d4bd6395d244b11bed109f39d70893d75c38cd",
+    "src/forms.tsx": "ef0bf31dad2c2c1417747746adfdeb0cdd21c0ffc968fa4898cc48e93f0e9bd7",
+    "src/flows.tsx": "3f525c51c8720b02f67e8c39a278f82b39aa30b4f5a7c91959bab40fd6bf3859",
+    "src/App.tsx": "afab4b2245be2939cc817e4378ea597caeb4a9d38bd5834988ddc732905b3d2e",
+    "src/styles.css": "93adce63d78e4fb44ba83c8fd028bf02a95e5d36ba635aee0841519191f28b18",
+    "server/domain.ts": "0d398f81e2e47d80776f2009a6fc7f934d85303e089c6a8b9469e9f7ea1b1ea9",
+    "tests/material-demand.test.ts": "a56cd42af4d3edebbca80d0168eb9bdf86ef9b8ef0d4338cd5821549c5886c74",
+    "tests/material-demand.browser.js": "0273f29a91f277bacdf6dfe492512a79ede1bdae2f6ac8e1059cb01caf3b23c5"
+  }
+}

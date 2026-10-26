@@ -31,6 +31,20 @@ actuales. Los datos y documentos de ejemplo son ficticios.
 | Documentos y certificados             | **Documentos**, **Detalle**, **Facturas** y **Abastecimiento → Lotes y certificados**: propietarios y metadatos, plantilla global, máximo una orden escaneada por OC/OCM, un documento por factura, un certificado de cada clase por lote y una plantilla global; previsualización, descarga, impresión y **Reemplazar** sobre el mismo registro sin versiones. **Agregar** aparece para clases disponibles. Contenidos placeholder y propietarios identificados como OC/OCM cuando corresponden a órdenes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Correos y contactos                   | **Correos**, **Detalle**, **Códigos** y **Configuración**: sugerencias por evento/cargo/directorio, Para/CC/CCO, direcciones válidas, adjuntos deduplicados, faltantes y destinos de liberación. Simulación confirmada antes de guardar mensaje y destinatarios; historial sin cuerpo ni versiones. Selección de órdenes con prefijo OC/OCM.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
+## Materiales pendientes y consolidación desde OC · 26 de octubre de 2026
+
+**Abastecimiento → Materiales pendientes** agrega la tabla plana entre vínculos
+y lotes. Consulta entrega solicitada de OC autorizadas con renglones abiertos,
+excluye compras de inventario y parejas con una OCM no anulada. Incluye búsqueda,
+filtros, ordenamiento, paginación de 50 filas, URL propia y resumen persistente
+de hasta siete materiales distintos con sus múltiples orígenes.
+
+El diálogo compartido conserva materiales y orígenes, propone 10 % adicional
+editable de 5 % a 10 % y cantidad final ajustable. Cambiar proveedor conserva
+el borrador. El guardado transaccional crea vínculos exactos y detecta compras
+o cantidades concurrentes, sin consumir un número ante fallo ni agregar
+atributos al modelo. [Contrato y reglas](ABASTECIMIENTO-OCM.md).
+
 ## Las 28 entidades locales
 
 | Grupo                    | Colecciones                                                                                                                                                                                                                                                                                                                                                             |

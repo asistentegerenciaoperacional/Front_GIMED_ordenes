@@ -76,17 +76,36 @@ try {
     "return (" + source.trim().replace(/;\s*$/, "") + ")",
   )();
   const result = await journey(
-    ariaPage(page, { autoConfirm: !file.includes("aria-controls") && !file.includes("favorites") && !file.includes("barcodes") && !file.includes("maquila-costs") && !file.includes("product-materials") }),
+    ariaPage(page, {
+      autoConfirm:
+        !file.includes("aria-controls") &&
+        !file.includes("favorites") &&
+        !file.includes("barcodes") &&
+        !file.includes("maquila-costs") &&
+        !file.includes("product-materials") &&
+        !file.includes("material-demand"),
+    }),
   );
   assert.deepEqual(
     consoleMessages,
     [],
     "Sin errores ni advertencias de React o React Aria",
   );
-  const evidence = file.includes("product-materials") ? "tests/evidence/product-materials" : file.includes("maquila-costs") ? "tests/evidence/costs" : file.includes("barcodes") ? "tests/evidence/barcodes" : file.includes("favorites") ? "tests/evidence/favorites" : "tests/evidence/aria";
+  const evidence = file.includes("material-demand")
+    ? "tests/evidence/ocm"
+    : file.includes("product-materials")
+      ? "tests/evidence/product-materials"
+      : file.includes("maquila-costs")
+        ? "tests/evidence/costs"
+        : file.includes("barcodes")
+          ? "tests/evidence/barcodes"
+          : file.includes("favorites")
+            ? "tests/evidence/favorites"
+            : "tests/evidence/aria";
   await mkdir(evidence, { recursive: true });
   const report =
-    evidence + "/" +
+    evidence +
+    "/" +
     engine +
     "-" +
     file.split("/").pop().replace(".js", ".json");
