@@ -90,6 +90,7 @@ try {
     ariaPage(page, {
       autoConfirm:
         !file.includes("aria-controls") &&
+        !file.includes("order-authorization") &&
         !file.includes("favorites") &&
         !file.includes("barcodes") &&
         !file.includes("maquila-costs") &&
@@ -102,17 +103,19 @@ try {
     [],
     "Sin errores ni advertencias de React o React Aria",
   );
-  const evidence = file.includes("material-demand")
-    ? "tests/evidence/ocm"
-    : file.includes("product-materials")
-      ? "tests/evidence/product-materials"
-      : file.includes("maquila-costs")
-        ? "tests/evidence/costs"
-        : file.includes("barcodes")
-          ? "tests/evidence/barcodes"
-          : file.includes("favorites")
-            ? "tests/evidence/favorites"
-            : "tests/evidence/aria";
+  const evidence = file.includes("order-authorization")
+    ? "tests/evidence/authorization"
+    : file.includes("material-demand")
+      ? "tests/evidence/ocm"
+      : file.includes("product-materials")
+        ? "tests/evidence/product-materials"
+        : file.includes("maquila-costs")
+          ? "tests/evidence/costs"
+          : file.includes("barcodes")
+            ? "tests/evidence/barcodes"
+            : file.includes("favorites")
+              ? "tests/evidence/favorites"
+              : "tests/evidence/aria";
   await mkdir(evidence, { recursive: true });
   const report =
     evidence +

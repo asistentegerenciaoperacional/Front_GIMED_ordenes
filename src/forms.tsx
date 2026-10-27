@@ -24,7 +24,6 @@ import {
 } from "../shared/product-materials";
 import {
   materialSupplierGroups,
-  suggestedMaterial,
 } from "../shared/favorite-suppliers";
 import {
   blankRow,
@@ -1297,21 +1296,18 @@ export function OrderForm({
   );
   const fresh = (t: string, provider: string): Row => {
     if (t === "producto") {
-      const p = db.productos.find(
-        (p) => p.id_maquilador === provider && p.activo,
-      );
       return {
-        id_producto: p?.id ?? "",
-        cantidad_solicitada: p?.unidades_lote ?? 0,
-        precio_unitario: String(currentCost(db, p?.id ?? "")?.costo ?? 0),
-        ...recommendations(db, p?.id ?? "", p?.unidades_lote ?? 0),
+        id_producto: "",
+        cantidad_solicitada: 0,
+        precio_unitario: "0.00",
+        ...recommendations(db, "", 0),
         cantidad_corrugado: null,
         sticker_pct: 10,
       };
     }
     if (t === "material") {
       return {
-        id_material: suggestedMaterial(db, provider)?.id ?? "",
+        id_material: "",
         cantidad_solicitada: 0,
         precio_unitario: "0.00",
       };
@@ -2075,6 +2071,7 @@ export function OrderForm({
                                 id={key("producto")}
                                 value={l.producto}
                                 list={`conceptos-anteriores-${i}`}
+                                placeholder="Escribe o selecciona un concepto…"
                                 onChange={(e) =>
                                   update(i, "producto", e.target.value)
                                 }

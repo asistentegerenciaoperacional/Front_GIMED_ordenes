@@ -19,7 +19,13 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import { useDeferredValue, useMemo, useState, type MouseEvent } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+  type MouseEvent,
+} from "react";
 import {
   deviation,
   isInitialProductLot,
@@ -105,6 +111,11 @@ import {
   type MaterialNeed,
 } from "../shared/material-demand";
 import { ProductSupply } from "./material-supply";
+import {
+  OrderAuthorizationDialog,
+  OrderAuthorizationSession,
+  type OrderSelection,
+} from "./order-authorization";
 import { useBogotaDay } from "./use-bogota-day";
 
 function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
@@ -187,6 +198,11 @@ export function OrdersPage({
         : "",
     query = params.get("q") ?? "";
   const stateKey = params.toString();
+  const selectionKey = `${group}:${stateKey}`;
+  const [selectionContext, setSelectionContext] = useState<string | null>(null);
+  const selecting =
+    selectionContext === selectionKey && view === "no_autorizadas";
+  useEffect(() => setSelectionContext(null), [group, stateKey]);
   const tableKey = JSON.stringify([
     params.get("filtros"),
     params.get("estado"),
@@ -459,6 +475,164 @@ export function OrdersPage({
       hint: "Seguimiento finalizado",
     },
   ];
+  const renderTable = (selection?: OrderSelection) => (
+    <div className="table-scroll">
+      <DataTable
+        className="data-table orders-table"
+        rowVersion={
+          selection ? { rows: page.rows, ids: selection.ids } : page.rows
+        }
+        cacheKey={
+          selection ? { tableCacheKey, ids: selection.ids } : tableCacheKey
+        }
+        onRowClick={selection ? selection.toggle : undefined}
+      >
+        <TableHead>
+          <TableRow>
+            {selection && (
+              <TableColumn className="authorization-checkbox-column">
+                Selección
+              </TableColumn>
+            )}
+            {columns.map((column) => {
+              return (
+                <ColumnHeader
+                  key={column.key}
+                  column={column}
+                  options={openedColumn === column.key ? openedOptions : []}
+                  filter={tableState.filters[column.key]}
+                  sort={tableState.sort}
+                  open={openedColumn === column.key}
+                  onOpen={() => setOpenedColumn(column.key)}
+                  onClose={() => setOpenedColumn(null)}
+                  onFilter={(filter) =>
+                    saveTable({
+                      ...tableState,
+                      filters: {
+                        ...tableState.filters,
+                        [column.key]: filter,
+                      },
+                    })
+                  }
+                  onSort={(sort) => saveTable({ ...tableState, sort })}
+                />
+              );
+            })}
+            <TableColumn scope="col">
+              <span className="visually-hidden">Acciones</span>
+            </TableColumn>
+          </TableRow>
+        </TableHead>
+        <TableRows>
+          {page.rows.map((o) => {
+            const { ls, p, name } = o;
+            const reference = orderReference(o.tipo_orden, o.no_orden);
+            const returnTo = `${window.location.pathname}${window.location.search}`;
+            const signedOrder = model.documentByOrderId.get(o.id);
+            return (
+              <TableRow
+                key={o.id}
+                data-selection-key={selection ? o.id : undefined}
+                data-order-selected={selection?.ids.has(o.id) || undefined}
+              >
+                {selection && (
+                  <TableCell>
+                    <CheckChoice
+                      checked={selection.ids.has(o.id)}
+                      onChange={() => selection.toggle(o.id)}
+                      aria-label={`Seleccionar ${reference}`}
+                    >
+                      <span className="visually-hidden">Seleccionar orden</span>
+                    </CheckChoice>
+                  </TableCell>
+                )}
+                <TableCell>
+                  <LinkButton
+                    variant="link"
+                    className="order-link"
+                    href={`/ordenes/${o.id}`}
+                  >
+                    {orderReference(o.tipo_orden, o.no_orden)}
+                  </LinkButton>
+                  <small>
+                    <Badge value={o.tipo_orden} />
+                  </small>
+                </TableCell>
+                <TableCell>
+                  <strong>{p.nombre_corto ?? p.nombre_largo}</strong>
+                  <small>NIT {p.nit ?? "Sin informar"}</small>
+                </TableCell>
+                <TableCell className="description">
+                  <strong>{name}</strong>
+                  <small>
+                    {ls.length} {orderItemLabel(o.tipo_orden, ls.length !== 1)} ·{" "}
+                    {count(o.requestedQuantity)} unidades solicitadas
+                  </small>
+                </TableCell>
+                <TableCell className="nowrap">
+                  {shortDate(o.fecha_elaboracion)}
+                </TableCell>
+                <TableCell className="nowrap">
+                  {shortDate(o.fecha_solicitada_entrega)}
+                </TableCell>
+                <TableCell>
+                  <Badge value={o.visible} />
+                </TableCell>
+                <TableCell className="right num nowrap">
+                  {money(o.total)}
+                </TableCell>
+                <TableCell className="order-actions-cell">
+                  <div className="order-row-actions">
+                    <LinkButton
+                      icon={Printer}
+                      className="icon-btn table-action"
+                      href={`/ordenes/${o.id}/imprimir?returnTo=${encodeURIComponent(returnTo)}`}
+                      onClick={capturePrintReturnPosition}
+                      aria-label={`Imprimir ${reference}`}
+                      title="Imprimir orden"
+                    />
+                    {signedOrder ? (
+                      <LinkButton
+                        icon={FileCheck2}
+                        className="icon-btn table-action"
+                        variant="primary"
+                        href={`/api/documents/${signedOrder.id}/content`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Ver orden firmada de ${reference}`}
+                        title="Ver orden firmada"
+                      />
+                    ) : (
+                      <Documents
+                        owner="orden_compra"
+                        ownerId={o.id}
+                        documents={[]}
+                        compact
+                        showList={false}
+                        renderAddTrigger={(open) => (
+                          <Button
+                            icon={FilePlus2}
+                            className="icon-btn table-action"
+                            aria-label={`Agregar orden firmada para ${reference}`}
+                            title="Agregar orden firmada"
+                            onClick={open}
+                          />
+                        )}
+                      />
+                    )}
+                    <RowLink
+                      label={`Ver orden ${o.no_orden}`}
+                      href={`/ordenes/${o.id}`}
+                    />
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableRows>
+      </DataTable>
+    </div>
+  );
   return (
     <>
       <TabGroup
@@ -638,6 +812,16 @@ export function OrdersPage({
                         </CustomFilterSelect>
                       </div>
                     )}
+                    {view === "no_autorizadas" && !selecting && (
+                      <Button
+                        icon={FileCheck2}
+                        variant="primary"
+                        disabled={!rows.length}
+                        onClick={() => setSelectionContext(selectionKey)}
+                      >
+                        Autorizar
+                      </Button>
+                    )}
                     <div className="custom-filter-control">
                       <div className="custom-filter-select-wrap">
                         <CustomFilterSelect
@@ -711,148 +895,14 @@ export function OrdersPage({
                       )}
                     </div>
                   )}
-                <div className="table-scroll">
-                  <DataTable
-                    className="data-table orders-table"
-                    rowVersion={page.rows}
-                    cacheKey={tableCacheKey}
+                {selecting ? (
+                  <OrderAuthorizationSession
+                    key={selectionKey}
+                    onExit={() => setSelectionContext(null)}
                   >
-                    <TableHead>
-                      <TableRow>
-                        {columns.map((column) => {
-                          return (
-                            <ColumnHeader
-                              key={column.key}
-                              column={column}
-                              options={
-                                openedColumn === column.key ? openedOptions : []
-                              }
-                              filter={tableState.filters[column.key]}
-                              sort={tableState.sort}
-                              open={openedColumn === column.key}
-                              onOpen={() => setOpenedColumn(column.key)}
-                              onClose={() => setOpenedColumn(null)}
-                              onFilter={(filter) =>
-                                saveTable({
-                                  ...tableState,
-                                  filters: {
-                                    ...tableState.filters,
-                                    [column.key]: filter,
-                                  },
-                                })
-                              }
-                              onSort={(sort) =>
-                                saveTable({ ...tableState, sort })
-                              }
-                            />
-                          );
-                        })}
-                        <TableColumn scope="col">
-                          <span className="visually-hidden">Acciones</span>
-                        </TableColumn>
-                      </TableRow>
-                    </TableHead>
-                    <TableRows>
-                      {page.rows.map((o) => {
-                        const { ls, p, name } = o;
-                        const reference = orderReference(
-                          o.tipo_orden,
-                          o.no_orden,
-                        );
-                        const returnTo = `${window.location.pathname}${window.location.search}`;
-                        const signedOrder = model.documentByOrderId.get(o.id);
-                        return (
-                          <TableRow key={o.id}>
-                            <TableCell>
-                              <LinkButton
-                                variant="link"
-                                className="order-link"
-                                href={`/ordenes/${o.id}`}
-                              >
-                                {orderReference(o.tipo_orden, o.no_orden)}
-                              </LinkButton>
-                              <small>
-                                <Badge value={o.tipo_orden} />
-                              </small>
-                            </TableCell>
-                            <TableCell>
-                              <strong>
-                                {p.nombre_corto ?? p.nombre_largo}
-                              </strong>
-                              <small>NIT {p.nit ?? "Sin informar"}</small>
-                            </TableCell>
-                            <TableCell className="description">
-                              <strong>{name}</strong>
-                              <small>
-                                {ls.length}{" "}
-                                {orderItemLabel(o.tipo_orden, ls.length !== 1)}{" "}
-                                · {count(o.requestedQuantity)} unidades
-                                solicitadas
-                              </small>
-                            </TableCell>
-                            <TableCell className="nowrap">
-                              {shortDate(o.fecha_elaboracion)}
-                            </TableCell>
-                            <TableCell className="nowrap">
-                              {shortDate(o.fecha_solicitada_entrega)}
-                            </TableCell>
-                            <TableCell>
-                              <Badge value={o.visible} />
-                            </TableCell>
-                            <TableCell className="right num nowrap">
-                              {money(o.total)}
-                            </TableCell>
-                            <TableCell className="order-actions-cell">
-                              <div className="order-row-actions">
-                                <LinkButton
-                                  icon={Printer}
-                                  className="icon-btn table-action"
-                                  href={`/ordenes/${o.id}/imprimir?returnTo=${encodeURIComponent(returnTo)}`}
-                                  onClick={capturePrintReturnPosition}
-                                  aria-label={`Imprimir ${reference}`}
-                                  title="Imprimir orden"
-                                />
-                                {signedOrder ? (
-                                  <LinkButton
-                                    icon={FileCheck2}
-                                    className="icon-btn table-action"
-                                    variant="primary"
-                                    href={`/api/documents/${signedOrder.id}/content`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    aria-label={`Ver orden firmada de ${reference}`}
-                                    title="Ver orden firmada"
-                                  />
-                                ) : (
-                                  <Documents
-                                    owner="orden_compra"
-                                    ownerId={o.id}
-                                    documents={[]}
-                                    compact
-                                    showList={false}
-                                    renderAddTrigger={(open) => (
-                                      <Button
-                                        icon={FilePlus2}
-                                        className="icon-btn table-action"
-                                        aria-label={`Agregar orden firmada para ${reference}`}
-                                        title="Agregar orden firmada"
-                                        onClick={open}
-                                      />
-                                    )}
-                                  />
-                                )}
-                                <RowLink
-                                  label={`Ver orden ${o.no_orden}`}
-                                  href={`/ordenes/${o.id}`}
-                                />
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableRows>
-                  </DataTable>
-                </div>
+                    {renderTable}
+                  </OrderAuthorizationSession>
+                ) : renderTable()}
                 {!rows.length && (
                   <Empty
                     title="No hay órdenes coincidentes"
@@ -952,9 +1002,7 @@ export function OrderDetail({
   const { db, run, navigate, notify } = useApp();
   const o = db.orden_compra.find((o) => o.id === id);
   const [edit, setEdit] = useState(false),
-    [authorize, setAuthorize] = useState(false),
-    [signed, setSigned] = useState(false),
-    [busy, setBusy] = useState(false);
+    [authorize, setAuthorize] = useState(false);
   const [lot, setLot] = useState<{ line: Row; record?: Row } | null>(null),
     [receipt, setReceipt] = useState<Row | null>(null),
     [mail, setMail] = useState<Row | null>(null);
@@ -1135,7 +1183,6 @@ export function OrderDetail({
                 icon={FileCheck2}
                 variant="primary"
                 onClick={() => {
-                  setSigned(false);
                   setAuthorize(true);
                 }}
               >
@@ -1909,53 +1956,11 @@ export function OrderDetail({
         </ConfirmationDialog>
       )}
       {authorize && (
-        <Dialog
-          title={`Autorizar orden ${o.no_orden}`}
-          subtitle="La autorización corresponde a toda la orden de compra."
+        <OrderAuthorizationDialog
+          ids={[id]}
           onClose={() => setAuthorize(false)}
-        >
-          <div className="dialog-body">
-            <div className="notice warning">
-              <Info size={17} aria-hidden="true" />
-              Esta acción es irreversible. La orden no podrá volver a no
-              autorizada.
-            </div>
-            <CheckChoice
-              className="checkbox-row"
-              checked={signed}
-              onChange={setSigned}
-            >
-              Confirmo que la orden física tiene todas las firmas necesarias.
-            </CheckChoice>
-          </div>
-          <div className="dialog-footer">
-            <CancelButton onClick={() => setAuthorize(false)}>
-              Cancelar
-            </CancelButton>
-            <Button
-              variant="primary"
-              icon={Check}
-              disabled={!signed || busy}
-              onClick={async () => {
-                setBusy(true);
-                try {
-                  await run(
-                    "authorizeOrder",
-                    { id, confirm: true },
-                    "Orden autorizada",
-                  );
-                  setAuthorize(false);
-                } catch (e) {
-                  notify((e as Error).message, true);
-                } finally {
-                  setBusy(false);
-                }
-              }}
-            >
-              Confirmar autorización
-            </Button>
-          </div>
-        </Dialog>
+          onAuthorized={() => setAuthorize(false)}
+        />
       )}
     </>
   );

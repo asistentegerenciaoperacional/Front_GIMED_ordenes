@@ -775,3 +775,22 @@ Compilación y **242 pruebas automatizadas** aprobadas, incluidas 11 pruebas nue
 El recorrido general de Chromium aprueba **598 comprobaciones**. Su reloj de fixture y los selectores de menús/diálogos se adaptaron a los controles actuales, manteniendo las aserciones. La comprobación de reinicio recupera íntegramente las 28 colecciones. Los hashes de la base real y de `Planeacion/db.md` permanecen iguales a los respaldos.
 
 [Informe y hashes](tests/evidence/manual-supply/report.json), [recorrido general](tests/evidence/manual-supply/general-browser.json), [reinicio](tests/evidence/manual-supply/restart.json), [captura de escritorio](tests/evidence/ocm/chromium-manual-link-1440.png), [captura móvil](tests/evidence/ocm/chromium-manual-link-375.png). Recuperación y comandos en [VINCULACION-OCM.md](VINCULACION-OCM.md).
+
+## Autorización múltiple — 27 de octubre de 2026
+
+Disponible en No autorizadas de Productos y Materiales, incluidos Otros. Selección por casilla o fila, contador, cancelación y diálogo compartido con autorización individual. La sesión se desmonta al cambiar búsqueda, filtros, ordenación, página, vista, grupo o ruta, o al cancelar/finalizar; no se persiste ni conserva una caché de selección. No se fuerza la recolección de basura.
+
+**254 pruebas automatizadas aprobadas**, incluidas 11 nuevas de autorización: OC/OCM/Otros, firmas obligatorias, listas inválidas o repetidas, fecha común, persistencia íntegra, órdenes inexistentes/anuladas/autorizadas, rechazo atómico, concurrencia y regresión individual. Compilación de producción aprobada.
+
+**Chromium y WebKit: 44 comprobaciones por motor (88 en total)**, con 54 órdenes creadas en una base temporal para cubrir también virtualización y paginación. Se verifican casillas, fila, teclado, enlaces, todos los cambios de contexto, regreso sin selección, foco del buscador, firmas, cierre y reapertura, listas OCM/Otros, presentación a 375 y 1440 px, conflicto real del servicio, recarga/descarte de las afectadas, revisión obligatoria, bloqueo durante envío y ausencia de cambios parciales. Sin errores ni advertencias de React/React Aria. Capturas revisadas visualmente. Firefox no pudo iniciar su ejecutable (`browserType.launch: spawn UNKNOWN`) en dos intentos; no se afirma cobertura de ese motor.
+
+[Chromium](tests/evidence/authorization/chromium-order-authorization.browser.json), [WebKit](tests/evidence/authorization/webkit-order-authorization.browser.json), [escritorio](tests/evidence/authorization/chromium-1440.png), [móvil](tests/evidence/authorization/chromium-375.png).
+
+Reproducción:
+
+    npm test
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/order-authorization.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/order-authorization.browser.js webkit
+
+API: `POST /api/commands` con `name: "authorizeOrders"` y `payload: { ids: string[], confirm: true }`. Éxito: `{ result: {} }`; entrada inválida: `VALIDATION`; selección desactualizada: `AUTHORIZATION_CHANGED`, con `details.orders` que identifica todas las afectadas. La transacción comprueba el conjunto antes de modificar datos y aplica una misma fecha. El contrato individual permanece `{ id, confirm: true }`.

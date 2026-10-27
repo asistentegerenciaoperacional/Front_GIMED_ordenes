@@ -92,8 +92,10 @@ function DataTableView({
         )
       )
         return;
-      const row = event.target.closest<HTMLTableRowElement>("tr[data-need]");
-      const key = row?.dataset.need;
+      const row = event.target.closest<HTMLElement>(
+        "[data-selection-key], tr[data-need]",
+      );
+      const key = row?.dataset.selectionKey ?? row?.dataset.need;
       if (key && table.contains(row)) onRowClick(key);
     };
     table.addEventListener("click", handleClick);

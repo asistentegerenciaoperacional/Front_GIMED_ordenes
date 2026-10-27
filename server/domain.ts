@@ -35,6 +35,8 @@ import {
   nextOrderNumber,
   lineTable,
   orderLines,
+  orderState,
+  orderReference,
   orderItemLabel,
   recommendations,
   assignedBarcode,
@@ -51,6 +53,61 @@ import {
 import { BusinessError, check, findRecord } from "./integrity";
 export const newId = () => randomBytes(12).toString("hex");
 const now = () => new Date().toISOString();
+
+function authorizeOrders(db: Database, ids: unknown, confirm: unknown): Row {
+  check(
+    confirm === true,
+    "Confirma que las órdenes físicas tienen todas las firmas.",
+  );
+  check(
+    Array.isArray(ids) &&
+      ids.length > 0 &&
+      ids.every((id) => typeof id === "string" && /^[a-f0-9]{24}$/.test(id)) &&
+      new Set(ids).size === ids.length,
+    "Selecciona órdenes válidas sin repetir.",
+    "VALIDATION",
+    {
+      ids: "Selecciona al menos una orden; los identificadores deben ser válidos y únicos.",
+    },
+  );
+  const byId = new Map(db.orden_compra.map((order) => [order.id, order]));
+  const unavailable = ids.flatMap((id: string) => {
+    const order = byId.get(id);
+    if (
+      order &&
+      order.estado_autorizacion === "no_autorizada" &&
+      orderState(db, order) !== "anulada"
+    )
+      return [];
+    return [
+      {
+        id,
+        reference: order
+          ? orderReference(order.tipo_orden, order.no_orden)
+          : id,
+        reason: !order
+          ? "La orden ya no existe."
+          : order.estado_autorizacion !== "no_autorizada"
+            ? "La orden ya está autorizada."
+            : "La orden está anulada.",
+      },
+    ];
+  });
+  check(
+    !unavailable.length,
+    "No se autorizó ninguna orden. Revisa las órdenes que dejaron de estar disponibles.",
+    "AUTHORIZATION_CHANGED",
+    {},
+    { orders: unavailable },
+  );
+  const date = now();
+  for (const id of ids) {
+    const order = byId.get(id)!;
+    order.estado_autorizacion = "autorizada";
+    order.fecha_autorizacion = date;
+  }
+  return {};
+}
 function price(value: string | number): string {
   try {
     return decimal(value);
@@ -989,20 +1046,10 @@ export async function command(
     }
     case "editOrder":
       return saveOrder(db, p, true);
-    case "authorizeOrder": {
-      const o = findRecord(db, "orden_compra", { id: p.id });
-      check(
-        p.confirm === true,
-        "Confirma que la orden física tiene todas las firmas.",
-      );
-      check(
-        o.estado_autorizacion === "no_autorizada",
-        "La orden ya está autorizada.",
-      );
-      o.estado_autorizacion = "autorizada";
-      o.fecha_autorizacion = now();
-      return {};
-    }
+    case "authorizeOrder":
+      return authorizeOrders(db, [p.id], p.confirm);
+    case "authorizeOrders":
+      return authorizeOrders(db, p.ids, p.confirm);
     case "setLineState": {
       const table = p.entity as Entity;
       check(

@@ -2919,6 +2919,65 @@ textarea.control {
 .demand-page-actions {
   font-size: 12px;
 }
+.authorization-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: #f8fafc;
+}
+.orders-table [data-selection-key] {
+  cursor: pointer;
+}
+.orders-table [data-selection-key]:hover > * {
+  background: #f8fafc;
+}
+.orders-table [data-order-selected] > *,
+.orders-table [data-order-selected]:hover > * {
+  background: #eef4ff;
+}
+.authorization-checkbox-column {
+  width: 80px;
+}
+.authorization-orders {
+  margin: 20px 0;
+}
+.authorization-orders h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+.authorization-orders ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.authorization-orders li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.authorization-orders li strong {
+  min-width: 95px;
+}
+.authorization-conflicts {
+  padding-left: 20px;
+}
+@media (max-width: 600px) {
+  .authorization-selection {
+    align-items: stretch;
+  }
+  .authorization-selection > .inline {
+    width: 100%;
+  }
+  .authorization-selection > .inline .btn {
+    flex: 1;
+  }
+}
 .demand-selection {
   position: sticky;
   bottom: 0;
