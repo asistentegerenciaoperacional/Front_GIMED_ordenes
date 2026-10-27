@@ -100,6 +100,11 @@ import {
   text,
   useApp,
 } from "./ui";
+import {
+  buildMaterialNeeds,
+  type MaterialNeed,
+} from "../shared/material-demand";
+import { ProductSupply } from "./material-supply";
 import { useBogotaDay } from "./use-bogota-day";
 
 function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
@@ -960,6 +965,16 @@ export function OrderDetail({
   >(null);
   const [actionBusy, setActionBusy] = useState(false);
   const [actionError, setActionError] = useState<string>();
+  const supplyNeeds = useMemo(() => {
+    const byLine = new Map<string, MaterialNeed[]>();
+    if (o?.tipo_orden === "producto")
+      for (const need of buildMaterialNeeds(db, id)) {
+        const list = byLine.get(need.line.id) ?? [];
+        list.push(need);
+        byLine.set(need.line.id, list);
+      }
+    return byLine;
+  }, [db, id, o?.tipo_orden]);
   if (!o)
     return (
       <Empty
@@ -1269,7 +1284,7 @@ export function OrderDetail({
                             <span className="mini-label">
                               {text(orderItemLabel(o.tipo_orden))} {l.posicion}
                             </span>
-                            <h3>{name}</h3>
+                            <h3 tabIndex={-1}>{name}</h3>
                           </div>
                           <div className="inline line-card-actions">
                             <Badge value={l.estado} />
@@ -1625,51 +1640,10 @@ export function OrderDetail({
                                       : "No se encontraron lotes para este producto."}
                                   </p>
                                 )}
-                                {db.abastecimiento_material.some(
-                                  (a) => a.id_orden_producto === l.id,
-                                ) && (
-                                  <div style={{ marginTop: 16 }}>
-                                    <small>Materiales vinculados</small>
-                                    <div
-                                      className="inline"
-                                      style={{ marginTop: 7 }}
-                                    >
-                                      {db.abastecimiento_material
-                                        .filter(
-                                          (a) => a.id_orden_producto === l.id,
-                                        )
-                                        .map((a) => {
-                                          const m = db.orden_material.find(
-                                            (m) => m.id === a.id_orden_material,
-                                          )!;
-                                          const mo = db.orden_compra.find(
-                                            (o) => o.id === m.id_orden_compra,
-                                          )!;
-                                          return (
-                                            <LinkButton
-                                              key={m.id}
-                                              className="small"
-                                              href={`/ordenes/${mo.id}`}
-                                            >
-                                              {orderReference(
-                                                mo.tipo_orden,
-                                                mo.no_orden,
-                                              )}{" "}
-                                              ·{" "}
-                                              {
-                                                db.materiales.find(
-                                                  (x) => x.id === m.id_material,
-                                                )?.nombre_material
-                                              }
-                                              {m.estado === "anulada"
-                                                ? " · Anulada"
-                                                : ""}
-                                            </LinkButton>
-                                          );
-                                        })}
-                                    </div>
-                                  </div>
-                                )}
+                                <ProductSupply
+                                  productLineId={l.id}
+                                  needs={supplyNeeds.get(l.id) ?? []}
+                                />
                               </LineDisclosure>
                             </>
                           ) : (
@@ -1749,7 +1723,9 @@ export function OrderDetail({
                                     )}
                                     {linkedProductLines.length > 0 && (
                                       <div style={{ marginTop: 16 }}>
-                                        <small>Órdenes de producto vinculadas</small>
+                                        <small>
+                                          Órdenes de producto vinculadas
+                                        </small>
                                         <div
                                           className="inline"
                                           style={{ marginTop: 7 }}
@@ -1885,8 +1861,7 @@ export function OrderDetail({
           onClose={() => setPendingAction(null)}
           busy={actionBusy}
           destructive={
-            pendingAction.kind === "delete" ||
-            pendingAction.kind === "anular"
+            pendingAction.kind === "delete" || pendingAction.kind === "anular"
           }
           error={actionError}
         >

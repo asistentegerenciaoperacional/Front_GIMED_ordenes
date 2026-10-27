@@ -9,6 +9,7 @@ import { createFixtureVite } from "./fixture-vite.mjs";
 
 const file = process.argv[2] ?? "tests/browser-journey.js";
 const engine = process.argv[3] ?? "chromium";
+const historicalJourney = file === "tests/browser-journey.js";
 await mkdir("tests/.tmp", { recursive: true });
 const temporary = await mkdtemp(resolve("tests/.tmp/aria-browser-"));
 const socket = createServer();
@@ -17,7 +18,15 @@ const port = socket.address().port;
 await new Promise((ok) => socket.close(ok));
 const server = spawn(
   process.execPath,
-  ["node_modules/tsx/dist/cli.mjs", "server/index.ts"],
+  [
+    ...(historicalJourney
+      ? ["--import", "./tests/fixtures/browser-clock.mjs"]
+      : []),
+    ...(historicalJourney
+      ? ["--import", "tsx"]
+      : ["node_modules/tsx/dist/cli.mjs"]),
+    "server/index.ts",
+  ],
   {
     env: {
       ...process.env,
@@ -54,6 +63,8 @@ try {
   });
   const context = await browser.newContext();
   const page = await context.newPage();
+  if (historicalJourney)
+    await page.clock.setFixedTime(new Date("2026-10-14T12:00:00.000Z"));
   const consoleMessages = [];
   page.on("console", (message) => {
     if (
@@ -134,6 +145,18 @@ try {
             height: innerHeight,
             scroll: document.documentElement.scrollWidth,
             focus: document.activeElement?.outerHTML.slice(0, 220),
+            dialogs: [
+              ...document.querySelectorAll('.dialog[role="dialog"]'),
+            ].map((el) => ({
+              title: el.querySelector("h2")?.textContent,
+              hidden: el.closest('[aria-hidden="true"]')?.className,
+              buttons: [...el.querySelectorAll("button")].map((button) => ({
+                text: button.textContent,
+                hidden: button
+                  .closest('[aria-hidden="true"]')
+                  ?.outerHTML.slice(0, 180),
+              })),
+            })),
             panels: [
               ...document.querySelectorAll(
                 ".column-filter-panel,.column-filter-dialog",

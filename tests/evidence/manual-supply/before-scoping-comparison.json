@@ -1,0 +1,513 @@
+{
+  "acceptance": "Equipo actual sin limitación de CPU; ensayo CPU 4x separado por confirmación del usuario",
+  "stressReport": "after-stress-performance.json",
+  "browser": "155.0.8059.85",
+  "date": "2026-10-27T13:56:38.220Z",
+  "baselineCommit": "d905af2b2e6a8afb5dc0b18de53cde46bd3ee067",
+  "dataHash": "2eadb88592c002a778c14ffff861d10bf56a9ce791eebdc76beac94d77511019",
+  "memoryAllowanceBytes": 5000000,
+  "passed": false,
+  "measurements": [
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 160.39999997615814,
+      "after": 145.70000004768372,
+      "limit": 260.39999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 53.89999997615814,
+      "after": 54.60000002384186,
+      "limit": 73.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 68.5,
+      "after": 71.40000009536743,
+      "limit": 88.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 42.799999952316284,
+      "after": 46.39999997615814,
+      "limit": 62.799999952316284,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 46.300000071525574,
+      "after": 58.699999928474426,
+      "limit": 66.30000007152557,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 46.60000002384186,
+      "after": 46.299999952316284,
+      "limit": 66.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 46.40000009536743,
+      "after": 45.60000002384186,
+      "limit": 66.40000009536743,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 46.5,
+      "after": 46.300000071525574,
+      "limit": 66.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 45.89999997615814,
+      "after": 45.10000002384186,
+      "limit": 65.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 45.299999952316284,
+      "after": 45.299999952316284,
+      "limit": 65.29999995231628,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 42.299999952316284,
+      "after": 41.89999997615814,
+      "limit": 62.299999952316284,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 46.60000002384186,
+      "after": 45.39999997615814,
+      "limit": 66.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 17741692,
+      "after": 17832516,
+      "limit": 22741692,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 161.5,
+      "after": 144.29999995231628,
+      "limit": 261.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 54.89999997615814,
+      "after": 53.700000047683716,
+      "limit": 74.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 71.39999997615814,
+      "after": 71.39999997615814,
+      "limit": 91.39999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 43.5,
+      "after": 53.10000002384186,
+      "limit": 63.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 45.800000071525574,
+      "after": 46,
+      "limit": 65.80000007152557,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 46.5,
+      "after": 45.799999952316284,
+      "limit": 66.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 46.299999952316284,
+      "after": 46.199999928474426,
+      "limit": 66.29999995231628,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 46.200000047683716,
+      "after": 46.200000047683716,
+      "limit": 66.20000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 45.699999928474426,
+      "after": 45.699999928474426,
+      "limit": 65.69999992847443,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 44.89999997615814,
+      "after": 45.5,
+      "limit": 64.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 46.60000002384186,
+      "after": 37.700000047683716,
+      "limit": 66.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 46.699999928474426,
+      "after": 46.60000002384186,
+      "limit": 66.69999992847443,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 16461716,
+      "after": 16542328,
+      "limit": 21461716,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 892.8999999761581,
+      "after": 856.7000000476837,
+      "limit": 1026.834999972582,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 68.70000004768372,
+      "after": 56.39999997615814,
+      "limit": 88.70000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 82.5,
+      "after": 70,
+      "limit": 102.5,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 67.20000004768372,
+      "after": 56,
+      "limit": 87.20000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 78.39999997615814,
+      "after": 59.199999928474426,
+      "limit": 98.39999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 46.39999997615814,
+      "after": 46.60000002384186,
+      "limit": 66.39999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 87.39999997615814,
+      "after": 45.90000009536743,
+      "limit": 107.39999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 122.70000004768372,
+      "after": 51,
+      "limit": 142.70000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 54.39999997615814,
+      "after": 45.39999997615814,
+      "limit": 74.39999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 45.199999928474426,
+      "after": 45.10000002384186,
+      "limit": 65.19999992847443,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 42.60000002384186,
+      "after": 85.5,
+      "limit": 62.60000002384186,
+      "passed": false
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 46.799999952316284,
+      "after": 46.10000002384186,
+      "limit": 66.79999995231628,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 41505892,
+      "after": 41568508,
+      "limit": 47731775.8,
+      "passed": true
+    }
+  ],
+  "downloads": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "beforeBytes": 866202,
+      "afterBytes": 873240
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "beforeBytes": 866202,
+      "afterBytes": 873240
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "beforeBytes": 866202,
+      "afterBytes": 873240
+    }
+  ],
+  "cycles": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "beforeGrowth": 616224,
+      "afterGrowth": 612416,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 17220100
+        },
+        {
+          "cycles": 10,
+          "usedSize": 17700684
+        },
+        {
+          "cycles": 20,
+          "usedSize": 17735772
+        },
+        {
+          "cycles": 30,
+          "usedSize": 17769024
+        },
+        {
+          "cycles": 40,
+          "usedSize": 17808840
+        },
+        {
+          "cycles": 50,
+          "usedSize": 17832516
+        }
+      ]
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "beforeGrowth": 573028,
+      "afterGrowth": 563116,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 15979212
+        },
+        {
+          "cycles": 10,
+          "usedSize": 16429056
+        },
+        {
+          "cycles": 20,
+          "usedSize": 16468224
+        },
+        {
+          "cycles": 30,
+          "usedSize": 16481292
+        },
+        {
+          "cycles": 40,
+          "usedSize": 16504316
+        },
+        {
+          "cycles": 50,
+          "usedSize": 16542328
+        }
+      ]
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "beforeGrowth": 586936,
+      "afterGrowth": 582068,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 40986440
+        },
+        {
+          "cycles": 10,
+          "usedSize": 41452780
+        },
+        {
+          "cycles": 20,
+          "usedSize": 41482756
+        },
+        {
+          "cycles": 30,
+          "usedSize": 41498336
+        },
+        {
+          "cycles": 40,
+          "usedSize": 41523740
+        },
+        {
+          "cycles": 50,
+          "usedSize": 41568508
+        }
+      ]
+    }
+  ],
+  "longTasks": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "before": [
+        58
+      ],
+      "after": [
+        57
+      ]
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "before": [
+        51
+      ],
+      "after": []
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "before": [
+        75,
+        71,
+        127,
+        322,
+        50,
+        119,
+        106,
+        80,
+        123,
+        86,
+        71,
+        92,
+        104,
+        94,
+        65,
+        51,
+        54,
+        91
+      ],
+      "after": [
+        86,
+        60,
+        99,
+        294,
+        53,
+        90,
+        72,
+        82,
+        68,
+        66,
+        71,
+        72,
+        67,
+        66,
+        67,
+        64,
+        64,
+        67,
+        65,
+        68,
+        65,
+        65,
+        62,
+        68,
+        67
+      ]
+    }
+  ]
+}

@@ -91,7 +91,10 @@ export const materialNeedKey = (productLine: string, material: string) =>
   `${productLine}/${material}`;
 
 /** Linear indexes per immutable snapshot; an existing purchase covers a pair, not an entire OC. */
-export function buildMaterialNeeds(db: Database): MaterialNeed[] {
+export function buildMaterialNeeds(
+  db: Database,
+  orderId?: string,
+): MaterialNeed[] {
   const materials = new Map(db.materiales.map((m) => [m.id, m]));
   const types = new Map(
     db.tipos_materiales.map((t) => [t.id, t.tipo_material ?? ""]),
@@ -109,7 +112,9 @@ export function buildMaterialNeeds(db: Database): MaterialNeed[] {
     db.orden_compra
       .filter(
         (o) =>
-          o.tipo_orden === "producto" && o.estado_autorizacion === "autorizada",
+          o.tipo_orden === "producto" &&
+          o.estado_autorizacion === "autorizada" &&
+          (!orderId || o.id === orderId),
       )
       .map((order) => [
         order.id,

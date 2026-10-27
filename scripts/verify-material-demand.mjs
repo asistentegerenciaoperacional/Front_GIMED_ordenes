@@ -26,12 +26,9 @@ for (const engine of ["chromium", "firefox", "webkit"]) {
       "tests/.tmp/firefox-runtime/firefox.exe",
     );
   }
-  await run(
-    [
-      "scripts/verify-aria-browser.mjs",
-      "tests/material-demand.browser.js",
-      engine,
-    ],
-    env,
-  );
+  for (const file of [
+    "tests/material-demand.browser.js",
+    "tests/material-demand-link.browser.js",
+  ])
+    await run(["scripts/verify-aria-browser.mjs", file, engine], env);
 }

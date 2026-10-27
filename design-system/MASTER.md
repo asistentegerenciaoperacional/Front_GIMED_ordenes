@@ -128,7 +128,9 @@ material/MAIA, OC, producto/maquilador, cantidad y entrega solicitada. Reutiliza
 propios usan el prefijo `pendientes_`.
 
 Desde y Hasta son campos de fecha compartidos, inicialmente vacíos, con botón
-Consultar. La fecha de cada fila se muestra como día de Bogotá en `dd/mm/aaaa`.
+Consultar. Sin un rango aplicado, la tabla muestra todos los vínculos pendientes;
+ambos campos vacíos conservan ese resultado y un rango válido lo limita. La fecha
+de cada fila se muestra como día de Bogotá en `dd/mm/aaaa`.
 La tabla mantiene un mínimo interno de 1010 px y desplaza horizontalmente dentro
 de su contenedor, sin ensanchar la página. El panel permite que el resumen inferior
 permanezca adherido al viewport; solo el contenedor de la tabla recorta su scroll.
@@ -138,9 +140,9 @@ los oculten. Muestra hasta siete materiales distintos, cantidad de vínculos y O
 cada material tiene una acción para quitar sus orígenes. Al alcanzar siete, bloquear
 solo materiales nuevos, permitiendo añadir otros orígenes de los existentes. En
 móvil los elementos del resumen se ajustan en varias filas y su lista tiene altura
-limitada; Preparar OCM sigue visible y el foco conserva margen para no quedar tapado.
+limitada; Elaborar OCM sigue visible y el foco conserva margen para no quedar tapado.
 
-Preparar OCM abre el diálogo compartido con tipo Material y materiales bloqueados.
+Elaborar OCM abre el diálogo compartido con tipo Material y materiales bloqueados.
 La base y el conteo de orígenes preceden a los campos. Cantidad y adicional de 5–10 %,
 inicialmente 10 %, comparten una fila; porcentaje ocupa 104 px. Cambiar proveedor
 conserva los datos. La revisión presenta cantidad final, precio, subtotal y OC de
@@ -156,6 +158,33 @@ Entrega solicitada; el servicio vuelve a validar antes de guardar con HTTP 422,
 `VALIDATION` y `fields.fecha_solicitada_entrega`. Un error conserva el borrador
 y devuelve a captura; se retira al corregir una fecha compatible con ambos
 límites. No se añade este límite superior a compras sin asociación.
+
+### Vincular una OCM existente
+
+En el detalle de cada renglón de producto, Abastecimiento reúne los vínculos históricos,
+el conteo de materiales pendientes y la acción **Vincular OCM existente**. Se habilita
+solo si hay una necesidad vigente; Materiales pendientes conserva la creación de OCM.
+El diálogo compartido bloquea OC y producto y utiliza `ReferencePicker` para elegir
+un material pendiente y un renglón compatible de OCM. Distinguir opciones por número,
+posición y proveedor, con cantidad, entrega y autorización disponibles. La identidad
+siempre es el ID del renglón y del material, nunca su nombre.
+Acotar la colección renderizada a 50 coincidencias, buscando sobre todas las OCM
+compatibles. Si hay más, indicar el total y cómo acotar por número o proveedor.
+Conservar el ID seleccionado al cambiar la búsqueda; no crear otro menú ni duplicar
+la gestión de teclado, foco o filtrado accesible de React Aria.
+
+Mostrar únicamente renglones de OCM de material en seguimiento, autorizadas o no;
+permitir compartirlos entre OC sin asignar cantidades. Una entrega igual o posterior
+a la OC produce un aviso no bloqueante **solo al vincular**. Toda edición posterior
+de esa OCM exige una entrega anterior a todas sus OC asociadas, incluso si conserva
+la fecha. No extender la excepción a la creación consolidada.
+
+Errores usan `ErrorNotice`; conservar la selección ante fallos y conflictos. Ante
+`SUPPLY_CHANGED`, bloquear el envío hasta **Revisar opciones actualizadas**, sin
+elegir otro material o compra automáticamente. Cancelar descarta únicamente el
+borrador y usa la confirmación compartida si hubo cambios. Impedir envíos duplicados.
+Tras cerrar, devolver foco al disparador conservando scroll; si quedó deshabilitado,
+enfocar el encabezado Abastecimiento. Ajustar las acciones en varias filas en móvil.
 
 ## Estados e interacción
 

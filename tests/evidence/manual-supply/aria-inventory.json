@@ -1,0 +1,3653 @@
+{
+  "generated": "2026-10-27T14:35:36.855Z",
+  "points": 605,
+  "files": [
+    "src/App.tsx",
+    "src/catalogs.tsx",
+    "src/column-filter.tsx",
+    "src/document-controls.tsx",
+    "src/favorite-suppliers.tsx",
+    "src/flows.tsx",
+    "src/forms.tsx",
+    "src/maquila-costs.tsx",
+    "src/material-supply.tsx",
+    "src/navigation-drawer.tsx",
+    "src/orders.tsx",
+    "src/pending-materials.tsx",
+    "src/product-history.tsx",
+    "src/product-materials.tsx",
+    "src/ui.tsx"
+  ],
+  "inventory": [
+    {
+      "file": "src/App.tsx",
+      "line": 338,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 384,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 394,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 404,
+      "component": "NavigationDrawer",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 414,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 427,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 441,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/App.tsx",
+      "line": 481,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 316,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 327,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 341,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 346,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 354,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 355,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 356,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 381,
+      "component": "ColumnHeader",
+      "substitute": "Column / Popover"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 408,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 412,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 417,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 420,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 422,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 434,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 450,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 456,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 458,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 469,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 476,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 500,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 501,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 528,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 570,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 571,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 572,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 573,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 574,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 575,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 576,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 579,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 587,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 588,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 589,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 597,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 604,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 607,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 636,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 726,
+      "component": "Tabs",
+      "substitute": "Tabs / TabList / Tab / TabPanel"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 764,
+      "component": "TabGroup",
+      "substitute": "Tabs"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 773,
+      "component": "TabHeader",
+      "substitute": "TabList / Tab"
+    },
+    {
+      "file": "src/catalogs.tsx",
+      "line": 783,
+      "component": "TabContent",
+      "substitute": "TabPanel"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 78,
+      "component": "Action",
+      "substitute": "Button / ToggleButton"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 129,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 197,
+      "component": "ControlLabel",
+      "substitute": "Label"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 199,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 210,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 227,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 256,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 281,
+      "component": "Action",
+      "substitute": "Button / ToggleButton"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 295,
+      "component": "Action",
+      "substitute": "Button / ToggleButton"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 316,
+      "component": "Action",
+      "substitute": "Button / ToggleButton"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 331,
+      "component": "ControlLabel",
+      "substitute": "Label"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 332,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 370,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 382,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 397,
+      "component": "ChoiceGroup",
+      "substitute": "CheckboxGroup"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 404,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 428,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 439,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/column-filter.tsx",
+      "line": 440,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 145,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 167,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 174,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 179,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 186,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 189,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 214,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 219,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 222,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 227,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 244,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 250,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 264,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/document-controls.tsx",
+      "line": 267,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 84,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 88,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 89,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 90,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 91,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 94,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 96,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 97,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 102,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 167,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 180,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 290,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 299,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 308,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 327,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 328,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 345,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/favorite-suppliers.tsx",
+      "line": 348,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 115,
+      "component": "Tabs",
+      "substitute": "Tabs / TabList / Tab / TabPanel"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 217,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 228,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 233,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 243,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 244,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 245,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 247,
+      "component": "ColumnHeader",
+      "substitute": "Column / Popover"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 270,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 273,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 274,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 275,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 279,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 293,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 294,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 298,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 312,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 319,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 320,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 417,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 424,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 432,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 449,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 450,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 451,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 452,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 453,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 454,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 457,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 459,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 460,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 461,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 468,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 469,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 498,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 511,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 522,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 527,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 539,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 540,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 541,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 543,
+      "component": "ColumnHeader",
+      "substitute": "Column / Popover"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 564,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 569,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 572,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 573,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 574,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 578,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 581,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 582,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 583,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 584,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 606,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 607,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 618,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 619,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 852,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 861,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 884,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 910,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 920,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 925,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 929,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 941,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 942,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 943,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 945,
+      "component": "ColumnHeader",
+      "substitute": "Column / Popover"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 967,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 970,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 973,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 974,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 975,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 979,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 985,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 986,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 989,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 997,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1005,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1013,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1020,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1031,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1032,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1052,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1098,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1103,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1116,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1136,
+      "component": "ChoiceGroup",
+      "substitute": "CheckboxGroup"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1143,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1157,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1160,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1180,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1185,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1188,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1194,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1207,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1210,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1218,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1235,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1259,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1265,
+      "component": "ProductPicker",
+      "substitute": "ComboBox por ID"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1284,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1285,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1324,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1327,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1374,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1390,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1391,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1392,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1393,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1394,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1395,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1396,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1399,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1403,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1404,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1408,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1409,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1410,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1473,
+      "component": "TabGroup",
+      "substitute": "Tabs"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1479,
+      "component": "TabHeader",
+      "substitute": "TabList / Tab"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1485,
+      "component": "TabContent",
+      "substitute": "TabPanel"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1520,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1523,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1529,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1543,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1550,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1551,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1552,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1553,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1554,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1555,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1558,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1564,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1565,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1566,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1567,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1664,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1675,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1715,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1716,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1717,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1719,
+      "component": "ColumnHeader",
+      "substitute": "Column / Popover"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1739,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1742,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1746,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1747,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1748,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1762,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1765,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1773,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1783,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1784,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1785,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1787,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1793,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1805,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1806,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1824,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/flows.tsx",
+      "line": 1839,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 274,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 278,
+      "component": "TooltipHelp",
+      "substitute": "Tooltip"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 290,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 309,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 322,
+      "component": "ProductPicker",
+      "substitute": "ComboBox por ID"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 350,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 368,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 387,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 402,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 416,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 456,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 486,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 489,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 657,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 672,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 676,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 691,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 709,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 715,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 754,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 770,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 784,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 791,
+      "component": "ChoiceGroup",
+      "substitute": "CheckboxGroup"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 807,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 835,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 836,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 894,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 898,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 928,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 986,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1001,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1013,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1025,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1031,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1049,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1065,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1079,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1080,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1124,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1130,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1134,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1139,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1152,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1157,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1164,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1170,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1179,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1200,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1208,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1224,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1238,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1239,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1798,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1812,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1837,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1849,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1850,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1863,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1868,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1875,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1913,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1917,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1927,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1933,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 1975,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2012,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2035,
+      "component": "ProductPicker",
+      "substitute": "ComboBox por ID"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2074,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2082,
+      "component": "SuggestionList",
+      "substitute": "Sugerencias ComboBox con texto libre"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2101,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2109,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2144,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2152,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2196,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2205,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2254,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2366,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2384,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2394,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2416,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2421,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2438,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2444,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2464,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2469,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2515,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2519,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2529,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2548,
+      "component": "ConfirmationDialog",
+      "substitute": "Dialog de confirmación"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2657,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2664,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2668,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2669,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2682,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2683,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2699,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2700,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2723,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2739,
+      "component": "ControlSelect",
+      "substitute": "Select"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2764,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2787,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2803,
+      "component": "SuggestionList",
+      "substitute": "Sugerencias ComboBox con texto libre"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2815,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2816,
+      "component": "ControlTextArea",
+      "substitute": "TextField / TextArea"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2832,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2868,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/forms.tsx",
+      "line": 2869,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 180,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 184,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 185,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 186,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 187,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 188,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 189,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 194,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 196,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 197,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 198,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 199,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 202,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 204,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 211,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 257,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 310,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 323,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/maquila-costs.tsx",
+      "line": 336,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 93,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 124,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 264,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 271,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 281,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 293,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 294,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 303,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 304,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 314,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 344,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 402,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/material-supply.tsx",
+      "line": 405,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/navigation-drawer.tsx",
+      "line": 49,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/navigation-drawer.tsx",
+      "line": 60,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/navigation-drawer.tsx",
+      "line": 95,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 121,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 464,
+      "component": "TabGroup",
+      "substitute": "Tabs"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 472,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 482,
+      "component": "TabHeader",
+      "substitute": "TabList / Tab"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 514,
+      "component": "TabContent",
+      "substitute": "TabPanel"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 517,
+      "component": "Action",
+      "substitute": "Button / ToggleButton"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 556,
+      "component": "TabGroup",
+      "substitute": "Tabs"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 568,
+      "component": "TabHeader",
+      "substitute": "TabList / Tab"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 604,
+      "component": "TabContent",
+      "substitute": "TabPanel"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 608,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 668,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 677,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 704,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 708,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 715,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 720,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 721,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 724,
+      "component": "ColumnHeader",
+      "substitute": "Column / Popover"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 750,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 755,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 765,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 766,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 767,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 778,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 784,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 793,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 796,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 799,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 802,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 805,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 807,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 816,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 834,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 844,
+      "component": "RowLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 862,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 878,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 893,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 909,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 930,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 982,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1098,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1115,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1118,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1125,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1134,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1279,
+      "component": "OrderLineCard",
+      "substitute": "Disclosure"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1293,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1300,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1312,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1323,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1426,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1440,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1447,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1448,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1449,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1455,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1461,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1467,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1473,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1479,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1489,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1491,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1492,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1509,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1529,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1557,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1575,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1591,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1596,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1612,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1667,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1691,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1706,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1735,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1798,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1845,
+      "component": "ConfirmationDialog",
+      "substitute": "Dialog de confirmación"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1912,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1923,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1932,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1935,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 1995,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2003,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2037,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2038,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2039,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2040,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2041,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2042,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2043,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2044,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2045,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2046,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2049,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2054,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2056,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2067,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2068,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2079,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2088,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2091,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2094,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2097,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/orders.tsx",
+      "line": 2106,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 251,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 259,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 265,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 272,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 278,
+      "component": "DateInput",
+      "substitute": "TextField / Popover / Calendar"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 285,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 297,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 309,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 314,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 326,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 330,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 331,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 332,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 334,
+      "component": "ColumnHeader",
+      "substitute": "Column / Popover"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 357,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 359,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 364,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 365,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 380,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 389,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 390,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 397,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 404,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 407,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 411,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 412,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 442,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 452,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 485,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/pending-materials.tsx",
+      "line": 503,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 93,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 97,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 98,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 99,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 100,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 101,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 102,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 105,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 113,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 114,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 115,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 118,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 119,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 120,
+      "component": "LinkButton",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 134,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 135,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 148,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 152,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 153,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 154,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 155,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 156,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 159,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 162,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 163,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 166,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 167,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 175,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-history.tsx",
+      "line": 176,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 190,
+      "component": "DataTable",
+      "substitute": "Table"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 194,
+      "component": "TableHead",
+      "substitute": "TableHeader"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 195,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 196,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 197,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 198,
+      "component": "TableColumn",
+      "substitute": "Column"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 201,
+      "component": "TableRows",
+      "substitute": "TableBody"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 202,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 203,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 204,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 216,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 226,
+      "component": "TableRow",
+      "substitute": "Row"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 227,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 230,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 233,
+      "component": "TableCell",
+      "substitute": "Cell"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 289,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 313,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 460,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 469,
+      "component": "ControlForm",
+      "substitute": "Form"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 478,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 501,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 502,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 507,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 522,
+      "component": "Field",
+      "substitute": "Label / FieldError"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 527,
+      "component": "ControlInput",
+      "substitute": "TextField / SearchField / NumberField"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 536,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 554,
+      "component": "CheckChoice",
+      "substitute": "Checkbox"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 617,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/product-materials.tsx",
+      "line": 620,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 207,
+      "component": "Action",
+      "substitute": "Button / ToggleButton"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 275,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 381,
+      "component": "ControlLabel",
+      "substitute": "Label"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 385,
+      "component": "TooltipHelp",
+      "substitute": "Tooltip"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 389,
+      "component": "ControlError",
+      "substitute": "FieldError"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 628,
+      "component": "ControlLink",
+      "substitute": "Link"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 686,
+      "component": "Dialog",
+      "substitute": "ModalOverlay / Modal / Dialog"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 696,
+      "component": "CancelButton",
+      "substitute": "Button con descarte"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 699,
+      "component": "Button",
+      "substitute": "Button"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 829,
+      "component": "TabGroup",
+      "substitute": "Tabs"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 830,
+      "component": "TabHeader",
+      "substitute": "TabList / Tab"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 831,
+      "component": "TabContent",
+      "substitute": "TabPanel"
+    },
+    {
+      "file": "src/ui.tsx",
+      "line": 843,
+      "component": "LinkButton",
+      "substitute": "Link"
+    }
+  ]
+}

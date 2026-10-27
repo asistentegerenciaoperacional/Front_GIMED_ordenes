@@ -34,10 +34,11 @@ actuales. Los datos y documentos de ejemplo son ficticios.
 ## Materiales pendientes y consolidación desde OC · 26 de octubre de 2026
 
 **Abastecimiento → Materiales pendientes** agrega la tabla plana entre vínculos
-y lotes. Consulta entrega solicitada de OC autorizadas con renglones abiertos,
-excluye compras de inventario y parejas con una OCM no anulada. Incluye búsqueda,
-filtros, ordenamiento, paginación de 50 filas, URL propia y resumen persistente
-de hasta siete materiales distintos con sus múltiples orígenes.
+y lotes. Muestra por defecto todas las entregas solicitadas de OC autorizadas
+con renglones abiertos y permite acotar por rango; excluye compras de inventario
+y parejas con una OCM no anulada. Incluye búsqueda, filtros, ordenamiento,
+paginación de 50 filas, URL propia y resumen persistente de hasta siete materiales
+distintos con sus múltiples orígenes.
 
 El diálogo compartido conserva materiales y orígenes, propone 10 % adicional
 editable de 5 % a 10 % y cantidad final ajustable. Cambiar proveedor conserva
@@ -122,3 +123,10 @@ Lista agrupada compartida con favoritos, filtro Con costos/Todos los productos j
 ### Productos y materiales · 23 de octubre de 2026
 
 Lista única por producto, sin Agregar global ni pestañas secundarias. Búsqueda, cinco filtros y detalle de tres columnas con capacidad bajo el corrugado. El lápiz configura corrugado, adhesivo y selección múltiple general; los productos vacíos siguen accesibles. El guardado es transaccional y compara la selección original, conserva borrador ante fallos y exige revisar conflictos. Cinta y Sticker son únicos globalmente y excluyentes por producto; se controlan también reclasificaciones y referencias. FULL/PARCIAL y órdenes históricas conservan su significado. [Contrato, reglas y recuperación](PRODUCTOS-MATERIALES.md).
+
+
+### Vinculación manual de OCM · 27 de octubre de 2026
+
+Acción por producto en el detalle de OC, con material pendiente y renglones de OCM compatibles por ID. Reutiliza la consulta de pendientes con alcance por OC y los selectores/dialogos React Aria. Guardado transaccional con selección esperada, concurrencia, reintentos, error sin cambios parciales y conservación de vínculos históricos. Las compras en seguimiento pueden compartirse sin asignar cantidades. Se impide nueva cobertura duplicada al reactivar o sustituir materiales.
+
+Entrega tardía permitida con aviso solo al vincular; cualquier edición posterior exige corregirla según todas las OC asociadas. Se cubren teclado, búsqueda, cancelación, borrador ante conflicto, foco y scroll, incluida la desaparición concurrente de la necesidad. [Contrato, recuperación y pruebas](VINCULACION-OCM.md).

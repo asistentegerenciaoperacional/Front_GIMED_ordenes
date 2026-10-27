@@ -1,5 +1,6 @@
 import {
   buildMaterialNeeds,
+  needsInRange,
   type MaterialNeed,
 } from "../shared/material-demand";
 import type { Database } from "../shared/models";
@@ -87,6 +88,15 @@ export function buildDemandRows(db: Database): DemandRow[] {
       },
     };
   });
+}
+export function filterDemandRange(
+  rows: DemandRow[],
+  desde: string,
+  hasta: string,
+) {
+  return !desde && !hasta
+    ? rows
+    : (needsInRange(rows, desde, hasta) as DemandRow[]);
 }
 export function searchDemandRows(rows: DemandRow[], query: string) {
   const terms = canonical(query).split(/\s+/).filter(Boolean);

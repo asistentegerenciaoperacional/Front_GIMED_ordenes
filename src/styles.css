@@ -2891,7 +2891,13 @@ textarea.control {
   padding: 8px;
   min-height: 32px;
 }
-.material-demand-table tr[data-selected] td {
+.material-demand-table tr[data-need] {
+  cursor: pointer;
+}
+.material-demand-table tr[data-need]:not([data-demand-selected]):hover td {
+  background: #f7f9fc;
+}
+.material-demand-table tr[data-demand-selected] td {
   background: #eff5ff;
 }
 .material-demand-table strong {

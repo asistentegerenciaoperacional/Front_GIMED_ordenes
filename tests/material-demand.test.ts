@@ -22,6 +22,7 @@ import { JsonStore } from "../server/store";
 import {
   buildDemandRows,
   demandColumns,
+  filterDemandRange,
   readDemandParams,
   searchDemandRows,
 } from "../src/material-demand-table";
@@ -89,6 +90,13 @@ test("pendientes: solo materiales específicos de renglones autorizados en segui
     rows.some((row) => [sid(53), sid(54), sid(55)].includes(row.material.id)),
     false,
   );
+});
+
+test("pendientes: sin rango muestra todos los vínculos y el rango opcional los acota", () => {
+  const rows = buildDemandRows(makeMaterialDemandFixture());
+  assert.equal(filterDemandRange(rows, "", "").length, rows.length);
+  assert.equal(filterDemandRange(rows, "2027-02-15", "2027-02-15").length, 3);
+  assert.equal(filterDemandRange(rows, "2027-02-15", "").length, 0);
 });
 
 test("pendientes: una compra cubre solo la pareja producto–material; cerrada y sin autorizar cuentan, anulada no", () => {

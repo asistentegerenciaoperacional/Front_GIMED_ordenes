@@ -2,7 +2,6 @@ import { useDeferredValue, useMemo, useState, type FormEvent } from "react";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import {
   consolidateMaterialSources,
-  needsInRange,
   validDemandDay,
   type MaterialDemand,
 } from "../shared/material-demand";
@@ -21,6 +20,7 @@ import { OrderForm } from "./forms";
 import {
   buildDemandRows,
   demandColumns,
+  filterDemandRange,
   pendingPrefix,
   readDemandParams,
   searchDemandRows,
@@ -79,7 +79,7 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
   });
   const all = useMemo(() => buildDemandRows(db), [db]);
   const ranged = useMemo(
-    () => needsInRange(all, desde, hasta) as DemandRow[],
+    () => filterDemandRange(all, desde, hasta),
     [all, desde, hasta],
   );
   const query = local.get("q") ?? "";
@@ -145,8 +145,10 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
     () => new Set([...selected.values()].map((row) => row.order.id)).size,
     [selected],
   );
+  const hasRange = Boolean(desde || hasta);
   const queried =
-    validDemandDay(desde) && validDemandDay(hasta) && desde <= hasta;
+    !hasRange ||
+    (validDemandDay(desde) && validDemandDay(hasta) && desde <= hasta);
   const pages = Math.max(1, Math.ceil(rows.length / pageSize));
   const rawPage = Number(local.get("pagina") ?? 1);
   const page =
@@ -170,6 +172,26 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
     event.preventDefault();
     const a = parseDateInput(from),
       b = parseDateInput(to);
+    if (!from && !to) {
+      if (
+        (desde || hasta) &&
+        selected.size &&
+        !(await confirmAction(
+          "Quitar el rango descartará los materiales y vínculos seleccionados.",
+          "Quitar rango",
+          true,
+        ))
+      ) {
+        setFrom(desde);
+        setTo(hasta);
+        return;
+      }
+      if (desde || hasta) setSelected(new Map());
+      setError(null);
+      setStatus("");
+      saveParams({ desde: "", hasta: "" });
+      return;
+    }
     const fields: Record<string, string> = {};
     if (!a) fields.desde = "Indica una fecha Desde válida.";
     if (!b) fields.hasta = "Indica una fecha Hasta válida.";
@@ -220,7 +242,12 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
     try {
       const fuentes = [...selected.values()].map((row) => ({ ...row.source }));
       consolidateMaterialSources(fuentes);
-      setDraft({ desde, hasta, fuentes });
+      const days = [...selected.values()].map((row) => row.deliveryDay).sort();
+      setDraft({
+        desde: desde || days[0],
+        hasta: hasta || days.at(-1)!,
+        fuentes,
+      });
       setError(null);
     } catch (error) {
       catchError(error);
@@ -259,32 +286,31 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
             <Field
               id="field-desde"
               label="Entrega solicitada desde"
-              required
               error={error?.fields.desde}
             >
               <DateInput
                 id="field-desde"
                 value={from}
                 onChange={setFrom}
-                required
               />
             </Field>
             <Field
               id="field-hasta"
               label="Hasta"
-              required
               error={error?.fields.hasta}
             >
               <DateInput
                 id="field-hasta"
                 value={to}
                 onChange={setTo}
-                required
               />
             </Field>
             <Button type="submit" variant="primary">
               Consultar
             </Button>
+            <p className="compact-note demand-range-note">
+              Deja ambas fechas vacías para mostrar todos los vínculos pendientes.
+            </p>
           </div>
         </ControlForm>
         <div
@@ -326,6 +352,17 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
           <DataTable
             className="data-table catalog-table material-demand-table"
             aria-label="Necesidades de material por producto"
+            onRowClick={(key) => {
+              const row = visible.find((item) => item.key === key);
+              if (!row) return;
+              if (
+                !selected.has(key) &&
+                groups.size === 7 &&
+                !groups.has(row.material.id)
+              )
+                return;
+              toggle(row, !selected.has(key));
+            }}
           >
             <TableHead>
               <TableRow>
@@ -359,7 +396,7 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
                 <TableRow
                   key={row.key}
                   data-need={row.key}
-                  data-selected={selected.has(row.key) || undefined}
+                  data-demand-selected={selected.has(row.key) || undefined}
                 >
                   <TableCell>
                     <CheckChoice
@@ -416,12 +453,16 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
                           ? "Selecciona un rango de entrega"
                           : ranged.length
                             ? "Sin necesidades coincidentes"
-                            : "Sin materiales pendientes en este rango"
+                            : hasRange
+                              ? "Sin materiales pendientes en este rango"
+                              : "Sin materiales pendientes"
                       }
                       description={
                         !queried
                           ? "Indica Desde y Hasta y pulsa Consultar para ver los materiales que faltan por ordenar."
-                          : "Ajusta el rango, la búsqueda o los filtros para consultar otras necesidades."
+                          : hasRange
+                            ? "Ajusta el rango, la búsqueda o los filtros para consultar otras necesidades."
+                            : "No hay vínculos pendientes de compra para mostrar."
                       }
                     />
                   </TableCell>

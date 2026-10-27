@@ -764,3 +764,14 @@ Reproducción:
     npm test
     npm run build
     node scripts/verify-aria-browser.mjs tests/material-demand-delivery.browser.js chromium
+
+
+## Vinculación manual OC–OCM — 27 de octubre de 2026
+
+Compilación y **242 pruebas automatizadas** aprobadas, incluidas 11 pruebas nuevas de consulta acotada por OC, identidad, elegibilidad, cobertura, sustitución de anuladas, persistencia, conflictos, concurrencia con creación consolidada, reintentos y fechas. La integridad conserva duplicados históricos y bloquea nuevas coberturas duplicadas, incluso al reactivar o sustituir un material. No cambia el esquema ni los precios de órdenes.
+
+**Chromium, Firefox y WebKit:** 74 comprobaciones de creación consolidada y 36 de vinculación por motor, a 375, 768, 1024 y 1440 px. Incluyen búsqueda, teclado, cancelación, error del servicio, conflicto, borrador, compartir OCM, entrega tardía y validación estricta al editar después. Se comprueba foco y scroll, incluido el cierre concurrente del producto que elimina la sección de abastecimiento. Sin avisos de React/React Aria.
+
+El recorrido general de Chromium aprueba **598 comprobaciones**. Su reloj de fixture y los selectores de menús/diálogos se adaptaron a los controles actuales, manteniendo las aserciones. La comprobación de reinicio recupera íntegramente las 28 colecciones. Los hashes de la base real y de `Planeacion/db.md` permanecen iguales a los respaldos.
+
+[Informe y hashes](tests/evidence/manual-supply/report.json), [recorrido general](tests/evidence/manual-supply/general-browser.json), [reinicio](tests/evidence/manual-supply/restart.json), [captura de escritorio](tests/evidence/ocm/chromium-manual-link-1440.png), [captura móvil](tests/evidence/ocm/chromium-manual-link-375.png). Recuperación y comandos en [VINCULACION-OCM.md](VINCULACION-OCM.md).

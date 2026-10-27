@@ -1,0 +1,479 @@
+{
+  "acceptance": "Equipo actual sin limitación de CPU; ensayo CPU 4x separado por confirmación del usuario",
+  "stressReport": "after-stress-performance.json",
+  "browser": "155.0.8059.85",
+  "date": "2026-10-27T14:31:38.962Z",
+  "baselineCommit": "d905af2b2e6a8afb5dc0b18de53cde46bd3ee067",
+  "dataHash": "2eadb88592c002a778c14ffff861d10bf56a9ce791eebdc76beac94d77511019",
+  "memoryAllowanceBytes": 5000000,
+  "passed": true,
+  "measurements": [
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 143.20000004768372,
+      "after": 146.29999995231628,
+      "limit": 243.20000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 53.89999997615814,
+      "after": 54.5,
+      "limit": 73.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 70.20000004768372,
+      "after": 70.70000004768372,
+      "limit": 90.20000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 43,
+      "after": 42.39999997615814,
+      "limit": 63,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 46.60000002384186,
+      "after": 46.10000002384186,
+      "limit": 66.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 45.5,
+      "after": 45.5,
+      "limit": 65.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 42.700000047683716,
+      "after": 43.200000047683716,
+      "limit": 62.700000047683716,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 45,
+      "after": 45.699999928474426,
+      "limit": 65,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 43.800000071525574,
+      "after": 43.5,
+      "limit": 63.800000071525574,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 44.89999997615814,
+      "after": 46,
+      "limit": 64.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 42,
+      "after": 37.59999990463257,
+      "limit": 62,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 45.5,
+      "after": 46.09999990463257,
+      "limit": 65.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 17788064,
+      "after": 17870028,
+      "limit": 22788064,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 129.5,
+      "after": 129.10000002384186,
+      "limit": 229.5,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 53.800000071525574,
+      "after": 53.800000071525574,
+      "limit": 73.80000007152557,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 71,
+      "after": 61.60000002384186,
+      "limit": 91,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 40.700000047683716,
+      "after": 40.299999952316284,
+      "limit": 60.700000047683716,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 45.89999997615814,
+      "after": 46.10000002384186,
+      "limit": 65.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 46,
+      "after": 45.40000009536743,
+      "limit": 66,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 44.09999990463257,
+      "after": 44.199999928474426,
+      "limit": 64.09999990463257,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 45.59999990463257,
+      "after": 42.5,
+      "limit": 65.59999990463257,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 44.60000002384186,
+      "after": 45.299999952316284,
+      "limit": 64.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 45.89999997615814,
+      "after": 45.60000002384186,
+      "limit": 65.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 36.60000002384186,
+      "after": 37.799999952316284,
+      "limit": 56.60000002384186,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 44.89999997615814,
+      "after": 47.199999928474426,
+      "limit": 64.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "6000 lotes / 375px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 16499460,
+      "after": 16548888,
+      "limit": 21499460,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "load P95 ms",
+      "before": 676.1000000238419,
+      "after": 662.2999999523163,
+      "limit": 777.5150000274182,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "search P95 ms",
+      "before": 56.700000047683716,
+      "after": 59.5,
+      "limit": 76.70000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "search-clear P95 ms",
+      "before": 72.70000004768372,
+      "after": 71.89999997615814,
+      "limit": 92.70000004768372,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "pagination P95 ms",
+      "before": 48.89999997615814,
+      "after": 41.5,
+      "limit": 68.89999997615814,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-open P95 ms",
+      "before": 45.59999990463257,
+      "after": 46,
+      "limit": 65.59999990463257,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "dialog-close P95 ms",
+      "before": 45.5,
+      "after": 45.300000071525574,
+      "limit": 65.5,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "filter-open P95 ms",
+      "before": 46.5,
+      "after": 43.39999997615814,
+      "limit": 66.5,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "sort P95 ms",
+      "before": 45.299999952316284,
+      "after": 45,
+      "limit": 65.29999995231628,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "filter-close P95 ms",
+      "before": 45.5,
+      "after": 46,
+      "limit": 65.5,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "selection-filter P95 ms",
+      "before": 45.5,
+      "after": 43.59999990463257,
+      "limit": 65.5,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-detail P95 ms",
+      "before": 49.799999952316284,
+      "after": 53.200000047683716,
+      "limit": 69.79999995231628,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "navigation-return P95 ms",
+      "before": 47,
+      "after": 46.5,
+      "limit": 67,
+      "passed": true
+    },
+    {
+      "scenario": "60000 lotes / 1440px / CPU 1x",
+      "metric": "stable heap bytes",
+      "before": 41095564,
+      "after": 40225868,
+      "limit": 47259898.6,
+      "passed": true
+    }
+  ],
+  "downloads": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "beforeBytes": 866202,
+      "afterBytes": 874071
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "beforeBytes": 866202,
+      "afterBytes": 874071
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "beforeBytes": 866202,
+      "afterBytes": 874071
+    }
+  ],
+  "cycles": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "beforeGrowth": 601864,
+      "afterGrowth": 612924,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 17257104
+        },
+        {
+          "cycles": 10,
+          "usedSize": 17739860
+        },
+        {
+          "cycles": 20,
+          "usedSize": 17772240
+        },
+        {
+          "cycles": 30,
+          "usedSize": 17809884
+        },
+        {
+          "cycles": 40,
+          "usedSize": 17848944
+        },
+        {
+          "cycles": 50,
+          "usedSize": 17870028
+        }
+      ]
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "beforeGrowth": 559124,
+      "afterGrowth": 552044,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 15996844
+        },
+        {
+          "cycles": 10,
+          "usedSize": 16425444
+        },
+        {
+          "cycles": 20,
+          "usedSize": 16457576
+        },
+        {
+          "cycles": 30,
+          "usedSize": 16464488
+        },
+        {
+          "cycles": 40,
+          "usedSize": 16490184
+        },
+        {
+          "cycles": 50,
+          "usedSize": 16548888
+        }
+      ]
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "beforeGrowth": 584976,
+      "afterGrowth": 587936,
+      "samples": [
+        {
+          "cycles": 0,
+          "usedSize": 39637932
+        },
+        {
+          "cycles": 10,
+          "usedSize": 40125312
+        },
+        {
+          "cycles": 20,
+          "usedSize": 40155956
+        },
+        {
+          "cycles": 30,
+          "usedSize": 40169204
+        },
+        {
+          "cycles": 40,
+          "usedSize": 40206888
+        },
+        {
+          "cycles": 50,
+          "usedSize": 40225868
+        }
+      ]
+    }
+  ],
+  "longTasks": [
+    {
+      "lots": 6000,
+      "width": 1440,
+      "before": [
+        55
+      ],
+      "after": [
+        55
+      ]
+    },
+    {
+      "lots": 6000,
+      "width": 375,
+      "before": [],
+      "after": []
+    },
+    {
+      "lots": 60000,
+      "width": 1440,
+      "before": [
+        63,
+        54,
+        77,
+        251,
+        54,
+        55
+      ],
+      "after": [
+        55,
+        58,
+        82,
+        245,
+        56
+      ]
+    }
+  ]
+}

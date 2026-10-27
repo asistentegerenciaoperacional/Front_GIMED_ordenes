@@ -1,5 +1,6 @@
 import {
   cloneElement,
+  useEffect,
   memo,
   useCallback,
   useMemo,
@@ -63,6 +64,7 @@ class PageTableLayout extends TableLayout<unknown> {
 type TableProps = React.ComponentPropsWithRef<"table"> & {
   rowVersion?: unknown;
   cacheKey?: unknown;
+  onRowClick?: (key: string) => void;
 };
 export const DataTable = memo(
   DataTableView,
@@ -74,10 +76,29 @@ function DataTableView({
   "aria-label": label,
   rowVersion,
   cacheKey,
+  onRowClick,
   ...props
 }: TableProps) {
   const tableRef = useRef<HTMLTableElement>(null);
   const layout = useMemo(() => new PageTableLayout(tableRef), []);
+  useEffect(() => {
+    const table = tableRef.current;
+    if (!table || !onRowClick) return;
+    const handleClick = (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) return;
+      if (
+        event.target.closest(
+          "a, button, input, select, textarea, [role='checkbox'], .aria-checkbox",
+        )
+      )
+        return;
+      const row = event.target.closest<HTMLTableRowElement>("tr[data-need]");
+      const key = row?.dataset.need;
+      if (key && table.contains(row)) onRowClick(key);
+    };
+    table.addEventListener("click", handleClick);
+    return () => table.removeEventListener("click", handleClick);
+  }, [onRowClick]);
   const sections = flatten(children);
   const head = sections.find((node) => node.type === TableHead);
   const body = sections.find((node) => node.type === TableRows);

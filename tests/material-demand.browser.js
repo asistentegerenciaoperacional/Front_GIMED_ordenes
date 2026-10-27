@@ -46,7 +46,7 @@ async (page) => {
   const row = (line, id) => page.locator(`[data-need="${line}/${id}"]`);
   const checkFor = (line, id) => row(line, id).getByRole('checkbox');
   const search = () => page.getByRole('textbox', { name: 'Buscar OC, producto o material pendiente', exact: true });
-  const prepare = () => page.getByRole('button', { name: 'Preparar OCM', exact: true }).click();
+  const prepare = () => page.getByRole('button', { name: 'Elaborar OCM', exact: true }).click();
   const quantity = () => dialog().locator('.order-form-line').first().getByRole('spinbutton', { name: 'Cantidad solicitada', exact: true });
   const percent = () => dialog().getByRole('spinbutton', { name: 'Adicional del material 1 (%)', exact: true });
   const price = () => dialog().locator('.order-form-line').first().getByRole('textbox', { name: 'Precio unitario', exact: true });
@@ -67,7 +67,7 @@ async (page) => {
   check(await page.getByRole('tab', { name: 'Materiales pendientes', exact: true }).getAttribute('aria-selected') === 'true', 'Nueva subpestaña seleccionada por URL');
   check((await page.getByRole('tab').allTextContents()).join('|').includes('Vínculos entre órdenes|Materiales pendientes|Lotes y certificados'), 'Pestaña situada entre vínculos y lotes');
   check(await page.locator('[data-need]').count() === 0, 'Sin consulta automática ni rango inicial');
-  check(await page.getByRole('button', { name: 'Preparar OCM', exact: true }).isDisabled(), 'Preparar deshabilitado sin selección');
+  check(await page.getByRole('button', { name: 'Elaborar OCM', exact: true }).isDisabled(), 'Preparar deshabilitado sin selección');
   await page.locator('[id="field-desde"]').fill('28/02/2027');
   await page.locator('[id="field-hasta"]').fill('01/02/2027');
   await page.getByRole('button', { name: 'Consultar', exact: true }).click();
@@ -107,7 +107,7 @@ async (page) => {
   check(new URL(page.url()).searchParams.get('pendientes_hasta') === range.hasta, 'Cancelar cambio conserva rango consultado');
   await page.locator('[id="field-hasta"]').fill('28/02/2027');
   const selectionBounds = await page.locator('.demand-selection').boundingBox();
-  check(selectionBounds.y >= 0 && selectionBounds.y + selectionBounds.height <= 1001, 'Resumen y Preparar OCM permanecen visibles sobre la lista');
+  check(selectionBounds.y >= 0 && selectionBounds.y + selectionBounds.height <= 1001, 'Resumen y Elaborar OCM permanecen visibles sobre la lista');
   await screenshot('pendientes-1440');
   await prepare();
   check(await dialog().getByRole('combobox', { name: 'Tipo de orden', exact: true }).isDisabled(), 'Tipo Material bloqueado');
@@ -217,7 +217,7 @@ async (page) => {
     await screenshot('dialogo-' + width);
     await page.keyboard.press('Escape');
     await page.getByRole('dialog').waitFor({ state: 'hidden' });
-    check(await page.getByRole('button', { name: 'Preparar OCM', exact: true }).evaluate(el => el === document.activeElement), 'Foco vuelve a Preparar OCM a ' + width);
+    check(await page.getByRole('button', { name: 'Elaborar OCM', exact: true }).evaluate(el => el === document.activeElement), 'Foco vuelve a Elaborar OCM a ' + width);
   }
   const final = await state();
   check(final.orden_compra.some(order => order.id === created.id), 'Compra conservada tras navegación y pruebas adaptativas');

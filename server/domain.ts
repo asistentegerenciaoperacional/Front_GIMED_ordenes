@@ -1,5 +1,10 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Database } from "../shared/models";
+import {
+  materialSupplyLinkSchema,
+  materialSupplySelection,
+  materialSupplyLinkAvailable,
+} from "../shared/material-supply";
 import { costIssue } from "../shared/maquila-costs";
 import { isMaterialSupplier } from "../shared/favorite-suppliers";
 import {
@@ -952,6 +957,36 @@ export async function command(
     }
     case "createOrder":
       return saveOrder(db, p);
+    case "linkMaterialSupply": {
+      const parsed = materialSupplyLinkSchema.safeParse(p);
+      check(
+        parsed.success,
+        "Selecciona un material pendiente y un renglón de OCM válido.",
+        "VALIDATION",
+      );
+      const selection = parsed.data;
+      const current = materialSupplySelection(
+        db,
+        selection.id_orden_producto,
+        selection.id_orden_material,
+      );
+      check(
+        current &&
+          JSON.stringify(current) === JSON.stringify(selection.expected) &&
+          materialSupplyLinkAvailable(
+            db,
+            selection.id_orden_producto,
+            selection.id_orden_material,
+          ),
+        "La necesidad o el renglón de OCM cambió. Revisa las opciones actualizadas antes de vincular.",
+        "SUPPLY_CHANGED",
+      );
+      push(db, "abastecimiento_material", {
+        id_orden_producto: selection.id_orden_producto,
+        id_orden_material: selection.id_orden_material,
+      });
+      return {};
+    }
     case "editOrder":
       return saveOrder(db, p, true);
     case "authorizeOrder": {

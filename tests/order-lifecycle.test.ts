@@ -71,7 +71,9 @@ for (const entity of ["orden_material", "orden_otro"] as const) {
   test(`reabrir ${entity} cerrado o anulado conserva recepción, factura, documentos y vínculos`, async (t) => {
     const store = await fixture(t);
     const db = store.snapshot();
-    const line = db[entity][0];
+    // Test reopening without a competing purchase; the legacy first material
+    // has duplicate coverage, which must now be rejected when reactivated.
+    const line = db[entity][entity === "orden_material" ? 1 : 0];
     assert.ok(line);
     if (db.orden_compra.find((order) => order.id === line.id_orden_compra)!.estado_autorizacion !== "autorizada")
       await authorize(store, line.id_orden_compra);

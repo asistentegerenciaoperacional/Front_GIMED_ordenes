@@ -143,7 +143,7 @@ try {
     for (const key of firstMaterials)
       await page.locator(`[data-need="${key}"]`).getByRole("checkbox").check();
     const prepare = page.getByRole("button", {
-      name: "Preparar OCM",
+      name: "Elaborar OCM",
       exact: true,
     });
     await prepare.scrollIntoViewIfNeeded();

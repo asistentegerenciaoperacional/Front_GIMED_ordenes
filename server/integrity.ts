@@ -1,4 +1,5 @@
 import type { Database } from "../shared/models";
+import { introducesDuplicateSupply } from "../shared/material-supply";
 import { costScheduleIssue } from "../shared/maquila-costs";
 import { productMaterialsDatabaseIssue } from "../shared/product-materials";
 import {
@@ -204,6 +205,12 @@ export function validateDatabase(
       "R05",
     );
   }
+  if (previous)
+    check(
+      !introducesDuplicateSupply(db, previous),
+      "Este material ya tiene otra OCM vigente vinculada al producto. Conserva una sola compra vigente por material.",
+      "SUPPLY_CHANGED",
+    );
   const ownership: Record<string, string | null> = {
     factura_fisica: "factura",
     orden_compra_escaneada: "orden_compra",

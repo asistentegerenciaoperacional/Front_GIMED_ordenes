@@ -246,14 +246,14 @@ try {
           "location.search.includes('filtro=documento_con')",
           () =>
             page
-              .locator('[role="option"][data-key="documento_con"]')
+              .locator(':is([role="option"],[role="menuitemradio"])[data-key="documento_con"]')
               .click(),
         );
         await page
           .getByRole("button", { name: "Filtro personalizado", exact: true })
           .click();
         await page
-          .getByRole("option", {
+          .getByRole("menuitemradio", {
             name: "Sin filtro personalizado",
             exact: true,
           })

@@ -456,10 +456,6 @@ export function App() {
                 </div>
               </div>
               <div className="topbar-right">
-                <span className="demo-pill">
-                  <FlaskConical size={12} aria-hidden="true" />
-                  Demostración
-                </span>
                 <span className="avatar" aria-label="Espacio GIMED">
                   GI
                 </span>

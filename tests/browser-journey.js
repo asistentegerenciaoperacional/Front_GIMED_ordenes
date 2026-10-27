@@ -55,7 +55,7 @@ async (page) => {
       path: "tests/evidence/" + name + ".png",
       fullPage: true,
     });
-  const dialog = () => page.locator("[role=dialog]").last();
+  const dialog = () => page.locator(".aria-modal-overlay .dialog[role=dialog]").last();
   const helpFor = (control) => control.locator('xpath=ancestor::div[contains(concat(" ",normalize-space(@class)," ")," field ")][1]').locator('button.field-help');
   const tooltipFor = async (control) => {
     const tooltip=page.getByRole('tooltip');
@@ -564,6 +564,12 @@ async (page) => {
     await columnPanel.getByRole('combobox',{name:'Condición',exact:true}).selectOption('between');
     await columnPanel.getByRole('textbox',{name:'Desde',exact:true}).fill('100');
     await columnPanel.getByRole('textbox',{name:'Hasta',exact:true}).fill('60000000');
+    await page.waitForFunction(() => {
+      const el = document.querySelector('.column-filter-panel');
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight;
+    });
     check(await columnPanel.evaluate((el) => {
       const r=el.getBoundingClientRect();
       return r.left >= 0 && r.right <= innerWidth && r.top >= 0 && r.bottom <= innerHeight && r.height<=400 && r.height<=innerHeight*0.6+1;
@@ -814,8 +820,9 @@ async (page) => {
   await dialog()
     .getByRole("combobox", { name: "Buscar número de factura", exact: true })
     .fill(" cli-0001 ");
+  await dialog().getByRole("combobox", { name: "Buscar número de factura", exact: true }).press("Escape");
   await dialog()
-    .getByRole("button", { name: "Agregar factura", exact: true })
+    .getByRole("button", { name: "Agregar factura", exact: true, includeHidden: true })
     .click();
   check(
     await dialog()
@@ -823,6 +830,7 @@ async (page) => {
       .isDisabled(),
     "Factura desde lote conserva el proveedor",
   );
+  await dialog().getByRole("textbox", { name: "Número de factura", exact: true }).fill(" cli-0001 ");
   check(
     (await page.locator("form form").count()) === 0,
     "Los diálogos no anidan formularios HTML",
@@ -1322,11 +1330,11 @@ async (page) => {
   await dialog()
     .getByRole("combobox", { name: "Lote de material", exact: true })
     .fill("MAT-26-041");
-  await dialog().getByRole("option", { name: "MAT-26-041", exact: true }).click();
+  await page.getByRole("option", { name: "MAT-26-041", exact: true }).click();
   await dialog()
     .getByRole("combobox", { name: "Buscar número de factura", exact: true })
     .fill("ENV-00412");
-  await dialog().getByRole("option", { name: "ENV-00412", exact: true }).click();
+  await page.getByRole("option", { name: "ENV-00412", exact: true }).click();
   await dialog()
     .getByRole("button", { name: "Guardar recepción", exact: true })
     .click();
@@ -2015,7 +2023,7 @@ async (page) => {
   await dialog().getByRole('combobox', { name: 'Estado', exact: true }).selectOption('cerrado');
   const selectedInvoiceNumber = initial.factura.find((invoice) => invoice.id === sid(152)).numero_factura;
   await dialog().getByRole('combobox', { name: 'Buscar número de factura', exact: true }).fill(selectedInvoiceNumber);
-  await dialog().getByRole('option', { name: selectedInvoiceNumber, exact: true }).click();
+  await page.getByRole('option', { name: selectedInvoiceNumber, exact: true }).click();
   await dialog().getByRole('button', { name: 'Guardar lote', exact: true }).click();
   await page.getByRole('dialog').waitFor({ state: 'hidden' });
   await page.getByRole('button', { name: 'Agregar lote', exact: true }).click();

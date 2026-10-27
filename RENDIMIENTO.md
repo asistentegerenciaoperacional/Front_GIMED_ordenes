@@ -486,3 +486,27 @@ referencia y los límites. Los informes anteriores permanecen como
 y `material-demand-before-maia-labels-performance.json` en la misma carpeta.
 Las tablas anteriores reflejan la compilación final; las diferencias entre
 ejecuciones no se atribuyen causalmente al cambio de etiquetas.
+
+
+## Vinculación manual OC–OCM — 27 de octubre de 2026
+
+**39/39 límites aprobados**, compilaciones de producción contra el commit de recuperación `d905af2`, mismo equipo y Chrome, datos deterministas y CPU sin limitación. Se mantienen los presupuestos acordados de interacción, carga y memoria. La acción nueva no tenía equivalente anterior: se comparan las operaciones compartidas y la navegación al detalle; su selector se mide adicionalmente por separado.
+
+| Lotes / ancho | Carga P95 antes → después (ms) | Detalle P95 antes → después (ms) | Heap estable antes → después (MB) |
+|---|---:|---:|---:|
+| 6000 / 1440 px | 143.20 → 146.30 | 42.00 → 37.60 | 17.79 → 17.87 |
+| 6000 / 375 px | 129.50 → 129.10 | 36.60 → 37.80 | 16.50 → 16.55 |
+| 60000 / 1440 px | 676.10 → 662.30 | 49.80 → 53.20 | 41.10 → 40.23 |
+
+El primer ensayo detectó una regresión al calcular todos los pendientes antes de filtrar la OC abierta. Se añadió alcance por OC a la consulta común, con una prueba de equivalencia de resultados. Las muestras diagnósticas se conservan como `before-scoping-*`; la tabla y comparación corresponden a la compilación final.
+
+El selector nuevo limita el DOM a 50 coincidencias más la selección conservada, buscando sobre el conjunto completo. Cada interacción tiene 20 muestras de evento a resultado visible, separando la automatización; se ensayan 50 ciclos de apertura/cierre con liberación de objetos.
+
+| Lotes | OCM compatibles | Mayor P95 del flujo nuevo (ms) | Heap tras 50 ciclos: antes → después (MB) |
+|---|---:|---:|---:|
+| 6000 | 291 | 49.00 | 14.31 → 14.65 |
+| 60000 | 2909 | 49.40 | 29.92 → 30.22 |
+
+Ambos escenarios cumplen el límite de memoria y encuentran una OCM fuera de las primeras 50 coincidencias. Los informes conservan muestras, tareas largas, recursos JS, hashes de fixtures y uso de heap. Las mediciones aíslan la UI con una API sintética; no representan latencia de escritura en disco. CPU 4× no se ejecutó en este cambio y permanece como ensayo separado.
+
+[Comparación](tests/evidence/manual-supply/comparison.json), [referencia](tests/evidence/manual-supply/baseline-performance.json), [compilación final](tests/evidence/manual-supply/after-performance.json), [selector nuevo](tests/evidence/manual-supply/new-flow-performance.json). Reproducción: `node scripts/benchmark-manual-supply.mjs`.

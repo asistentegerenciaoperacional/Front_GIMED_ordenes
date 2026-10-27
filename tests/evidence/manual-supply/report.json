@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-27T14:35:37.278548+00:00",
+  "recoveryCommit": "d905af2b2e6a8afb5dc0b18de53cde46bd3ee067",
+  "databaseSha256": "2eadb88592c002a778c14ffff861d10bf56a9ce791eebdc76beac94d77511019",
+  "schemaSha256": "494b4c653fc5e9929e9ec8023b7f3756671b229669fd1a916c46b72f4625e475",
+  "unitTests": 242,
+  "generalBrowserChecks": 598,
+  "engines": {
+    "chromium": {
+      "manualChecks": 36,
+      "consolidationChecks": 74,
+      "viewports": [
+        375,
+        768,
+        1024,
+        1440
+      ]
+    },
+    "firefox": {
+      "manualChecks": 36,
+      "consolidationChecks": 74,
+      "viewports": [
+        375,
+        768,
+        1024,
+        1440
+      ]
+    },
+    "webkit": {
+      "manualChecks": 36,
+      "consolidationChecks": 74,
+      "viewports": [
+        375,
+        768,
+        1024,
+        1440
+      ]
+    }
+  },
+  "performancePassed": true,
+  "performanceChecks": 39,
+  "newFlowMemoryPassed": true,
+  "stressExecuted": false,
+  "sourceSha256": {
+    "src/orders.tsx": "7709f260ee146c79394fae5e9626d9a6e735fae4c8a8ea49f9579fcd1977b360",
+    "src/material-supply.tsx": "db38ee09b1af1f234a181a95d6d538acaf4aea88621a06687bab96fe920e4b38",
+    "shared/material-demand.ts": "e379e52ac3b95908f457c5bb485aed256faf1c936dc9b7e38d13818792e0e9a2",
+    "shared/material-supply.ts": "f6e6470a08c47490a27e0892e0fa102815ae8bf123d06275f60e1a08d754a888",
+    "server/domain.ts": "9e062f1d047383dbe6920fa744cdb5049e336411ed530ef84acd5fc992cf5b9d",
+    "server/integrity.ts": "55a90c1d69c0976e3bb1d968ce0232e918a04b469e97dc91c951823d3c13a793"
+  }
+}
