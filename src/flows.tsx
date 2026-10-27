@@ -18,6 +18,7 @@ import {
   Settings2,
 } from "lucide-react";
 import { Fragment, useMemo, useState } from "react";
+import { AppearanceSettings } from "./appearance-settings";
 import type { codigos_barras } from "../shared/models";
 import { assignedBarcode } from "../shared/schema";
 import {
@@ -1457,6 +1458,7 @@ export function SettingsPage() {
     }
   }
   const groups = [
+    { id: "apariencia", label: "Apariencia" },
     { id: "tolerancia", label: "Tolerancia de seguimiento" },
     { id: "contacto_interno", label: "Contactos internos" },
     { id: "destinatario_evento", label: "Destinatarios sugeridos" },
@@ -1483,11 +1485,13 @@ export function SettingsPage() {
           label="Apartados de configuración"
         />
         <TabContent id={tab}>
-          {[
-            "contacto_interno",
-            "destinatario_evento",
-            "adjunto_evento",
-          ].includes(tab) ? (
+          {tab === "apariencia" ? (
+            <AppearanceSettings />
+          ) : [
+              "contacto_interno",
+              "destinatario_evento",
+              "adjunto_evento",
+            ].includes(tab) ? (
             <CatalogTable key={tab} entity={tab as Entity} />
           ) : tab === "plantilla" ? (
             <section className="panel">

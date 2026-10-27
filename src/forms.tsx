@@ -65,6 +65,16 @@ import {
 } from "./components/controls";
 import { Documents } from "./document-controls";
 import { TooltipHelp } from "./components/overlays";
+import { OrderEntrySheet } from "./order-entry-sheet";
+import {
+  blankSheetLine,
+  compactSheetLines,
+  isEmptySheetLine,
+  indexedOrderLineErrors,
+  orderLinePayload,
+  padSheetLines,
+} from "./order-entry-draft";
+import { readOrderEntryPreference } from "./ui-preferences";
 import {
   entityValidation,
   validEntityField,
@@ -1265,6 +1275,10 @@ export function OrderForm({
 }) {
   const { db, run, navigate } = useApp();
   const supplyCreation = Boolean(abastecimiento && !order);
+  const [alternativeEntry] = useState(
+    () => !order && readOrderEntryPreference(),
+  );
+  const [activeSheetRow, setActiveSheetRow] = useState(0);
   const [type, setType] = useState(
     order?.tipo_orden ?? (supplyCreation ? "material" : initialType),
   );
@@ -1318,13 +1332,18 @@ export function OrderForm({
       precio_unitario: "0.00",
     };
   };
-  const [lines, setLines] = useState<Row[]>(() =>
-    order
+  const [lines, setLines] = useState<Row[]>(() => {
+    const initialLines = order
       ? orderLines(db, order.id).map((l) => ({ ...l, sticker_pct: 10 }))
       : abastecimiento
         ? consolidateMaterialSources(abastecimiento.fuentes)
-        : [fresh(initialType, suppliers(initialType)[0]?.id ?? "")],
-  );
+        : alternativeEntry
+          ? []
+          : [fresh(initialType, suppliers(initialType)[0]?.id ?? "")];
+    return alternativeEntry
+      ? padSheetLines(initialLines, () => fresh(type, supplier))
+      : initialLines;
+  });
   const [stage, setStage] = useState(1);
   const materialGroups = materialSupplierGroups(
     db,
@@ -1435,7 +1454,13 @@ export function OrderForm({
             ))
         );
       }
-      if (field === "lines") return lines.length >= 1 && lines.length <= 7;
+      if (field === "lines") {
+        const count =
+          alternativeEntry && stage === 1
+            ? compactSheetLines(lines).length
+            : lines.length;
+        return count >= 1 && count <= 7;
+      }
       const validLine = (line: Row, key: string) => {
         if (key === "adicional_pct")
           return (
@@ -1533,7 +1558,12 @@ export function OrderForm({
     setType(t);
     const provider = suppliers(t)[0]?.id ?? "";
     setSupplier(provider);
-    setLines([fresh(t, provider)]);
+    setLines(
+      alternativeEntry
+        ? padSheetLines([], () => fresh(t, provider))
+        : [fresh(t, provider)],
+    );
+    setActiveSheetRow(0);
     setStage(1);
     setDirty(true);
   }
@@ -1555,7 +1585,14 @@ export function OrderForm({
       return;
     }
     setSupplier(provider);
-    if (!order && !supplyCreation) setLines([fresh(type, provider)]);
+    if (!order && !supplyCreation) {
+      setLines(
+        alternativeEntry
+          ? padSheetLines([], () => fresh(type, provider))
+          : [fresh(type, provider)],
+      );
+      setActiveSheetRow(0);
+    }
     setDirty(true);
   }
   function acceptSupplierChange() {
@@ -1595,7 +1632,51 @@ export function OrderForm({
     );
     setDirty(true);
   }
+  function changeQuantity(index: number, raw: string) {
+    update(index, "cantidad_solicitada", raw === "" ? NaN : Number(raw));
+    setLines((previous) =>
+      previous.map((line, position) =>
+        position !== index
+          ? line
+          : {
+              ...line,
+              ...(alternativeEntry
+                ? { _sheet: { ...line._sheet, quantityInput: raw } }
+                : {}),
+              ...(type === "producto"
+                ? {
+                    cantidad_corrugado: null,
+                    cantidad_sticker: null,
+                    cantidad_cinta: null,
+                  }
+                : {}),
+            },
+      ),
+    );
+  }
+  function changeSheetQuery(index: number, query: string) {
+    setLines((previous) =>
+      previous.map((line, position) =>
+        position !== index || line._sheet?.query === query
+          ? line
+          : { ...line, _sheet: { ...line._sheet, query } },
+      ),
+    );
+    if (query) setDirty(true);
+  }
+  function showEntry() {
+    if (alternativeEntry)
+      setLines((previous) =>
+        padSheetLines(previous, () => fresh(type, supplier)),
+      );
+    setStage(1);
+  }
   function review() {
+    const candidates = alternativeEntry ? compactSheetLines(lines) : lines;
+    if (alternativeEntry) {
+      setLines(padSheetLines(candidates, () => fresh(type, supplier)));
+      setActiveSheetRow(0);
+    }
     try {
       if (supplyConflict) return;
       setError(null);
@@ -1605,6 +1686,8 @@ export function OrderForm({
           fields: { id_proveedor: "Campo obligatorio." },
         });
       const issues: Row = {};
+      if (alternativeEntry && !candidates.length)
+        issues.lines = "Añade al menos un renglón a la orden.";
       const deliveryCheck = orderDeliverySchema.safeParse(isoDate(delivery));
       if (!deliveryCheck.success)
         issues.fecha_solicitada_entrega = deliveryCheck.error.issues[0].message;
@@ -1630,56 +1713,54 @@ export function OrderForm({
         if (linkedSupplyIssue)
           issues.fecha_solicitada_entrega = linkedSupplyIssue;
       }
-      lines.forEach((l, i) => {
-        if (
-          supplyCreation &&
-          (!Number.isFinite(l.adicional_pct) ||
-            l.adicional_pct < 5 ||
-            l.adicional_pct > 10)
-        )
-          issues[`lines.${i}.adicional_pct`] =
-            "Introduce un adicional entre 5 y 10 %.";
-        if (type === "producto" && !l.id_producto)
-          issues[`lines.${i}.id_producto`] = "Selecciona un producto.";
-        if (type === "producto" && !assignedBarcode(db, l.id_producto) && !l.id)
-          issues[`lines.${i}.id_producto`] =
-            "El producto no tiene código asignado.";
-        if (type === "producto" && l.id_producto) {
-          const original =
-            order &&
-            db.orden_producto.find(
-              (row) => row.id === l.id && row.id_orden_compra === order.id,
-            );
-          const product = db.productos.find((row) => row.id === l.id_producto);
+      Object.assign(
+        issues,
+        indexedOrderLineErrors(candidates, (l) => {
+          const fields: Record<string, string> = {};
           if (
-            product?.activo !== true &&
-            original?.id_producto !== l.id_producto
+            supplyCreation &&
+            (!Number.isFinite(l.adicional_pct) ||
+              l.adicional_pct < 5 ||
+              l.adicional_pct > 10)
           )
-            issues[`lines.${i}.id_producto`] = "Selecciona un producto activo.";
-          if ((!original || replacement) && product?.id_maquilador !== supplier)
-            issues[`lines.${i}.id_producto`] =
-              "Selecciona un producto del proveedor de la orden.";
-        }
-        if (type === "material" && !l.id_material)
-          issues[`lines.${i}.id_material`] = "Selecciona un material.";
-        if (type === "otro" && !l.producto?.trim())
-          issues[`lines.${i}.producto`] = "Escribe el concepto.";
-        if (!Number.isSafeInteger(l.cantidad_solicitada))
-          issues[`lines.${i}.cantidad_solicitada`] =
-            "Introduce una cantidad entera.";
-        try {
-          decimal(l.precio_unitario);
-        } catch {
-          issues[`lines.${i}.precio_unitario`] =
-            "Introduce un precio con hasta dos decimales.";
-        }
-      });
+            fields.adicional_pct = "Introduce un adicional entre 5 y 10 %.";
+          if (type === "producto" && !l.id_producto)
+            fields.id_producto = "Selecciona un producto.";
+          if (type === "producto" && !assignedBarcode(db, l.id_producto) && !l.id)
+            fields.id_producto = "El producto no tiene código asignado.";
+          if (type === "producto" && l.id_producto) {
+            const original =
+              order &&
+              db.orden_producto.find(
+                (row) => row.id === l.id && row.id_orden_compra === order.id,
+              );
+            const product = db.productos.find((row) => row.id === l.id_producto);
+            if (product?.activo !== true && original?.id_producto !== l.id_producto)
+              fields.id_producto = "Selecciona un producto activo.";
+            if ((!original || replacement) && product?.id_maquilador !== supplier)
+              fields.id_producto =
+                "Selecciona un producto del proveedor de la orden.";
+          }
+          if (type === "material" && !l.id_material)
+            fields.id_material = "Selecciona un material.";
+          if (type === "otro" && !l.producto?.trim())
+            fields.producto = "Escribe el concepto.";
+          if (!Number.isSafeInteger(l.cantidad_solicitada))
+            fields.cantidad_solicitada = "Introduce una cantidad entera.";
+          try {
+            decimal(l.precio_unitario);
+          } catch {
+            fields.precio_unitario = "Introduce un precio con hasta dos decimales.";
+          }
+          return fields;
+        }),
+      );
       if (Object.keys(issues).length)
         throw new ApiError({
           message: "Revisa los datos de la orden.",
           fields: issues,
         });
-      const final: Row[] = lines.map((l) =>
+      const final: Row[] = candidates.map((l) =>
         type === "producto"
           ? {
               ...l,
@@ -1751,7 +1832,9 @@ export function OrderForm({
                 cantidad_solicitada: line.cantidad_solicitada,
                 precio_unitario: line.precio_unitario,
               }))
-            : lines,
+            : alternativeEntry
+              ? lines.map(orderLinePayload)
+              : lines,
           ...(supplyCreation ? { abastecimiento } : {}),
         },
         order ? "Orden actualizada" : "Orden creada",
@@ -1770,7 +1853,7 @@ export function OrderForm({
             /^lines\.\d+\.id_producto$/.test(field),
         )
       )
-        setStage(1);
+        showEntry();
     } finally {
       submittingOrder.current = false;
       setBusy(false);
@@ -1790,11 +1873,309 @@ export function OrderForm({
       return "—";
     }
   };
+  const entryFields = {
+    type: (
+      <Field id="field-tipo_orden" label="Tipo de orden">
+        <ControlSelect
+          id="field-tipo_orden"
+          value={type}
+          disabled={!!order || supplyCreation}
+          onChange={(e) => switchType(e.target.value)}
+        >
+          {["producto", "material", "otro"].map((t) => (
+            <option key={t} value={t}>
+              {text(t)}
+            </option>
+          ))}
+        </ControlSelect>
+      </Field>
+    ),
+    number: (
+      <Field
+        id="field-no_orden"
+        label="Número de orden"
+        error={error?.fields.no_orden}
+      >
+        <ControlInput
+          id="field-no_orden"
+          value={number}
+          readOnly
+          autoComplete="off"
+        />
+      </Field>
+    ),
+    provider: (
+      <Field
+        id="field-id_proveedor"
+        label="Proveedor"
+        required
+        error={error?.fields.id_proveedor}
+      >
+        <ProviderPicker
+          id="field-id_proveedor"
+          value={supplier}
+          disabled={authorized}
+          providers={
+            type === "material"
+              ? [...materialGroups.favorites, ...materialGroups.others]
+              : suppliers(type)
+          }
+          sections={
+            type === "material"
+              ? Object.fromEntries([
+                  ...materialGroups.favorites.map((p) => [p.id, "Favoritos"]),
+                  ...materialGroups.others.map((p) => [
+                    p.id,
+                    "Otros proveedores",
+                  ]),
+                ])
+              : undefined
+          }
+          commitOnSelection
+          onChange={(id) => {
+            if (id) changeSupplier(id);
+          }}
+        />
+      </Field>
+    ),
+    date: (
+      <Field
+        id="field-fecha_elaboracion"
+        label={
+          alternativeEntry && stage === 1 ? "Fecha" : "Fecha de elaboración"
+        }
+      >
+        <DateInput
+          id="field-fecha_elaboracion"
+          aria-label="Fecha de elaboración"
+          value={order ? date : today()}
+          readOnly={!order}
+          onChange={(value) => {
+            setDate(value);
+            setDirty(true);
+          }}
+        />
+      </Field>
+    ),
+    delivery: (
+      <Field
+        id="field-fecha_solicitada_entrega"
+        label={
+          alternativeEntry && stage === 1
+            ? "Fecha entrega"
+            : "Entrega solicitada"
+        }
+        required
+        error={error?.fields.fecha_solicitada_entrega}
+      >
+        <DateInput
+          id="field-fecha_solicitada_entrega"
+          aria-label="Entrega solicitada"
+          value={delivery}
+          onChange={(value) => {
+            setDelivery(value);
+            setDirty(true);
+          }}
+        />
+      </Field>
+    ),
+  };
+  function renderEntryItem(l: Row, i: number) {
+    const key = (field: string) => `field-lines.${i}.${field}`;
+    const selectedProduct = db.productos.find(
+      (product) => product.id === l.id_producto,
+    );
+    const original =
+      order &&
+      db.orden_producto.find(
+        (line) => line.id === l.id && line.id_orden_compra === order.id,
+      );
+    return (
+      <Field
+        id={key(
+          type === "producto"
+            ? "id_producto"
+            : type === "material"
+              ? "id_material"
+              : "producto",
+        )}
+        label={
+          type === "producto"
+            ? "Producto"
+            : type === "material"
+              ? "Material"
+              : "Producto o concepto"
+        }
+        required={!alternativeEntry || !isEmptySheetLine(l)}
+        error={
+          error?.fields[
+            `lines.${i}.${type === "producto" ? "id_producto" : type === "material" ? "id_material" : "producto"}`
+          ] ?? error?.fields.id_producto
+        }
+      >
+        {type === "producto" ? (
+          <ProductPicker
+            id={key("id_producto")}
+            products={[
+              ...(selectedProduct &&
+              selectedProduct.activo !== true &&
+              original?.id_producto === selectedProduct.id
+                ? [selectedProduct]
+                : []),
+              ...db.productos.filter(
+                (p) =>
+                  p.activo === true &&
+                  (p.id_maquilador === supplier ||
+                    p.id === original?.id_producto),
+              ),
+            ]}
+            value={String(l.id_producto ?? "")}
+            placeholder={alternativeEntry ? "" : undefined}
+            onQueryChange={
+              alternativeEntry
+                ? (query) => changeSheetQuery(i, query)
+                : undefined
+            }
+            disabled={productsLocked}
+            aria-describedby={
+              productsLocked ? "order-products-locked" : undefined
+            }
+            onChange={(id) => changeProduct(i, id)}
+          />
+        ) : type === "material" ? (
+          <MaterialPicker
+            id={key("id_material")}
+            materials={db.materiales}
+            value={l.id_material}
+            placeholder={alternativeEntry ? "" : undefined}
+            onQueryChange={
+              alternativeEntry
+                ? (query) => changeSheetQuery(i, query)
+                : undefined
+            }
+            disabled={supplyCreation}
+            aria-describedby={
+              supplyCreation ? "order-supply-locked" : undefined
+            }
+            onChange={(id) => update(i, "id_material", id)}
+          />
+        ) : (
+          <>
+            <ControlInput
+              id={key("producto")}
+              value={l.producto}
+              list={`conceptos-anteriores-${i}`}
+              placeholder={
+                alternativeEntry ? "" : "Escribe o selecciona un concepto…"
+              }
+              onChange={(e) => update(i, "producto", e.target.value)}
+            />
+            <SuggestionList id={`conceptos-anteriores-${i}`}>
+              {[...new Set(db.orden_otro.map((o) => o.producto))].map((p) => (
+                <option key={p} value={p} />
+              ))}
+            </SuggestionList>
+          </>
+        )}
+      </Field>
+    );
+  }
+  function renderEntryQuantity(l: Row, i: number) {
+    const key = (field: string) => `field-lines.${i}.${field}`;
+    return (
+      <Field
+        id={key("cantidad_solicitada")}
+        label="Cantidad solicitada"
+        required={!alternativeEntry || !isEmptySheetLine(l)}
+        error={error?.fields[`lines.${i}.cantidad_solicitada`]}
+      >
+        <ControlInput
+          disabled={alternativeEntry && supplyCreation && !l.id_material}
+          id={key("cantidad_solicitada")}
+          type="number"
+          step="1"
+          value={
+            Number.isNaN(l.cantidad_solicitada) ? "" : l.cantidad_solicitada
+          }
+          onChange={(event) => changeQuantity(i, event.target.value)}
+        />
+      </Field>
+    );
+  }
+  function renderEntryPrice(l: Row, i: number) {
+    const key = (field: string) => `field-lines.${i}.${field}`;
+    return (
+      <Field
+        id={key("precio_unitario")}
+        label="Precio unitario"
+        required={!alternativeEntry || !isEmptySheetLine(l)}
+        error={
+          error?.fields[`lines.${i}.precio_unitario`] ??
+          error?.fields.precio_unitario
+        }
+      >
+        <ControlInput
+          disabled={alternativeEntry && supplyCreation && !l.id_material}
+          id={key("precio_unitario")}
+          inputMode="decimal"
+          value={l.precio_unitario}
+          onChange={(e) => update(i, "precio_unitario", e.target.value)}
+        />
+      </Field>
+    );
+  }
+  function renderEntryAdditional(l: Row, i: number) {
+    const key = (field: string) => `field-lines.${i}.${field}`;
+    return (
+      <Field
+        id={key("adicional_pct")}
+        label="Adicional (%)"
+        tooltip="Base de las OC seleccionadas × (1 + adicional / 100), redondeada hacia arriba"
+        error={error?.fields[`lines.${i}.adicional_pct`]}
+      >
+        <ControlInput
+          id={key("adicional_pct")}
+          aria-label={`Adicional del material ${i + 1} (%)`}
+          type="number"
+          min="5"
+          max="10"
+          step="any"
+          value={Number.isFinite(l.adicional_pct) ? l.adicional_pct : ""}
+          onChange={(event) => {
+            const percent =
+              event.target.value === "" ? NaN : Number(event.target.value);
+            setDirty(true);
+            setLines((previous) =>
+              previous.map((line, index) => {
+                if (index !== i) return line;
+                try {
+                  return {
+                    ...line,
+                    adicional_pct: percent,
+                    cantidad_solicitada: demandQuantity(
+                      line.cantidad_base,
+                      percent,
+                    ),
+                  };
+                } catch {
+                  return {
+                    ...line,
+                    adicional_pct: percent,
+                  };
+                }
+              }),
+            );
+          }}
+        />
+      </Field>
+    );
+  }
   return (
     <Dialog
       title={
         order ? `Editar orden · ${order.no_orden}` : "Nueva orden de compra"
       }
+      className={alternativeEntry && stage === 1 ? "order-entry-dialog" : ""}
       subtitle={
         stage === 1
           ? `1. Datos y ${orderItemLabel(type, true)} de la orden`
@@ -1839,102 +2220,139 @@ export function OrderForm({
               Abrir orden existente
             </Button>
           )}
-          {stage === 1 ? (
+          {stage === 1 && alternativeEntry ? (
+            <>
+              <div className="order-sheet-type">{entryFields.type}</div>
+              <OrderEntrySheet
+                title={
+                  type === "producto"
+                    ? "ORDEN DE PRODUCCIÓN"
+                    : "ORDEN DE COMPRA"
+                }
+                number={entryFields.number}
+                date={entryFields.date}
+                delivery={entryFields.delivery}
+                provider={entryFields.provider}
+                nit={(() => {
+                  const provider = db.proveedor.find(
+                    (row) => row.id === supplier,
+                  );
+                  return provider?.nit
+                    ? `${provider.nit}${provider.digito_verf ? `-${provider.digito_verf}` : ""}`
+                    : "";
+                })()}
+                rows={lines.map((line, index) => ({
+                  key: line._sheet.key,
+                  cells: [
+                    type === "producto"
+                      ? (assignedBarcode(db, line.id_producto)?.codigo ?? "")
+                      : type === "material"
+                        ? (db.materiales
+                            .find(
+                              (material) => material.id === line.id_material,
+                            )
+                            ?.codigo_material?.toString()
+                            .padStart(3, "0") ?? "")
+                        : "",
+                    renderEntryItem(line, index),
+                    renderEntryQuantity(line, index),
+                    renderEntryPrice(line, index),
+                    isEmptySheetLine(line) ? (
+                      ""
+                    ) : (
+                      <output aria-label={`Total del renglón ${index + 1}`}>
+                        {total([line])}
+                      </output>
+                    ),
+                  ],
+                }))}
+                total={total(compactSheetLines(lines))}
+                activeRow={activeSheetRow}
+                onActiveRow={setActiveSheetRow}
+                clearDisabled={
+                  supplyCreation || isEmptySheetLine(lines[activeSheetRow])
+                }
+                onClear={() => {
+                  setLines((previous) =>
+                    previous.map((line, index) => {
+                      if (index !== activeSheetRow) return line;
+                      return blankSheetLine(() => fresh(type, supplier));
+                    }),
+                  );
+                  setDirty(true);
+                }}
+              />
+              {type === "producto" &&
+                lines.some(
+                  (line) =>
+                    line.id_producto &&
+                    (!assignedBarcode(db, line.id_producto) ||
+                      !currentCost(db, line.id_producto)),
+                ) && (
+                  <div className="order-sheet-notes">
+                    {lines.map(
+                      (line, index) =>
+                        line.id_producto && (
+                          <div key={line._sheet.key}>
+                            {!assignedBarcode(db, line.id_producto) && (
+                              <small>
+                                Fila {index + 1}: Sin código asignado.
+                              </small>
+                            )}
+                            {!currentCost(db, line.id_producto) && (
+                              <small>
+                                Fila {index + 1}: Sin costo registrado.
+                              </small>
+                            )}
+                          </div>
+                        ),
+                    )}
+                  </div>
+                )}
+              {supplyCreation && (
+                <section
+                  className="order-sheet-supply"
+                  aria-label="Detalle de abastecimiento"
+                >
+                  <h3>Detalle de abastecimiento</h3>
+                  {lines.map(
+                    (line, index) =>
+                      line.id_material && (
+                        <div className="order-form-line" key={line._sheet.key}>
+                          <h4>
+                            Fila {index + 1} ·{" "}
+                            {
+                              db.materiales.find(
+                                (material) => material.id === line.id_material,
+                              )?.nombre_material
+                            }
+                          </h4>
+                          <p className="order-line-basis">
+                            Base según OC: {count(line.cantidad_base)} unidades
+                            · Orígenes:{" "}
+                            {supplyOrigins
+                              .get(line.id_material)
+                              ?.map((origin) =>
+                                orderReference("producto", origin.no_orden),
+                              )
+                              .join(", ")}{" "}
+                            · {line.fuentes.length} renglones de producto
+                          </p>
+                          {renderEntryAdditional(line, index)}
+                        </div>
+                      ),
+                  )}
+                </section>
+              )}
+            </>
+          ) : stage === 1 ? (
             <>
               <div className="form-grid three">
-                <Field id="field-tipo_orden" label="Tipo de orden">
-                  <ControlSelect
-                    id="field-tipo_orden"
-                    value={type}
-                    disabled={!!order || supplyCreation}
-                    onChange={(e) => switchType(e.target.value)}
-                  >
-                    {["producto", "material", "otro"].map((t) => (
-                      <option key={t} value={t}>
-                        {text(t)}
-                      </option>
-                    ))}
-                  </ControlSelect>
-                </Field>
-                <Field
-                  id="field-no_orden"
-                  label="Número de orden"
-                  error={error?.fields.no_orden}
-                >
-                  <ControlInput
-                    id="field-no_orden"
-                    value={number}
-                    readOnly
-                    autoComplete="off"
-                  />
-                </Field>
-                <Field
-                  id="field-id_proveedor"
-                  label="Proveedor"
-                  required
-                  error={error?.fields.id_proveedor}
-                >
-                  <ProviderPicker
-                    id="field-id_proveedor"
-                    value={supplier}
-                    disabled={authorized}
-                    providers={
-                      type === "material"
-                        ? [
-                            ...materialGroups.favorites,
-                            ...materialGroups.others,
-                          ]
-                        : suppliers(type)
-                    }
-                    sections={
-                      type === "material"
-                        ? Object.fromEntries([
-                            ...materialGroups.favorites.map((p) => [
-                              p.id,
-                              "Favoritos",
-                            ]),
-                            ...materialGroups.others.map((p) => [
-                              p.id,
-                              "Otros proveedores",
-                            ]),
-                          ])
-                        : undefined
-                    }
-                    commitOnSelection
-                    onChange={(id) => {
-                      if (id) changeSupplier(id);
-                    }}
-                  />
-                </Field>
-                <Field
-                  id="field-fecha_elaboracion"
-                  label="Fecha de elaboración"
-                >
-                  <DateInput
-                    id="field-fecha_elaboracion"
-                    value={order ? date : today()}
-                    readOnly={!order}
-                    onChange={(value) => {
-                      setDate(value);
-                      setDirty(true);
-                    }}
-                  />
-                </Field>
-                <Field
-                  id="field-fecha_solicitada_entrega"
-                  label="Entrega solicitada"
-                  required
-                  error={error?.fields.fecha_solicitada_entrega}
-                >
-                  <DateInput
-                    id="field-fecha_solicitada_entrega"
-                    value={delivery}
-                    onChange={(value) => {
-                      setDelivery(value);
-                      setDirty(true);
-                    }}
-                  />
-                </Field>
+                {entryFields.type}
+                {entryFields.number}
+                {entryFields.provider}
+                {entryFields.date}
+                {entryFields.delivery}
               </div>
               <div>
                 {productsLocked && (
@@ -2005,89 +2423,7 @@ export function OrderForm({
                         </p>
                       )}
                       <div className="form-grid three">
-                        <Field
-                          id={key(
-                            type === "producto"
-                              ? "id_producto"
-                              : type === "material"
-                                ? "id_material"
-                                : "producto",
-                          )}
-                          label={
-                            type === "producto"
-                              ? "Producto"
-                              : type === "material"
-                                ? "Material"
-                                : "Producto o concepto"
-                          }
-                          required
-                          error={
-                            error?.fields[
-                              `lines.${i}.${type === "producto" ? "id_producto" : type === "material" ? "id_material" : "producto"}`
-                            ] ?? error?.fields.id_producto
-                          }
-                        >
-                          {type === "producto" ? (
-                            <ProductPicker
-                              id={key("id_producto")}
-                              products={[
-                                ...(selectedProduct &&
-                                selectedProduct.activo !== true &&
-                                original?.id_producto === selectedProduct.id
-                                  ? [selectedProduct]
-                                  : []),
-                                ...db.productos.filter(
-                                  (p) =>
-                                    p.activo === true &&
-                                    (p.id_maquilador === supplier ||
-                                      p.id === original?.id_producto),
-                                ),
-                              ]}
-                              value={String(l.id_producto ?? "")}
-                              disabled={productsLocked}
-                              aria-describedby={
-                                productsLocked
-                                  ? "order-products-locked"
-                                  : undefined
-                              }
-                              onChange={(id) => changeProduct(i, id)}
-                            />
-                          ) : type === "material" ? (
-                            <MaterialPicker
-                              id={key("id_material")}
-                              materials={db.materiales}
-                              value={l.id_material}
-                              disabled={supplyCreation}
-                              aria-describedby={
-                                supplyCreation
-                                  ? "order-supply-locked"
-                                  : undefined
-                              }
-                              onChange={(id) => update(i, "id_material", id)}
-                            />
-                          ) : (
-                            <>
-                              <ControlInput
-                                id={key("producto")}
-                                value={l.producto}
-                                list={`conceptos-anteriores-${i}`}
-                                placeholder="Escribe o selecciona un concepto…"
-                                onChange={(e) =>
-                                  update(i, "producto", e.target.value)
-                                }
-                              />
-                              <SuggestionList id={`conceptos-anteriores-${i}`}>
-                                {[
-                                  ...new Set(
-                                    db.orden_otro.map((o) => o.producto),
-                                  ),
-                                ].map((p) => (
-                                  <option key={p} value={p} />
-                                ))}
-                              </SuggestionList>
-                            </>
-                          )}
-                        </Field>
+                        {renderEntryItem(l, i)}
                         <div
                           className={
                             supplyCreation
@@ -2095,119 +2431,14 @@ export function OrderForm({
                               : "order-quantity-fields"
                           }
                         >
-                          <Field
-                            id={key("cantidad_solicitada")}
-                            label="Cantidad solicitada"
-                            required
-                            error={
-                              error?.fields[`lines.${i}.cantidad_solicitada`]
-                            }
-                          >
-                            <ControlInput
-                              id={key("cantidad_solicitada")}
-                              type="number"
-                              step="1"
-                              value={
-                                Number.isNaN(l.cantidad_solicitada)
-                                  ? ""
-                                  : l.cantidad_solicitada
-                              }
-                              onChange={(e) => {
-                                update(
-                                  i,
-                                  "cantidad_solicitada",
-                                  e.target.value === ""
-                                    ? NaN
-                                    : Number(e.target.value),
-                                );
-                                if (type === "producto")
-                                  setLines((old) =>
-                                    old.map((l, n) =>
-                                      n !== i
-                                        ? l
-                                        : {
-                                            ...l,
-                                            cantidad_corrugado: null,
-                                            cantidad_sticker: null,
-                                            cantidad_cinta: null,
-                                          },
-                                    ),
-                                  );
-                              }}
-                            />
-                          </Field>
+                          {renderEntryQuantity(l, i)}
                           {supplyCreation && (
                             <div className="demand-percent">
-                              <Field
-                                id={key("adicional_pct")}
-                                label="Adicional (%)"
-                                tooltip="Base de las OC seleccionadas × (1 + adicional / 100), redondeada hacia arriba"
-                                error={
-                                  error?.fields[`lines.${i}.adicional_pct`]
-                                }
-                              >
-                                <ControlInput
-                                  id={key("adicional_pct")}
-                                  aria-label={`Adicional del material ${i + 1} (%)`}
-                                  type="number"
-                                  min="5"
-                                  max="10"
-                                  step="any"
-                                  value={
-                                    Number.isFinite(l.adicional_pct)
-                                      ? l.adicional_pct
-                                      : ""
-                                  }
-                                  onChange={(event) => {
-                                    const percent =
-                                      event.target.value === ""
-                                        ? NaN
-                                        : Number(event.target.value);
-                                    setDirty(true);
-                                    setLines((previous) =>
-                                      previous.map((line, index) => {
-                                        if (index !== i) return line;
-                                        try {
-                                          return {
-                                            ...line,
-                                            adicional_pct: percent,
-                                            cantidad_solicitada: demandQuantity(
-                                              line.cantidad_base,
-                                              percent,
-                                            ),
-                                          };
-                                        } catch {
-                                          return {
-                                            ...line,
-                                            adicional_pct: percent,
-                                          };
-                                        }
-                                      }),
-                                    );
-                                  }}
-                                />
-                              </Field>
+                              {renderEntryAdditional(l, i)}
                             </div>
                           )}
                         </div>
-                        <Field
-                          id={key("precio_unitario")}
-                          label="Precio unitario"
-                          required
-                          error={
-                            error?.fields[`lines.${i}.precio_unitario`] ??
-                            error?.fields.precio_unitario
-                          }
-                        >
-                          <ControlInput
-                            id={key("precio_unitario")}
-                            inputMode="decimal"
-                            value={l.precio_unitario}
-                            onChange={(e) =>
-                              update(i, "precio_unitario", e.target.value)
-                            }
-                          />
-                        </Field>
+                        {renderEntryPrice(l, i)}
                         {type === "producto" && (
                           <div className="field">
                             <span className="field-label">
@@ -2502,14 +2733,16 @@ export function OrderForm({
               )}
             </>
           )}
-          <div className="order-totals">
-            <span>Total de la orden</span>
-            <strong className="num">{total()}</strong>
-          </div>
+          {!(alternativeEntry && stage === 1) && (
+            <div className="order-totals">
+              <span>Total de la orden</span>
+              <strong className="num">{total()}</strong>
+            </div>
+          )}
         </div>
         <div className="dialog-footer">
           {stage === 2 && (
-            <Button icon={ArrowLeft} onClick={() => setStage(1)}>
+            <Button icon={ArrowLeft} onClick={showEntry}>
               Volver
             </Button>
           )}

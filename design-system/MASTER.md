@@ -2,7 +2,7 @@
 
 Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
 
-Actualizado el 26 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+Actualizado el 27 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
 
 ## Bases
 
@@ -45,6 +45,22 @@ La migración, su punto de recuperación y su verificación se registran en [MIG
 - Iconos Lucide en SVG, decorativos con `aria-hidden`; controles de solo icono tienen nombre accesible. Todas las acciones de tabla usan `table-action` en `Button` o `LinkButton` para obtener el tooltip compartido `ActionTooltip`, al pasar el cursor o enfocar. El texto procede de `title`, `aria-label` o el texto del botón, en ese orden; se evita el tooltip nativo duplicado y la implementación por pantalla.
 
 Todas las pestañas de nivel 1 y 2 (`[role="tab"]`) y los encabezados de columna (`.data-table th`) muestran `cursor: pointer` al hacer hover.
+
+### Hoja alternativa de creación de órdenes
+
+Configuración → Apariencia permite activar **Vista alternativa de creación de órdenes**, desactivada por defecto. La elección se guarda en este navegador con la clave `gimed:ui:alternative-order-entry`; no pertenece a la base de compras ni al parámetro de listado `vista`. Cada formulario toma la preferencia al abrirse y mantiene su presentación durante todo el borrador. Si falla el almacenamiento, la elección funciona durante la sesión y Configuración informa que no persistirá.
+
+`OrderEntrySheet` es una presentación del paso 1 del `OrderForm` existente para productos, materiales y otros, incluida la creación desde Abastecimiento. Reutiliza los campos, autocompletados, calendario, reglas, cálculos y comandos actuales. El listado, la edición de órdenes existentes, el paso 2, el detalle y la impresión conservan sus componentes y estilos.
+
+La hoja constituye una excepción visual acotada a `.order-entry-sheet`: fondo blanco, texto negro, bordes negros de 1 px, Calibri/Arial de 15 px y etiquetas azules `#004890`. El título usa 24 px y peso 700 en `#003366`: **ORDEN DE PRODUCCIÓN No.** para productos y **ORDEN DE COMPRA No.** para materiales/otros. La cabecera reserva vacío el espacio del logo y mide al menos 96 px; las filas de fecha/entrega, proveedor y NIT miden 42 px. Fecha de elaboración y consecutivo son automáticos; NIT y códigos son de solo lectura.
+
+La cuadrícula muestra exactamente siete posiciones y cinco columnas: CÓDIGO, PRODUCTO, CANTIDAD, PRECIO UNIDAD y TOTAL, con proporciones 15/37/14/16/18 %. No incluye factura ni revisó. Encabezados y renglones tienen 44 px de altura; GRAN TOTAL tiene 38 px. Las cifras usan alineación derecha y dígitos tabulares. Los campos conservan nombres accesibles aunque sus etiquetas individuales se oculten visualmente dentro de la cuadrícula. El foco usa contorno azul interior; los errores conservan el resumen del diálogo y borde rojo interior en el campo/celda, sin mensajes inferiores duplicados.
+
+El selector de tipo, **Vaciar fila**, el indicador de fila activa y los avisos se sitúan fuera del documento. Desde Abastecimiento, los materiales y las posiciones adicionales permanecen bloqueados; bases, OC de origen y porcentajes adicionales se muestran en un panel auxiliar. En móvil la hoja conserva un ancho mínimo de 880 px con desplazamiento horizontal interno. El diálogo conserva su scroll vertical y sus acciones de revisión/cancelación.
+
+Se puede empezar a escribir en cualquiera de las siete filas. Vaciar fila limpia únicamente la posición activa, sin mover las demás. Revisar orden elimina exclusivamente las filas completamente vacías y compacta las restantes en su orden original antes de validarlas; los errores corresponden a esas nuevas posiciones. Cero explícito, número inválido, texto de búsqueda pendiente o cualquier fila parcial se conservan. Volver desde revisión restaura las siete posiciones y los ajustes de empaque.
+
+Dentro de la cuadrícula, las flechas recorren las celdas y Enter confirma la edición y baja una fila, sin enviar el formulario. En los límites no se avanza fuera de la hoja. Los menús de autocompletado abiertos conservan prioridad para seleccionar con flechas/Enter; una selección no produce además un salto de fila. Calendarios, Tab y Escape mantienen su comportamiento compartido. La navegación específica de la hoja se acota a esta tabla y no altera las otras tablas de React Aria.
 
 ### Historial de producto
 

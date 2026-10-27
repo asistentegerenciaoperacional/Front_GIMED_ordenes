@@ -1,5 +1,26 @@
 # Verificación del prototipo
 
+## Hoja alternativa de creación — 27 de octubre de 2026
+
+Compilación de producción y **267 pruebas automatizadas aprobadas**. Las pruebas nuevas cubren siete posiciones, claves estables, compactación con huecos, correspondencia de errores de cantidad/precio con las posiciones compactadas, conservación de filas parciales (cero, fracción, cantidad/precio inválido, consulta pendiente y concepto), separación de metadatos visuales del payload y preferencia local con recuperación ante escritura bloqueada.
+
+**Chromium y WebKit: 56 comprobaciones por motor**, con cuatro órdenes guardadas por recorrido en bases temporales. Incluyen los tres tipos de orden, siete posiciones, selección por autocompletado, navegación con flechas/Enter, prioridad del menú abierto, calendario, subtotales y total exactos, compactación `1,3 → 1,2` y `2,4,5 → 1,2,3`, errores en las nuevas posiciones, vaciado de la fila activa, cancelación, revisión y regreso, guardado sin metadatos de UI, OCM desde Abastecimiento con materiales bloqueados y conservación de bases/orígenes/adicionales. También comprueban edición clásica de una orden creada, impresión existente, ancho mínimo/ausencia de desborde a 375 px, preferencia desactivada por defecto, persistencia tras recarga y funcionamiento en sesión con almacenamiento bloqueado. Sin errores ni advertencias de React/React Aria.
+
+Regresiones actuales aprobadas en Chromium: **27 comprobaciones de fechas de creación** y **26 de entrega de OCM desde Abastecimiento**, con modo alternativo desactivado, a 375 y 1440 px. Conservan los rechazos de API, el foco del banner y el borrador ante errores. Las capturas de la hoja en escritorio y móvil se revisaron visualmente.
+
+Dos recorridos históricos adicionales no completaron: `form-validation.browser.js` intenta editar la fecha automática de elaboración, actualmente de solo lectura; `material-demand.browser.js` espera que no exista consulta inicial, aunque el comportamiento vigente carga pendientes sin rango. Son expectativas anteriores a esta implementación; no se modificó la aplicación para satisfacerlas. La validación relevante está cubierta por los recorridos actuales indicados arriba y por el nuevo recorrido completo.
+
+[Chromium](tests/evidence/aria/chromium-order-entry-sheet.browser.json), [WebKit](tests/evidence/aria/webkit-order-entry-sheet.browser.json), [hoja en escritorio](tests/evidence/aria/order-entry-sheet-1440.png), [hoja en móvil](tests/evidence/aria/order-entry-sheet-375.png), [panel auxiliar de OCM](tests/evidence/aria/order-entry-sheet-supply.png).
+
+Reproducción con bases temporales:
+
+    npm test
+    npm run build
+    node scripts/verify-aria-browser.mjs tests/order-entry-sheet.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/order-entry-sheet.browser.js webkit
+    node scripts/verify-aria-browser.mjs tests/order-creation-date.browser.js chromium
+    node scripts/verify-aria-browser.mjs tests/material-demand-delivery.browser.js chromium
+
 Verificación general del **13 de octubre de 2026**, con Node.js 24 y Google Chrome, utilizando Playwright CLI. El recorrido principal utiliza archivos de datos separados del estado de la aplicación; la revisión adicional de errores usa formularios aislados en memoria. La implementación conserva los datos existentes y no reinicia el archivo de demostración.
 
 La [cobertura](COBERTURA.md) relaciona los resultados con los requisitos actuales. La revisión específica de renglones del **14 de octubre de 2026**, descrita al final, añade las pruebas de despliegue, presentación y reapertura OCM.
