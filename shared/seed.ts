@@ -346,41 +346,33 @@ export function makeSeed(): Database {
     [161, 110, "PRO-26-021", 4000, "en_seguimiento"],
     [162, 115, "PRO-26-012", 12000, "cerrado"],
     [163, 116, "PRO-25-006", 10000, "cerrado"],
-  ]
-    .filter(
-      ([, line]) =>
-        db.orden_producto.find((row) => row.id === sid(Number(line)))
-          ?.estado !== "anulada",
-    )
-    .forEach(([id, line, numero_lote, qty, estado]) =>
-      add("lote_producto", Number(id), {
-        id_orden_producto: sid(Number(line)),
-        id_factura: sid(150),
-        numero_lote,
-        cantidad_recibida: qty,
-        fecha_estimada_batch_record: d(
-          id === 161 ? "2026-10-18" : "2026-10-12",
-        ),
-        fecha_entrega_batch_record:
-          estado === "cerrado" ? d("2026-10-01") : null,
-        estado_batch_record: estado === "cerrado" ? "validado" : "pendiente",
-        fecha_inspeccion: estado === "cerrado" ? d("2026-10-01") : null,
-        estado_inspeccion: estado === "cerrado" ? "aprobada" : "pendiente",
-        fecha_recepcion: d("2026-10-01"),
-        fecha_confirmacion: estado === "cerrado" ? d("2026-10-01") : null,
-        ubicacion: "Bodega Bogotá",
-        estado,
-      }),
-    );
+    [164, 113, "PRO-26-AN01", 1500, "anulado"],
+    [165, 113, "PRO-26-AN02", 500, "anulado"],
+  ].forEach(([id, line, numero_lote, qty, estado]) =>
+    add("lote_producto", Number(id), {
+      id_orden_producto: sid(Number(line)),
+      id_factura: sid(150),
+      numero_lote,
+      cantidad_recibida: qty,
+      fecha_estimada_batch_record: d(id === 161 ? "2026-10-18" : "2026-10-12"),
+      fecha_entrega_batch_record: estado === "cerrado" ? d("2026-10-01") : null,
+      estado_batch_record: estado === "cerrado" ? "validado" : "pendiente",
+      fecha_inspeccion: estado === "cerrado" ? d("2026-10-01") : null,
+      estado_inspeccion: estado === "cerrado" ? "aprobada" : "pendiente",
+      fecha_recepcion: d("2026-10-01"),
+      fecha_confirmacion: estado === "cerrado" ? d("2026-10-01") : null,
+      ubicacion: "Bodega Bogotá",
+      estado,
+    }),
+  );
   db.orden_producto.forEach((line, index) => {
-    if (line.estado === "anulada") return;
     if (!db.lote_producto.some((lot) => lot.id_orden_producto === line.id))
       add("lote_producto", 600 + index, {
         id_orden_producto: line.id,
         fecha_estimada_batch_record: db.orden_compra.find(
           (order) => order.id === line.id_orden_compra,
         )!.fecha_solicitada_entrega,
-        estado: "en_seguimiento",
+        estado: line.estado === "anulada" ? "anulado" : "en_seguimiento",
       });
   });
   const doc = (
@@ -458,6 +450,7 @@ export function makeSeed(): Database {
     ["envio_orden_compra", "proveedor", "Compras", "para"],
     ["envio_certificado_calidad", "interno", "Calidad", "para"],
     ["envio_certificado_liberacion", "proveedor", "Compras", "para"],
+    ["cotizacion_materiales", "proveedor", "Compras", "para"],
   ].forEach(([tipo_evento, tipo_contacto, cargo_area, tipo_destinatario], i) =>
     add("destinatario_evento", 200 + i, {
       tipo_evento,

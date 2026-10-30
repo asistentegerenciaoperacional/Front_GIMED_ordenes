@@ -16,7 +16,7 @@ Los parámetros propios tienen el prefijo `pendientes_`: `desde`, `hasta`, `q`, 
 
 ## Selección, consolidación y cantidades
 
-Se permiten hasta **siete materiales distintos**, identificados por ID; nombres repetidos conservan su identidad y código. Alcanzado el límite, se pueden añadir más renglones de origen de un material seleccionado. El resumen permanece visible, cuenta materiales, vínculos y OC, y permite quitar todos los orígenes de un material.
+La selección admite más de siete materiales distintos para **Cotizar materiales**, identificados por ID; nombres repetidos conservan su identidad y código. **Elaborar OCM** queda deshabilitado al superar siete, con una explicación visible. La creación de OCM conserva el límite de siete materiales también en el servicio. El resumen permanece visible, cuenta materiales, vínculos y OC, y permite quitar todos los orígenes de un material. La cotización reutiliza la consolidación sin aplicar el límite propio de la orden; [plantilla, destinatarios y envío simulado](COTIZACIONES-MATERIALES.md).
 
 **Elaborar OCM** abre el mismo `OrderForm` de las órdenes habituales. Tipo Material, materiales y orígenes quedan bloqueados; cambiar el proveedor conserva el borrador. Para cambiar materiales se vuelve a la selección. Cancelar o Escape conservan la selección y piden confirmar si se editaron campos del formulario.
 

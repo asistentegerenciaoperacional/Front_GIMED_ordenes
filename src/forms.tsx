@@ -22,9 +22,7 @@ import {
   materialCatalogIssue,
   materialRole,
 } from "../shared/product-materials";
-import {
-  materialSupplierGroups,
-} from "../shared/favorite-suppliers";
+import { materialSupplierGroups } from "../shared/favorite-suppliers";
 import {
   blankRow,
   currentCost,
@@ -64,7 +62,7 @@ import {
   SuggestionList,
 } from "./components/controls";
 import { Documents } from "./document-controls";
-import { TooltipHelp } from "./components/overlays";
+import { TooltipHelp, confirmAction } from "./components/overlays";
 import { OrderEntrySheet } from "./order-entry-sheet";
 import {
   blankSheetLine,
@@ -340,7 +338,13 @@ export function CatalogForm({
                   control = (
                     <ProviderPicker
                       id={id}
-                      providers={db.proveedor}
+                      providers={
+                        entity === "productos" && field === "id_maquilador"
+                          ? db.proveedor.filter(
+                              (provider) => provider.Es_maquila === true,
+                            )
+                          : db.proveedor
+                      }
                       value={String(value ?? "")}
                       onChange={(id) => update(field, id || null)}
                     />
@@ -396,14 +400,36 @@ export function CatalogForm({
                     <ControlSelect
                       id={id}
                       value={value ?? ""}
-                      onChange={(e) => update(field, e.target.value || null)}
+                      onChange={(e) => {
+                        if (
+                          entity === "destinatario_evento" &&
+                          field === "tipo_evento" &&
+                          e.target.value === "cotizacion_materiales"
+                        ) {
+                          setValues({
+                            ...values,
+                            tipo_evento: e.target.value,
+                            tipo_contacto: "proveedor",
+                            tipo_destinatario: "para",
+                          });
+                          setDirty(true);
+                        } else update(field, e.target.value || null);
+                      }}
                     >
                       <option value="">Seleccionar…</option>
-                      {meta.enums[spec.type].map((v) => (
-                        <option key={v} value={v}>
-                          {text(v)}
-                        </option>
-                      ))}
+                      {meta.enums[spec.type]
+                        .filter((v) => !(entity === "adjunto_evento" && field === "tipo_evento" && v === "cotizacion_materiales"))
+                        .filter((v) =>
+                          entity !== "destinatario_evento" ||
+                          values.tipo_evento !== "cotizacion_materiales" ||
+                          (field !== "tipo_contacto" && field !== "tipo_destinatario") ||
+                          v === (field === "tipo_contacto" ? "proveedor" : "para")
+                        )
+                        .map((v) => (
+                          <option key={v} value={v}>
+                            {text(v)}
+                          </option>
+                        ))}
                     </ControlSelect>
                   );
                 else if (spec.type === "datetime")
@@ -789,7 +815,7 @@ export function InvoiceForm({
               </div>
             </div>
           )}
-          <h3>Recepciones opcionales</h3>
+          <h3>Lotes disponibles</h3>
           <ControlInput
             className="control"
             aria-label="Buscar orden o lote para la factura"
@@ -945,6 +971,20 @@ export function InvoicePicker({
   );
 }
 
+export const productLotFieldOrder = [
+  "numero_lote",
+  "cantidad_recibida",
+  "estado",
+  "fecha_estimada_batch_record",
+  "fecha_entrega_batch_record",
+  "estado_batch_record",
+  "fecha_inspeccion",
+  "estado_inspeccion",
+  "fecha_recepcion",
+  "fecha_confirmacion",
+  "ubicacion",
+];
+
 export function LotForm({
   line,
   record,
@@ -983,7 +1023,14 @@ export function LotForm({
       const payload = { ...row, id_orden_producto: line.id, id: record?.id };
       delete payload.id;
       if (record) payload.id = record.id;
-      await run("saveLot", { row: payload }, "Lote guardado");
+      try {
+        await run("saveLot", { row: payload }, "Lote guardado");
+      } catch (failure) {
+        const problem = failure as ApiError;
+        if (problem.code !== "CONFIRMATION") throw failure;
+        if (!await confirmAction(problem.message, "Anular lote y producto", true)) return;
+        await run("saveLot", { row: payload, confirm: true, expected: problem.details.expected }, "Lote y producto anulados");
+      }
       onClose();
     } catch (e) {
       catchError(e);
@@ -1014,6 +1061,11 @@ export function LotForm({
             {Object.entries(meta.tables.lote_producto.fields)
               .filter(
                 ([f]) => !["id", "id_orden_producto", "id_factura"].includes(f),
+              )
+              .sort(
+                ([a], [b]) =>
+                  productLotFieldOrder.indexOf(a) -
+                  productLotFieldOrder.indexOf(b),
               )
               .map(([field, spec]) => {
                 const id = `field-${field}`;
@@ -1069,20 +1121,21 @@ export function LotForm({
                   </Field>
                 );
               })}
+            {o && (
+              <Field
+                id="field-id_factura"
+                label="Factura (opcional)"
+                error={error?.fields.id_factura}
+              >
+                <InvoicePicker
+                  layout="stacked"
+                  provider={o.id_proveedor}
+                  value={row.id_factura}
+                  onChange={(v) => update("id_factura", v)}
+                />
+              </Field>
+            )}
           </div>
-          {o && (
-            <Field
-              id="field-id_factura"
-              label="Factura (opcional)"
-              error={error?.fields.id_factura}
-            >
-              <InvoicePicker
-                provider={o.id_proveedor}
-                value={row.id_factura}
-                onChange={(v) => update("id_factura", v)}
-              />
-            </Field>
-          )}
         </div>
         <div className="dialog-footer">
           <CancelButton onClick={onClose}>Cancelar</CancelButton>
@@ -1262,12 +1315,14 @@ export function ReceiptForm({
 
 export function OrderForm({
   order,
+  proposedSupplier,
   onClose,
   initialType = "producto",
   abastecimiento,
   onReviewSupply,
 }: {
   order?: Row;
+  proposedSupplier?: string;
   onClose: () => void;
   initialType?: string;
   abastecimiento?: MaterialDemand;
@@ -1302,6 +1357,11 @@ export function OrderForm({
   const replacement =
     Boolean(order) && type === "producto" && supplier !== order?.id_proveedor;
   const [pendingSupplier, setPendingSupplier] = useState<string | null>(null);
+  useEffect(() => {
+    if (authorized || !proposedSupplier || proposedSupplier === order?.id_proveedor) return;
+    const frame = requestAnimationFrame(() => setPendingSupplier(proposedSupplier));
+    return () => cancelAnimationFrame(frame);
+  }, [authorized,proposedSupplier,order?.id,order?.id_proveedor]);
   const [date, setDate] = useState(
     order?.fecha_elaboracion?.slice(0, 10) ?? today(),
   );
@@ -1726,7 +1786,11 @@ export function OrderForm({
             fields.adicional_pct = "Introduce un adicional entre 5 y 10 %.";
           if (type === "producto" && !l.id_producto)
             fields.id_producto = "Selecciona un producto.";
-          if (type === "producto" && !assignedBarcode(db, l.id_producto) && !l.id)
+          if (
+            type === "producto" &&
+            !assignedBarcode(db, l.id_producto) &&
+            !l.id
+          )
             fields.id_producto = "El producto no tiene código asignado.";
           if (type === "producto" && l.id_producto) {
             const original =
@@ -1734,10 +1798,18 @@ export function OrderForm({
               db.orden_producto.find(
                 (row) => row.id === l.id && row.id_orden_compra === order.id,
               );
-            const product = db.productos.find((row) => row.id === l.id_producto);
-            if (product?.activo !== true && original?.id_producto !== l.id_producto)
+            const product = db.productos.find(
+              (row) => row.id === l.id_producto,
+            );
+            if (
+              product?.activo !== true &&
+              original?.id_producto !== l.id_producto
+            )
               fields.id_producto = "Selecciona un producto activo.";
-            if ((!original || replacement) && product?.id_maquilador !== supplier)
+            if (
+              (!original || replacement) &&
+              product?.id_maquilador !== supplier
+            )
               fields.id_producto =
                 "Selecciona un producto del proveedor de la orden.";
           }
@@ -1750,7 +1822,8 @@ export function OrderForm({
           try {
             decimal(l.precio_unitario);
           } catch {
-            fields.precio_unitario = "Introduce un precio con hasta dos decimales.";
+            fields.precio_unitario =
+              "Introduce un precio con hasta dos decimales.";
           }
           return fields;
         }),
@@ -2901,7 +2974,7 @@ export function MailForm({
                 value={event}
                 onChange={(e) => setEvent(e.target.value)}
               >
-                {meta.enums.tipo_evento_correo.map((t) => (
+                {meta.enums.tipo_evento_correo.filter((t) => t !== "cotizacion_materiales").map((t) => (
                   <option key={t} value={t}>
                     {text(t)}
                   </option>

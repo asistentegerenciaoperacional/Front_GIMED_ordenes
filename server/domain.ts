@@ -1,4 +1,12 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { randomBytes } from "node:crypto";
+import { deliverMail, simulatedTransport, type MailTransport } from "./mail";
+export type { MailTransport } from "./mail";
+import { materialQuotationPreview } from "./material-quotation";
+import {
+  quotationEvent,
+  quotationTemplate,
+  quotationTemplateSchema,
+} from "../shared/material-quotation";
 import type { Database } from "../shared/models";
 import {
   materialSupplyLinkSchema,
@@ -51,6 +59,14 @@ import {
   type Row,
 } from "../shared/schema";
 import { BusinessError, check, findRecord } from "./integrity";
+import {
+  matchesProductLotLifecycleSnapshot,
+  productLotLifecycleSnapshot,
+} from "../shared/product-lot-lifecycle";
+import {
+  saveProductOrderSheet,
+  createProductLots,
+} from "./product-order-sheet";
 export const newId = () => randomBytes(12).toString("hex");
 const now = () => new Date().toISOString();
 
@@ -651,13 +667,252 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
   }
   return { orderId: o.id };
 }
-function requireAuthorized(db: Database, line: Row) {
-  const order = db.orden_compra.find((o) => o.id === line.id_orden_compra)!;
+function requireAuthorized(
+  db: Database,
+  line: Row,
+  orders?: ReadonlyMap<string, Row>,
+) {
+  const order =
+    orders?.get(line.id_orden_compra) ??
+    db.orden_compra.find((o) => o.id === line.id_orden_compra)!;
   check(
     order.estado_autorizacion === "autorizada",
     "Autoriza la orden de compra antes de gestionar el seguimiento.",
     "AUTHORIZATION",
   );
+}
+
+function validateLotStateExpectation(
+  db: Database,
+  lineIds: string[],
+  expected: unknown,
+  required = false,
+) {
+  const current = productLotLifecycleSnapshot(db, lineIds);
+  check(
+    (expected === undefined && !required) ||
+      matchesProductLotLifecycleSnapshot(expected, current),
+    "Los lotes o el estado del producto cambiaron. Revisa la selección actualizada antes de continuar.",
+    "LOT_STATE_CHANGED",
+    {},
+    { expected: current },
+  );
+  return current;
+}
+
+function saveProductLotChanges(
+  db: Database,
+  changes: Row[],
+  options: {
+    expected?: unknown;
+    confirm?: unknown;
+    requireExpected?: boolean;
+    reopenLines?: string[];
+  },
+) {
+  const lineIds = [
+    ...new Set(changes.map((lot) => String(lot.id_orden_producto))),
+  ];
+  const before = validateLotStateExpectation(db, lineIds, options.expected);
+  const changed = new Map(changes.map((lot) => [lot.id, lot]));
+  const oldById = new Map(db.lote_producto.map((lot) => [lot.id, lot]));
+  const linesById = new Map(db.orden_producto.map((line) => [line.id, line]));
+  const orders = new Map(db.orden_compra.map((order) => [order.id, order]));
+  const lines = lineIds.map((id) => {
+    const line = linesById.get(id);
+    check(line, "El producto de la orden ya no existe.", "NOT_FOUND");
+    return line;
+  });
+  for (const line of lines) requireAuthorized(db, line, orders);
+  for (const lot of changes) {
+    const old = oldById.get(lot.id);
+    const line = linesById.get(lot.id_orden_producto)!;
+    check(
+      lot.estado !== "cerrado" ||
+        (old?.estado !== "anulado" && line.estado !== "anulada"),
+      "Reabre el lote y su producto antes de cerrar el seguimiento del lote.",
+      "VALIDATION",
+      {
+        estado: "El lote o su producto está anulado; reábrelo antes de cerrar.",
+      },
+    );
+  }
+  const futureLots = db.lote_producto.map((lot) => changed.get(lot.id) ?? lot);
+  for (const lot of changes)
+    if (!oldById.has(lot.id))
+      futureLots.push(lot as Database["lote_producto"][number]);
+  const allAnnulled = new Map<string, boolean>();
+  for (const lot of futureLots)
+    allAnnulled.set(
+      lot.id_orden_producto,
+      (allAnnulled.get(lot.id_orden_producto) ?? true) &&
+        lot.estado === "anulado",
+    );
+  const annulled = lines.filter((line) => {
+    return line.estado !== "anulada" && allAnnulled.get(line.id) === true;
+  });
+  if (annulled.length) {
+    const productNames = new Map(
+      db.productos.map((product) => [product.id, product.nombre_producto]),
+    );
+    const products = annulled.map((line) => ({
+      id: line.id,
+      posicion: line.posicion,
+      no_orden: orders.get(line.id_orden_compra)!.no_orden,
+      producto: productNames.get(line.id_producto) ?? "Producto",
+    }));
+    check(
+      options.confirm === true &&
+        (!options.requireExpected || options.expected !== undefined),
+      annulled.length === 1
+        ? "Anular este lote dejará todos los lotes anulados y también anulará el producto de la orden. Confirma para continuar; se conservarán todos sus datos."
+        : "Anular estos lotes también anulará los productos indicados porque no quedarán lotes vigentes. Confirma para continuar; se conservarán todos sus datos.",
+      "CONFIRMATION",
+      {},
+      { expected: before, products },
+    );
+  }
+  for (const lot of changes) {
+    const old = oldById.get(lot.id);
+    if (old) Object.assign(old, lot);
+    else push(db, "lote_producto", lot);
+  }
+  const reopening = new Set(options.reopenLines ?? []);
+  for (const line of lines) {
+    if (allAnnulled.get(line.id) === true) line.estado = "anulada";
+    else if (reopening.has(line.id)) line.estado = "en_seguimiento";
+  }
+  return { rows: changes, productIds: lines.map((line) => line.id) };
+}
+
+export function setProductLotStates(db: Database, payload: Row): Row {
+  check(
+    Array.isArray(payload.ids) &&
+      payload.ids.length > 0 &&
+      payload.ids.every(
+        (id: unknown) => typeof id === "string" && /^[a-f0-9]{24}$/.test(id),
+      ) &&
+      new Set(payload.ids).size === payload.ids.length,
+    "Selecciona lotes válidos sin repetir.",
+    "VALIDATION",
+    { ids: "Selecciona al menos un lote, sin repetir identificadores." },
+  );
+  check(
+    ["en_seguimiento", "cerrado", "anulado"].includes(payload.estado),
+    "Estado de lote inválido.",
+    "VALIDATION",
+    { estado: "Selecciona un estado de lote válido." },
+  );
+  const lotsById = new Map(db.lote_producto.map((lot) => [lot.id, lot]));
+  const changes = payload.ids.map((id: string) => {
+    const lot = lotsById.get(id);
+    check(lot, "El lote ya no existe.", "NOT_FOUND");
+    return { ...lot, estado: payload.estado };
+  });
+  return saveProductLotChanges(db, changes, {
+    expected: payload.expected,
+    confirm: payload.confirm,
+    requireExpected: true,
+    reopenLines:
+      payload.estado === "en_seguimiento"
+        ? changes.map((lot: Row) => lot.id_orden_producto)
+        : [],
+  });
+}
+
+function applyProductLineState(line: Row, lots: Row[], estado: string) {
+  if (estado === "anulada") for (const lot of lots) lot.estado = "anulado";
+  else if (line.estado === "anulada" && estado === "en_seguimiento")
+    for (const lot of lots) lot.estado = "en_seguimiento";
+  line.estado = estado;
+}
+
+export async function setProductLineStates(
+  db: Database,
+  payload: Row,
+): Promise<Row> {
+  check(
+    Array.isArray(payload.ids) &&
+      payload.ids.length > 0 &&
+      payload.ids.every(
+        (id: unknown) => typeof id === "string" && /^[a-f0-9]{24}$/.test(id),
+      ) &&
+      new Set(payload.ids).size === payload.ids.length,
+    "Selecciona productos de la orden válidos sin repetir.",
+    "VALIDATION",
+    {
+      ids: "Selecciona al menos un producto de la orden, sin repetir identificadores.",
+    },
+  );
+  check(
+    ["en_seguimiento", "cerrada", "anulada"].includes(payload.estado),
+    "Estado de producto inválido.",
+    "VALIDATION",
+    { estado: "Selecciona un estado de seguimiento válido." },
+  );
+  const available = new Map(db.orden_producto.map((line) => [line.id, line]));
+  const orders = new Map(db.orden_compra.map((order) => [order.id, order]));
+  const names = new Map(
+    db.productos.map((product) => [product.id, product.nombre_producto]),
+  );
+  const lotsByLine = new Map<string, Database["lote_producto"]>();
+  for (const lot of db.lote_producto) {
+    const lots = lotsByLine.get(lot.id_orden_producto) ?? [];
+    lots.push(lot);
+    lotsByLine.set(lot.id_orden_producto, lots);
+  }
+  const lines = payload.ids.map((id: string) => {
+    const line = available.get(id);
+    check(line, "El producto de la orden ya no existe.", "NOT_FOUND");
+    requireAuthorized(db, line, orders);
+    check(
+      line.estado !== "anulada" || payload.estado !== "cerrada",
+      "Reabre el producto anulado antes de cerrar su seguimiento.",
+    );
+    return line;
+  });
+  const expected = validateLotStateExpectation(
+    db,
+    payload.ids,
+    payload.expected,
+    true,
+  );
+  const products = lines.map((line: Row) => ({
+    id: line.id,
+    posicion: line.posicion,
+    no_orden: orders.get(line.id_orden_compra)!.no_orden,
+    producto: names.get(line.id_producto) ?? "Producto",
+  }));
+  if (payload.estado === "anulada")
+    check(
+      payload.confirm === true,
+      "Confirma la anulación de los productos seleccionados y todos sus lotes. Se conservarán sus datos.",
+      "CONFIRMATION",
+      {},
+      { products, expected },
+    );
+  if (payload.estado === "cerrada") {
+    const margin = tolerance(db);
+    const deviations = products.flatMap((product: Row) => {
+      const delta = deviation(
+        { ...db, lote_producto: lotsByLine.get(product.id) ?? [] },
+        available.get(product.id)!,
+      );
+      return delta !== null && Math.abs(delta) > margin
+        ? [{ ...product, deviation: delta }]
+        : [];
+    });
+    check(
+      !deviations.length || payload.confirm === true,
+      `Hay ${deviations.length} productos fuera del margen ±${margin} %. Confirma el cierre manual del conjunto.`,
+      "TOLERANCE",
+      {},
+      { deviations, expected },
+    );
+  }
+  for (const line of lines)
+    applyProductLineState(line, lotsByLine.get(line.id) ?? [], payload.estado);
+  return { productIds: lines.map((line: Row) => line.id) };
 }
 export function mailPreview(db: Database, p: Row): Row {
   check(
@@ -816,14 +1071,6 @@ export function mailPreview(db: Database, p: Row): Row {
     supplier,
   };
 }
-export type MailTransport = (message: {
-  from: string;
-  recipients: Row[];
-  body: string;
-  documents: Row[];
-  event: string;
-}) => Promise<string>;
-const simulatedTransport: MailTransport = async () => `sim-${randomUUID()}`;
 export async function command(
   db: Database,
   name: string,
@@ -831,6 +1078,58 @@ export async function command(
   transport: MailTransport = simulatedTransport,
 ): Promise<Row> {
   switch (name) {
+    case "saveQuotationTemplate": {
+      const parsed = quotationTemplateSchema.safeParse(p.plantilla);
+      if (!parsed.success)
+        throw new BusinessError(
+          "Revisa la plantilla de cotización.",
+          "VALIDATION",
+          Object.fromEntries(
+            parsed.error.issues.map((issue) => [
+              issue.path.join("."),
+              issue.message,
+            ]),
+          ),
+        );
+      const current = quotationTemplate(db);
+      check(
+        p.expected &&
+          p.expected.asunto === current.asunto &&
+          p.expected.cuerpo === current.cuerpo,
+        "La plantilla global cambió. Carga la versión actual y revisa tus cambios antes de guardar.",
+        "QUOTATION_TEMPLATE_CHANGED",
+      );
+      db.plantilla_correo = [{ tipo_evento: quotationEvent, ...parsed.data }];
+      return { plantilla: parsed.data };
+    }
+    case "sendMaterialQuotations": {
+      const preview = materialQuotationPreview(db, p.borrador);
+      check(
+        typeof p.expected_revision === "string" &&
+          p.expected_revision === preview.revision,
+        "Los datos de la cotización cambiaron. Actualiza y revisa los mensajes antes de confirmar.",
+        "QUOTATION_CHANGED",
+      );
+      check(
+        !Object.keys(preview.issues).length && preview.messages.length > 0,
+        "Completa los destinatarios de todos los materiales antes de enviar.",
+        "VALIDATION",
+        preview.issues,
+      );
+      const messages = [];
+      for (const message of preview.messages)
+        messages.push(
+          await deliverMail(db, transport, {
+            from: "zamira@gimed-demo.example",
+            recipients: [message.recipient],
+            subject: message.subject,
+            body: message.body,
+            documents: [],
+            event: quotationEvent,
+          }),
+        );
+      return { messages };
+    }
     case "setProductMaterials": {
       const desired = {
         id_materiales: p.id_materiales,
@@ -1046,6 +1345,14 @@ export async function command(
     }
     case "editOrder":
       return saveOrder(db, p, true);
+    case "saveProductOrderSheet":
+      return saveProductOrderSheet(db, p, command, (database,lots) => saveProductLotChanges(database,lots,{}));
+    case "createProductLots":
+      return createProductLots(db, p, command);
+    case "setProductLotStates":
+      return setProductLotStates(db, p);
+    case "setProductLineStates":
+      return setProductLineStates(db, p);
     case "authorizeOrder":
       return authorizeOrders(db, [p.id], p.confirm);
     case "authorizeOrders":
@@ -1062,6 +1369,8 @@ export async function command(
       );
       const l = findRecord(db, table, { id: p.id });
       requireAuthorized(db, l);
+      if (table === "orden_producto")
+        validateLotStateExpectation(db, [l.id], p.expected);
       check(
         table !== "orden_producto" ||
           l.estado !== "anulada" ||
@@ -1071,30 +1380,9 @@ export async function command(
       if (table === "orden_producto" && p.estado === "anulada") {
         check(
           p.confirm === true,
-          "Confirma la anulación del producto y la eliminación de todos sus lotes.",
+          "Confirma la anulación del producto y todos sus lotes. Se conservarán sus datos.",
           "CONFIRMATION",
         );
-        db.lote_producto = db.lote_producto.filter(
-          (lot) => lot.id_orden_producto !== l.id,
-        );
-      }
-      if (
-        table === "orden_producto" &&
-        l.estado === "anulada" &&
-        p.estado === "en_seguimiento"
-      ) {
-        const lots = db.lote_producto.filter(
-          (lot) => lot.id_orden_producto === l.id,
-        );
-        check(
-          lots.length === 0 || p.confirm === true,
-          "Este producto anulado conserva lotes anteriores. Confirma su reemplazo por un lote inicial nuevo.",
-          "CONFIRMATION",
-        );
-        db.lote_producto = db.lote_producto.filter(
-          (lot) => lot.id_orden_producto !== l.id,
-        );
-        createInitialProductLot(db, l);
       }
       if (p.estado === "cerrada" && table === "orden_producto") {
         const delta = deviation(db, l);
@@ -1107,7 +1395,13 @@ export async function command(
             { deviation: delta },
           );
       }
-      l.estado = p.estado;
+      if (table === "orden_producto")
+        applyProductLineState(
+          l,
+          db.lote_producto.filter((lot) => lot.id_orden_producto === l.id),
+          p.estado,
+        );
+      else l.estado = p.estado;
       return {};
     }
     case "saveLot": {
@@ -1143,8 +1437,16 @@ export async function command(
           ? value.numero_lote.trim() || null
           : value.numero_lote;
       if (!p.row.id) value.id = newId();
-      if (old) Object.assign(old, value);
-      else push(db, "lote_producto", value);
+      saveProductLotChanges(db, [value], {
+        expected: p.expected,
+        confirm: p.confirm,
+        reopenLines:
+          old &&
+          old.estado !== "en_seguimiento" &&
+          value.estado === "en_seguimiento"
+            ? [line.id]
+            : [],
+      });
       return { row: value };
     }
     case "deleteLot": {
@@ -1159,7 +1461,13 @@ export async function command(
         "CONFIRMATION",
       );
       db.lote_producto = db.lote_producto.filter((row) => row.id !== lot.id);
-      if (!db.lote_producto.some((row) => row.id_orden_producto === line.id))
+      const remaining = db.lote_producto.filter(
+        (row) => row.id_orden_producto === line.id,
+      );
+      if (
+        !remaining.length ||
+        remaining.every((row) => row.estado === "anulado")
+      )
         line.estado = "anulada";
       return {};
     }
@@ -1436,32 +1744,13 @@ export async function command(
         );
         seen.add(key);
       }
-      // The prototype transport confirms locally. No external email service is called.
-      const messageId = await transport({
+      const message = await deliverMail(db, transport, {
         from: preview.remitente,
         recipients: p.recipients,
         body: typeof p.body === "string" ? p.body : preview.body,
         documents: preview.documents,
         event: p.event,
       });
-      check(
-        typeof messageId === "string" && messageId.length,
-        "El simulador no confirmó el envío.",
-        "MAIL",
-      );
-      const message = push(db, "correo_enviado", {
-        id_correo: messageId,
-        remitente: preview.remitente,
-        tipo_evento: p.event,
-        fecha_envio: now(),
-      });
-      for (const r of p.recipients)
-        push(db, "correo_enviado_destinatario", {
-          id_correo: messageId,
-          remitente: preview.remitente,
-          destinatario: r.address,
-          tipo_destinatario: r.type,
-        });
       return { row: message };
     }
     default:

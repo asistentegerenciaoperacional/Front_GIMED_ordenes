@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile, copyFile } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { createServer } from "node:net";
 import { chromium, firefox, webkit } from "playwright-core";
@@ -12,6 +12,8 @@ const engine = process.argv[3] ?? "chromium";
 const historicalJourney = file === "tests/browser-journey.js";
 await mkdir("tests/.tmp", { recursive: true });
 const temporary = await mkdtemp(resolve("tests/.tmp/aria-browser-"));
+if (process.env.PROTOTIPO_BROWSER_SEED_FILE)
+  await copyFile(resolve(process.env.PROTOTIPO_BROWSER_SEED_FILE), join(temporary, "database.json"));
 const socket = createServer();
 await new Promise((ok) => socket.listen(0, "127.0.0.1", ok));
 const port = socket.address().port;
@@ -91,6 +93,7 @@ try {
       autoConfirm:
         !file.includes("aria-controls") &&
         !file.includes("order-authorization") &&
+        !file.includes("material-quotation") &&
         !file.includes("favorites") &&
         !file.includes("barcodes") &&
         !file.includes("maquila-costs") &&
@@ -103,19 +106,21 @@ try {
     [],
     "Sin errores ni advertencias de React o React Aria",
   );
-  const evidence = file.includes("order-authorization")
-    ? "tests/evidence/authorization"
-    : file.includes("material-demand")
-      ? "tests/evidence/ocm"
-      : file.includes("product-materials")
-        ? "tests/evidence/product-materials"
-        : file.includes("maquila-costs")
-          ? "tests/evidence/costs"
-          : file.includes("barcodes")
-            ? "tests/evidence/barcodes"
-            : file.includes("favorites")
-              ? "tests/evidence/favorites"
-              : "tests/evidence/aria";
+  const evidence = file.includes("material-quotation")
+    ? "tests/evidence/quotations"
+    : file.includes("order-authorization")
+      ? "tests/evidence/authorization"
+      : file.includes("material-demand")
+        ? "tests/evidence/ocm"
+        : file.includes("product-materials")
+          ? "tests/evidence/product-materials"
+          : file.includes("maquila-costs")
+            ? "tests/evidence/costs"
+            : file.includes("barcodes")
+              ? "tests/evidence/barcodes"
+              : file.includes("favorites")
+                ? "tests/evidence/favorites"
+                : "tests/evidence/aria";
   await mkdir(evidence, { recursive: true });
   const report =
     evidence +

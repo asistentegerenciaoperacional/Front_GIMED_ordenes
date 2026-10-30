@@ -75,6 +75,7 @@ import {
 } from "./order-table";
 import { replaceRoute } from "./routing";
 import { PendingMaterialsPage } from "./pending-materials";
+import { QuotationTemplateSettings } from "./quotation-template";
 import {
   buildSupplyRows,
   searchSupplyRows,
@@ -1464,6 +1465,7 @@ export function SettingsPage() {
     { id: "destinatario_evento", label: "Destinatarios sugeridos" },
     { id: "adjunto_evento", label: "Adjuntos por evento" },
     { id: "plantilla", label: "Plantilla de liberación" },
+    { id: "plantilla_cotizacion", label: "Plantilla de cotización" },
     { id: "pendientes", label: "Pendientes documentados" },
   ];
   return (
@@ -1493,6 +1495,8 @@ export function SettingsPage() {
               "adjunto_evento",
             ].includes(tab) ? (
             <CatalogTable key={tab} entity={tab as Entity} />
+          ) : tab === "plantilla_cotizacion" ? (
+            <QuotationTemplateSettings />
           ) : tab === "plantilla" ? (
             <section className="panel">
               <Documents owner={null} ownerId={null} />
@@ -1519,7 +1523,6 @@ export function SettingsPage() {
                   <h2>Tolerancia de seguimiento</h2>
                   <p>La configuración más reciente es la vigente.</p>
                 </div>
-                <Badge value="autorizada">±{tolerance(db)} % vigente</Badge>
               </div>
               <ControlForm onSubmit={submit} fieldErrors={error?.fields}>
                 <div className="panel-body stack">
@@ -1527,7 +1530,6 @@ export function SettingsPage() {
                   <Field
                     id="field-margen_tolerancia_pct"
                     label="Nueva tolerancia (%)"
-                    hint="La configuración vigente se conserva en el historial."
                     error={error?.fields.margen_tolerancia_pct}
                   >
                     <ControlInput
@@ -1538,11 +1540,6 @@ export function SettingsPage() {
                       onChange={(e) => setValue(Number(e.target.value))}
                     />
                   </Field>
-                  <div className="notice subtle">
-                    <Info size={17} aria-hidden="true" />
-                    El margen genera una advertencia al cerrar manualmente. No
-                    bloquea el cierre ni compensa cantidades entre productos.
-                  </div>
                   <div>
                     <Button type="submit" variant="primary" disabled={busy}>
                       Guardar nueva configuración

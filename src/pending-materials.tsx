@@ -1,7 +1,15 @@
-import { useDeferredValue, useMemo, useState, type FormEvent } from "react";
+import {
+  lazy,
+  Suspense,
+  useDeferredValue,
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import {
   consolidateMaterialSources,
+  groupMaterialSources,
   validDemandDay,
   type MaterialDemand,
 } from "../shared/material-demand";
@@ -52,6 +60,7 @@ import {
 } from "./ui";
 
 const pageSize = 50;
+const MaterialQuotationDialog = lazy(() => import("./material-quotation"));
 export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
   const { db } = useApp();
   const stateKey = params.toString();
@@ -67,6 +76,7 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
     () => new Map(),
   );
   const [draft, setDraft] = useState<MaterialDemand | null>(null);
+  const [quotation, setQuotation] = useState<MaterialDemand | null>(null);
   const [status, setStatus] = useState("");
   const [opened, setOpened] = useState<DemandColumnKey | null>(null);
   const { error, setError, catchError } = useErrors({
@@ -228,10 +238,6 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
     setSelected((previous) => {
       const next = new Map(previous);
       if (checked) {
-        const ids = new Set(
-          [...previous.values()].map((value) => value.material.id),
-        );
-        if (!ids.has(row.material.id) && ids.size >= 7) return previous;
         next.set(row.key, row);
       } else next.delete(row.key);
       return next;
@@ -288,29 +294,14 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
               label="Entrega solicitada desde"
               error={error?.fields.desde}
             >
-              <DateInput
-                id="field-desde"
-                value={from}
-                onChange={setFrom}
-              />
+              <DateInput id="field-desde" value={from} onChange={setFrom} />
             </Field>
-            <Field
-              id="field-hasta"
-              label="Hasta"
-              error={error?.fields.hasta}
-            >
-              <DateInput
-                id="field-hasta"
-                value={to}
-                onChange={setTo}
-              />
+            <Field id="field-hasta" label="Hasta" error={error?.fields.hasta}>
+              <DateInput id="field-hasta" value={to} onChange={setTo} />
             </Field>
             <Button type="submit" variant="primary">
               Consultar
             </Button>
-            <p className="compact-note demand-range-note">
-              Deja ambas fechas vacías para mostrar todos los vínculos pendientes.
-            </p>
           </div>
         </ControlForm>
         <div
@@ -355,12 +346,6 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
             onRowClick={(key) => {
               const row = visible.find((item) => item.key === key);
               if (!row) return;
-              if (
-                !selected.has(key) &&
-                groups.size === 7 &&
-                !groups.has(row.material.id)
-              )
-                return;
               toggle(row, !selected.has(key));
             }}
           >
@@ -401,11 +386,6 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
                   <TableCell>
                     <CheckChoice
                       checked={selected.has(row.key)}
-                      disabled={
-                        !selected.has(row.key) &&
-                        groups.size === 7 &&
-                        !groups.has(row.material.id)
-                      }
                       onChange={(checked) => toggle(row, checked)}
                       aria-label={`Seleccionar ${row.material.nombre_material} para OC ${row.order.no_orden}, renglón ${row.line.posicion}, ${row.product.nombre_producto}`}
                     >
@@ -508,7 +488,7 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
             role="status"
             aria-live="polite"
           >
-            <strong>{groups.size} de 7 materiales</strong>
+            <strong>{groups.size} materiales</strong>
             <span>
               {selected.size} {selected.size === 1 ? "vínculo" : "vínculos"} ·{" "}
               {selectedOrderCount} OC
@@ -541,13 +521,43 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
               </div>
             ))}
           </div>
-          <Button variant="primary" disabled={!selected.size} onClick={prepare}>
-            Elaborar OCM
-          </Button>
-          {groups.size === 7 && (
+          <div className="demand-selection-actions">
+            <Button
+              disabled={!selected.size}
+              onClick={() => {
+                try {
+                  const fuentes = [...selected.values()].map((row) => ({
+                    ...row.source,
+                  }));
+                  groupMaterialSources(fuentes);
+                  const days = [...selected.values()]
+                    .map((row) => row.deliveryDay)
+                    .sort();
+                  setQuotation({
+                    desde: desde || days[0],
+                    hasta: hasta || days.at(-1)!,
+                    fuentes,
+                  });
+                  setError(null);
+                } catch (cause) {
+                  catchError(cause);
+                }
+              }}
+            >
+              Cotizar materiales
+            </Button>
+            <Button
+              variant="primary"
+              disabled={!selected.size || groups.size > 7}
+              onClick={prepare}
+            >
+              Elaborar OCM
+            </Button>
+          </div>
+          {groups.size > 7 && (
             <p className="compact-note demand-limit">
-              Puedes añadir más orígenes de los materiales seleccionados. Quita
-              uno para elegir otro material.
+              Puedes cotizar todos los materiales. Para elaborar una OCM, reduce
+              la selección a un máximo de 7 materiales distintos.
             </p>
           )}
           {status && (
@@ -564,6 +574,14 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
           onClose={() => setDraft(null)}
           onReviewSupply={review}
         />
+      )}
+      {quotation && (
+        <Suspense fallback={<p role="status">Preparando cotización…</p>}>
+          <MaterialQuotationDialog
+            demanda={quotation}
+            onClose={() => setQuotation(null)}
+          />
+        </Suspense>
       )}
     </>
   );

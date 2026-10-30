@@ -58,7 +58,7 @@ try {
     JSON.stringify(result, null, 2) + "\n",
   );
   console.log(
-    "Reinicio correcto: las 28 colecciones coinciden íntegramente con el archivo guardado.",
+    `Reinicio correcto: las ${Object.keys(restored).length} colecciones coinciden íntegramente con el archivo guardado.`,
   );
 } finally {
   server.kill();

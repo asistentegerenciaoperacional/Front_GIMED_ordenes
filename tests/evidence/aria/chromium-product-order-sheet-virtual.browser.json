@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "La base temporal carga más de 5000 lotes",
+    "El DOM inicial contiene únicamente la ventana visible y el margen",
+    "La tabla anuncia el número total de filas a las ayudas de accesibilidad",
+    "Flechas navegan con identidad estable",
+    "El DOM no crece acumulativamente al recorrer 25%",
+    "El DOM no crece acumulativamente al recorrer 75%",
+    "El DOM no crece acumulativamente al recorrer 100%",
+    "El DOM no crece acumulativamente al recorrer 50%",
+    "El DOM no crece acumulativamente al recorrer 0%",
+    "El teclado alcanza filas que estaban desmontadas",
+    "La posición accesible de la fila es global, no la de la ventana virtual",
+    "La navegación mantiene acotada la cantidad de filas montadas",
+    "Los encabezados permanecen visibles durante el desplazamiento vertical",
+    "El desplazamiento horizontal queda dentro de la hoja en móvil",
+    "Todas las columnas se desplazan horizontalmente",
+    "El bloque de prueba supera 1 MB y conserva destinos estables",
+    "El servidor guarda 5000 lotes en una sola operación atómica",
+    "Se aplicaron todas las ubicaciones del bloque masivo"
+  ],
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-em8b6l\\database.json"
+}

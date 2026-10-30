@@ -3,9 +3,18 @@ async (page) => {
   const origin = new URL(page.url()).origin;
   const checks = [];
   const errors = [];
+  const commands = [];
   let requests = 0;
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("request", () => requests++);
+  page.on("response", async (response) => {
+    if (response.url().endsWith("/api/commands"))
+      commands.push({
+        request: response.request().postDataJSON(),
+        status: response.status(),
+        body: await response.json(),
+      });
+  });
   const check = (condition, label) => {
     if (!condition) throw new Error(label);
     checks.push(label);
@@ -30,14 +39,49 @@ async (page) => {
   const productLines = db.orden_producto
     .filter((line) => line.id_orden_compra === productOrder.id)
     .sort((a, b) => a.posicion - b.posicion);
+  const hasConflictingCoverage = (line) => {
+    const products = new Set(
+      db.abastecimiento_material
+        .filter((link) => link.id_orden_material === line.id)
+        .map((link) => link.id_orden_producto),
+    );
+    return db.orden_material.some(
+      (other) =>
+        other.id !== line.id &&
+        other.id_material === line.id_material &&
+        other.estado !== "anulada" &&
+        db.abastecimiento_material.some(
+          (link) =>
+            link.id_orden_material === other.id &&
+            products.has(link.id_orden_producto),
+        ),
+    );
+  };
+  // The seed deliberately keeps historical duplicate coverage. A successful
+  // reopening must use another material; restoring duplicate coverage is invalid.
   const materialLine = db.orden_material.find(
     (line) =>
       line.id_lote_material &&
+      !hasConflictingCoverage(line) &&
       db.orden_compra.some(
         (order) =>
           order.id === line.id_orden_compra &&
           order.estado_autorizacion === "autorizada",
       ),
+  );
+  const conflictingMaterialLine = db.orden_material.find(
+    (line) =>
+      line.id_lote_material &&
+      hasConflictingCoverage(line) &&
+      db.orden_compra.some(
+        (order) =>
+          order.id === line.id_orden_compra &&
+          order.estado_autorizacion === "autorizada",
+      ),
+  );
+  check(
+    !!materialLine && !!conflictingMaterialLine,
+    "Fixtures de OCM con recepción distinguen reapertura válida y cobertura duplicada histórica",
   );
   const go = async (id) => {
     await page.goto(`${origin}/ordenes/${id}`);
@@ -215,12 +259,19 @@ async (page) => {
     await materialCard()
       .getByRole("button", { name: "Reabrir", exact: true })
       .click();
-    await page.waitForFunction(
-      (index) =>
-        document.querySelectorAll(".line-card")[index].dataset.state ===
-        "en_seguimiento",
-      materialPosition,
-    );
+    try {
+      await page.waitForFunction(
+        (index) =>
+          document.querySelectorAll(".line-card")[index].dataset.state ===
+          "en_seguimiento",
+        materialPosition,
+      );
+    } catch (error) {
+      const current = await state();
+      throw new Error(
+        `${error.message}; OCM ${previous}: ${JSON.stringify(current.orden_material.find((line) => line.id === materialLine.id))}; avisos: ${await page.locator('[role="status"], [role="alert"]').allTextContents()}; commands: ${JSON.stringify(commands)}`,
+      );
+    }
     const after = await state();
     const expected = {
       ...before.orden_material.find((line) => line.id === materialLine.id),
@@ -241,6 +292,50 @@ async (page) => {
       `Reabrir OCM ${previous} conserva documentos, lote y abastecimiento`,
     );
   }
+  await command("setLineState", {
+    entity: "orden_material",
+    id: conflictingMaterialLine.id,
+    estado: "anulada",
+    confirm: true,
+  });
+  await go(conflictingMaterialLine.id_orden_compra);
+  const conflictPosition = db.orden_material
+    .filter(
+      (line) =>
+        line.id_orden_compra === conflictingMaterialLine.id_orden_compra,
+    )
+    .sort((a, b) => a.posicion - b.posicion)
+    .findIndex((line) => line.id === conflictingMaterialLine.id);
+  const conflictCard = page.locator(".line-card").nth(conflictPosition);
+  const beforeConflict = await state();
+  const [rejectedResponse] = await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/commands") &&
+        response.request().postDataJSON()?.name === "setLineState",
+    ),
+    conflictCard.getByRole("button", { name: "Reabrir", exact: true }).click(),
+  ]);
+  const rejected = await rejectedResponse.json();
+  check(
+    rejectedResponse.status() === 422 && rejected.code === "SUPPLY_CHANGED",
+    "Reabrir OCM anulada rechaza restaurar cobertura duplicada",
+  );
+  await page.getByText(rejected.message, { exact: true }).waitFor();
+  check(
+    await conflictCard
+      .getByRole("button", { name: "Reabrir", exact: true })
+      .isVisible(),
+    "El rechazo conserva visible Reabrir y muestra su causa",
+  );
+  check(
+    JSON.stringify(await state()) === JSON.stringify(beforeConflict),
+    "La reapertura rechazada conserva íntegra la base temporal",
+  );
+  await page.screenshot({
+    path: "tests/evidence/order-detail/material-reopen-conflict.png",
+    fullPage: false,
+  });
   for (const status of ["en_seguimiento", "cerrada", "anulada"]) {
     await command("setLineState", {
       entity: "orden_producto",
@@ -391,4 +486,4 @@ async (page) => {
   };
   check(errors.length === 0, `Sin errores de navegador: ${errors.join("; ")}`);
   return { checks, performance };
-}
+};

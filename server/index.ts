@@ -3,12 +3,14 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { JsonStore } from "./store";
 import { command, mailPreview } from "./domain";
+import { materialQuotationPreview } from "./material-quotation";
 import { BusinessError } from "./integrity";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const store = await JsonStore.open(
   process.env.PROTOTIPO_DATA_FILE || resolve(root, "data/database.json"),
 );
 const app = express();
+app.use("/api/commands", express.json({ limit: "16mb" }));
 app.use(express.json({ limit: "1mb" }));
 app.get("/api/state", (_req, res) => res.json(store.snapshot()));
 app.post("/api/commands", async (req, res) => {
@@ -19,6 +21,9 @@ app.post("/api/commands", async (req, res) => {
 });
 app.post("/api/mail-preview", (req, res) =>
   res.json(mailPreview(store.snapshot(), req.body)),
+);
+app.post("/api/material-quotation-preview", (req, res) =>
+  res.json(materialQuotationPreview(store.snapshot(), req.body)),
 );
 const escape = (s: string) =>
   s.replace(
@@ -52,7 +57,7 @@ app.use(
     _next: express.NextFunction,
   ) => {
     if (err instanceof BusinessError)
-      res.status(err.code === "NOT_FOUND" ? 404 : 422).json({
+      res.status(err.code === "NOT_FOUND" ? 404 : ["SHEET_CHANGED", "LOT_STATE_CHANGED"].includes(err.code) ? 409 : 422).json({
         message: err.message,
         code: err.code,
         fields: err.fields,

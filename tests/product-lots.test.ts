@@ -20,8 +20,11 @@ import {
 } from "../src/live-validation";
 
 const base = resolve("tests/.tmp");
-const delivery = "2026-10-28T12:00:00.000Z";
-const later = "2026-11-05T12:00:00.000Z";
+const future = (days: number) =>
+  new Date(Date.now() + days * 86400000).toISOString().slice(0, 10) +
+  "T12:00:00.000Z";
+const delivery = future(30);
+const later = future(40);
 async function fixture(t: test.TestContext) {
   await mkdir(base, { recursive: true });
   const dir = await mkdtemp(join(base, "product-lots-"));
@@ -343,9 +346,13 @@ test("el número es obligatorio para datos de seguimiento y cierre, pero una ent
     );
     await unchanged(store, before);
   }
-  await execute(store, "saveLot", { row: { ...lot, estado: "anulado" } });
+  await execute(store, "saveLot", {
+    row: { ...lot, estado: "anulado" },
+    confirm: true,
+  });
   assert.equal(lotFor(store, line.id).numero_lote, null);
   assert.equal(lotFor(store, line.id).estado, "anulado");
+  assert.equal(linesFor(store, created.orderId)[0].estado, "anulada");
   await execute(store, "saveLot", {
     row: { ...lot, numero_lote: " LOTE-01 ", cantidad_recibida: 30 },
   });

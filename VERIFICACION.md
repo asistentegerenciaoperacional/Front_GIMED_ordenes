@@ -815,3 +815,70 @@ Reproducción:
     node scripts/verify-aria-browser.mjs tests/order-authorization.browser.js webkit
 
 API: `POST /api/commands` con `name: "authorizeOrders"` y `payload: { ids: string[], confirm: true }`. Éxito: `{ result: {} }`; entrada inválida: `VALIDATION`; selección desactualizada: `AUTHORIZATION_CHANGED`, con `details.orders` que identifica todas las afectadas. La transacción comprueba el conjunto antes de modificar datos y aplica una misma fecha. El contrato individual permanece `{ id, confirm: true }`.
+
+## Cotización de materiales — 30 de octubre de 2026
+
+Implementada selección superior a siete materiales con bloqueo exclusivo de Elaborar OCM, cotización por material/proveedor, un destinatario por proveedor compartido entre sus materiales, selección de proveedores adicionales, correo manual, reglas por cargo y plantilla global de asunto/cuerpo con ajustes por lote. La revisión utiliza datos del servidor y una revisión esperada; los cambios obligan a actualizar y revisar de nuevo. Transporte exclusivamente simulado y registro transaccional sin compras ni vínculos nuevos.
+
+Compilación de producción aprobada y **308 pruebas automatizadas aprobadas** en la suite observada, incluidas **15 pruebas nuevas de cotización y migración**. Se cubren más de siete materiales, homónimos, suma/adicional exactos, contactos ambiguos, destinatarios inválidos o repetidos, proveedores sin rol, fuentes manipuladas, plantilla global y conflictos, persistencia, migración con respaldo y rollback ante fallo del simulador. Los fixtures históricos de reglas de orden usan un reloj fijo para no caducar por sus fechas de entrega.
+
+**Chromium y WebKit: 40 comprobaciones por motor (80 en total)**. Se verifican Configuración, persistencia y variables de la plantilla, ocho materiales seleccionados, bloqueo de OCM y desbloqueo al volver a siete, proveedores fuera de favoritos, teclado, un contacto o correo manual compartido, cantidades, revisión, foco, conflicto real por cambio de contacto, conservación de ajustes, bloqueo de cierre/doble envío y registro de ocho mensajes simulados. Capturas de 375 y 1440 px revisadas visualmente; todos los botones del pie de revisión permanecen dentro de la ventana. Sin errores ni advertencias de React o React Aria.
+
+**Regresión de OCM en Chromium: 76 comprobaciones aprobadas**, incluidas creación y persistencia, límite de siete al elaborar, selección ampliada para cotización, conflictos, búsqueda/filtros/paginación y 375/768/1024/1440 px. No se ejecutó el empaquetado portable ni el recorrido general completo como parte de esta validación.
+
+La migración del archivo local generó un respaldo exacto del estado previo. La comparación confirma que las 28 colecciones anteriores conservan íntegramente sus registros y que solo se añadió la colección de plantilla. El SHA256 del DBML de referencia permanece igual. [Informe de migración](tests/evidence/quotations/migration-report.json).
+
+[Chromium](tests/evidence/quotations/chromium-material-quotation.browser.json), [WebKit](tests/evidence/quotations/webkit-material-quotation.browser.json), [regresión OCM](tests/evidence/ocm/chromium-material-demand.browser.json), [captura móvil](tests/evidence/quotations/chromium-capture-375.png), [revisión móvil](tests/evidence/quotations/chromium-review-375.png), [revisión de escritorio](tests/evidence/quotations/chromium-review-1440.png). Contrato, reproducción y extensión provisional en [COTIZACIONES-MATERIALES.md](COTIZACIONES-MATERIALES.md).
+
+## Hoja alternativa de OC de productos — 30 de octubre de 2026
+
+Implementación en `codex/hoja-oc-productos`, creada desde `master` en `931b0fb`, conservando los cambios locales previos. Activación independiente y desactivada por defecto en Configuración → Apariencia. Materiales/OCM mantiene su tabla actual. Contrato: [HOJA-OC-PRODUCTOS.md](HOJA-OC-PRODUCTOS.md); estándar visual actualizado en [design-system/MASTER.md](design-system/MASTER.md).
+
+`npm run build` aprobado, incluido TypeScript. Vite informa que el chunk principal supera 500 kB; el módulo de esta hoja y sus estilos se cargan de forma diferida. `npm test`: **311 pruebas aprobadas, 0 fallos**. La suite específica contiene 14 pruebas de identidad, saldos, propagación, Bogotá, protección antes de interpretar, contradicciones, referencias, campos relacionados, matrices TSV con comillas/saltos/filas vacías, 17 variantes de filtros, originales y rollback de operaciones mixtas y nuevos lotes.
+
+Pruebas de navegador sobre bases temporales independientes:
+
+| Suite | Chromium | WebKit |
+| --- | ---: | ---: |
+| Preferencia, tres hojas, edición y tabla OCM clásica | 10 | 10 |
+| Rangos, portapapeles, recuperación, conflictos y herramientas | 33 | — |
+| Las 17 variantes de filtros y controles | 43 | 43 |
+| Estados desde la hoja, tolerancias y confirmación/cancelación | 22 | 22 |
+| Virtualización y guardado de 5.000 lotes | 18 | — |
+| Ciclo global desde detalle y formulario clásico de lote | 23 | — |
+| Regresión de creación alternativa y clásica | 56 | — |
+| Regresión del detalle de OC/OCM | 65 | — |
+| Regresión de abastecimiento y elaboración de OCM | 76 | — |
+
+**421 comprobaciones de navegador aprobadas** en estas ejecuciones. Reportes sin errores de página ni advertencias React/React Aria. El portapapeles del recorrido completo se valida en Chromium; no se afirma la misma cobertura para WebKit.
+
+Se comprueban nueve/24 columnas, selección por identidades, autorización de la OC completa con renglones ocultos, propagación por propietario, filas estables durante edición, reaplicación explícita de consultas, columnas persistentes por hoja, prioridad del calendario/autocompletado y factura mediante el selector existente. La recuperación sustituye el borrador actual, permanece sin guardar y conserva el conflicto contra cambios concurrentes. Guardar y continuar utiliza los originales actualizados antes de actuar sobre estados; descartar antes de crear lotes conserva los datos persistidos. Se prueban impresión/documento para varias filas de una misma OC, bloqueo con varias OC, regreso desde impresión, triángulo de sobreentrega accesible y recuperación de la barra oculta.
+
+La prueba de volumen genera **más de 5.000 lotes**, recorre 0/25/50/75/100 % sin crecimiento acumulativo del DOM y mantiene menos de 50 filas montadas. Navega con teclado a filas previamente desmontadas, comprueba los índices accesibles globales y encabezados visibles, y verifica desplazamiento horizontal interno a 375 px sin columnas fijas. Un bloque de más de 1 MB guarda **5.000 ubicaciones en una única operación atómica**. Capturas de 1440 × 900 y 375 × 812 revisadas visualmente.
+
+Las transiciones conservan lotes, IDs y datos al anular/reabrir. Se confirma el conjunto que anula el último lote, la reapertura de todos los lotes de un producto anulado, la reapertura selectiva y el cierre manual con tolerancia, sin cierre automático de sus lotes. Cancelar conserva la base y el rango. La semilla conserva los lotes anulados; las pruebas no reinician la base local de trabajo. El motor y las comprobaciones de concurrencia son comunes a ambas vistas: [CICLO-LOTES.md](CICLO-LOTES.md).
+
+La regresión del detalle detectó un fixture antiguo que intentaba reabrir una OCM con cobertura histórica duplicada. Se conserva la regla comercial: ahora la prueba distingue una reapertura válida y el rechazo HTTP 422 `SUPPLY_CHANGED`, comprueba el aviso visible y confirma que el rechazo no escribe datos. No fue necesario modificar la restricción de abastecimiento.
+
+Reproducción, después de compilar:
+
+```powershell
+npm test
+npm run build
+node scripts/verify-aria-browser.mjs tests/product-order-sheet.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/product-order-sheet.browser.js webkit
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-interaction.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-filters.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-filters.browser.js webkit
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-states.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-states.browser.js webkit
+node --import tsx scripts/verify-product-sheet-large.ts
+node scripts/verify-aria-browser.mjs tests/product-lot-lifecycle.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/order-entry-sheet.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/order-detail.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/material-demand.browser.js chromium
+```
+
+Evidencias: [interacciones](tests/evidence/aria/chromium-product-order-sheet-interaction.browser.json), [filtros Chromium](tests/evidence/aria/chromium-product-order-sheet-filters.browser.json), [filtros WebKit](tests/evidence/aria/webkit-product-order-sheet-filters.browser.json), [estados Chromium](tests/evidence/aria/chromium-product-order-sheet-states.browser.json), [estados WebKit](tests/evidence/aria/webkit-product-order-sheet-states.browser.json), [volumen](tests/evidence/aria/chromium-product-order-sheet-virtual.browser.json), [ciclo clásico](tests/evidence/aria/chromium-product-lot-lifecycle.browser.json), [detalle](tests/evidence/aria/chromium-order-detail.browser.json), [escritorio](tests/evidence/aria/product-sheet-1440.png), [móvil](tests/evidence/aria/product-sheet-375.png), [captura de interacción](tests/evidence/aria/product-sheet-interaction-desktop.png) y [rechazo de reapertura OCM](tests/evidence/order-detail/material-reopen-conflict.png).
+
+Esta validación no incluye empaquetado portable, Firefox ni el recorrido general completo de `browser-journey.js`.

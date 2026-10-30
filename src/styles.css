@@ -1745,6 +1745,9 @@ textarea.control {
   container-type: inline-size;
   container-name: line-detail;
 }
+.product-lots-title {
+  font-size: 16px;
+}
 .line-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1825,6 +1828,9 @@ textarea.control {
 }
 .lot-list .product-lots-table td.lot-identity {
   overflow-wrap: anywhere;
+}
+.product-lots-table td.lot-identity small {
+  font-size: 12px;
 }
 .lot-section-title {
   display: none;
@@ -2059,6 +2065,28 @@ textarea.control {
   font-size: 11px;
   line-height: 1.6;
   color: var(--muted);
+}
+.appearance-option {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.appearance-option .aria-check-indicator {
+  margin-top: calc((1.5em - 14px) / 2);
+}
+.appearance-option-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.appearance-option-copy strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.appearance-option-description {
+  color: #334155;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 .catalog-tabs {
   display: flex;
@@ -2997,6 +3025,44 @@ textarea.control {
   gap: 4px;
   font-size: 12px;
 }
+.demand-selection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.quotation-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-width: 0;
+}
+.quotation-card h3 { margin: 0 0 10px; font-size: 15px; }
+.quotation-card h4 { margin: 0 0 10px; }
+.quotation-card > .compact-note { margin: 0 0 14px; }
+.quotation-providers { list-style: none; padding: 0; margin: 12px 0; }
+.quotation-providers li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.quotation-providers li span { min-width: 0; overflow-wrap: anywhere; }
+.quotation-providers small { display: block; color: var(--muted); margin-top: 4px; }
+.quotation-recipient { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
+.quotation-preview-trigger { margin: 10px 0; }
+.material-quotation-dialog .dialog-footer { flex-wrap: wrap; }
+.quotation-message { white-space: pre-wrap; overflow-wrap: anywhere; }
+.quotation-template-fields .compact-note { overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .demand-selection-actions { width: 100%; }
+  .demand-selection-actions > .btn { flex: 1 1 140px; }
+  .quotation-card { padding: 12px; }
+  .material-quotation-dialog { scroll-padding-bottom: 160px; }
+  .material-quotation-dialog .quotation-review-footer > .btn { flex: 1 1 auto; }
+  .material-quotation-dialog .quotation-review-footer > .btn:last-child { flex-basis: 100%; }
+}
 .demand-selection-count > span {
   color: var(--muted);
 }
@@ -3006,6 +3072,8 @@ textarea.control {
   min-width: 0;
   flex-wrap: wrap;
   gap: 8px;
+  max-height: 160px;
+  overflow-y: auto;
 }
 .demand-selection-item {
   display: flex;

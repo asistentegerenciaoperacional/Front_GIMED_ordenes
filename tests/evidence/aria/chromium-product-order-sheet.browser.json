@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "La hoja está desactivada por defecto",
+    "Seguimiento presenta las 24 columnas",
+    "No hay tarjetas de resumen en la hoja",
+    "La selección tiene identidad de lote estable",
+    "Editar prepara un borrador sin guardar",
+    "Guardar aplica la edición al renglón de producto",
+    "No autorizadas presenta nueve columnas",
+    "Anuladas conserva los lotes anulados",
+    "OCM mantiene su tabla clásica",
+    "Sin errores de página: "
+  ],
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-R0OHWM\\database.json"
+}

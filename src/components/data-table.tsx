@@ -3,7 +3,9 @@ import {
   useEffect,
   memo,
   useCallback,
+  useContext,
   useMemo,
+  useLayoutEffect,
   useRef,
   type ReactElement,
   type ReactNode,
@@ -15,6 +17,7 @@ import {
   Table,
   TableBody,
   TableHeader,
+  TableStateContext,
 } from "react-aria-components/Table";
 import {
   Rect,
@@ -27,6 +30,15 @@ type Part = { children?: ReactNode } & React.HTMLAttributes<HTMLElement> & {
     colSpan?: number;
     scope?: string;
   };
+function ManualTableNavigation() {
+  const setDisabled =
+    useContext(TableStateContext)?.setKeyboardNavigationDisabled;
+  useLayoutEffect(() => {
+    setDisabled?.(true);
+    return () => setDisabled?.(false);
+  }, [setDisabled]);
+  return null;
+}
 // Declarative table parts are data for the adapter, never standalone DOM controls.
 export function TableHead({ children }: Part) {
   return <>{children}</>;
@@ -65,6 +77,7 @@ type TableProps = React.ComponentPropsWithRef<"table"> & {
   rowVersion?: unknown;
   cacheKey?: unknown;
   onRowClick?: (key: string) => void;
+  manualKeyboardNavigation?: boolean;
 };
 export const DataTable = memo(
   DataTableView,
@@ -77,6 +90,7 @@ function DataTableView({
   rowVersion,
   cacheKey,
   onRowClick,
+  manualKeyboardNavigation = false,
   ...props
 }: TableProps) {
   const tableRef = useRef<HTMLTableElement>(null);
@@ -116,6 +130,7 @@ function DataTableView({
       }),
     [rowVersion ?? body?.props.children],
   );
+  const firstManualRow = manualKeyboardNavigation ? rows[0] : undefined;
   const renderRow = useCallback(
     (row: (typeof rows)[number]) => (
       <Row
@@ -136,14 +151,34 @@ function DataTableView({
               key={index}
               textValue={nodeText(content as ReactNode)}
             >
-              {() => content as ReactNode}
+              {() => (
+                <>
+                  {manualKeyboardNavigation &&
+                    row === firstManualRow &&
+                    index === 0 && <ManualTableNavigation />}
+                  {content as ReactNode}
+                </>
+              )}
             </Cell>
           );
         })}
       </Row>
     ),
-    [],
+    [manualKeyboardNavigation, firstManualRow],
   );
+  useLayoutEffect(() => {
+    if (props["aria-rowcount"] === undefined || !tableRef.current) return;
+    // Manual row windows expose their total and stable indices, rather than
+    // the size of React Aria's mounted collection.
+    tableRef.current.setAttribute(
+      "aria-rowcount",
+      String(props["aria-rowcount"]),
+    );
+    for (const row of tableRef.current.querySelectorAll<HTMLElement>(
+      "[data-global-row-index]",
+    ))
+      row.setAttribute("aria-rowindex", row.dataset.globalRowIndex!);
+  }, [props["aria-rowcount"], rows]);
   const emptyRow =
     rows.length === 1
       ? rows.find(
@@ -228,6 +263,7 @@ function DataTableView({
                   .selectionOnly
               }
               isRowHeader={index === 0}
+              style={column.props.style as React.CSSProperties | undefined}
               className={
                 info?.key === "total"
                   ? "right"

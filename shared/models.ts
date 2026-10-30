@@ -211,21 +211,21 @@ export interface contacto_interno {
 
 export interface destinatario_evento {
   id: string;
-  tipo_evento: "codigos_barras_nuevos" | "envio_orden_compra" | "envio_certificado_calidad" | "envio_certificado_liberacion";
+  tipo_evento: "codigos_barras_nuevos" | "envio_orden_compra" | "envio_certificado_calidad" | "envio_certificado_liberacion" | "cotizacion_materiales";
   tipo_contacto: "interno" | "proveedor";
   cargo_area: string;
   tipo_destinatario: "para" | "cc" | "cco";
 }
 
 export interface adjunto_evento {
-  tipo_evento: "codigos_barras_nuevos" | "envio_orden_compra" | "envio_certificado_calidad" | "envio_certificado_liberacion";
+  tipo_evento: "codigos_barras_nuevos" | "envio_orden_compra" | "envio_certificado_calidad" | "envio_certificado_liberacion" | "cotizacion_materiales";
   tipo_adjunto: "orden_compra_escaneada" | "certificado_calidad" | "certificado_liberacion";
 }
 
 export interface correo_enviado {
   id_correo: string;
   remitente: string;
-  tipo_evento: "codigos_barras_nuevos" | "envio_orden_compra" | "envio_certificado_calidad" | "envio_certificado_liberacion";
+  tipo_evento: "codigos_barras_nuevos" | "envio_orden_compra" | "envio_certificado_calidad" | "envio_certificado_liberacion" | "cotizacion_materiales";
   fecha_envio: string;
 }
 
@@ -234,6 +234,12 @@ export interface correo_enviado_destinatario {
   remitente: string;
   destinatario: string;
   tipo_destinatario: "para" | "cc" | "cco";
+}
+
+export interface plantilla_correo {
+  tipo_evento: "codigos_barras_nuevos" | "envio_orden_compra" | "envio_certificado_calidad" | "envio_certificado_liberacion" | "cotizacion_materiales"; // Prototype extension; not in production DBML.
+  asunto: string; // Prototype extension; not in production DBML.
+  cuerpo: string; // Prototype extension; not in production DBML.
 }
 
 export interface EntityMap {
@@ -265,5 +271,6 @@ export interface EntityMap {
   adjunto_evento: adjunto_evento;
   correo_enviado: correo_enviado;
   correo_enviado_destinatario: correo_enviado_destinatario;
+  plantilla_correo: plantilla_correo;
 }
 export type Database = { [K in keyof EntityMap]: EntityMap[K][] };

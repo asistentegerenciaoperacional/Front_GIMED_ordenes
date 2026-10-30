@@ -16,8 +16,11 @@ import {
 } from "../shared/schema";
 
 const base = resolve("tests/.tmp");
-const delivery = "2026-10-28T12:00:00.000Z";
-const newDelivery = "2026-11-06T12:00:00.000Z";
+const future = (days: number) =>
+  new Date(Date.now() + days * 86400000).toISOString().slice(0, 10) +
+  "T12:00:00.000Z";
+const delivery = future(30);
+const newDelivery = future(40);
 const elaboration = "2026-10-07T12:00:00.000Z";
 async function fixture(t: test.TestContext) {
   await mkdir(base, { recursive: true });
@@ -75,7 +78,10 @@ for (const entity of ["orden_material", "orden_otro"] as const) {
     // has duplicate coverage, which must now be rejected when reactivated.
     const line = db[entity][entity === "orden_material" ? 1 : 0];
     assert.ok(line);
-    if (db.orden_compra.find((order) => order.id === line.id_orden_compra)!.estado_autorizacion !== "autorizada")
+    if (
+      db.orden_compra.find((order) => order.id === line.id_orden_compra)!
+        .estado_autorizacion !== "autorizada"
+    )
       await authorize(store, line.id_orden_compra);
     for (const previous of ["cerrada", "anulada"]) {
       await execute(store, "setLineState", {
@@ -687,7 +693,7 @@ test("borrar un lote conserva el estado cerrado del producto mientras queden otr
   );
 });
 
-test("anular elimina todos los lotes con confirmación, conserva renglón y abastecimiento; reabrir crea un único lote nuevo con fecha actual", async (t) => {
+test("anular conserva todos los datos y lotes; reabrir el producto anulado reactiva los mismos lotes sin crear otros", async (t) => {
   const store = await fixture(t);
   const line = store
     .snapshot()
@@ -709,7 +715,8 @@ test("anular elimina todos los lotes con confirmación, conserva renglón y abas
     store
       .snapshot()
       .lote_producto.filter((lot) => lot.id_orden_producto === line.id).length,
-    0,
+    before.lote_producto.filter((lot) => lot.id_orden_producto === line.id)
+      .length,
   );
   assert.deepEqual(
     store.snapshot().orden_producto.find((row) => row.id === line.id),
@@ -747,10 +754,15 @@ test("anular elimina todos los lotes con confirmación, conserva renglón y abas
     id: line.id,
     estado: "en_seguimiento",
   });
-  const newLot = lotFor(store, line.id);
-  assert.ok(isInitialProductLot(newLot));
-  assert.equal(newLot.fecha_estimada_batch_record, newDelivery);
-  assert.ok(!before.lote_producto.some((lot) => lot.id === newLot.id));
+  const reopenedLots = store
+    .snapshot()
+    .lote_producto.filter((lot) => lot.id_orden_producto === line.id);
+  assert.deepEqual(
+    reopenedLots,
+    before.lote_producto
+      .filter((lot) => lot.id_orden_producto === line.id)
+      .map((lot) => ({ ...lot, estado: "en_seguimiento" })),
+  );
   await execute(store, "setLineState", {
     entity: "orden_producto",
     id: line.id,
@@ -760,11 +772,11 @@ test("anular elimina todos los lotes con confirmación, conserva renglón y abas
     store
       .snapshot()
       .lote_producto.filter((lot) => lot.id_orden_producto === line.id),
-    [newLot],
+    reopenedLots,
   );
 });
 
-test("reabrir un producto anulado heredado exige confirmación para reemplazar sus lotes; reabrir cerrado conserva sus lotes", async (t) => {
+test("reabrir un producto anulado conserva sus lotes existentes y abre todos; reabrir cerrado conserva sus lotes", async (t) => {
   const store = await fixture(t);
   const line = store
     .snapshot()
@@ -777,12 +789,9 @@ test("reabrir un producto anulado heredado exige confirmación para reemplazar s
       numero_lote: "LEGACY",
     });
   });
-  await rejectedUnchanged(
-    store,
-    "setLineState",
-    { entity: "orden_producto", id: line.id, estado: "en_seguimiento" },
-    "CONFIRMATION",
-  );
+  const originalLots = store
+    .snapshot()
+    .lote_producto.filter((lot) => lot.id_orden_producto === line.id);
   const independent = store
     .snapshot()
     .lote_producto.filter((lot) => lot.id_orden_producto !== line.id);
@@ -792,16 +801,12 @@ test("reabrir un producto anulado heredado exige confirmación para reemplazar s
     estado: "en_seguimiento",
     confirm: true,
   });
-  assert.ok(
-    !store.snapshot().lote_producto.some((lot) => lot.id === sid(5001)),
-  );
-  assert.equal(
+  assert.deepEqual(
     store
       .snapshot()
-      .lote_producto.filter((lot) => lot.id_orden_producto === line.id).length,
-    1,
+      .lote_producto.filter((lot) => lot.id_orden_producto === line.id),
+    originalLots.map((lot) => ({ ...lot, estado: "en_seguimiento" })),
   );
-  assert.ok(isInitialProductLot(lotFor(store, line.id)));
   assert.deepEqual(
     store
       .snapshot()
@@ -824,16 +829,22 @@ test("reabrir un producto anulado heredado exige confirmación para reemplazar s
   );
 });
 
-test("semilla: productos anulados sin lotes; cargar datos heredados conserva todos los registros hasta una operación confirmada", async (t) => {
+test("semilla: productos anulados conservan lotes anulados; cargar datos no modifica registros", async (t) => {
   const seed = validateDatabase(makeSeed());
   assert.ok(seed.orden_producto.some((line) => line.estado === "anulada"));
   for (const line of seed.orden_producto.filter(
     (row) => row.estado === "anulada",
   ))
-    assert.equal(
-      seed.lote_producto.filter((lot) => lot.id_orden_producto === line.id)
-        .length,
-      0,
+    assert.ok(
+      seed.lote_producto.some((lot) => lot.id_orden_producto === line.id),
+    );
+  for (const line of seed.orden_producto.filter(
+    (row) => row.estado === "anulada",
+  ))
+    assert.ok(
+      seed.lote_producto
+        .filter((lot) => lot.id_orden_producto === line.id)
+        .every((lot) => lot.estado === "anulado"),
     );
   const store = await fixture(t);
   await store.transaction((db) => {

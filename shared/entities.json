@@ -72,7 +72,8 @@
       "codigos_barras_nuevos",
       "envio_orden_compra",
       "envio_certificado_calidad",
-      "envio_certificado_liberacion"
+      "envio_certificado_liberacion",
+      "cotizacion_materiales"
     ],
     "tipo_contacto": [
       "interno",
@@ -997,6 +998,29 @@
         "id_correo",
         "remitente",
         "destinatario"
+      ],
+      "unique": []
+    },
+    "plantilla_correo": {
+      "fields": {
+        "tipo_evento": {
+          "type": "tipo_evento_correo",
+          "required": true,
+          "prototype": true
+        },
+        "asunto": {
+          "type": "varchar",
+          "required": true,
+          "prototype": true
+        },
+        "cuerpo": {
+          "type": "varchar",
+          "required": true,
+          "prototype": true
+        }
+      },
+      "pk": [
+        "tipo_evento"
       ],
       "unique": []
     }

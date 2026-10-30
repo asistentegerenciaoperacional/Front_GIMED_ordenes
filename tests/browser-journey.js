@@ -108,7 +108,7 @@ async (page) => {
     .getByRole("heading", { name: "Órdenes de compra", exact: true })
     .waitFor();
   const initial = await state();
-  check(Object.keys(initial).length === 28, "Estado con 28 colecciones");
+  check(Object.keys(initial).length === 29 && Array.isArray(initial.plantilla_correo), "Estado con 28 colecciones base y plantilla provisional");
   const drawerRoutes=['Órdenes de compra','Abastecimiento','Catálogos','Códigos de barras','Proveedores','Facturas','Documentos','Correos','Configuración'];
   for (const width of [375,768,1024,1440]) {
     await page.setViewportSize({width,height:900});

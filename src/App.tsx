@@ -300,7 +300,11 @@ export function App() {
         if (
           error instanceof ApiError &&
           (error.code === "CONSECUTIVE_CHANGED" ||
+            error.code === "SHEET_CHANGED" ||
+            error.code === "LOT_STATE_CHANGED" ||
             error.code === "AUTHORIZATION_CHANGED" ||
+            error.code === "QUOTATION_CHANGED" ||
+            error.code === "QUOTATION_TEMPLATE_CHANGED" ||
             error.code === "SUPPLY_CHANGED" ||
             error.code === "FAVORITES_CHANGED" ||
             error.code === "PRODUCT_MATERIALS_CHANGED" ||

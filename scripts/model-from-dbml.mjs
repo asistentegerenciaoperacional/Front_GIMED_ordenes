@@ -71,6 +71,17 @@ tables.orden_producto.fields.cantidad_cinta = {
   required: false,
   prototype: true,
 };
+// Additive prototype extensions; the reference DBML stays unchanged.
+enums.tipo_evento_correo.push("cotizacion_materiales");
+tables.plantilla_correo = {
+  fields: {
+    tipo_evento: { type: "tipo_evento_correo", required: true, prototype: true },
+    asunto: { type: "varchar", required: true, prototype: true },
+    cuerpo: { type: "varchar", required: true, prototype: true },
+  },
+  pk: ["tipo_evento"],
+  unique: [],
+};
 const refs = [];
 for (const m of source.matchAll(
   /Ref:\s*"(\w+)"\."(\w+)"\s*[^\n"]*"(\w+)"\."(\w+)"/g,

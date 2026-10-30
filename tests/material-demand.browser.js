@@ -66,7 +66,7 @@ async (page) => {
   await panel().waitFor();
   check(await page.getByRole('tab', { name: 'Materiales pendientes', exact: true }).getAttribute('aria-selected') === 'true', 'Nueva subpestaña seleccionada por URL');
   check((await page.getByRole('tab').allTextContents()).join('|').includes('Vínculos entre órdenes|Materiales pendientes|Lotes y certificados'), 'Pestaña situada entre vínculos y lotes');
-  check(await page.locator('[data-need]').count() === 0, 'Sin consulta automática ni rango inicial');
+  check(await page.locator('[data-need]').count() > 0 && await page.locator('[id="field-desde"]').inputValue() === '', 'Sin rango inicial se muestran todos los pendientes');
   check(await page.getByRole('button', { name: 'Elaborar OCM', exact: true }).isDisabled(), 'Preparar deshabilitado sin selección');
   await page.locator('[id="field-desde"]').fill('28/02/2027');
   await page.locator('[id="field-hasta"]').fill('01/02/2027');
@@ -84,15 +84,19 @@ async (page) => {
 
   const seven = [material.id, ...extra];
   for (const id of seven) await checkFor(first.id, id).check();
-  check((await page.locator('.demand-selection-count').innerText()).includes('7 de 7 materiales'), 'Siete materiales distintos, incluyendo homónimos');
-  check(await checkFor(second.id, cap.id).isDisabled(), 'Octavo material bloqueado');
+  check((await page.locator('.demand-selection-count').innerText()).includes('7 materiales'), 'Siete materiales distintos, incluyendo homónimos');
+  check(await checkFor(second.id, cap.id).isEnabled(), 'Octavo material disponible para cotización');
+  await checkFor(second.id, cap.id).check();
+  check(await page.getByRole('button', { name: 'Elaborar OCM', exact: true }).isDisabled(), 'Más de siete materiales bloquean elaborar OCM');
+  check(await page.getByRole('button', { name: 'Cotizar materiales', exact: true }).isEnabled(), 'Cotización disponible sobre siete materiales');
+  await checkFor(second.id, cap.id).uncheck();
   check(await checkFor(second.id, material.id).isEnabled(), 'Más orígenes de un material seleccionado permanecen habilitados');
   await checkFor(second.id, material.id).check();
   check((await page.locator('.demand-selection-count').innerText()).includes('8 vínculos · 2 OC'), 'Conteo de vínculos y cabeceras independientes del límite');
   check(await page.getByRole('button', { name: 'Quitar Envase con nombre repetido (MAIA 200) de la selección', exact: true }).count() === 1 && await page.getByRole('button', { name: 'Quitar Envase con nombre repetido (MAIA 201) de la selección', exact: true }).count() === 1, 'Resumen distingue homónimos por MAIA en sus acciones accesibles');
   await search().fill('sin-coincidencias-material');
   await page.getByText('Sin necesidades coincidentes', { exact: true }).waitFor();
-  check((await page.locator('.demand-selection-count').innerText()).includes('7 de 7 materiales'), 'Buscar conserva selección oculta');
+  check((await page.locator('.demand-selection-count').innerText()).includes('7 materiales'), 'Buscar conserva selección oculta');
   await search().fill(''); await checkFor(first.id, material.id).waitFor();
   await page.getByRole('button', { name: 'Filtrar y ordenar Cantidad de producto', exact: true }).click();
   await page.getByRole('button', { name: 'De mayor a menor', exact: true }).click();
@@ -192,7 +196,7 @@ async (page) => {
   await page.locator('[id="field-hasta"]').fill('27/02/2027');
   await page.getByRole('button', { name: 'Consultar', exact: true }).click();
   await page.getByRole('alertdialog').getByRole('button', { name: 'Cambiar rango', exact: true }).click();
-  check((await page.locator('.demand-selection-count').innerText()).includes('0 de 7 materiales') && new URL(page.url()).searchParams.get('pendientes_hasta') === '2027-02-27', 'Aceptar otro rango descarta selección y aplica la nueva consulta');
+  check((await page.locator('.demand-selection-count').innerText()).includes('0 materiales') && new URL(page.url()).searchParams.get('pendientes_hasta') === '2027-02-27', 'Aceptar otro rango descarta selección y aplica la nueva consulta');
 
   for (let i = 0; i < 4; i++) await createProduct('2027-02-23', Array.from({ length: 7 }, () => ({ id_producto: product.id, cantidad_solicitada: 100, precio_unitario: '1.00' })));
   await page.goto(queriedUrl); await panel().waitFor();

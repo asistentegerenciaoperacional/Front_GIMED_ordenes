@@ -193,7 +193,7 @@ export function demandQuantity(base: number | bigint, percent: number): number {
     throw new RangeError("Cantidad recomendada fuera de rango.");
   return total;
 }
-export function consolidateMaterialSources(sources: MaterialSource[]) {
+export function groupMaterialSources(sources: MaterialSource[]) {
   const groups = new Map<
     string,
     {
@@ -231,7 +231,11 @@ export function consolidateMaterialSources(sources: MaterialSource[]) {
     group.fuentes.push(source);
     groups.set(source.id_material, group);
   }
-  if (groups.size < 1 || groups.size > 7)
-    throw new Error("Selecciona entre uno y siete materiales distintos.");
   return [...groups.values()];
+}
+export function consolidateMaterialSources(sources: MaterialSource[]) {
+  const groups = groupMaterialSources(sources);
+  if (groups.length < 1 || groups.length > 7)
+    throw new Error("Selecciona entre uno y siete materiales distintos.");
+  return groups;
 }

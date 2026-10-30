@@ -180,8 +180,8 @@ try {
   assert.equal(initialResponse.status, 200);
   const initial = await initialResponse.json();
   check(
-    Object.keys(initial).length === 28,
-    "Iniciar.cmd arranca las 28 colecciones desde una ruta con espacios y acentos",
+    Object.keys(initial).length === 29 && Array.isArray(initial.plantilla_correo),
+    "Iniciar.cmd arranca las 28 colecciones base y la plantilla provisional desde una ruta con espacios y acentos",
   );
   check(
     await present(resolve(root, "data/database.json")),

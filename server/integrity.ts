@@ -2,6 +2,7 @@ import type { Database } from "../shared/models";
 import { introducesDuplicateSupply } from "../shared/material-supply";
 import { costScheduleIssue } from "../shared/maquila-costs";
 import { productMaterialsDatabaseIssue } from "../shared/product-materials";
+import { quotationEvent, quotationTemplateIssues } from "../shared/material-quotation";
 import {
   schemas,
   entities,
@@ -92,6 +93,17 @@ export function validateDatabase(
           { [ref.field]: "Selecciona un registro existente." },
         );
     }
+  for (const template of db.plantilla_correo) {
+    check(template.tipo_evento === quotationEvent, "La plantilla global corresponde a cotización de materiales.");
+    const fields = quotationTemplateIssues(template);
+    check(!Object.keys(fields).length, "Revisa la plantilla de cotización.", "VALIDATION", fields);
+  }
+  for (const rule of db.destinatario_evento.filter((r) => r.tipo_evento === quotationEvent))
+    check(rule.tipo_contacto === "proveedor" && rule.tipo_destinatario === "para",
+      "La cotización admite reglas de contactos de proveedor como destinatario principal.", "VALIDATION",
+      { tipo_contacto: "Selecciona Proveedor.", tipo_destinatario: "Selecciona Para." });
+  check(!db.adjunto_evento.some((rule) => rule.tipo_evento === quotationEvent),
+    "Las cotizaciones incluyen los datos en el mensaje y no admiten adjuntos configurados.", "VALIDATION", { tipo_evento: "Selecciona otro evento para configurar adjuntos." });
   const costConflict = costScheduleIssue(db.costos_maquila);
   if (costConflict)
     throw new BusinessError(

@@ -24,6 +24,8 @@ import {
   useEffect,
   useMemo,
   useState,
+  lazy,
+  Suspense,
   type MouseEvent,
 } from "react";
 import {
@@ -56,12 +58,7 @@ import {
   TableRow,
   TableRows,
 } from "./components/data-table";
-import {
-  LotForm,
-  MailForm,
-  OrderForm,
-  ReceiptForm,
-} from "./forms";
+import { LotForm, MailForm, OrderForm, ReceiptForm } from "./forms";
 import { confirmAction } from "./components/overlays";
 import { Documents } from "./document-controls";
 import {
@@ -117,6 +114,9 @@ import {
   type OrderSelection,
 } from "./order-authorization";
 import { useBogotaDay } from "./use-bogota-day";
+import { useProductSheetPreference } from "./product-sheet-preferences";
+import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
+const ProductOrderSheet = lazy(() => import("./product-order-sheet").then(module => ({ default: module.ProductOrderSheet })));
 
 function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
   const { db } = useApp();
@@ -183,6 +183,12 @@ function setParams(group: string, params: URLSearchParams, values: Row) {
   replaceRoute(`ordenes/${group}${next.size ? `?${next}` : ""}`);
 }
 export function OrdersPage({
+  group, params,
+}: { group: "productos" | "materiales"; params: URLSearchParams }) {
+  const preference = useProductSheetPreference();
+  return group === "productos" && preference.enabled ? <Suspense fallback={<div role="status">Cargando hoja de OC…</div>}><ProductOrderSheet params={params} /></Suspense> : <ClassicOrdersPage group={group} params={params} />;
+}
+function ClassicOrdersPage({
   group,
   params,
 }: {
@@ -217,21 +223,27 @@ export function OrdersPage({
     const start = performance.now();
     const prepared = cachedOrderRead(db, "model", () => {
       const { orders, documentByOrderId } = buildOrderReadModel(db);
-      const strings=new Map<string,string>();
-      const itemGroups=new Map<string,(typeof orders)[number]['itemValues']>();
-      const intern=<T extends string|null>(value:T):T=>{
-        if(value===null)return value;
-        if(!strings.has(value))strings.set(value,value);
+      const strings = new Map<string, string>();
+      const itemGroups = new Map<
+        string,
+        (typeof orders)[number]["itemValues"]
+      >();
+      const intern = <T extends string | null>(value: T): T => {
+        if (value === null) return value;
+        if (!strings.has(value)) strings.set(value, value);
         return strings.get(value) as T;
       };
-      for(const order of orders){
-        order.total=intern(order.total);
-        order.elaborationDay=intern(order.elaborationDay);
-        order.deliveryDay=intern(order.deliveryDay);
-        order.pendingBatchDay=intern(order.pendingBatchDay);
-        const key=order.tipo_orden+'\0'+order.itemValues.map(item=>JSON.stringify(item)).join('\0');
-        if(!itemGroups.has(key))itemGroups.set(key,order.itemValues);
-        order.itemValues=itemGroups.get(key)!;
+      for (const order of orders) {
+        order.total = intern(order.total);
+        order.elaborationDay = intern(order.elaborationDay);
+        order.deliveryDay = intern(order.deliveryDay);
+        order.pendingBatchDay = intern(order.pendingBatchDay);
+        const key =
+          order.tipo_orden +
+          "\0" +
+          order.itemValues.map((item) => JSON.stringify(item)).join("\0");
+        if (!itemGroups.has(key)) itemGroups.set(key, order.itemValues);
+        order.itemValues = itemGroups.get(key)!;
       }
       return { orders, documentByOrderId };
     });
@@ -565,8 +577,8 @@ export function OrdersPage({
                 <TableCell className="description">
                   <strong>{name}</strong>
                   <small>
-                    {ls.length} {orderItemLabel(o.tipo_orden, ls.length !== 1)} ·{" "}
-                    {count(o.requestedQuantity)} unidades solicitadas
+                    {ls.length} {orderItemLabel(o.tipo_orden, ls.length !== 1)}{" "}
+                    · {count(o.requestedQuantity)} unidades solicitadas
                   </small>
                 </TableCell>
                 <TableCell className="nowrap">
@@ -902,7 +914,9 @@ export function OrdersPage({
                   >
                     {renderTable}
                   </OrderAuthorizationSession>
-                ) : renderTable()}
+                ) : (
+                  renderTable()
+                )}
                 {!rows.length && (
                   <Empty
                     title="No hay órdenes coincidentes"
@@ -1006,11 +1020,12 @@ export function OrderDetail({
   const [lot, setLot] = useState<{ line: Row; record?: Row } | null>(null),
     [receipt, setReceipt] = useState<Row | null>(null),
     [mail, setMail] = useState<Row | null>(null);
-  const [pendingAction, setPendingAction] = useState<
+  type LotAction =
     | { kind: "delete"; line: Row; record: Row }
     | { kind: "anular" | "reabrir"; line: Row }
-    | null
-  >(null);
+    | null;
+  const [pendingAction, setPendingActionValue] = useState<(NonNullable<LotAction> & { expected: ReturnType<typeof productLotLifecycleSnapshot> }) | null>(null);
+  const setPendingAction = (action: LotAction) => setPendingActionValue(action ? { ...action, expected: productLotLifecycleSnapshot(db, [action.line.id]) } : null);
   const [actionBusy, setActionBusy] = useState(false);
   const [actionError, setActionError] = useState<string>();
   const supplyNeeds = useMemo(() => {
@@ -1053,6 +1068,7 @@ export function OrderDetail({
             )
         : [];
   async function changeState(l: Row, s: string) {
+    const expected = o?.tipo_orden === "producto" ? productLotLifecycleSnapshot(db, [l.id]) : undefined;
     if (!authorized) {
       notify(
         "Autoriza la orden de compra antes de cambiar el estado del seguimiento.",
@@ -1069,8 +1085,7 @@ export function OrderDetail({
     if (
       s === "en_seguimiento" &&
       o!.tipo_orden === "producto" &&
-      l.estado === "anulada" &&
-      db.lote_producto.some((record) => record.id_orden_producto === l.id)
+      l.estado === "anulada"
     ) {
       setActionError(undefined);
       setPendingAction({ kind: "reabrir", line: l });
@@ -1092,7 +1107,7 @@ export function OrderDetail({
       if (d !== null && Math.abs(d) > tolerance(db)) {
         if (
           !(await confirmAction(
-            `La desviación del producto es ${d.toFixed(2)} %, fuera del margen ±${tolerance(db)} %. ¿Confirmar el cierre manual?`,
+            `La desviación del producto es ${d.toFixed(2)} %, fuera del margen ±${tolerance(db)} %. ¿Confirmar el cierre del lote?`,
           ))
         )
           return;
@@ -1102,7 +1117,7 @@ export function OrderDetail({
     try {
       await run(
         "setLineState",
-        { entity: lineTable(o!.tipo_orden), id: l.id, estado: s, confirm },
+        { entity: lineTable(o!.tipo_orden), id: l.id, estado: s, confirm, expected },
         `Estado del ${orderItemLabel(o!.tipo_orden)} actualizado`,
       );
     } catch (e) {
@@ -1129,10 +1144,11 @@ export function OrderDetail({
             estado:
               pendingAction.kind === "anular" ? "anulada" : "en_seguimiento",
             confirm: true,
+            expected: pendingAction.expected,
           },
           pendingAction.kind === "anular"
-            ? "Producto anulado y lotes eliminados"
-            : "Producto reabierto con un lote inicial nuevo",
+            ? "Producto y lotes anulados; datos conservados"
+            : "Producto y lotes reabiertos",
         );
       setPendingAction(null);
     } catch (e) {
@@ -1469,7 +1485,9 @@ export function OrderDetail({
                           {o.tipo_orden === "producto" ? (
                             <>
                               <div className="spread">
-                                <h3>Lotes de producto ({lots.length})</h3>
+                                <h3 className="product-lots-title">
+                                  Lotes de producto ({lots.length})
+                                </h3>
                                 <Button
                                   icon={Plus}
                                   className="small"
@@ -1902,7 +1920,7 @@ export function OrderDetail({
               ? "Eliminar lote"
               : pendingAction.kind === "anular"
                 ? "Anular producto"
-                : "Reabrir y reemplazar lotes"
+                : "Reabrir producto y lotes"
           }
           onConfirm={confirmLotAction}
           onClose={() => setPendingAction(null)}
@@ -1925,31 +1943,28 @@ export function OrderDetail({
               </p>
               {db.lote_producto.filter(
                 (record) => record.id_orden_producto === pendingAction.line.id,
-              ).length === 1 && (
+              ).filter((record) => record.id !== pendingAction.record.id && record.estado !== "anulado").length === 0 && (
                 <p className="notice warning">
-                  Es el último lote de este producto. Al eliminarlo, el producto
+                  No quedarán lotes activos de este producto. Al eliminarlo, el producto
                   quedará anulado.
                 </p>
               )}
             </>
           ) : pendingAction.kind === "anular" ? (
             <p>
-              Se anulará el producto {pendingAction.line.posicion} y se
-              eliminarán todos sus lotes (
+              Se anulará el producto {pendingAction.line.posicion} y todos sus lotes (
               {
                 db.lote_producto.filter(
                   (record) =>
                     record.id_orden_producto === pendingAction.line.id,
                 ).length
               }
-              ), incluidos sus datos de recepción, Batch record e inspección. Se
-              conservarán el renglón comercial y sus vínculos de abastecimiento.
+              ). Se conservarán sus identificadores, datos de recepción, Batch record, inspección y vínculos de abastecimiento.
             </p>
           ) : (
             <p>
-              Este producto anulado conserva lotes de una versión anterior. Se
-              eliminarán todos y se creará un lote inicial nuevo con la entrega
-              solicitada actual y estados pendientes.
+              El producto y todos sus lotes conservados pasarán a seguimiento,
+              incluidos los que estaban cerrados o anulados. Sus datos no se reemplazarán.
             </p>
           )}
           <p>Las facturas y sus documentos se conservarán.</p>

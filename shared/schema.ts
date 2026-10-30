@@ -335,6 +335,7 @@ export function deviation(db: Database, line: Row): number | null {
   );
 }
 export const titles: Record<Entity, string> = {
+  plantilla_correo: "Plantilla de cotización",
   productos: "Productos",
   codigos_barras: "Códigos de barras",
   proveedor: "Proveedores",
@@ -465,6 +466,7 @@ export const words: Record<string, string> = {
   cc: "CC",
   cco: "CCO",
   codigos_barras_nuevos: "Códigos nuevos",
+  cotizacion_materiales: "Cotización de materiales",
   envio_orden_compra: "Orden de compra",
   envio_certificado_calidad: "Certificado de calidad",
   envio_certificado_liberacion: "Certificado de liberación",

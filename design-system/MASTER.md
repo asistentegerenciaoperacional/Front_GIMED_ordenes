@@ -152,9 +152,10 @@ de su contenedor, sin ensanchar la página. El panel permite que el resumen infe
 permanezca adherido al viewport; solo el contenedor de la tabla recorta su scroll.
 
 El resumen conserva materiales seleccionados aunque la búsqueda, filtros o página
-los oculten. Muestra hasta siete materiales distintos, cantidad de vínculos y OC;
-cada material tiene una acción para quitar sus orígenes. Al alcanzar siete, bloquear
-solo materiales nuevos, permitiendo añadir otros orígenes de los existentes. En
+los oculten. Muestra materiales distintos, cantidad de vínculos y OC;
+cada material tiene una acción para quitar sus orígenes. Se pueden seleccionar
+más de siete materiales para Cotizar materiales; sobre siete se deshabilita solo
+Elaborar OCM y se explica cómo reducir la selección. En
 móvil los elementos del resumen se ajustan en varias filas y su lista tiene altura
 limitada; Elaborar OCM sigue visible y el foco conserva margen para no quedar tapado.
 
@@ -165,6 +166,10 @@ conserva los datos. La revisión presenta cantidad final, precio, subtotal y OC 
 origen. Conflictos usan `ErrorNotice`, bloqueo del envío y Revisar selección;
 cancelación, foco y guardado pertenecen a la capa compartida. Base y porcentaje
 son temporales. [Reglas y contrato](../ABASTECIMIENTO-OCM.md).
+
+**Cotizar materiales** abre un diálogo ancho con envío simulado explícito. Cada material muestra identidad, base, adicional 5–10 %, cantidad final editable, entrega más próxima y proveedores elegidos. Los favoritos del tipo se precargan y el autocompletado permite otros proveedores de materiales. Quitar o agregar no modifica los favoritos guardados. La sección común de destinatarios mantiene un contacto o correo manual por proveedor, compartido entre sus materiales. Cada material requiere al menos un proveedor destinatario y cada proveedor incluido una dirección válida; las faltas se muestran en el banner y en sus campos.
+
+Una sola plantilla de asunto y cuerpo se edita para el lote, con ayuda de variables y sin cambiar la global de Configuración. Revisar consulta al servidor y muestra un mensaje por material/proveedor con dirección, asunto y cuerpo bajo un disclosure React Aria. El encabezado recibe el foco al pasar a revisión. La confirmación simula todos los mensajes; durante el envío se bloquean cierre y doble envío. Conflictos ofrecen Actualizar datos y requieren revisar de nuevo, preservando ajustes compatibles. Cancelar y éxito conservan la selección de la tabla. El diálogo se carga bajo demanda y sus borradores se liberan al cerrar. Diseño adaptable a 375/1440 px, con controles y pies de la capa de diálogo existente. [Contrato y plantilla global](../COTIZACIONES-MATERIALES.md).
 
 La OCM preparada desde pendientes exige entrega solicitada anterior al día
 más próximo de entrega de sus OC de origen; la igualdad es inválida. El límite
@@ -244,7 +249,9 @@ Editar una orden autorizada bloquea los selectores de producto y las acciones de
 
 Cambiar proveedor en una OC de producto sin autorizar abre un diálogo inmediato con Cancelar enfocado inicialmente y una acción explícita «Cambiar proveedor». Explica la pérdida de cabecera, productos, lotes, documentos propios y vínculos al guardar, y la conservación de las OCM. Aceptar reinicia el borrador con entrega vacía obligatoria; volver al proveedor original restaura el anterior. La revisión mantiene un aviso «Reemplazo pendiente» y la acción «Guardar reemplazo». El borrador conserva los datos almacenados hasta ese guardado.
 
-Cada lote tiene una acción de eliminar con nombre accesible, deshabilitada sin autorización. Su diálogo explica los datos que se borrarán y la conservación de facturas y documentos; borrar el último añade la advertencia de anulación. Anular producto confirma la eliminación de todos sus lotes. Reabrir un producto anulado crea un lote inicial; si conserva lotes heredados, confirma su reemplazo. Agregar lote permanece deshabilitado en productos anulados y el estado vacío indica que deben reabrirse. Las confirmaciones reutilizan el diálogo React Aria, cancelan con Escape y mantienen el error visible si falla el guardado.
+Cada lote tiene una acción de eliminar con nombre accesible, deshabilitada sin autorización. Su diálogo explica los datos que se borrarán y la conservación de facturas y documentos; borrar el último añade la advertencia de anulación. Esta eliminación física es distinta de anular.
+
+Anular producto confirma que el renglón y todos sus lotes quedarán anulados, conservando identificadores y datos. Anular el último lote no anulado confirma también la anulación del producto y evalúa conjuntamente la selección. Reabrir un producto anulado confirma que todos sus lotes conservados, incluidos los cerrados o anulados, pasarán a seguimiento; no crea ni reemplaza lotes. Reabrir lotes concretos reactiva su renglón sin modificar sus hermanos. El cierre del producto sigue siendo manual, con confirmación de tolerancia. Agregar lote permanece deshabilitado en productos anulados y el estado vacío indica que deben reabrirse. Las confirmaciones reutilizan el diálogo React Aria, cancelan con Escape y mantienen el error visible si falla el guardado. Revalidan las consecuencias y el snapshot antes de persistir. Contrato: [CICLO-LOTES.md](../CICLO-LOTES.md).
 
 Cantidad de sticker y porcentaje comparten fila en escritorio y móvil. El porcentaje ocupa 64 px y ambos campos tienen 8 px de separación. Las fórmulas y límites se muestran en tooltips al pasar el cursor o enfocar el control, con descripciones enlazadas mediante `aria-describedby`. La ayuda se puede leer al mover el cursor sobre ella; Escape la cierra sin cerrar el diálogo. Los errores de validación permanecen visibles junto al campo. El posicionamiento de los tooltips respeta los límites de la ventana y los controles fijos del diálogo.
 
@@ -358,3 +365,21 @@ En **Avisar códigos nuevos**, la casilla **Seleccionar todos** se sitúa debajo
 Confirmaciones usan el diálogo compartido React Aria, bloqueo durante guardado y foco devuelto al disparador. Errores conservan el diálogo y elección; conflictos actualizan el snapshot y exigen «Revisar datos actualizados» antes de confirmar otra vez. Proveedor del producto continúa bloqueado en GS1. No sustituir identificadores por nombres, incluso si coinciden.
 
 Especificación de datos, recuperación y pruebas: [CODIGOS-BARRAS.md](../CODIGOS-BARRAS.md).
+
+## Hoja alternativa de OC de productos
+
+**Configuración → Apariencia → Vista alternativa de la tabla de OC de productos**, independiente de la preferencia de creación y desactivada por defecto. Exclusiva del listado de Productos; Materiales/OCM conserva su tabla actual.
+
+Usa el ancho disponible, una cinta compacta de dos filas en escritorio y ninguna tarjeta de resumen. Las acciones agrupan creación, lotes, seguimiento del producto, autorización, documentos, impresión, edición, portapapeles, filtros y columnas. Los iconos tienen nombre accesible y tooltip. La cinta se oculta y recupera desde un control siempre disponible. Los filtros conservan el estándar global y los encabezados reutilizan `ColumnHeader`.
+
+El cuerpo constituye una excepción de densidad: texto de 12 px, filas de 32 px, bordes finos y cifras alineadas a la derecha. Los encabezados permanecen visibles verticalmente; todas las columnas se desplazan horizontalmente. Sin paginación: se montan las filas visibles y unas seis de margen por lado, comunicando total y posiciones globales a las ayudas de accesibilidad. En móvil el desplazamiento es interno.
+
+En seguimiento presenta lotes abiertos y cerrados de OC autorizadas; Anuladas presenta sus lotes anulados. Blanco representa seguimiento; verde suave (`#ecfdf3`), cierre; rojo suave (`#fff1f2`), anulación. La selección añade bordes azules y conserva esos colores. El estado también figura en la etiqueta accesible de la fila. No se añaden columnas de estado de cabecera o renglón. No autorizadas presenta un registro por renglón con nueve columnas; las otras hojas tienen las 24 columnas de [HOJA-OC-PRODUCTOS.md](../HOJA-OC-PRODUCTOS.md). La elección de columnas se recuerda por hoja y siempre queda una visible.
+
+Clic selecciona; Shift+clic y Shift+flechas forman rangos. Doble clic, F2 o escritura inicia edición. Enter confirma y baja; Escape cancela la celda. Autocompletados y calendarios conservan prioridad. Tab permite salir cuando no se está editando. Los errores se reúnen en la cabecera y marcan sus celdas en rojo, con acceso para localizarlas. Los cambios pendientes se distinguen con peso y subrayado punteado.
+
+Las ediciones se identifican por entidad e ID. Cabecera se propaga a la OC; renglón, a sus lotes; lote afecta únicamente a sí mismo. La solicitada original se edita en el primer lote y los siguientes muestran su saldo anterior, excluyendo recibidas de anulados. Una sobreentrega se indica con cero y un triángulo ámbar con ayuda por cursor, foco o toque. Las OCM vinculadas muestran solo sus números y explican los materiales en su tooltip.
+
+Solo Guardar persiste. Recuperar sustituye el borrador actual, mantiene edición y conserva la comprobación de conflictos. Filtrar, ordenar y recuperar no guardan. Las filas permanecen estables durante la captura y se recalculan al guardar o reaplicar una consulta. Estados, autorización, nuevos lotes y reemplazo de proveedor resuelven antes el borrador: Guardar y continuar / Descartar y continuar / Cancelar. Autorizar incluye la OC completa, incluso renglones ocultos. Imprimir y documento requieren una única OC distinta.
+
+El ciclo global conserva IDs y datos al anular o reabrir. La confirmación del último lote explica la anulación del producto. Reabrir un producto anulado pone todos sus lotes conservados en seguimiento; reabrir lotes concretos mantiene el estado de sus hermanos. El cierre del producto sigue siendo manual y confirma tolerancia. Eliminar físicamente permanece separado de anular. Contrato y pruebas: [CICLO-LOTES.md](../CICLO-LOTES.md) y [VERIFICACION.md](../VERIFICACION.md).

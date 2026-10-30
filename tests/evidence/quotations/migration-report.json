@@ -1,0 +1,10 @@
+{
+  "backup": "data\\database.json.quotations-1793373395685-0bdb3f13-524b-44b1-9f73-871cf211e724.bak",
+  "originalSha256": "CBA074F2413852590DE287278AAD6A91CFAD1A01163E19958E8BDD55CF6C7883",
+  "backupSha256": "CBA074F2413852590DE287278AAD6A91CFAD1A01163E19958E8BDD55CF6C7883",
+  "unchangedCollections": true,
+  "collections": 29,
+  "templateCollectionAdded": true,
+  "dbmlSha256": "494B4C653FC5E9929E9EC8023B7F3756671B229669FD1A916C46B72F4625E475",
+  "dbmlUnchanged": true
+}
