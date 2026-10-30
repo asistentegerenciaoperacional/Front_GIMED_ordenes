@@ -124,6 +124,7 @@ export function overlaySheetChanges(
   db: Database,
   changes: SheetChange[],
 ): Database {
+  if (!changes.length) return db;
   const next = { ...db };
   for (const entity of Object.keys(sheetFields) as SheetEntity[]) {
     const byId = new Map<string, SheetChange[]>();

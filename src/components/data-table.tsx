@@ -130,7 +130,7 @@ function DataTableView({
       }),
     [rowVersion ?? body?.props.children],
   );
-  const firstManualRow = manualKeyboardNavigation ? rows[0] : undefined;
+  const firstManualRowId = manualKeyboardNavigation ? rows[0]?.id : undefined;
   const renderRow = useCallback(
     (row: (typeof rows)[number]) => (
       <Row
@@ -154,7 +154,7 @@ function DataTableView({
               {() => (
                 <>
                   {manualKeyboardNavigation &&
-                    row === firstManualRow &&
+                    row.id === firstManualRowId &&
                     index === 0 && <ManualTableNavigation />}
                   {content as ReactNode}
                 </>
@@ -164,20 +164,20 @@ function DataTableView({
         })}
       </Row>
     ),
-    [manualKeyboardNavigation, firstManualRow],
+    [manualKeyboardNavigation, firstManualRowId],
   );
   useLayoutEffect(() => {
     if (props["aria-rowcount"] === undefined || !tableRef.current) return;
     // Manual row windows expose their total and stable indices, rather than
     // the size of React Aria's mounted collection.
-    tableRef.current.setAttribute(
-      "aria-rowcount",
-      String(props["aria-rowcount"]),
-    );
+    const count = String(props["aria-rowcount"]);
+    if (tableRef.current.getAttribute("aria-rowcount") !== count)
+      tableRef.current.setAttribute("aria-rowcount", count);
     for (const row of tableRef.current.querySelectorAll<HTMLElement>(
       "[data-global-row-index]",
     ))
-      row.setAttribute("aria-rowindex", row.dataset.globalRowIndex!);
+      if (row.getAttribute("aria-rowindex") !== row.dataset.globalRowIndex)
+        row.setAttribute("aria-rowindex", row.dataset.globalRowIndex!);
   }, [props["aria-rowcount"], rows]);
   const emptyRow =
     rows.length === 1

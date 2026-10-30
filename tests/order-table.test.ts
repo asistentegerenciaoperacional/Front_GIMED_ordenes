@@ -5,6 +5,7 @@ import {
   calendarDay,
   columnOptions,
   filterColumnRows,
+  filterTableRows,
   filterProblem,
   hasFilter,
   matchesColumn,
@@ -43,6 +44,49 @@ const row = (id: string, changes: Partial<ColumnRow["cells"]> = {}) => ({
   },
 });
 const ids = (rows: { id: string }[]) => rows.map((r) => r.id);
+
+test("filtrar consulta solo columnas activas y conserva el array si no hay condiciones", () => {
+  const read: string[] = [];
+  const cells = Object.defineProperties(
+    {},
+    {
+      orden: {
+        get: () => {
+          read.push("orden");
+          return cell("10");
+        },
+      },
+      proveedor: {
+        get: () => {
+          throw new Error("No debe consultar una columna sin filtro");
+        },
+      },
+    },
+  ) as Record<string, ColumnCell>;
+  const rows = [{ cells }],
+    columns: Column<string>[] = [
+      { key: "orden", label: "Orden", kind: "integer" },
+      { key: "proveedor", label: "Proveedor", kind: "text" },
+    ];
+  assert.strictEqual(filterTableRows(rows, columns, {}), rows);
+  assert.strictEqual(
+    filterTableRows(
+      rows,
+      columns,
+      { orden: { operator: "equals", value: "10" } },
+      "orden",
+    ),
+    rows,
+  );
+  assert.deepEqual(read, []);
+  assert.equal(
+    filterTableRows(rows, columns, {
+      orden: { operator: "equals", value: "10" },
+    }).length,
+    1,
+  );
+  assert.deepEqual(read, ["orden"]);
+});
 
 test("selección de valores: unión dentro de la columna e intersección entre columnas", () => {
   const rows = [

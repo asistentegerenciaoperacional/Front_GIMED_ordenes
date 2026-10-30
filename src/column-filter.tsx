@@ -159,6 +159,7 @@ function FilterPanel<Key extends string>({
   const [value, setValue] = useState(filter?.value ?? "");
   const [end, setEnd] = useState(filter?.end ?? "");
   const [search, setSearch] = useState("");
+  const [valuePage, setValuePage] = useState(0);
   const [error, setError] = useState("");
   useEffect(() => {
     if (
@@ -176,11 +177,20 @@ function FilterPanel<Key extends string>({
     options.length > 0 && options.every((v) => selected.has(v.key));
   const someChecked = options.some((v) => selected.has(v.key));
 
-  const shown = options.filter((v) =>
-    v.label
-      .toLocaleLowerCase("es-CO")
-      .includes(search.toLocaleLowerCase("es-CO")),
-  );
+  const shown = useMemo(() => {
+    const query = search.toLocaleLowerCase("es-CO");
+    return query
+      ? options.filter((v) =>
+          v.label.toLocaleLowerCase("es-CO").includes(query),
+        )
+      : options;
+  }, [options, search]);
+  const pageSize = 50,
+    page = Math.min(
+      valuePage,
+      Math.max(0, Math.ceil(shown.length / pageSize) - 1),
+    );
+  const visibleValues = shown.slice(page * pageSize, (page + 1) * pageSize);
   const labels =
     column.kind === "date"
       ? ["De más antigua a más reciente", "De más reciente a más antigua"]
@@ -374,7 +384,10 @@ function FilterPanel<Key extends string>({
                   placeholder="Buscar valores…"
                   autoComplete="off"
                   value={search}
-                  onChange={(event) => setSearch(event.target.value)}
+                  onChange={(event) => {
+                    setSearch(event.target.value);
+                    setValuePage(0);
+                  }}
                 />
               </div>
             )}
@@ -400,7 +413,7 @@ function FilterPanel<Key extends string>({
               aria-label="Valores de la columna"
               onChange={(next) => setSelected(new Set(next))}
             >
-              {shown.map((item, index) => (
+              {visibleValues.map((item, index) => (
                 <CheckChoice
                   key={item.key}
                   className="column-value-option"
@@ -421,6 +434,34 @@ function FilterPanel<Key extends string>({
                 </p>
               )}
             </ChoiceGroup>
+            {shown.length > pageSize && (
+              <div
+                className="inline column-value-pagination"
+                aria-label="Páginas de valores"
+              >
+                <Button
+                  className="small"
+                  disabled={page === 0}
+                  onClick={() => setValuePage(page - 1)}
+                  aria-label="Valores anteriores"
+                >
+                  Anterior
+                </Button>
+                <span role="status">
+                  {page * pageSize + 1}–
+                  {Math.min((page + 1) * pageSize, shown.length)} de{" "}
+                  {shown.length}
+                </span>
+                <Button
+                  className="small"
+                  disabled={(page + 1) * pageSize >= shown.length}
+                  onClick={() => setValuePage(page + 1)}
+                  aria-label="Siguientes valores"
+                >
+                  Siguiente
+                </Button>
+              </div>
+            )}
           </fieldset>
         </div>
       </div>

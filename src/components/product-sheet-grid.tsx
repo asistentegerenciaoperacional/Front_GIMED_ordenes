@@ -2,6 +2,7 @@ import {
   cloneElement,
   isValidElement,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -111,7 +112,7 @@ export function ProductSheetGrid({
   invalid?: (row: ProductSheetRow, col: SheetColumn) => boolean;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
-  const [scroll, setScroll] = useState(0),
+  const [windowStart, setWindowStart] = useState(0),
     [height, setHeight] = useState(550);
   useEffect(() => {
     const element = viewport.current!;
@@ -119,9 +120,9 @@ export function ProductSheetGrid({
     resize.observe(element);
     return () => resize.disconnect();
   }, []);
-  useEffect(() => {
+  useLayoutEffect(() => {
     viewport.current!.scrollTop = 0;
-    setScroll(0);
+    setWindowStart(0);
   }, [rows]);
   useEffect(() => {
     if (range && !editing) reveal(range.focus);
@@ -132,10 +133,7 @@ export function ProductSheetGrid({
       ?.querySelector<HTMLInputElement>("[data-active] input")
       ?.focus({ preventScroll: true });
   }, [editing?.rowKey, editing?.column]);
-  const start = Math.max(
-    0,
-    Math.floor((scroll - headerHeight) / rowHeight) - 6,
-  );
+  const start = Math.min(windowStart, Math.max(0, rows.length - 1));
   const end = Math.min(rows.length, start + Math.ceil(height / rowHeight) + 13);
   const bounds = range && rangeBounds(range);
   function reveal(point: SheetPoint) {
@@ -256,7 +254,16 @@ export function ProductSheetGrid({
       role="region"
       aria-label="Hoja de órdenes de productos"
       tabIndex={0}
-      onScroll={(event) => setScroll(event.currentTarget.scrollTop)}
+      onScroll={(event) =>
+        setWindowStart(
+          Math.max(
+            0,
+            Math.floor(
+              (event.currentTarget.scrollTop - headerHeight) / rowHeight,
+            ) - 6,
+          ),
+        )
+      }
       onKeyDownCapture={navigate}
       onCopy={(event) => {
         if (!editing) onCopy(event);

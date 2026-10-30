@@ -1,6 +1,12 @@
 import { spawn } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, writeFile, copyFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  writeFile,
+  copyFile,
+} from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { createServer } from "node:net";
 import { chromium, firefox, webkit } from "playwright-core";
@@ -13,7 +19,10 @@ const historicalJourney = file === "tests/browser-journey.js";
 await mkdir("tests/.tmp", { recursive: true });
 const temporary = await mkdtemp(resolve("tests/.tmp/aria-browser-"));
 if (process.env.PROTOTIPO_BROWSER_SEED_FILE)
-  await copyFile(resolve(process.env.PROTOTIPO_BROWSER_SEED_FILE), join(temporary, "database.json"));
+  await copyFile(
+    resolve(process.env.PROTOTIPO_BROWSER_SEED_FILE),
+    join(temporary, "database.json"),
+  );
 const socket = createServer();
 await new Promise((ok) => socket.listen(0, "127.0.0.1", ok));
 const port = socket.address().port;
@@ -79,6 +88,13 @@ try {
     vite = await createFixtureVite({ temporary });
     await vite.listen();
     await page.goto(vite.resolvedUrls.local[0] + "tests/live-errors.html");
+  } else if (process.env.PROTOTIPO_BROWSER_MODE === "development") {
+    vite = await createFixtureVite({
+      temporary,
+      server: { proxy: { "/api": { target: `http://127.0.0.1:${port}` } } },
+    });
+    await vite.listen();
+    await page.goto(vite.resolvedUrls.local[0]);
   } else await page.goto(`http://127.0.0.1:${port}`);
   if (file.includes("invoice-scroll"))
     await page.goto(
@@ -127,9 +143,13 @@ try {
     "/" +
     engine +
     "-" +
+    (process.env.PROTOTIPO_BROWSER_MODE === "development"
+      ? "development-"
+      : "") +
     file.split("/").pop().replace(".js", ".json");
   const output = {
     ...result,
+    mode: vite ? "development" : "production",
     consoleMessages,
     dataFile: join(temporary, "database.json"),
   };

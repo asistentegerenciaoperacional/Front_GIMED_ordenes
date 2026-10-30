@@ -146,12 +146,11 @@ const unauthorizedKeys = [
   "fecha_solicitada_entrega",
   "fecha_estimada_batch_record",
 ];
+const unauthorizedColumns = unauthorizedKeys.map((key) =>
+  productSheetColumns.find((col) => col.key === key)!,
+);
 export const columnsForSheet = (view: SheetView) =>
-  view === "no_autorizadas"
-    ? unauthorizedKeys.map((key) =>
-        productSheetColumns.find((col) => col.key === key)!,
-      )
-    : productSheetColumns;
+  view === "no_autorizadas" ? unauthorizedColumns : productSheetColumns;
 export type SupplyItem = {
   order: orden_compra;
   material: string;
@@ -262,6 +261,50 @@ export function sheetValue(
     return numbers.format(Number(value));
   return col.kind === "enum" ? sheetEnumLabel(String(value)) : String(value);
 }
+// Known columns are lazy, cached prototype getters. No Proxy traps or enumerable
+// caches: React's development inspector can safely read arbitrary properties.
+class SheetCells {
+  [key: string]: ColumnCell;
+  #db: Database;
+  #row: ProductSheetRow;
+  #cache?: Map<string, ColumnCell>;
+  constructor(db: Database, row: ProductSheetRow) {
+    this.#db = db;
+    this.#row = row;
+  }
+  static {
+    for (const column of productSheetColumns)
+      Object.defineProperty(this.prototype, column.key, {
+        get(this: SheetCells) {
+          return this.#read(column);
+        },
+      });
+  }
+  #read(column: SheetColumn): ColumnCell {
+    const cached = this.#cache?.get(column.key);
+    if (cached) return cached;
+    const label = sheetValue(this.#db, this.#row, column),
+      raw = sheetRaw(this.#row, column);
+    const value =
+      column.kind === "date"
+        ? raw
+          ? calendarDay(String(raw))
+          : null
+        : column.kind === "integer" || column.kind === "decimal"
+          ? raw == null
+            ? null
+            : String(raw)
+          : label || null;
+    const cell = {
+      sortValue: value,
+      values: [
+        { key: value ?? EMPTY_VALUE, label: label || "Sin informar", value },
+      ],
+    };
+    (this.#cache ??= new Map()).set(column.key, cell);
+    return cell;
+  }
+}
 export function buildProductSheet(
   db: Database,
   view: SheetView,
@@ -283,16 +326,16 @@ export function buildProductSheet(
   for (const link of db.abastecimiento_material) {
     const line = materialLines.get(link.id_orden_material),
       order = line && orders.get(line.id_orden_compra);
-    if (line && order)
-      supply.set(link.id_orden_producto, [
-        ...(supply.get(link.id_orden_producto) ?? []),
-        {
-          order,
-          material: materials.get(line.id_material)?.nombre_material ?? "",
-          quantity: line.cantidad_solicitada,
-          state: line.estado,
-        },
-      ]);
+    if (line && order) {
+      const items = supply.get(link.id_orden_producto) ?? [];
+      items.push({
+        order,
+        material: materials.get(line.id_material)?.nombre_material ?? "",
+        quantity: line.cantidad_solicitada,
+        state: line.estado,
+      });
+      supply.set(link.id_orden_producto, items);
+    }
   }
   const documents = new Map(
     db.documento
@@ -339,39 +382,7 @@ export function buildProductSheet(
         documentId: documents.get(order.id),
         cells: {},
       };
-      const cache: Record<string, ColumnCell> = {};
-      row.cells = new Proxy(cache, {
-        get: (target, key: string) => {
-          if (!target[key]) {
-            const col = productSheetColumns.find(
-              (column) => column.key === key,
-            )!;
-            const label = sheetValue(db, row, col),
-              raw = sheetRaw(row, col);
-            const value =
-              col.kind === "date"
-                ? raw
-                  ? calendarDay(String(raw))
-                  : null
-                : col.kind === "integer" || col.kind === "decimal"
-                  ? raw == null
-                    ? null
-                    : String(raw)
-                  : label || null;
-            target[key] = {
-              sortValue: value,
-              values: [
-                {
-                  key: value ?? EMPTY_VALUE,
-                  label: label || "Sin informar",
-                  value,
-                },
-              ],
-            };
-          }
-          return target[key];
-        },
-      });
+      row.cells = new SheetCells(db, row);
       rows.push(row);
     };
     if (view === "no_autorizadas") append(undefined, true);

@@ -1,0 +1,210 @@
+{
+  "checks": [
+    "La prueba utiliza más de 5000 lotes",
+    "Sin errores ni bloqueo después de filtro personalizado",
+    "filtro personalizado responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de filtro personalizado",
+    "Sin errores ni bloqueo después de quitar filtro",
+    "quitar filtro responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de quitar filtro",
+    "Sin errores ni bloqueo después de cambiar a Anuladas",
+    "cambiar a Anuladas responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de cambiar a Anuladas",
+    "Sin errores ni bloqueo después de cambiar a No autorizadas",
+    "cambiar a No autorizadas responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de cambiar a No autorizadas",
+    "Sin errores ni bloqueo después de cambiar a En seguimiento",
+    "cambiar a En seguimiento responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de cambiar a En seguimiento",
+    "Sin errores ni bloqueo después de buscar",
+    "buscar responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de buscar",
+    "Sin errores ni bloqueo después de limpiar búsqueda",
+    "limpiar búsqueda responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de limpiar búsqueda",
+    "Sin errores ni bloqueo después de filtro de columna",
+    "filtro de columna responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de filtro de columna",
+    "Sin errores ni bloqueo después de limpiar condición de columna",
+    "limpiar condición de columna responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de limpiar condición de columna",
+    "Sin errores ni bloqueo después de ordenar",
+    "ordenar responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de ordenar",
+    "Sin errores ni bloqueo después de quitar ordenamiento",
+    "quitar ordenamiento responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de quitar ordenamiento",
+    "Sin errores ni bloqueo después de abrir columna con 5000 valores",
+    "abrir columna con 5000 valores responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de abrir columna con 5000 valores",
+    "El filtro no monta miles de casillas",
+    "Cambiar la página de valores conserva las elecciones fuera de ella",
+    "La elección de la segunda página se conserva",
+    "Buscar valores recorre todas las opciones, no solo la página",
+    "Sin errores ni bloqueo después de aplicar selección de valores",
+    "aplicar selección de valores responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de aplicar selección de valores",
+    "La selección de un valor filtra el lote esperado",
+    "Sin errores ni bloqueo después de quitar selección de valores",
+    "quitar selección de valores responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de quitar selección de valores",
+    "La columna se oculta sin recargar",
+    "Sin errores ni bloqueo después de ocultar y mostrar columna",
+    "ocultar y mostrar columna responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de ocultar y mostrar columna",
+    "Sin errores ni bloqueo después de selección y teclado",
+    "selección y teclado responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de selección y teclado",
+    "Sin errores ni bloqueo después de editar y confirmar",
+    "editar y confirmar responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de editar y confirmar",
+    "Sin errores ni bloqueo después de guardar sin recargar",
+    "guardar sin recargar responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de guardar sin recargar",
+    "El guardado persiste y la interfaz sigue respondiendo",
+    "Sin errores ni bloqueo después de pegar datos válidos",
+    "pegar datos válidos responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de pegar datos válidos",
+    "Sin errores ni bloqueo después de descartar borrador",
+    "descartar borrador responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de descartar borrador",
+    "Sin errores ni bloqueo después de pegar 5000 celdas protegidas",
+    "pegar 5000 celdas protegidas responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de pegar 5000 celdas protegidas",
+    "El resumen conserva todos los errores con un DOM limitado a 50 enlaces",
+    "Un error fuera de la ventana enfoca su celda estable sin bloquear",
+    "Sin errores ni bloqueo después de corregir y retirar errores",
+    "corregir y retirar errores responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de corregir y retirar errores",
+    "Sin errores ni bloqueo después de preparar pegado válido de 5000 lotes",
+    "preparar pegado válido de 5000 lotes responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de preparar pegado válido de 5000 lotes",
+    "Sin errores ni bloqueo después de descartar 5000 cambios",
+    "descartar 5000 cambios responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de descartar 5000 cambios",
+    "Sin errores ni bloqueo después de abrir y cancelar nuevos lotes",
+    "abrir y cancelar nuevos lotes responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de abrir y cancelar nuevos lotes",
+    "Sin errores ni bloqueo después de abrir y cancelar nueva OC",
+    "abrir y cancelar nueva OC responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de abrir y cancelar nueva OC",
+    "Sin errores ni bloqueo después de ocultar y recuperar herramientas",
+    "ocultar y recuperar herramientas responde dentro del presupuesto de 4 s con 5000 lotes",
+    "DOM de filas acotado después de ocultar y recuperar herramientas",
+    "Únicamente Guardar envía un comando durante la prueba"
+  ],
+  "timings": [
+    {
+      "name": "filtro personalizado",
+      "ms": 331
+    },
+    {
+      "name": "quitar filtro",
+      "ms": 162
+    },
+    {
+      "name": "cambiar a Anuladas",
+      "ms": 129
+    },
+    {
+      "name": "cambiar a No autorizadas",
+      "ms": 97
+    },
+    {
+      "name": "cambiar a En seguimiento",
+      "ms": 197
+    },
+    {
+      "name": "buscar",
+      "ms": 460
+    },
+    {
+      "name": "limpiar búsqueda",
+      "ms": 196
+    },
+    {
+      "name": "filtro de columna",
+      "ms": 880
+    },
+    {
+      "name": "limpiar condición de columna",
+      "ms": 274
+    },
+    {
+      "name": "ordenar",
+      "ms": 562
+    },
+    {
+      "name": "quitar ordenamiento",
+      "ms": 460
+    },
+    {
+      "name": "abrir columna con 5000 valores",
+      "ms": 261
+    },
+    {
+      "name": "aplicar selección de valores",
+      "ms": 349
+    },
+    {
+      "name": "quitar selección de valores",
+      "ms": 146
+    },
+    {
+      "name": "ocultar y mostrar columna",
+      "ms": 813
+    },
+    {
+      "name": "selección y teclado",
+      "ms": 678
+    },
+    {
+      "name": "editar y confirmar",
+      "ms": 912
+    },
+    {
+      "name": "guardar sin recargar",
+      "ms": 397
+    },
+    {
+      "name": "pegar datos válidos",
+      "ms": 246
+    },
+    {
+      "name": "descartar borrador",
+      "ms": 213
+    },
+    {
+      "name": "pegar 5000 celdas protegidas",
+      "ms": 364
+    },
+    {
+      "name": "corregir y retirar errores",
+      "ms": 814
+    },
+    {
+      "name": "preparar pegado válido de 5000 lotes",
+      "ms": 1060
+    },
+    {
+      "name": "descartar 5000 cambios",
+      "ms": 312
+    },
+    {
+      "name": "abrir y cancelar nuevos lotes",
+      "ms": 478
+    },
+    {
+      "name": "abrir y cancelar nueva OC",
+      "ms": 471
+    },
+    {
+      "name": "ocultar y recuperar herramientas",
+      "ms": 730
+    }
+  ],
+  "pageErrors": [],
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-WdyM7U\\database.json"
+}

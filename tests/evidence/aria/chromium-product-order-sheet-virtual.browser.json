@@ -19,6 +19,7 @@
     "El servidor guarda 5000 lotes en una sola operación atómica",
     "Se aplicaron todas las ubicaciones del bloque masivo"
   ],
+  "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-em8b6l\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-i3TrBN\\database.json"
 }

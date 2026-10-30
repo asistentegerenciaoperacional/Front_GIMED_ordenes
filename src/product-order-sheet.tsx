@@ -151,6 +151,27 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [storageError, setStorageError] = useState(false),
     [error, setError] = useState<ApiError | null>(null),
     [issues, setIssues] = useState<SheetCellIssue[]>([]);
+  const [issuePage, setIssuePage] = useState(0);
+  useEffect(() => setIssuePage(0), [issues]);
+  const issuePageSize = 50;
+  const currentIssuePage = Math.min(
+    issuePage,
+    Math.max(0, Math.ceil(issues.length / issuePageSize) - 1),
+  );
+  const visibleIssues = issues.slice(
+    currentIssuePage * issuePageSize,
+    (currentIssuePage + 1) * issuePageSize,
+  );
+  const errorNotice = useMemo(
+    () =>
+      error ??
+      (issues.length
+        ? new ApiError({
+            message: `Revisa ${issues.length} celdas: ${issues[0].message}`,
+          })
+        : null),
+    [error, issues],
+  );
   const [range, setRange] = useState<SheetRange | null>(null),
     [editing, setEditing] = useState<Editing | null>(null);
   const [pendingInvoice, setPendingInvoice] = useState<string | null>(null);
@@ -183,21 +204,32 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [projectionDay, setProjectionDay] = useState(day);
   const filterDay = changes.length || editing ? projectionDay : day;
   const viewDb = useMemo(() => overlaySheetChanges(db, changes), [db, changes]);
+  const projectionRows = useMemo(
+    () => buildProductSheet(projection, view),
+    [projection, view],
+  );
   const currentRows = useMemo(
-    () => buildProductSheet(viewDb, view),
-    [viewDb, view],
+    () =>
+      viewDb === projection ? projectionRows : buildProductSheet(viewDb, view),
+    [viewDb, view, projection, projectionRows],
   );
   const currentByKey = useMemo(
     () => new Map(currentRows.map((row) => [row.key, row])),
     [currentRows],
   );
   const allColumns = columnsForSheet(view);
-  const requestedColumns = allColumns.filter(
-    (col) => !hidden.includes(col.key),
+  const columns = useMemo(() => {
+    const visible = allColumns.filter((col) => !hidden.includes(col.key));
+    return visible.length ? visible : allColumns.slice(0, 1);
+  }, [allColumns, hidden]);
+  const modifiedKeys = useMemo(
+    () => new Set(changes.map(changeKey)),
+    [changes],
   );
-  const columns = requestedColumns.length
-    ? requestedColumns
-    : allColumns.slice(0, 1);
+  const invalidKeys = useMemo(
+    () => new Set(issues.map((issue) => `${issue.rowKey}/${issue.column}`)),
+    [issues],
+  );
   const key = params.toString();
   const tableState = useMemo(
     () => readColumnState(params, allColumns),
@@ -207,7 +239,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const query = (params.get("q") ?? "").trim().toLocaleLowerCase("es-CO");
   const candidates = useMemo(
     () =>
-      buildProductSheet(projection, view).filter(
+      projectionRows.filter(
         (row) =>
           matchesSheetFilter(row, filter, filterDay) &&
           (!query ||
@@ -217,7 +249,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 .includes(query),
             )),
       ),
-    [projection, view, filter, query, filterDay, projectionRevision],
+    [projectionRows, filter, query, filterDay, projectionRevision],
   );
   const rows = useMemo(
     () =>
@@ -228,6 +260,20 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       ),
     [candidates, key],
   );
+  const filterOptions = useMemo(() => {
+    const column = allColumns.find((col) => col.key === openedColumn);
+    return column
+      ? columnOptions(
+          filterTableRows(
+            candidates,
+            allColumns,
+            tableState.filters,
+            column.key,
+          ),
+          column,
+        )
+      : [];
+  }, [openedColumn, candidates, allColumns, tableState.filters]);
   useEffect(() => {
     if (draftRef.current.length || editing) return;
     setProjection(db);
@@ -294,7 +340,11 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   };
   const changeQuery = (values: Record<string, string>) => {
     if (editing && !commit()) return;
-    setProjection(overlaySheetChanges(db, draftRef.current));
+    setProjection(
+      draftRef.current === changes
+        ? viewDb
+        : overlaySheetChanges(db, draftRef.current),
+    );
     setProjectionDay(day);
     setProjectionRevision((value) => value + 1);
     setRange(null);
@@ -1026,19 +1076,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           sesión hasta guardar los cambios.
         </div>
       )}
-      <ErrorNotice
-        error={
-          error ??
-          (issues.length
-            ? new ApiError({
-                message: `Revisa ${issues.length} celdas: ${issues[0].message}`,
-              })
-            : null)
-        }
-      />
+      <ErrorNotice error={errorNotice} />
       {!!issues.length && (
         <div className="product-sheet-errors" aria-label="Celdas rechazadas">
-          {issues.map((issue, index) => (
+          {visibleIssues.map((issue, index) => (
             <Button
               key={index}
               variant="link"
@@ -1058,6 +1099,34 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           ))}
         </div>
       )}
+      {issues.length > issuePageSize && (
+        <div
+          className="inline product-sheet-error-pages"
+          aria-label="Páginas de errores"
+        >
+          <Button
+            className="small"
+            disabled={!currentIssuePage}
+            onClick={() => setIssuePage(currentIssuePage - 1)}
+            aria-label="Errores anteriores"
+          >
+            Anterior
+          </Button>
+          <span role="status">
+            Errores {currentIssuePage * issuePageSize + 1}–
+            {Math.min((currentIssuePage + 1) * issuePageSize, issues.length)} de{" "}
+            {issues.length}
+          </span>
+          <Button
+            className="small"
+            disabled={(currentIssuePage + 1) * issuePageSize >= issues.length}
+            onClick={() => setIssuePage(currentIssuePage + 1)}
+            aria-label="Siguientes errores"
+          >
+            Siguiente
+          </Button>
+        </div>
+      )}
       <div className="product-sheet-status" role="status">
         {changes.length
           ? `${changes.length} cambios sin guardar · ${storageError ? "Sin copia local actualizada" : "Copia local del borrador"}`
@@ -1069,11 +1138,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             : ""}
       </div>
       <ProductSheetGrid
-        invalid={(row, col) =>
-          issues.some(
-            (issue) => issue.rowKey === row.key && issue.column === col.key,
-          )
-        }
+        invalid={(row, col) => invalidKeys.has(`${row.key}/${col.key}`)}
         rows={rows}
         columns={columns}
         range={range}
@@ -1092,19 +1157,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             column={col}
             filter={tableState.filters[col.key]}
             sort={tableState.sort}
-            options={
-              openedColumn === col.key
-                ? columnOptions(
-                    filterTableRows(
-                      candidates,
-                      allColumns,
-                      tableState.filters,
-                      col.key,
-                    ),
-                    col,
-                  )
-                : []
-            }
+            options={openedColumn === col.key ? filterOptions : []}
             open={openedColumn === col.key}
             onOpen={() => setOpenedColumn(col.key)}
             onClose={() => setOpenedColumn(null)}
@@ -1124,12 +1177,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         renderCell={(projected, col) => {
           const row = display(projected),
             target = sheetTarget(row, col),
-            modified =
-              target &&
-              changes.some((change) => changeKey(change) === changeKey(target));
-          const invalid = issues.some(
-            (issue) => issue.rowKey === row.key && issue.column === col.key,
-          );
+            modified = target && modifiedKeys.has(changeKey(target));
+          const invalid = invalidKeys.has(`${row.key}/${col.key}`);
           if (col.key === "ocm")
             return (
               <div className="sheet-ocm-links">

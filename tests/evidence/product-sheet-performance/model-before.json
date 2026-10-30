@@ -1,0 +1,59 @@
+{
+  "stage": "before",
+  "node": "v24.17.0",
+  "samples": 5,
+  "output": [
+    {
+      "lots": 5000,
+      "measurements": [
+        {
+          "name": "build",
+          "medianMs": 2.75,
+          "maxMs": 5.67
+        },
+        {
+          "name": "buildAndNoFilters",
+          "medianMs": 114.2,
+          "maxMs": 128.97
+        },
+        {
+          "name": "buildAndOneFilter",
+          "medianMs": 121.7,
+          "maxMs": 125.9
+        },
+        {
+          "name": "buildFilterAndSort",
+          "medianMs": 115.34,
+          "maxMs": 118.25
+        }
+      ],
+      "emptyOverlayPreservesIdentity": false
+    },
+    {
+      "lots": 20000,
+      "measurements": [
+        {
+          "name": "build",
+          "medianMs": 8.7,
+          "maxMs": 21.58
+        },
+        {
+          "name": "buildAndNoFilters",
+          "medianMs": 480.59,
+          "maxMs": 493.63
+        },
+        {
+          "name": "buildAndOneFilter",
+          "medianMs": 492.21,
+          "maxMs": 511.17
+        },
+        {
+          "name": "buildFilterAndSort",
+          "medianMs": 477.72,
+          "maxMs": 504.31
+        }
+      ],
+      "emptyOverlayPreservesIdentity": false
+    }
+  ]
+}

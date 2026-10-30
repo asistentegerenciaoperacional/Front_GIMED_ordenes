@@ -284,11 +284,13 @@ export function filterTableRows<Key extends string, T extends ColumnRow<Key>>(
   filters: ColumnFilters<Key>,
   except?: Key,
 ): T[] {
+  const active = columns.filter(
+    (col) => col.key !== except && hasFilter(filters[col.key]),
+  );
+  if (!active.length) return rows;
   return rows.filter((row) =>
-    columns.every(
-      (col) =>
-        col.key === except ||
-        matchesColumn(row.cells[col.key], col, filters[col.key]),
+    active.every((col) =>
+      matchesColumn(row.cells[col.key], col, filters[col.key]),
     ),
   );
 }

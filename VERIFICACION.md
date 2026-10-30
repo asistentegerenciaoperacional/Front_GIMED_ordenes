@@ -882,3 +882,74 @@ node scripts/verify-aria-browser.mjs tests/material-demand.browser.js chromium
 Evidencias: [interacciones](tests/evidence/aria/chromium-product-order-sheet-interaction.browser.json), [filtros Chromium](tests/evidence/aria/chromium-product-order-sheet-filters.browser.json), [filtros WebKit](tests/evidence/aria/webkit-product-order-sheet-filters.browser.json), [estados Chromium](tests/evidence/aria/chromium-product-order-sheet-states.browser.json), [estados WebKit](tests/evidence/aria/webkit-product-order-sheet-states.browser.json), [volumen](tests/evidence/aria/chromium-product-order-sheet-virtual.browser.json), [ciclo clásico](tests/evidence/aria/chromium-product-lot-lifecycle.browser.json), [detalle](tests/evidence/aria/chromium-order-detail.browser.json), [escritorio](tests/evidence/aria/product-sheet-1440.png), [móvil](tests/evidence/aria/product-sheet-375.png), [captura de interacción](tests/evidence/aria/product-sheet-interaction-desktop.png) y [rechazo de reapertura OCM](tests/evidence/order-detail/material-reopen-conflict.png).
 
 Esta validación no incluye empaquetado portable, Firefox ni el recorrido general completo de `browser-journey.js`.
+
+## Congelamiento y rendimiento de la hoja — 30 de octubre de 2026
+
+**Commit de recuperación: `d4273e5`**, en `codex/hoja-oc-productos`, anterior a cualquier corrección de esta incidencia. Conserva el estado completo del proyecto, incluidos los cambios locales de la implementación previa.
+
+Se reprodujo el fallo con la aplicación real servida por Vite y React de desarrollo con StrictMode. Tras aplicar un filtro personalizado se produjo `TypeError: Cannot read properties of undefined (reading 'key')` en `sheetValue`, llamado por el getter del `Proxy` de celdas desde `react-dom` → `addObjectDiffToProperties` → `logComponentRender`. React inspeccionaba una propiedad que no era una columna; el `Proxy` asumía lo contrario. Las pruebas previas ejecutaban `dist`, cuyo React de producción no utiliza ese inspector. La escritura del servicio podía haber terminado aunque se bloqueara la actualización de la interfaz. [Captura previa](tests/evidence/product-sheet-performance/development-before.png).
+
+Se eliminó el `Proxy`: las columnas conocidas tienen lectores de prototipo finitos, caché privada y no enumerable, e inspección de propiedades ajenas segura. La regresión unitaria comprueba lecturas de `then`, `toJSON`, propiedades de depuración y símbolos, serialización y estabilidad de la caché. Se verifica además que una superposición vacía conserva la base y que las columnas conservan su identidad.
+
+Optimizaciones verificadas:
+
+- Los filtros leen únicamente columnas activas; sin condiciones devuelven el mismo array y no consultan celdas. Una prueba con lectores que fallan si se acceden columnas inactivas protege esta propiedad.
+- La proyección y la visualización comparten el modelo cuando corresponde; cambiar una consulta no reconstruye la base ni los modelos de todas las filas. Columnas y opciones de menú conservan referencias estables.
+- Los marcadores de edición/error consultan índices `Set`, evitando recorrer todo el borrador o todos los errores por cada celda visible.
+- El scroll actualiza la ventana al cruzar una fila, no por cada píxel. El adaptador conserva el renderizador mientras no cambia la identidad de su primera fila y no reescribe atributos accesibles que ya son correctos.
+- Los menús montan hasta 50 valores y el resumen hasta 50 enlaces de error. Su navegación conserva selecciones, la búsqueda cubre todos los valores y los enlaces localizan celdas fuera de la ventana. Las filas de datos siguen virtualizadas y sin paginación.
+- El aviso de error se conserva entre renders que no cambian sus errores, evitando repetir foco y scroll.
+
+Medición local, Node v24.17.0, mediana de cinco muestras sobre modelos nuevos en cada operación:
+
+| Lotes generados | Operación | Antes (ms) | Después (ms) |
+| --- | --- | ---: | ---: |
+| 5.000 | Construir y filtrar sin condiciones | 114,20 | 0,61 |
+| 5.000 | Construir y aplicar un filtro | 121,70 | 7,90 |
+| 5.000 | Construir, filtrar y ordenar | 115,34 | 6,00 |
+| 20.000 | Construir y filtrar sin condiciones | 480,59 | 2,15 |
+| 20.000 | Construir y aplicar un filtro | 492,21 | 27,15 |
+| 20.000 | Construir, filtrar y ordenar | 477,72 | 21,72 |
+
+Estas cifras corresponden al procesamiento del modelo, no al tiempo completo de interacción. [Resultados originales antes](tests/evidence/product-sheet-performance/model-before.json) y [después](tests/evidence/product-sheet-performance/model-after.json). El benchmark no escribe datos de compras; genera registros en memoria.
+
+Compilación y TypeScript aprobados. **314 pruebas automatizadas aprobadas**, cero fallos. Vite conserva su aviso del chunk principal superior a 500 kB.
+
+Pruebas de navegador de esta corrección, con bases temporales independientes:
+
+| Recorrido | Entorno y motor | Comprobaciones |
+| --- | --- | ---: |
+| Las 17 variantes de filtros y controles | Desarrollo, Chromium | 43 |
+| Las 17 variantes de filtros y controles | Desarrollo, WebKit | 43 |
+| Rangos, recuperación, conflictos, guardado, autorización y documentos | Desarrollo, Chromium | 33 |
+| Estados, cierre manual, tolerancia, confirmación y cancelación | Desarrollo, Chromium | 22 |
+| 27 acciones consecutivas con más de 5.000 lotes | Desarrollo, Chromium | 92 |
+| El mismo recorrido de 27 acciones | Producción, Chromium | 92 |
+| Virtualización, índices globales, móvil y guardado atómico de 5.000 lotes | Producción, Chromium | 18 |
+| Creación clásica/alternativa, revisión, edición e impresión | Producción, Chromium | 56 |
+| Abastecimiento y tabla clásica OCM | Producción, Chromium | 76 |
+
+**475 comprobaciones de navegador aprobadas** en estas ejecuciones; sin errores de página, advertencias React/React Aria ni overlays de error de Vite. Los recorridos consecutivos no recargan la página entre acciones. Comprueban filtros personalizados, condición y selección de valores de columna, quitar filtros, las tres hojas, búsqueda, orden y quitar orden, columnas, rangos y teclado, edición/confirmación, guardado y respuesta posterior, pegado válido, descarte, 5.000 rechazos protegidos, localización/corrección de errores, preparación y descarte de 5.000 ediciones válidas, diálogos de nuevos lotes/nueva OC y ocultar/recuperar herramientas. Únicamente Guardar envía un comando de datos en ese recorrido.
+
+Cada acción mantiene menos de 50 filas montadas y se verifica contra un presupuesto de 4 segundos, incluyendo automatización y espera de dos frames. El máximo medido del recorrido fue **1.525 ms en desarrollo y 1.060 ms en producción**; guardar y continuar usando la interfaz tomó 664/397 ms, y preparar 5.000 cambios válidos, 1.198/1.060 ms. Son muestras locales individuales de interacción, no percentiles ni garantías de hardware. Las capturas del filtro extenso y del resumen de errores se revisaron visualmente.
+
+Reproducción principal, desde PowerShell:
+
+```powershell
+npm test
+npm run build
+node --import tsx scripts/benchmark-product-sheet.ts after
+$env:PROTOTIPO_BROWSER_MODE='development'
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-filters.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-filters.browser.js webkit
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-interaction.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/product-order-sheet-states.browser.js chromium
+node --import tsx scripts/verify-product-sheet-large.ts tests/product-order-sheet-performance.browser.js
+$env:PROTOTIPO_BROWSER_MODE='production'
+node --import tsx scripts/verify-product-sheet-large.ts tests/product-order-sheet-performance.browser.js
+node --import tsx scripts/verify-product-sheet-large.ts
+node scripts/verify-aria-browser.mjs tests/order-entry-sheet.browser.js chromium
+node scripts/verify-aria-browser.mjs tests/material-demand.browser.js chromium
+```
+
+El runner de desarrollo usa Vite, StrictMode y un proxy al servicio de prueba; el de producción usa `dist`. Los reportes incluyen su modo y utilizan nombres separados. Evidencias: [filtros Chromium desarrollo](tests/evidence/aria/chromium-development-product-order-sheet-filters.browser.json), [WebKit desarrollo](tests/evidence/aria/webkit-development-product-order-sheet-filters.browser.json), [interacciones](tests/evidence/aria/chromium-development-product-order-sheet-interaction.browser.json), [estados](tests/evidence/aria/chromium-development-product-order-sheet-states.browser.json), [recorrido y tiempos desarrollo](tests/evidence/aria/chromium-development-product-order-sheet-performance.browser.json), [producción](tests/evidence/aria/chromium-product-order-sheet-performance.browser.json), [filtro extenso](tests/evidence/product-sheet-performance/production-5000-values.png) y [errores masivos](tests/evidence/product-sheet-performance/production-5000-errors.png).

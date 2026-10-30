@@ -32,7 +32,7 @@ const child = spawn(
   process.execPath,
   [
     "scripts/verify-aria-browser.mjs",
-    "tests/product-order-sheet-virtual.browser.js",
+    process.argv[2] ?? "tests/product-order-sheet-virtual.browser.js",
     "chromium",
   ],
   {

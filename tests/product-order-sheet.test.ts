@@ -24,6 +24,32 @@ import { command } from "../server/domain";
 import { JsonStore } from "../server/store";
 const column = (key: string) =>
   productSheetColumns.find((col) => col.key === key)!;
+test("las celdas soportan inspección de React sin traps, efectos ni expansión de cachés", () => {
+  const { row } = fixture();
+  for (const key of [
+    "then",
+    "toJSON",
+    "_debugInfo",
+    Symbol.toStringTag,
+    Symbol.iterator,
+  ])
+    assert.equal(Reflect.get(row.cells, key), undefined);
+  assert.doesNotThrow(() => JSON.stringify(row));
+  const first = row.cells.precio_unitario;
+  assert.strictEqual(first, row.cells.precio_unitario);
+  assert.deepEqual(Object.keys(row.cells), []);
+  assert.doesNotThrow(() =>
+    Reflect.ownKeys(row.cells).forEach((key) => Reflect.get(row.cells, key)),
+  );
+});
+test("sin borrador se conserva la identidad de la base y de las columnas", () => {
+  const db = makeSeed();
+  assert.strictEqual(overlaySheetChanges(db, []), db);
+  assert.strictEqual(
+    columnsForSheet("no_autorizadas"),
+    columnsForSheet("no_autorizadas"),
+  );
+});
 test("copias versionadas rechazan destinos corruptos sin alterar la base", () => {
   const { row } = fixture();
   const valid = {

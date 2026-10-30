@@ -1,0 +1,59 @@
+{
+  "stage": "after",
+  "node": "v24.17.0",
+  "samples": 5,
+  "output": [
+    {
+      "lots": 5000,
+      "measurements": [
+        {
+          "name": "build",
+          "medianMs": 1.41,
+          "maxMs": 3.74
+        },
+        {
+          "name": "buildAndNoFilters",
+          "medianMs": 0.61,
+          "maxMs": 2.65
+        },
+        {
+          "name": "buildAndOneFilter",
+          "medianMs": 7.9,
+          "maxMs": 10.15
+        },
+        {
+          "name": "buildFilterAndSort",
+          "medianMs": 6,
+          "maxMs": 6.72
+        }
+      ],
+      "emptyOverlayPreservesIdentity": true
+    },
+    {
+      "lots": 20000,
+      "measurements": [
+        {
+          "name": "build",
+          "medianMs": 2.25,
+          "maxMs": 4.15
+        },
+        {
+          "name": "buildAndNoFilters",
+          "medianMs": 2.15,
+          "maxMs": 3.86
+        },
+        {
+          "name": "buildAndOneFilter",
+          "medianMs": 27.15,
+          "maxMs": 28.98
+        },
+        {
+          "name": "buildFilterAndSort",
+          "medianMs": 21.72,
+          "maxMs": 32.59
+        }
+      ],
+      "emptyOverlayPreservesIdentity": true
+    }
+  ]
+}
