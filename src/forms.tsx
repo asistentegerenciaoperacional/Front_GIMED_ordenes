@@ -912,7 +912,7 @@ export function InvoicePicker({
   return (
     <>
       <div
-        className={`invoice-picker${layout === "stacked" ? " invoice-picker-stacked" : ""}`}
+        className={`invoice-picker${layout === "stacked" ? " invoice-picker-stacked" : ""}${chosen ? " invoice-picker-has-attachment" : ""}`}
       >
         <ReferencePicker
           options={options}
@@ -1331,7 +1331,7 @@ export function OrderForm({
   const { db, run, navigate } = useApp();
   const supplyCreation = Boolean(abastecimiento && !order);
   const [alternativeEntry] = useState(
-    () => !order && readOrderEntryPreference(),
+    () => readOrderEntryPreference(),
   );
   const [activeSheetRow, setActiveSheetRow] = useState(0);
   const [type, setType] = useState(
@@ -1667,7 +1667,11 @@ export function OrderForm({
     setSupplier(pendingSupplier);
     setDate(today());
     setDelivery("");
-    setLines([fresh(type, pendingSupplier)]);
+    setLines(
+      alternativeEntry
+        ? padSheetLines([], () => fresh(type, pendingSupplier))
+        : [fresh(type, pendingSupplier)],
+    );
     setStage(1);
     setDirty(true);
     setError(null);
@@ -2053,6 +2057,14 @@ export function OrderForm({
       </Field>
     ),
   };
+  function entryBarcode(line: Row) {
+    const original = order && db.orden_producto.find(
+      (row) => row.id === line.id && row.id_orden_compra === order.id && row.id_producto === line.id_producto,
+    );
+    return original
+      ? db.codigos_barras.find((code) => code.id === original.id_codigo_barras)
+      : assignedBarcode(db, line.id_producto);
+  }
   function renderEntryItem(l: Row, i: number) {
     const key = (field: string) => `field-lines.${i}.${field}`;
     const selectedProduct = db.productos.find(
@@ -2163,7 +2175,10 @@ export function OrderForm({
         error={error?.fields[`lines.${i}.cantidad_solicitada`]}
       >
         <ControlInput
-          disabled={alternativeEntry && supplyCreation && !l.id_material}
+          disabled={
+            alternativeEntry &&
+            ((supplyCreation && !l.id_material) || (productsLocked && !l.id))
+          }
           id={key("cantidad_solicitada")}
           type="number"
           step="1"
@@ -2188,7 +2203,10 @@ export function OrderForm({
         }
       >
         <ControlInput
-          disabled={alternativeEntry && supplyCreation && !l.id_material}
+          disabled={
+            alternativeEntry &&
+            ((supplyCreation && !l.id_material) || (productsLocked && !l.id))
+          }
           id={key("precio_unitario")}
           inputMode="decimal"
           value={l.precio_unitario}
@@ -2296,7 +2314,14 @@ export function OrderForm({
           {stage === 1 && alternativeEntry ? (
             <>
               <div className="order-sheet-type">{entryFields.type}</div>
+              {productsLocked && (
+                <p className="notice subtle" id="order-products-locked">
+                  Los productos están bloqueados porque la orden está autorizada.
+                  Puedes ajustar cantidades, precios y materiales de empaque.
+                </p>
+              )}
               <OrderEntrySheet
+                editing={Boolean(order)}
                 title={
                   type === "producto"
                     ? "ORDEN DE PRODUCCIÓN"
@@ -2318,7 +2343,7 @@ export function OrderForm({
                   key: line._sheet.key,
                   cells: [
                     type === "producto"
-                      ? (assignedBarcode(db, line.id_producto)?.codigo ?? "")
+                      ? (entryBarcode(line)?.codigo ?? "")
                       : type === "material"
                         ? (db.materiales
                             .find(
@@ -2343,7 +2368,9 @@ export function OrderForm({
                 activeRow={activeSheetRow}
                 onActiveRow={setActiveSheetRow}
                 clearDisabled={
-                  supplyCreation || isEmptySheetLine(lines[activeSheetRow])
+                  productsLocked ||
+                  supplyCreation ||
+                  isEmptySheetLine(lines[activeSheetRow])
                 }
                 onClear={() => {
                   setLines((previous) =>
@@ -2359,7 +2386,7 @@ export function OrderForm({
                 lines.some(
                   (line) =>
                     line.id_producto &&
-                    (!assignedBarcode(db, line.id_producto) ||
+                    (!entryBarcode(line) ||
                       !currentCost(db, line.id_producto)),
                 ) && (
                   <div className="order-sheet-notes">
@@ -2367,7 +2394,7 @@ export function OrderForm({
                       (line, index) =>
                         line.id_producto && (
                           <div key={line._sheet.key}>
-                            {!assignedBarcode(db, line.id_producto) && (
+                            {!entryBarcode(line) && (
                               <small>
                                 Fila {index + 1}: Sin código asignado.
                               </small>

@@ -1,0 +1,1234 @@
+{
+  "sent": [
+    {
+      "key": "ArrowDown",
+      "at": 0.0014999999984866008
+    },
+    {
+      "key": "ArrowDown",
+      "at": 40.884799999999814
+    },
+    {
+      "key": "ArrowDown",
+      "at": 72.50719999999274
+    },
+    {
+      "key": "ArrowDown",
+      "at": 113.40189999999711
+    },
+    {
+      "key": "ArrowDown",
+      "at": 140.17939999999362
+    },
+    {
+      "key": "ArrowDown",
+      "at": 173.53689999999187
+    },
+    {
+      "key": "ArrowDown",
+      "at": 204.54439999999886
+    },
+    {
+      "key": "ArrowDown",
+      "at": 239.2399000000005
+    },
+    {
+      "key": "ArrowDown",
+      "at": 277.1820000000007
+    },
+    {
+      "key": "ArrowDown",
+      "at": 308.86179999999877
+    },
+    {
+      "key": "ArrowDown",
+      "at": 341.5938999999926
+    },
+    {
+      "key": "ArrowDown",
+      "at": 373.6900999999925
+    },
+    {
+      "key": "ArrowDown",
+      "at": 404.91599999999744
+    },
+    {
+      "key": "ArrowDown",
+      "at": 436.18919999999343
+    },
+    {
+      "key": "ArrowDown",
+      "at": 472.87289999998757
+    },
+    {
+      "key": "ArrowDown",
+      "at": 507.6308999999892
+    },
+    {
+      "key": "ArrowDown",
+      "at": 539.5671999999904
+    },
+    {
+      "key": "ArrowDown",
+      "at": 573.137699999992
+    },
+    {
+      "key": "ArrowDown",
+      "at": 606.2409999999945
+    },
+    {
+      "key": "ArrowDown",
+      "at": 639.2579999999871
+    },
+    {
+      "key": "ArrowDown",
+      "at": 674.1714999999967
+    },
+    {
+      "key": "ArrowDown",
+      "at": 705.2446999999956
+    },
+    {
+      "key": "ArrowDown",
+      "at": 732.4111999999877
+    },
+    {
+      "key": "ArrowDown",
+      "at": 774.1062999999995
+    },
+    {
+      "key": "ArrowDown",
+      "at": 806.0499999999884
+    },
+    {
+      "key": "ArrowDown",
+      "at": 839.6426999999967
+    },
+    {
+      "key": "ArrowDown",
+      "at": 873.0046999999904
+    },
+    {
+      "key": "ArrowDown",
+      "at": 903.9262999999919
+    },
+    {
+      "key": "ArrowDown",
+      "at": 935.2209000000003
+    },
+    {
+      "key": "ArrowDown",
+      "at": 966.9208999999973
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1005.8445999999967
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1039.5469999999914
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1070.5733999999939
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1107.5138000000006
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1138.5778999999893
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1172.1875999999902
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1204.2873999999865
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1235.6907999999967
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1272.5644999999931
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1306.2193999999872
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1337.525999999998
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1371.5866999999998
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1404.2219999999943
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1434.2054999999964
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1478.975299999991
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1502.2242999999871
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1538.2272999999986
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1571.8677999999927
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1603.9167999999918
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1635.8132999999943
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1679.4468999999954
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1710.9208999999973
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1742.9394999999931
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1774.0332999999955
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1804.2795999999944
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1835.4968999999983
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1873.1587
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1903.8873999999923
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1934.2190999999875
+    },
+    {
+      "key": "ArrowDown",
+      "at": 1980.3855999999942
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2007.6195000000007
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2047.7514999999985
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2079.57729999999
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2110.6612999999925
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2140.907699999996
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2172.640699999989
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2211.0364999999874
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2242.9609999999957
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2269.7391999999963
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2307.114600000001
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2339.0792999999976
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2372.380799999999
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2404.1907999999967
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2437.124499999991
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2472.797099999996
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2508.9179999999906
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2540.0026999999973
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2574.106799999994
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2605.8041999999987
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2635.519199999995
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2666.411799999987
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2712.8731999999873
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2740.845499999996
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2772.7544999999955
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2802.7739999999903
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2834.551099999997
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2866.302100000001
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2904.689699999988
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2938.2293999999965
+    },
+    {
+      "key": "ArrowDown",
+      "at": 2969.571499999991
+    }
+  ],
+  "trace": {
+    "start": 73681.19999999925,
+    "keys": [
+      {
+        "key": "ArrowDown",
+        "repeat": false,
+        "trusted": true,
+        "at": 73681.79999999888,
+        "stamp": 73680.69999999925,
+        "delay": 1.099999999627471
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 73780.09999999963,
+        "stamp": 73721.69999999925,
+        "delay": 58.40000000037253
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 73859.39999999851,
+        "stamp": 73753.79999999888,
+        "delay": 105.59999999962747
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 73943.89999999851,
+        "stamp": 73794.69999999925,
+        "delay": 149.19999999925494
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74026.09999999963,
+        "stamp": 73820.69999999925,
+        "delay": 205.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74103.69999999925,
+        "stamp": 73854.69999999925,
+        "delay": 249
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74179.79999999888,
+        "stamp": 73885.69999999925,
+        "delay": 294.09999999962747
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74259.09999999963,
+        "stamp": 73919.69999999925,
+        "delay": 339.40000000037253
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74344.29999999888,
+        "stamp": 73957.79999999888,
+        "delay": 386.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74414,
+        "stamp": 73989.69999999925,
+        "delay": 424.30000000074506
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74492.09999999963,
+        "stamp": 74022.69999999925,
+        "delay": 469.40000000037253
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74566.09999999963,
+        "stamp": 74054.69999999925,
+        "delay": 511.40000000037253
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74636.29999999888,
+        "stamp": 74085.79999999888,
+        "delay": 550.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74705,
+        "stamp": 74116.69999999925,
+        "delay": 588.3000000007451
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74777.79999999888,
+        "stamp": 74153.79999999888,
+        "delay": 624
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74861.19999999925,
+        "stamp": 74188.79999999888,
+        "delay": 672.4000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 74937.59999999963,
+        "stamp": 74220.79999999888,
+        "delay": 716.8000000007451
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75019.39999999851,
+        "stamp": 74253.79999999888,
+        "delay": 765.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75109.89999999851,
+        "stamp": 74286.79999999888,
+        "delay": 823.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75183.69999999925,
+        "stamp": 74319.69999999925,
+        "delay": 864
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75261.69999999925,
+        "stamp": 74354.79999999888,
+        "delay": 906.9000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75349.19999999925,
+        "stamp": 74385.69999999925,
+        "delay": 963.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75429.89999999851,
+        "stamp": 74413.69999999925,
+        "delay": 1016.1999999992549
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75499.69999999925,
+        "stamp": 74454.69999999925,
+        "delay": 1045
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75570.29999999888,
+        "stamp": 74486.79999999888,
+        "delay": 1083.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75646.69999999925,
+        "stamp": 74520.69999999925,
+        "delay": 1126
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75713.09999999963,
+        "stamp": 74553.69999999925,
+        "delay": 1159.4000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75801.79999999888,
+        "stamp": 74584.69999999925,
+        "delay": 1217.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75876.5,
+        "stamp": 74615.79999999888,
+        "delay": 1260.7000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 75951.19999999925,
+        "stamp": 74647.69999999925,
+        "delay": 1303.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76022.89999999851,
+        "stamp": 74686.69999999925,
+        "delay": 1336.199999999255
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76102.19999999925,
+        "stamp": 74720.79999999888,
+        "delay": 1381.4000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76174.29999999888,
+        "stamp": 74751.69999999925,
+        "delay": 1422.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76245.5,
+        "stamp": 74788.79999999888,
+        "delay": 1456.7000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76316.79999999888,
+        "stamp": 74819.69999999925,
+        "delay": 1497.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76394,
+        "stamp": 74852.79999999888,
+        "delay": 1541.2000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76484.19999999925,
+        "stamp": 74884.69999999925,
+        "delay": 1599.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76558.69999999925,
+        "stamp": 74916.79999999888,
+        "delay": 1641.9000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76633.79999999888,
+        "stamp": 74953.69999999925,
+        "delay": 1680.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76703.89999999851,
+        "stamp": 74986.79999999888,
+        "delay": 1717.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76777.69999999925,
+        "stamp": 75018.79999999888,
+        "delay": 1758.9000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76844.69999999925,
+        "stamp": 75052.69999999925,
+        "delay": 1792
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76911.89999999851,
+        "stamp": 75084.79999999888,
+        "delay": 1827.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 76978.5,
+        "stamp": 75114.79999999888,
+        "delay": 1863.7000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77050.89999999851,
+        "stamp": 75159.79999999888,
+        "delay": 1891.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77116.09999999963,
+        "stamp": 75182.79999999888,
+        "delay": 1933.300000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77201.59999999963,
+        "stamp": 75218.79999999888,
+        "delay": 1982.800000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77267.59999999963,
+        "stamp": 75252.69999999925,
+        "delay": 2014.9000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77337.69999999925,
+        "stamp": 75284.69999999925,
+        "delay": 2053
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77411.5,
+        "stamp": 75316.79999999888,
+        "delay": 2094.7000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77479.79999999888,
+        "stamp": 75360.79999999888,
+        "delay": 2119
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77545.09999999963,
+        "stamp": 75391.79999999888,
+        "delay": 2153.300000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77610.89999999851,
+        "stamp": 75423.69999999925,
+        "delay": 2187.199999999255
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77680.59999999963,
+        "stamp": 75454.69999999925,
+        "delay": 2225.9000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77746.89999999851,
+        "stamp": 75484.79999999888,
+        "delay": 2262.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77814,
+        "stamp": 75516.69999999925,
+        "delay": 2297.300000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77891.59999999963,
+        "stamp": 75553.79999999888,
+        "delay": 2337.800000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 77974.09999999963,
+        "stamp": 75584.79999999888,
+        "delay": 2389.300000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78046.29999999888,
+        "stamp": 75614.69999999925,
+        "delay": 2431.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78114.69999999925,
+        "stamp": 75661.79999999888,
+        "delay": 2452.9000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78183.39999999851,
+        "stamp": 75688.79999999888,
+        "delay": 2494.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78257.29999999888,
+        "stamp": 75728.69999999925,
+        "delay": 2528.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78325.5,
+        "stamp": 75760.69999999925,
+        "delay": 2564.800000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78391.29999999888,
+        "stamp": 75791.69999999925,
+        "delay": 2599.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78459.89999999851,
+        "stamp": 75821.79999999888,
+        "delay": 2638.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78532,
+        "stamp": 75853.69999999925,
+        "delay": 2678.300000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78598.5,
+        "stamp": 75891.69999999925,
+        "delay": 2706.800000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78675.89999999851,
+        "stamp": 75923.79999999888,
+        "delay": 2752.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78742.29999999888,
+        "stamp": 75950.79999999888,
+        "delay": 2791.5
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78808.89999999851,
+        "stamp": 75987.79999999888,
+        "delay": 2821.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78896.39999999851,
+        "stamp": 76019.79999999888,
+        "delay": 2876.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 78980.29999999888,
+        "stamp": 76053.69999999925,
+        "delay": 2926.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79044.29999999888,
+        "stamp": 76084.69999999925,
+        "delay": 2959.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79107.79999999888,
+        "stamp": 76117.69999999925,
+        "delay": 2990.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79177.79999999888,
+        "stamp": 76153.69999999925,
+        "delay": 3024.0999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79241.89999999851,
+        "stamp": 76189.69999999925,
+        "delay": 3052.300000000745
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79306,
+        "stamp": 76220.79999999888,
+        "delay": 3085.2000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79380.39999999851,
+        "stamp": 76254.79999999888,
+        "delay": 3125.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79484.09999999963,
+        "stamp": 76286.69999999925,
+        "delay": 3197.4000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79550.19999999925,
+        "stamp": 76316.79999999888,
+        "delay": 3233.4000000003725
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79617.5,
+        "stamp": 76347.79999999888,
+        "delay": 3269.7000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79683.89999999851,
+        "stamp": 76393.69999999925,
+        "delay": 3290.199999999255
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79752.89999999851,
+        "stamp": 76421.69999999925,
+        "delay": 3331.199999999255
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79815.79999999888,
+        "stamp": 76453.79999999888,
+        "delay": 3362
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79880.39999999851,
+        "stamp": 76483.79999999888,
+        "delay": 3396.5999999996275
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 79955,
+        "stamp": 76515.79999999888,
+        "delay": 3439.2000000011176
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 80024.89999999851,
+        "stamp": 76546.69999999925,
+        "delay": 3478.199999999255
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 80088.69999999925,
+        "stamp": 76585.69999999925,
+        "delay": 3503
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 80171.79999999888,
+        "stamp": 76618.79999999888,
+        "delay": 3553
+      },
+      {
+        "key": "ArrowDown",
+        "repeat": true,
+        "trusted": true,
+        "at": 80237.69999999925,
+        "stamp": 76650.69999999925,
+        "delay": 3587
+      }
+    ],
+    "frames": [
+      -9.099999999249121,
+      16.69999999999709,
+      250.09999999999127,
+      1316.6000000000058,
+      5049.899999999994,
+      83.40000000000873,
+      16.59999999999127,
+      16.90000000000873,
+      16.5,
+      16.69999999999709,
+      16.69999999999709,
+      16.69999999999709,
+      16.70000000001164,
+      16.69999999999709,
+      16.69999999999709,
+      16.69999999999709,
+      16.5,
+      16.60000000000582,
+      16.69999999999709
+    ],
+    "longTasks": [
+      {
+        "at": 73681.79999999888,
+        "ms": 97
+      },
+      {
+        "at": 73779.69999999925,
+        "ms": 164
+      },
+      {
+        "at": 73943.79999999888,
+        "ms": 400
+      },
+      {
+        "at": 74344.09999999963,
+        "ms": 917
+      },
+      {
+        "at": 75261.69999999925,
+        "ms": 2075
+      },
+      {
+        "at": 77337.69999999925,
+        "ms": 2971
+      },
+      {
+        "at": 80309.29999999888,
+        "ms": 81
+      }
+    ],
+    "commits": 183,
+    "renderDurations": [],
+    "transitions": [
+      {
+        "time": 73779.59999999963,
+        "row": 660,
+        "column": 0
+      },
+      {
+        "time": 73859.19999999925,
+        "row": 661,
+        "column": 0
+      },
+      {
+        "time": 73939.69999999925,
+        "row": 662,
+        "column": 0
+      },
+      {
+        "time": 74024.59999999963,
+        "row": 663,
+        "column": 0
+      },
+      {
+        "time": 74103.39999999851,
+        "row": 664,
+        "column": 0
+      },
+      {
+        "time": 74179.39999999851,
+        "row": 665,
+        "column": 0
+      },
+      {
+        "time": 74258.79999999888,
+        "row": 666,
+        "column": 0
+      },
+      {
+        "time": 74344,
+        "row": 667,
+        "column": 0
+      },
+      {
+        "time": 74413.69999999925,
+        "row": 668,
+        "column": 0
+      },
+      {
+        "time": 74492,
+        "row": 669,
+        "column": 0
+      },
+      {
+        "time": 75429.59999999963,
+        "row": 681,
+        "column": 0
+      },
+      {
+        "time": 75499.39999999851,
+        "row": 682,
+        "column": 0
+      },
+      {
+        "time": 75570,
+        "row": 683,
+        "column": 0
+      },
+      {
+        "time": 75646.29999999888,
+        "row": 684,
+        "column": 0
+      },
+      {
+        "time": 75712.89999999851,
+        "row": 685,
+        "column": 0
+      },
+      {
+        "time": 75801.5,
+        "row": 686,
+        "column": 0
+      }
+    ],
+    "missingActiveFrames": 1
+  },
+  "memorySamples": [
+    {
+      "at": 76010.1978,
+      "usedSize": 139669952,
+      "totalSize": 266670080,
+      "embedderHeapUsedSize": 9021952,
+      "backingStorageSize": 1105486
+    }
+  ]
+}

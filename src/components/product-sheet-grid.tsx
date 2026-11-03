@@ -92,6 +92,8 @@ export function ProductSheetGrid({
   onCancel,
   onCopy,
   onPaste,
+  onClear,
+  onHideColumns,
   selectedOrders,
   invalid,
 }: {
@@ -108,10 +110,85 @@ export function ProductSheetGrid({
   onCancel: () => void;
   onCopy: (event?: React.ClipboardEvent) => void;
   onPaste: (text: string) => void;
+  onClear: () => void;
+  onHideColumns: () => void;
   selectedOrders: Set<string>;
   invalid?: (row: ProductSheetRow, col: SheetColumn) => boolean;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
+  const drag = useRef<{
+    anchor: SheetPoint;
+    last: SheetPoint;
+    x: number;
+    y: number;
+  } | null>(null);
+  const dragged = useRef(false);
+  useEffect(() => {
+    let frame = 0;
+    const tick = () => {
+      frame = 0;
+      const state = drag.current,
+        element = viewport.current;
+      if (!state || !element) return;
+      const rect = element.getBoundingClientRect();
+      const dx =
+        state.x < rect.left + 24 ? -18 : state.x > rect.right - 24 ? 18 : 0;
+      const dy =
+        state.y < rect.top + headerHeight + 20
+          ? -18
+          : state.y > rect.bottom - 20
+            ? 18
+            : 0;
+      if (dx || dy) element.scrollBy(dx, dy);
+      const x = Math.max(rect.left + 1, Math.min(rect.right - 18, state.x));
+      const y = Math.max(
+        rect.top + headerHeight + 1,
+        Math.min(rect.bottom - 18, state.y),
+      );
+      const cell = document
+        .elementFromPoint(x, y)
+        ?.closest<HTMLElement>("[data-sheet-row]");
+      if (cell && element.contains(cell)) {
+        const point = {
+          row: Number(cell.dataset.sheetRow),
+          column: Number(cell.dataset.sheetColumn),
+        };
+        if (
+          point.row !== state.last.row ||
+          point.column !== state.last.column
+        ) {
+          dragged.current = true;
+          state.last = point;
+          onRange({ anchor: state.anchor, focus: point });
+        }
+      }
+      if (dx || dy) frame = requestAnimationFrame(tick);
+    };
+    const move = (event: PointerEvent) => {
+      if (!drag.current || !(event.buttons & 1)) return;
+      drag.current.x = event.clientX;
+      drag.current.y = event.clientY;
+      if (frame) cancelAnimationFrame(frame);
+      tick();
+    };
+    const end = () => {
+      drag.current = null;
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      window.setTimeout(() => {
+        dragged.current = false;
+      }, 0);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end);
+    window.addEventListener("pointercancel", end);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", end);
+      window.removeEventListener("pointercancel", end);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [onRange]);
   const [windowStart, setWindowStart] = useState(0),
     [height, setHeight] = useState(550);
   useEffect(() => {
@@ -158,6 +235,15 @@ export function ProductSheetGrid({
   function navigate(event: KeyboardEvent<HTMLDivElement>) {
     if (event.key === "Tab" && !editing) return;
     if (
+      !editing && event.altKey && event.shiftKey && !event.ctrlKey &&
+      !event.metaKey && event.key.toLowerCase() === "h"
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      onHideColumns();
+      return;
+    }
+    if (
       event.nativeEvent.isComposing ||
       event.altKey ||
       event.ctrlKey ||
@@ -186,6 +272,12 @@ export function ProductSheetGrid({
       !editing
     )
       return;
+    if (!editing && ["Delete", "Del", "Supr"].includes(event.key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (range) onClear();
+      return;
+    }
     const current = range?.focus ?? { row: 0, column: 0 };
     if (!rows.length || !columns.length) return;
     if (event.key === "F2") {
@@ -265,6 +357,28 @@ export function ProductSheetGrid({
         )
       }
       onKeyDownCapture={navigate}
+      onPointerDownCapture={(event) => {
+        if (event.pointerType !== "mouse" || event.button !== 0) return;
+        const target = event.target as Element;
+        if (target.closest('button, a, input, [role="combobox"]')) return;
+        const cell = target.closest<HTMLElement>("[data-sheet-row]");
+        if (!cell || (editing && !onCommit())) return;
+        const point = {
+          row: Number(cell.dataset.sheetRow),
+          column: Number(cell.dataset.sheetColumn),
+        };
+        const anchor = event.shiftKey ? (range?.anchor ?? point) : point;
+        drag.current = {
+          anchor,
+          last: point,
+          x: event.clientX,
+          y: event.clientY,
+        };
+        dragged.current = false;
+        onRange({ anchor, focus: point });
+        viewport.current?.focus({ preventScroll: true });
+        event.preventDefault();
+      }}
       onCopy={(event) => {
         if (!editing) onCopy(event);
       }}
@@ -275,6 +389,11 @@ export function ProductSheetGrid({
         }
       }}
       onClickCapture={(event) => {
+        if (dragged.current) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
         const element = event.target as Element;
         if (element.closest('button, a, input, [role="combobox"]')) return;
         const cell = element.closest<HTMLElement>("[data-sheet-row]");
@@ -351,6 +470,12 @@ export function ProductSheetGrid({
                     : undefined
                 }
                 data-lot-state={row.lot?.estado}
+                data-active-row={
+                  (bounds?.top === index &&
+                    bounds.bottom === index &&
+                    bounds.left === bounds.right) ||
+                  undefined
+                }
                 data-order-selected={
                   selectedOrders.has(row.order.id) || undefined
                 }

@@ -116,7 +116,11 @@ import {
 import { useBogotaDay } from "./use-bogota-day";
 import { useProductSheetPreference } from "./product-sheet-preferences";
 import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
-const ProductOrderSheet = lazy(() => import("./product-order-sheet").then(module => ({ default: module.ProductOrderSheet })));
+const ProductOrderSheet = lazy(() =>
+  import("./product-order-sheet").then((module) => ({
+    default: module.ProductOrderSheet,
+  })),
+);
 
 function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
   const { db } = useApp();
@@ -183,10 +187,20 @@ function setParams(group: string, params: URLSearchParams, values: Row) {
   replaceRoute(`ordenes/${group}${next.size ? `?${next}` : ""}`);
 }
 export function OrdersPage({
-  group, params,
-}: { group: "productos" | "materiales"; params: URLSearchParams }) {
+  group,
+  params,
+}: {
+  group: "productos" | "materiales";
+  params: URLSearchParams;
+}) {
   const preference = useProductSheetPreference();
-  return group === "productos" && preference.enabled ? <Suspense fallback={<div role="status">Cargando hoja de OC…</div>}><ProductOrderSheet params={params} /></Suspense> : <ClassicOrdersPage group={group} params={params} />;
+  return group === "productos" && preference.enabled ? (
+    <Suspense fallback={<div role="status">Cargando hoja de OC…</div>}>
+      <ProductOrderSheet params={params} />
+    </Suspense>
+  ) : (
+    <ClassicOrdersPage group={group} params={params} />
+  );
 }
 function ClassicOrdersPage({
   group,
@@ -1024,8 +1038,21 @@ export function OrderDetail({
     | { kind: "delete"; line: Row; record: Row }
     | { kind: "anular" | "reabrir"; line: Row }
     | null;
-  const [pendingAction, setPendingActionValue] = useState<(NonNullable<LotAction> & { expected: ReturnType<typeof productLotLifecycleSnapshot> }) | null>(null);
-  const setPendingAction = (action: LotAction) => setPendingActionValue(action ? { ...action, expected: productLotLifecycleSnapshot(db, [action.line.id]) } : null);
+  const [pendingAction, setPendingActionValue] = useState<
+    | (NonNullable<LotAction> & {
+        expected: ReturnType<typeof productLotLifecycleSnapshot>;
+      })
+    | null
+  >(null);
+  const setPendingAction = (action: LotAction) =>
+    setPendingActionValue(
+      action
+        ? {
+            ...action,
+            expected: productLotLifecycleSnapshot(db, [action.line.id]),
+          }
+        : null,
+    );
   const [actionBusy, setActionBusy] = useState(false);
   const [actionError, setActionError] = useState<string>();
   const supplyNeeds = useMemo(() => {
@@ -1068,7 +1095,10 @@ export function OrderDetail({
             )
         : [];
   async function changeState(l: Row, s: string) {
-    const expected = o?.tipo_orden === "producto" ? productLotLifecycleSnapshot(db, [l.id]) : undefined;
+    const expected =
+      o?.tipo_orden === "producto"
+        ? productLotLifecycleSnapshot(db, [l.id])
+        : undefined;
     if (!authorized) {
       notify(
         "Autoriza la orden de compra antes de cambiar el estado del seguimiento.",
@@ -1107,7 +1137,7 @@ export function OrderDetail({
       if (d !== null && Math.abs(d) > tolerance(db)) {
         if (
           !(await confirmAction(
-            `La desviación del producto es ${d.toFixed(2)} %, fuera del margen ±${tolerance(db)} %. ¿Confirmar el cierre del lote?`,
+            `La desviación del producto es ${d.toFixed(2)} %, fuera del margen ±${tolerance(db)} %. ¿Confirmar el cierre del producto?`,
           ))
         )
           return;
@@ -1117,7 +1147,13 @@ export function OrderDetail({
     try {
       await run(
         "setLineState",
-        { entity: lineTable(o!.tipo_orden), id: l.id, estado: s, confirm, expected },
+        {
+          entity: lineTable(o!.tipo_orden),
+          id: l.id,
+          estado: s,
+          confirm,
+          expected,
+        },
         `Estado del ${orderItemLabel(o!.tipo_orden)} actualizado`,
       );
     } catch (e) {
@@ -1941,30 +1977,40 @@ export function OrderDetail({
                 de recepción, Batch record e inspección. Esta acción no se puede
                 deshacer.
               </p>
-              {db.lote_producto.filter(
-                (record) => record.id_orden_producto === pendingAction.line.id,
-              ).filter((record) => record.id !== pendingAction.record.id && record.estado !== "anulado").length === 0 && (
+              {db.lote_producto
+                .filter(
+                  (record) =>
+                    record.id_orden_producto === pendingAction.line.id,
+                )
+                .filter(
+                  (record) =>
+                    record.id !== pendingAction.record.id &&
+                    record.estado !== "anulado",
+                ).length === 0 && (
                 <p className="notice warning">
-                  No quedarán lotes activos de este producto. Al eliminarlo, el producto
-                  quedará anulado.
+                  No quedarán lotes activos de este producto. Al eliminarlo, el
+                  producto quedará anulado.
                 </p>
               )}
             </>
           ) : pendingAction.kind === "anular" ? (
             <p>
-              Se anulará el producto {pendingAction.line.posicion} y todos sus lotes (
+              Se anulará el producto {pendingAction.line.posicion} y todos sus
+              lotes (
               {
                 db.lote_producto.filter(
                   (record) =>
                     record.id_orden_producto === pendingAction.line.id,
                 ).length
               }
-              ). Se conservarán sus identificadores, datos de recepción, Batch record, inspección y vínculos de abastecimiento.
+              ). Se conservarán sus identificadores, datos de recepción, Batch
+              record, inspección y vínculos de abastecimiento.
             </p>
           ) : (
             <p>
               El producto y todos sus lotes conservados pasarán a seguimiento,
-              incluidos los que estaban cerrados o anulados. Sus datos no se reemplazarán.
+              incluidos los que estaban cerrados o anulados. Sus datos no se
+              reemplazarán.
             </p>
           )}
           <p>Las facturas y sus documentos se conservarán.</p>

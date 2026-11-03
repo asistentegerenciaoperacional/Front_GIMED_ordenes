@@ -1,0 +1,68 @@
+{
+  "checks": [
+    "Control sin hook de DevTools ni perfilador de CPU",
+    "full-window-horizontal: todas las teclas reales recibidas",
+    "full-window-vertical: todas las teclas reales recibidas",
+    "Mismo modelo con un solo lote visible para aislar el coste del render",
+    "one-row-horizontal: todas las teclas reales recibidas",
+    "Sin excepciones en los controles"
+  ],
+  "results": [
+    {
+      "name": "full-window-horizontal",
+      "keysSent": 144,
+      "keysReceived": 144,
+      "inputRate": 60,
+      "enqueueMs": 2394.0330000000004,
+      "drainMs": 7509.741499999999,
+      "inputDelayP95Ms": 7092.0999999996275,
+      "mountedCells": 744,
+      "heapBefore": 40383984,
+      "heapAfter": 156572960,
+      "heapAfterGc": 40952288,
+      "active": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "name": "full-window-vertical",
+      "keysSent": 180,
+      "keysReceived": 180,
+      "inputRate": 60,
+      "enqueueMs": 2982.2848999999987,
+      "drainMs": 9094.974800000002,
+      "inputDelayP95Ms": 8633.099999999627,
+      "mountedCells": 744,
+      "heapBefore": 41457360,
+      "heapAfter": 182760468,
+      "heapAfterGc": 31690108,
+      "active": {
+        "row": 180,
+        "column": 0
+      }
+    },
+    {
+      "name": "one-row-horizontal",
+      "keysSent": 144,
+      "keysReceived": 144,
+      "inputRate": 60,
+      "enqueueMs": 2383.3348000000005,
+      "drainMs": 9.17899999999645,
+      "inputDelayP95Ms": 2,
+      "mountedCells": 24,
+      "heapBefore": 14655620,
+      "heapAfter": 93994184,
+      "heapAfterGc": 14691264,
+      "active": {
+        "row": 0,
+        "column": 0
+      }
+    }
+  ],
+  "pageErrors": [],
+  "instrumentation": "No DevTools hook, no CPU profiler, no frame/DOM observers, key capture only; no data commands",
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-VPwuIr\\database.json"
+}

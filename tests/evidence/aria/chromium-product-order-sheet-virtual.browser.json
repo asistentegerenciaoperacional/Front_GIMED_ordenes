@@ -9,6 +9,8 @@
     "El DOM no crece acumulativamente al recorrer 100%",
     "El DOM no crece acumulativamente al recorrer 50%",
     "El DOM no crece acumulativamente al recorrer 0%",
+    "Arrastrar cerca del borde horizontal desplaza hacia más columnas",
+    "Arrastrar cerca del borde desplaza y selecciona filas virtualizadas (fila 27, scroll 553)",
     "El teclado alcanza filas que estaban desmontadas",
     "La posición accesible de la fila es global, no la de la ventana virtual",
     "La navegación mantiene acotada la cantidad de filas montadas",
@@ -21,5 +23,5 @@
   ],
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-i3TrBN\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-Avy5YR\\database.json"
 }

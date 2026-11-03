@@ -45,6 +45,7 @@ export function OrderEntrySheet({
   onActiveRow,
   onClear,
   clearDisabled,
+  editing = false,
 }: {
   title: string;
   number: ReactNode;
@@ -58,6 +59,7 @@ export function OrderEntrySheet({
   onActiveRow: (index: number) => void;
   onClear: () => void;
   clearDisabled: boolean;
+  editing?: boolean;
 }) {
   const grid = useRef<HTMLDivElement>(null);
   const { fields } = useContext(FormErrorsContext);
@@ -130,7 +132,9 @@ export function OrderEntrySheet({
       <div
         className="order-sheet-scroll"
         role="region"
-        aria-label="Hoja de creación de la orden"
+        aria-label={
+          editing ? "Hoja de edición de la orden" : "Hoja de creación de la orden"
+        }
         tabIndex={0}
       >
         <div className="order-entry-sheet">

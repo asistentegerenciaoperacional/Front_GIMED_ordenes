@@ -50,7 +50,7 @@ test("cada OC y OCM admite una orden escaneada; reemplazar conserva identidad, p
     const order = await execute(store, "createOrder", {
       tipo_orden: type,
       id_proveedor: provider,
-      fecha_solicitada_entrega: "2026-10-30T12:00:00.000Z",
+      fecha_solicitada_entrega: "2099-10-30T12:00:00.000Z",
       lines: [{ ...item, cantidad_solicitada: 100, precio_unitario: "125.00" }],
     });
     const payload = {

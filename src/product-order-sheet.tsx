@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Dialog as AriaDialog, DialogTrigger } from "react-aria-components/Dialog";
+import { Popover } from "react-aria-components/Popover";
 import {
   ChevronDown,
   ChevronUp,
@@ -552,6 +554,41 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     if (overflow)
       notify(`${overflow} celdas fuera de la hoja no se pegaron.`, true);
   }
+  function clearSelection() {
+    if (!range) return;
+    const bounds = rangeBounds(range);
+    const inputs = rows
+      .slice(bounds.top, bounds.bottom + 1)
+      .flatMap((row) =>
+        columns
+          .slice(bounds.left, bounds.right + 1)
+          .map((column) => ({ row: display(row), column, text: "" })),
+      );
+    const result = proposeSheetInput(db, changes, inputs);
+    draft(result.changes);
+    setIssues(result.issues);
+    setError(null);
+  }
+  function updateHidden(next: string[]) {
+    if (editing && !commit()) return;
+    setHidden(next);
+    setRange(null);
+    try {
+      localStorage.setItem(localVisibility + view, JSON.stringify(next));
+    } catch {
+      setStorageError(true);
+    }
+  }
+  function hideSelectedColumns() {
+    if (!range) return;
+    const { left, right } = rangeBounds(range);
+    const selectedColumns = columns.slice(left, right + 1);
+    if (selectedColumns.length >= columns.length) {
+      notify("Debe permanecer visible al menos una columna.", true);
+      return;
+    }
+    updateHidden([...new Set([...hidden, ...selectedColumns.map((col) => col.key)])]);
+  }
   async function states(scope: "lot" | "line", state: string) {
     const ids = scope === "lot" ? lotIds : lineIds;
     if (!ids.length) return;
@@ -957,13 +994,41 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             onClick={() => changeQuery({ filtro: "", filtros: "" })}
           />
         )}
-        <Button
-          icon={ChevronDown}
-          aria-expanded={columnsOpen}
-          onClick={() => setColumnsOpen(!columnsOpen)}
-        >
-          Columnas
-        </Button>
+        <DialogTrigger isOpen={columnsOpen} onOpenChange={setColumnsOpen}>
+          <Button icon={ChevronDown}>Columnas</Button>
+          <Popover className="product-sheet-column-popover" placement="bottom start" offset={4}>
+            <AriaDialog className="product-sheet-column-menu" aria-label="Columnas visibles">
+              <div className="product-sheet-column-menu-header">
+                <strong>Columnas visibles</strong>
+                <Button variant="link" disabled={hidden.length === 0} onClick={() => updateHidden([])}>
+                  Seleccionar todas
+                </Button>
+              </div>
+              <Button
+                className="product-sheet-hide-columns"
+                disabled={!range}
+                aria-keyshortcuts="Alt+Shift+H"
+                onClick={hideSelectedColumns}
+              >
+                Ocultar columnas seleccionadas <span>Alt+Mayús+H</span>
+              </Button>
+              <div className="product-sheet-column-list">
+                {allColumns.map((col) => (
+                  <CheckChoice
+                    key={col.key}
+                    checked={!hidden.includes(col.key)}
+                    disabled={!hidden.includes(col.key) && columns.length === 1}
+                    onChange={(checked) => updateHidden(checked
+                      ? hidden.filter((key) => key !== col.key)
+                      : [...hidden, col.key])}
+                  >
+                    {col.label}
+                  </CheckChoice>
+                ))}
+              </div>
+            </AriaDialog>
+          </Popover>
+        </DialogTrigger>
         <ControlInput
           className="control product-sheet-search"
           aria-label="Buscar en la hoja de OC"
@@ -1034,40 +1099,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           <Button onClick={() => setRecoveryOpen(true)}>
             Revisar copia guardada
           </Button>
-        </div>
-      )}
-      {columnsOpen && (
-        <div
-          className="product-sheet-column-menu"
-          role="group"
-          aria-label="Columnas visibles"
-        >
-          {allColumns.map((col) => (
-            <CheckChoice
-              key={col.key}
-              checked={!hidden.includes(col.key)}
-              disabled={!hidden.includes(col.key) && columns.length === 1}
-              onChange={(checked) => {
-                const next = checked
-                  ? hidden.filter((key) => key !== col.key)
-                  : [...hidden, col.key];
-                setHidden(next);
-                setRange(null);
-                setEditing(null);
-                try {
-                  localStorage.setItem(
-                    localVisibility + view,
-                    JSON.stringify(next),
-                  );
-                } catch {
-                  setStorageError(true);
-                }
-              }}
-            >
-              {col.label}
-            </CheckChoice>
-          ))}
-          <Button onClick={() => setColumnsOpen(false)}>Cerrar columnas</Button>
         </div>
       )}
       {storageError && (
@@ -1150,6 +1181,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         onCancel={() => setEditing(null)}
         onCopy={copy}
         onPaste={paste}
+        onClear={clearSelection}
+        onHideColumns={hideSelectedColumns}
         selectedOrders={selectedOrders}
         renderHeader={(col) => (
           <ColumnHeader
@@ -1227,7 +1260,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       </div>
       <div className="product-sheet-footer">
         {rows.length} {view === "no_autorizadas" ? "renglones" : "lotes"} ·{" "}
-        {new Set(rows.map((row) => row.order.id)).size} OC · Sin paginación
+        {new Set(rows.map((row) => row.order.id)).size} OC
       </div>
       {recovery && recoveryOpen && (
         <Dialog

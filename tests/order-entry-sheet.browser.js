@@ -468,11 +468,117 @@ async (page) => {
     exact: true,
   });
   check(
-    (await editing.locator(".order-entry-sheet").count()) === 0 &&
-      (await editing.locator(".order-form-line").count()) === 2,
-    "Órdenes existentes mantienen la edición clásica",
+    (await editing.locator(".order-entry-sheet").count()) === 1 &&
+      (await editing.locator("tbody tr").count()) === 7,
+    "Las órdenes existentes usan siete filas de boceto cuando está activo",
+  );
+  const alternate = initial.productos.find(p => p.id !== product.id && p.id_maquilador === product.id_maquilador && p.activo && initial.codigos_barras.some(code => code.id_producto === p.id && code.estado === "asignado"));
+  check(Boolean(alternate),"Hay otro producto asignado para verificar la sustitución");
+  const editItem = editing.locator('[data-sheet-row="0"][data-sheet-column="1"]').getByRole("combobox");
+  await editItem.fill(alternate.nombre_producto);
+  await page.locator(`[role="option"][data-key="${alternate.id}"]`).click();
+  const replacementCode=initial.codigos_barras.find(code=>code.id_producto===alternate.id && code.estado==="asignado").codigo;
+  check((await editing.locator('[data-sheet-row="0"][data-sheet-column="0"]').innerText()).includes(replacementCode),"Al cambiar el producto se muestra su código asignado actual");
+  const otherSupplier = initial.proveedor.find(p=>p.Es_maquila && p.id!==product.id_maquilador);
+  const providerInput=editing.getByRole("combobox",{name:"Proveedor",exact:true});
+  await providerInput.fill(otherSupplier.nombre_largo);
+  await page.locator(`[role="option"][data-key="${otherSupplier.id}"]`).click();
+  await page.getByRole("dialog",{name:"Cambiar proveedor y reemplazar la orden",exact:true}).getByRole("button",{name:"Cambiar proveedor",exact:true}).click();
+  check(await editing.locator(".order-entry-sheet tbody tr").count()===7,"Confirmar el reemplazo de proveedor mantiene las siete filas del boceto");
+  await providerInput.fill(initial.proveedor.find(p=>p.id===product.id_maquilador).nombre_largo);
+  await page.locator(`[role="option"][data-key="${product.id_maquilador}"]`).click();
+  check((await editing.locator('[data-sheet-row="0"][data-sheet-column="0"]').innerText()).includes(replacementCode),"Volver al proveedor inicial recupera el borrador de edición");
+  await editing.getByRole("button", { name: "Cancelar", exact: true }).click();
+  await command("authorizeOrder", { id: createdProduct.id, confirm: true });
+  await page.reload();
+  await page.getByRole("button", { name: "Editar", exact: true }).click();
+  await editing.locator(".order-entry-sheet").waitFor();
+  const editCell = (row, col) =>
+    editing.locator(`[data-sheet-row="${row}"][data-sheet-column="${col}"]`);
+  check(
+    (await editCell(0, 1).getByRole("combobox").isDisabled()) &&
+      (await editing.getByRole("button", { name: "Vaciar fila" }).isDisabled()),
+    "En OC autorizada no se pueden reemplazar ni quitar productos",
+  );
+  check(
+    (await editCell(6, 2).getByRole("textbox").isDisabled()) &&
+      (await editCell(6, 3).getByRole("textbox").isDisabled()),
+    "Las filas libres no permiten añadir productos a una OC autorizada",
+  );
+  const savedBefore = await state();
+  const originalLine = savedBefore.orden_producto.find(
+    (line) => line.id_orden_compra === createdProduct.id,
+  );
+  const originalCode = savedBefore.codigos_barras.find(
+    (code) => code.id === originalLine.id_codigo_barras,
+  ).codigo;
+  check(
+    (await editCell(0, 0).innerText()).includes(originalCode),
+    "La hoja muestra el código histórico de la orden",
+  );
+  await editCell(0, 2).getByRole("textbox").fill("4321");
+  await editing
+    .getByRole("button", { name: "Revisar orden", exact: true })
+    .click();
+  await editing.getByRole("button", { name: "Volver", exact: true }).click();
+  check(
+    (await editCell(0, 2).getByRole("textbox").inputValue()) === "4321",
+    "Volver conserva la edición y el formato boceto",
+  );
+  await editing
+    .getByRole("button", { name: "Revisar orden", exact: true })
+    .click();
+  await editing
+    .getByRole("button", { name: "Guardar cambios", exact: true })
+    .click();
+  await editing.waitFor({ state: "hidden" });
+  const savedAfter = await state();
+  check(
+    savedAfter.orden_producto.find((line) => line.id === originalLine.id)
+      .cantidad_solicitada === 4321 &&
+      savedAfter.orden_producto.find((line) => line.id === originalLine.id)
+        .id_codigo_barras === originalLine.id_codigo_barras,
+    "Guardar conserva identidad y código histórico y actualiza la cantidad",
+  );
+  for (const type of ["material", "otro"]) {
+    const existing = (await state()).orden_compra.find(
+      (order) =>
+        order.tipo_orden === type &&
+        !initial.orden_compra.some((old) => old.id === order.id),
+    );
+    await page.goto(origin + "/ordenes/" + existing.id);
+    await page.getByRole("button", { name: "Editar", exact: true }).click();
+    const form = page.getByRole("dialog", {
+      name: "Editar orden · " + existing.no_orden,
+      exact: true,
+    });
+    check(
+      (await form.locator(".order-entry-sheet").count()) === 1 &&
+        (await form.locator(".order-sheet-heading").innerText()).includes(
+          "ORDEN DE COMPRA",
+        ),
+      `Edición de ${type} usa el boceto de compra`,
+    );
+    await form
+      .getByRole("button", { name: "Revisar orden", exact: true })
+      .click();
+    check(
+      await form
+        .getByRole("button", { name: "Guardar cambios", exact: true })
+        .isVisible(),
+      `La edición de ${type} llega a revisión`,
+    );
+    await form.getByRole("button", { name: "Cancelar", exact: true }).click();
+  }
+  await page.evaluate((key) => localStorage.setItem(key, "false"), preference);
+  await page.goto(origin + "/ordenes/" + createdProduct.id);
+  await page.getByRole("button", { name: "Editar", exact: true }).click();
+  check(
+    (await editing.locator(".order-entry-sheet").count()) === 0,
+    "La edición conserva el formato clásico con la preferencia desactivada",
   );
   await editing.getByRole("button", { name: "Cancelar", exact: true }).click();
+  await page.evaluate((key) => localStorage.setItem(key, "true"), preference);
   await page.goto(origin + "/ordenes/" + createdProduct.id + "/imprimir");
   await page.locator(".print-table").waitFor();
   check(

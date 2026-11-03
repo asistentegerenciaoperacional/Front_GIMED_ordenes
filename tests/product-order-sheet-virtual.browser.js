@@ -53,6 +53,52 @@ async (page) => {
       `El DOM no crece acumulativamente al recorrer ${fraction * 100}%`,
     );
   }
+  const firstCell = page.locator(
+    '[data-sheet-row="0"][data-column-key="no_orden"]',
+  );
+  const firstBox = await firstCell.boundingBox(),
+    viewportBox = await viewport.boundingBox();
+  await page.mouse.move(
+    firstBox.x + firstBox.width / 2,
+    firstBox.y + firstBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    viewportBox.x + viewportBox.width - 4,
+    firstBox.y + firstBox.height / 2,
+    { steps: 5 },
+  );
+  await page.waitForTimeout(2000);
+  await page.mouse.up();
+  check(
+    (await viewport.evaluate((element) => element.scrollLeft)) > 200,
+    "Arrastrar cerca del borde horizontal desplaza hacia más columnas",
+  );
+  await viewport.evaluate((element) => {
+    element.scrollLeft = 0;
+    element.scrollTop = 0;
+  });
+  await firstCell.scrollIntoViewIfNeeded();
+  await page.mouse.move(
+    firstBox.x + firstBox.width / 2,
+    firstBox.y + firstBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    firstBox.x + firstBox.width / 2,
+    viewportBox.y + viewportBox.height - 4,
+    { steps: 5 },
+  );
+  await page.waitForTimeout(1500);
+  await page.mouse.up();
+  await page.waitForTimeout(100);
+  check(
+    Number(await page.locator("[data-active]").getAttribute("data-sheet-row")) >
+      25,
+    `Arrastrar cerca del borde desplaza y selecciona filas virtualizadas (fila ${await page.locator("[data-active]").getAttribute("data-sheet-row")}, scroll ${await viewport.evaluate((element) => element.scrollTop)})`,
+  );
+  await viewport.evaluate((element) => (element.scrollTop = 0));
+  await firstCell.waitFor();
   await page
     .locator('[data-sheet-row="0"][data-column-key="no_orden"]')
     .click();

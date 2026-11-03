@@ -2309,6 +2309,25 @@ textarea.control {
   min-width: 0;
   flex: none;
 }
+.invoice-picker-stacked.invoice-picker-has-attachment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  align-items: stretch;
+}
+.invoice-picker-stacked.invoice-picker-has-attachment .aria-combo-root {
+  grid-column: 1 / -1;
+}
+.invoice-picker-stacked.invoice-picker-has-attachment .btn.small {
+  grid-column: 1;
+  height: 34px;
+  min-height: 34px;
+}
+.invoice-picker-stacked.invoice-picker-has-attachment .btn.icon-btn {
+  grid-column: 2;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+}
 .invoice-picker .clip-blue {
   color: var(--primary);
 }

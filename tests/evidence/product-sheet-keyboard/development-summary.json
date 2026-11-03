@@ -1,0 +1,1177 @@
+{
+  "environment": {
+    "browser": "156.0.8078.80",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "instrumentation": "CDP trusted keydown, explicit timestamp, independent sender, frame/long-task observers, commit hook, heap before/after forced GC; CPU profile only fast-vertical"
+  },
+  "initial": {
+    "heap": {
+      "usedSize": 70709668,
+      "totalSize": 75849728,
+      "embedderHeapUsedSize": 6757216,
+      "backingStorageSize": 16137892
+    },
+    "dom": {
+      "documents": 2,
+      "nodes": 2461,
+      "jsEventListeners": 303
+    },
+    "metrics": {
+      "Timestamp": 15377.208625,
+      "AudioHandlers": 0,
+      "AudioWorkletProcessors": 0,
+      "Documents": 2,
+      "Frames": 1,
+      "JSEventListeners": 303,
+      "LayoutObjects": 2338,
+      "MediaKeySessions": 0,
+      "MediaKeys": 0,
+      "Nodes": 2461,
+      "Resources": 93,
+      "ContextLifecycleStateObservers": 8,
+      "V8PerContextDatas": 2,
+      "WorkerGlobalScopes": 0,
+      "UACSSResources": 0,
+      "RTCPeerConnections": 0,
+      "ResourceFetchers": 2,
+      "AdSubframes": 0,
+      "DetachedScriptStates": 0,
+      "ArrayBufferContents": 0,
+      "LayoutCount": 6,
+      "RecalcStyleCount": 10,
+      "LayoutDuration": 0.001873,
+      "RecalcStyleDuration": 0.003141,
+      "DevToolsCommandDuration": 0.003594,
+      "ScriptDuration": 2.155507,
+      "V8CompileDuration": 0,
+      "TaskDuration": 2.308552,
+      "TaskOtherDuration": 0.144437,
+      "ThreadTime": 2.338435,
+      "ProcessTime": 5.698134,
+      "JSHeapUsedSize": 70709668,
+      "JSHeapTotalSize": 75849728,
+      "FirstMeaningfulPaint": 15373.136409,
+      "DomContentLoaded": 15372.295091,
+      "NavigationStart": 15372.22071
+    },
+    "visible": {
+      "rows": 31,
+      "cells": 744,
+      "allDom": 1818,
+      "active": {
+        "row": 5,
+        "column": 0
+      }
+    }
+  },
+  "final": {
+    "heap": {
+      "usedSize": 70548916,
+      "totalSize": 72773632,
+      "embedderHeapUsedSize": 8088160,
+      "backingStorageSize": 16211054
+    },
+    "dom": {
+      "documents": 2,
+      "nodes": 2448,
+      "jsEventListeners": 316
+    },
+    "metrics": {
+      "Timestamp": 15560.706239,
+      "AudioHandlers": 0,
+      "AudioWorkletProcessors": 0,
+      "Documents": 2,
+      "Frames": 1,
+      "JSEventListeners": 316,
+      "LayoutObjects": 2334,
+      "MediaKeySessions": 0,
+      "MediaKeys": 0,
+      "Nodes": 2448,
+      "Resources": 93,
+      "ContextLifecycleStateObservers": 11,
+      "V8PerContextDatas": 2,
+      "WorkerGlobalScopes": 0,
+      "UACSSResources": 0,
+      "RTCPeerConnections": 0,
+      "ResourceFetchers": 2,
+      "AdSubframes": 0,
+      "DetachedScriptStates": 0,
+      "ArrayBufferContents": 0,
+      "LayoutCount": 550,
+      "RecalcStyleCount": 294,
+      "LayoutDuration": 0.125064,
+      "RecalcStyleDuration": 0.109631,
+      "DevToolsCommandDuration": 0.252835,
+      "ScriptDuration": 170.910482,
+      "V8CompileDuration": 0,
+      "TaskDuration": 172.799898,
+      "TaskOtherDuration": 1.401886,
+      "ThreadTime": 175.309563,
+      "ProcessTime": 238.454688,
+      "JSHeapUsedSize": 70548916,
+      "JSHeapTotalSize": 72773632,
+      "FirstMeaningfulPaint": 15373.136409,
+      "DomContentLoaded": 15372.295091,
+      "NavigationStart": 15372.22071
+    },
+    "visible": {
+      "rows": 31,
+      "cells": 744,
+      "allDom": 1820,
+      "active": {
+        "row": 394,
+        "column": 0
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "name": "paced-vertical",
+      "hz": 8,
+      "shift": false,
+      "keysSent": 24,
+      "keysCaptured": 24,
+      "trustedKeys": 24,
+      "enqueueMs": 2877.4,
+      "drainMs": 3801.6,
+      "elapsedMs": 7401.6,
+      "expected": {
+        "row": 29,
+        "column": 0
+      },
+      "actual": {
+        "row": 29,
+        "column": 0
+      },
+      "commits": 51,
+      "commitsPerKey": 2.13,
+      "observedTransitions": 24,
+      "inputDelayMs": {
+        "p50": 2018.6,
+        "p95": 3374.6,
+        "max": 3493.4
+      },
+      "frameGapMs": {
+        "p50": 99.9,
+        "p95": 5416.8,
+        "max": 5416.8
+      },
+      "longTasks": {
+        "count": 5,
+        "totalMs": 6882,
+        "maxMs": 3498
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 70878972,
+        "peak": 231486928,
+        "after": 231486928,
+        "afterGc": 67576272
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2461,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 2847,
+          "jsEventListeners": 831
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 29,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 6892.932,
+        "scriptMs": 6855.280000000001,
+        "layoutMs": 4.739999999999999,
+        "styleMs": 10.304,
+        "layouts": 25
+      }
+    },
+    {
+      "name": "fast-horizontal",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 144,
+      "keysCaptured": 144,
+      "trustedKeys": 144,
+      "enqueueMs": 2397.2,
+      "drainMs": 36096.4,
+      "elapsedMs": 41571.6,
+      "expected": {
+        "row": 29,
+        "column": 0
+      },
+      "actual": {
+        "row": 29,
+        "column": 0
+      },
+      "commits": 289,
+      "commitsPerKey": 2.01,
+      "observedTransitions": 144,
+      "inputDelayMs": {
+        "p50": 18166.4,
+        "p95": 34073.3,
+        "max": 35857.9
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 6449.9,
+        "max": 6449.9
+      },
+      "longTasks": {
+        "count": 3,
+        "totalMs": 38313,
+        "maxMs": 31847
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 67597712,
+        "peak": 289093980,
+        "after": 264566624,
+        "afterGc": 73014328
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 1000
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 29,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 38329.645,
+        "scriptMs": 38240.649,
+        "layoutMs": 20.926000000000002,
+        "styleMs": 28.255000000000003,
+        "layouts": 144
+      }
+    },
+    {
+      "name": "fast-vertical",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 80,
+      "keysCaptured": 80,
+      "trustedKeys": 80,
+      "enqueueMs": 1324.5,
+      "drainMs": 21940,
+      "elapsedMs": 25486.3,
+      "expected": {
+        "row": 109,
+        "column": 0
+      },
+      "actual": {
+        "row": 109,
+        "column": 0
+      },
+      "commits": 163,
+      "commitsPerKey": 2.04,
+      "observedTransitions": 13,
+      "inputDelayMs": {
+        "p50": 11298.2,
+        "p95": 20825.4,
+        "max": 21683.3
+      },
+      "frameGapMs": {
+        "p50": 133.4,
+        "p95": 16266.6,
+        "max": 16266.6
+      },
+      "longTasks": {
+        "count": 4,
+        "totalMs": 23485,
+        "maxMs": 15612
+      },
+      "missingActiveFrames": 1,
+      "heap": {
+        "before": 73035488,
+        "peak": 226049372,
+        "after": 226049372,
+        "afterGc": 62071760
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 6028,
+          "jsEventListeners": 779
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 109,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 23699.988999999994,
+        "scriptMs": 23443.399999999998,
+        "layoutMs": 23.692999999999998,
+        "styleMs": 15.814000000000002,
+        "layouts": 82
+      },
+      "cpu": {
+        "sampleTimeMs": 24898.156,
+        "topSelf": [
+          {
+            "function": "run",
+            "url": "",
+            "line": 0,
+            "selfMs": 4620.056999999988,
+            "inclusiveMs": 18570.069999999898
+          },
+          {
+            "function": "exports.createElement",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react.js?v=a28f718d",
+            "line": 624,
+            "selfMs": 1542.3210000000017,
+            "inclusiveMs": 2684.3049999999994
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "selfMs": 1256.7689999999986,
+            "inclusiveMs": 1256.7689999999986
+          },
+          {
+            "function": "addObjectDiffToProperties",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 2562,
+            "selfMs": 1114.1009999999997,
+            "inclusiveMs": 1934.4700000000012
+          },
+          {
+            "function": "ReactElement",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react.js?v=a28f718d",
+            "line": 133,
+            "selfMs": 1055.583000000001,
+            "inclusiveMs": 1055.583000000001
+          },
+          {
+            "function": "addValueToProperties",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 2481,
+            "selfMs": 822.014000000001,
+            "inclusiveMs": 822.014000000001
+          },
+          {
+            "function": "exports.jsxDEV",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react_jsx-dev-runtime.js?v=a28f718d",
+            "line": 192,
+            "selfMs": 595.5549999999993,
+            "inclusiveMs": 1100.2480000000003
+          },
+          {
+            "function": "updateProperties",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 10733,
+            "selfMs": 569.0800000000004,
+            "inclusiveMs": 1015.6170000000003
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/rolldown-runtime-DC62tzP2.js?v=c59b304d",
+            "line": 22,
+            "selfMs": 523.2900000000005,
+            "inclusiveMs": 523.2900000000005
+          },
+          {
+            "function": "$bbaa08b3cd72f041$export$9d1611c77c2fe928",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useObjectRef-CSDvZw2J.js?v=c59b304d",
+            "line": 155,
+            "selfMs": 481.28600000000023,
+            "inclusiveMs": 481.28600000000023
+          },
+          {
+            "function": "updateEffectImpl",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 5068,
+            "selfMs": 478.0020000000002,
+            "inclusiveMs": 479.58200000000016
+          },
+          {
+            "function": "$d27d541f9569d26d$export$45712eceda6fad21",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/usePress-B_JQ5RNJ.js?v=c59b304d",
+            "line": 134,
+            "selfMs": 477.9180000000003,
+            "inclusiveMs": 1780.8339999999973
+          },
+          {
+            "function": "$7230ffa83bc0c2cf$var$DOMElement",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/utils-Bwq741SC.js?v=c59b304d",
+            "line": 113,
+            "selfMs": 444.3280000000001,
+            "inclusiveMs": 1102.090000000001
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+            "line": 4326,
+            "selfMs": 421.4960000000001,
+            "inclusiveMs": 5655.96900000001
+          },
+          {
+            "function": "useCallback",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 14551,
+            "selfMs": 410.15599999999966,
+            "inclusiveMs": 410.15599999999966
+          },
+          {
+            "function": "measure",
+            "url": "",
+            "line": 0,
+            "selfMs": 387.97899999999987,
+            "inclusiveMs": 387.97899999999987
+          },
+          {
+            "function": "ReactElement",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react_jsx-dev-runtime.js?v=a28f718d",
+            "line": 105,
+            "selfMs": 385.86999999999995,
+            "inclusiveMs": 385.86999999999995
+          },
+          {
+            "function": "logComponentRender",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 2634,
+            "selfMs": 337.261,
+            "inclusiveMs": 6397.200999999986
+          },
+          {
+            "function": "updateForwardRef",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 5625,
+            "selfMs": 318.74399999999997,
+            "inclusiveMs": 3344.3810000000053
+          },
+          {
+            "function": "validateProperty",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 1975,
+            "selfMs": 309.88500000000016,
+            "inclusiveMs": 309.88500000000016
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "selfMs": 281.75100000000003,
+            "inclusiveMs": 281.75100000000003
+          },
+          {
+            "function": "now",
+            "url": "",
+            "line": 0,
+            "selfMs": 256.93500000000006,
+            "inclusiveMs": 256.93500000000006
+          },
+          {
+            "function": "$48a7d519b337145d$export$4eaf04e54aa8eed6",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useHover-DEBdiVLR.js?v=c59b304d",
+            "line": 6,
+            "selfMs": 236.33199999999997,
+            "inclusiveMs": 521.7830000000002
+          },
+          {
+            "function": "$390e54f620492c70$export$f680877a34711e37",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useObjectRef-CSDvZw2J.js?v=c59b304d",
+            "line": 50,
+            "selfMs": 217.43900000000005,
+            "inclusiveMs": 353.5660000000003
+          },
+          {
+            "function": "commitHookEffectListUnmount",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 6955,
+            "selfMs": 217.01800000000003,
+            "inclusiveMs": 231.27200000000008
+          },
+          {
+            "function": "$f6ba6936bfd098a0$export$ecf600387e221c37",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useCollection-BoYt4GlJ.js?v=c59b304d",
+            "line": 1387,
+            "selfMs": 191.23599999999985,
+            "inclusiveMs": 2663.1889999999994
+          },
+          {
+            "function": "reconcileChildFibersImpl",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 3974,
+            "selfMs": 191.009,
+            "inclusiveMs": 482.81899999999985
+          },
+          {
+            "function": "commitHookEffectListMount",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 6932,
+            "selfMs": 186.38499999999993,
+            "inclusiveMs": 500.65000000000015
+          },
+          {
+            "function": "TableCellElementType",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+            "line": 4315,
+            "selfMs": 168.67799999999997,
+            "inclusiveMs": 681.4620000000007
+          },
+          {
+            "function": "$fe16bffc7a557bf0$export$7f54fc3180508a52",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useEffectEvent-BGghQc_F.js?v=c59b304d",
+            "line": 7,
+            "selfMs": 133.61199999999997,
+            "inclusiveMs": 332.50900000000007
+          }
+        ],
+        "topInclusive": [
+          {
+            "function": "performWorkOnRoot",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 8699,
+            "selfMs": 0,
+            "inclusiveMs": 22132.721999999932
+          },
+          {
+            "function": "performSyncWorkOnRoot",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9876,
+            "selfMs": 0,
+            "inclusiveMs": 21973.96099999992
+          },
+          {
+            "function": "flushSyncWorkAcrossRoots_impl",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9781,
+            "selfMs": 0,
+            "inclusiveMs": 21973.96099999992
+          },
+          {
+            "function": "processRootScheduleInMicrotask",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9808,
+            "selfMs": 0,
+            "inclusiveMs": 21732.99599999993
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9890,
+            "selfMs": 0,
+            "inclusiveMs": 21732.99599999993
+          },
+          {
+            "function": "run",
+            "url": "",
+            "line": 0,
+            "selfMs": 4620.056999999988,
+            "inclusiveMs": 18570.069999999898
+          },
+          {
+            "function": "runWithFiberInDEV",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 941,
+            "selfMs": 121.986,
+            "inclusiveMs": 13983.63399999986
+          },
+          {
+            "function": "renderRootSync",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9025,
+            "selfMs": 7.867,
+            "inclusiveMs": 12610.813999999904
+          },
+          {
+            "function": "workLoopSync",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9081,
+            "selfMs": 2.001,
+            "inclusiveMs": 12523.408999999903
+          },
+          {
+            "function": "performUnitOfWork",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9184,
+            "selfMs": 4.859999999999999,
+            "inclusiveMs": 12521.407999999903
+          },
+          {
+            "function": "beginWork",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 6366,
+            "selfMs": 48.348000000000006,
+            "inclusiveMs": 11985.492999999931
+          },
+          {
+            "function": "renderWithHooks",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 4410,
+            "selfMs": 60.56399999999999,
+            "inclusiveMs": 10810.600999999953
+          },
+          {
+            "function": "completeRoot",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9292,
+            "selfMs": 0,
+            "inclusiveMs": 9606.988000000027
+          },
+          {
+            "function": "completeRootWhenReady",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 8818,
+            "selfMs": 0,
+            "inclusiveMs": 9606.988000000027
+          },
+          {
+            "function": "commitRoot",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9340,
+            "selfMs": 0,
+            "inclusiveMs": 9564.142000000023
+          },
+          {
+            "function": "updateFunctionComponent",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 5805,
+            "selfMs": 52.391999999999996,
+            "inclusiveMs": 8177.967000000016
+          },
+          {
+            "function": "flushSpawnedWork",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9494,
+            "selfMs": 0,
+            "inclusiveMs": 7261.031999999988
+          },
+          {
+            "function": "flushPendingEffects",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9577,
+            "selfMs": 1.591,
+            "inclusiveMs": 7158.974999999991
+          },
+          {
+            "function": "flushPassiveEffects",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 9584,
+            "selfMs": 0,
+            "inclusiveMs": 7157.383999999991
+          },
+          {
+            "function": "commitPassiveMountOnFiber",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 8341,
+            "selfMs": 58.268,
+            "inclusiveMs": 6911.2209999999895
+          },
+          {
+            "function": "recursivelyTraversePassiveMountEffects",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 8336,
+            "selfMs": 37.836000000000006,
+            "inclusiveMs": 6911.2209999999895
+          },
+          {
+            "function": "logComponentRender",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 2634,
+            "selfMs": 337.261,
+            "inclusiveMs": 6397.200999999986
+          },
+          {
+            "function": "Component",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/CollectionBuilder-CRiJNI4Z.js?v=c59b304d",
+            "line": 747,
+            "selfMs": 39.87200000000001,
+            "inclusiveMs": 5984.591000000007
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+            "line": 4326,
+            "selfMs": 421.4960000000001,
+            "inclusiveMs": 5655.96900000001
+          },
+          {
+            "function": "setIsStrictModeForDevtools",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 990,
+            "selfMs": 7.915,
+            "inclusiveMs": 3509.8930000000055
+          },
+          {
+            "function": "updateForwardRef",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+            "line": 5625,
+            "selfMs": 318.74399999999997,
+            "inclusiveMs": 3344.3810000000053
+          },
+          {
+            "function": "$a4d729ad50b8576a$export$c7e10bfc0c59f67c",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+            "line": 2682,
+            "selfMs": 58.75200000000002,
+            "inclusiveMs": 2818.7810000000027
+          },
+          {
+            "function": "$059e6e023d86289a$export$49571c903d73624c",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+            "line": 3036,
+            "selfMs": 36.958,
+            "inclusiveMs": 2766.1890000000008
+          },
+          {
+            "function": "exports.createElement",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react.js?v=a28f718d",
+            "line": 624,
+            "selfMs": 1542.3210000000017,
+            "inclusiveMs": 2684.3049999999994
+          },
+          {
+            "function": "$f6ba6936bfd098a0$export$ecf600387e221c37",
+            "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useCollection-BoYt4GlJ.js?v=c59b304d",
+            "line": 1387,
+            "selfMs": 191.23599999999985,
+            "inclusiveMs": 2663.1889999999994
+          }
+        ]
+      }
+    },
+    {
+      "name": "left-edge",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 80,
+      "keysCaptured": 80,
+      "trustedKeys": 80,
+      "enqueueMs": 1320.6,
+      "drainMs": 20083,
+      "elapsedMs": 23042.1,
+      "expected": {
+        "row": 109,
+        "column": 0
+      },
+      "actual": {
+        "row": 109,
+        "column": 0
+      },
+      "commits": 160,
+      "commitsPerKey": 2,
+      "observedTransitions": 0,
+      "inputDelayMs": {
+        "p50": 10219.5,
+        "p95": 19066.3,
+        "max": 19744.3
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 5950,
+        "max": 15900
+      },
+      "longTasks": {
+        "count": 3,
+        "totalMs": 21233,
+        "maxMs": 15272
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 62092168,
+        "peak": 117085896,
+        "after": 117085896,
+        "afterGc": 80070452
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 404
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 109,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 21254.487999999994,
+        "scriptMs": 21216.125000000004,
+        "layoutMs": 0,
+        "styleMs": 0,
+        "layouts": 0
+      }
+    },
+    {
+      "name": "sustained-vertical-1",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 80,
+      "keysCaptured": 80,
+      "trustedKeys": 80,
+      "enqueueMs": 2633.8,
+      "drainMs": 19014,
+      "elapsedMs": 23760.1,
+      "expected": {
+        "row": 189,
+        "column": 0
+      },
+      "actual": {
+        "row": 189,
+        "column": 0
+      },
+      "commits": 162,
+      "commitsPerKey": 2.02,
+      "observedTransitions": 13,
+      "inputDelayMs": {
+        "p50": 9664,
+        "p95": 18066.4,
+        "max": 18769
+      },
+      "frameGapMs": {
+        "p50": 3000,
+        "p95": 19200,
+        "max": 19200
+      },
+      "longTasks": {
+        "count": 4,
+        "totalMs": 21993,
+        "maxMs": 18546
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 80090996,
+        "peak": 406153560,
+        "after": 70378756,
+        "afterGc": 69956032
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 189,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 22089.677999999993,
+        "scriptMs": 21954.713999999996,
+        "layoutMs": 17.576999999999995,
+        "styleMs": 13.271999999999998,
+        "layouts": 82
+      }
+    },
+    {
+      "name": "sustained-vertical-2",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 80,
+      "keysCaptured": 80,
+      "trustedKeys": 80,
+      "enqueueMs": 2637.5,
+      "drainMs": 19105.2,
+      "elapsedMs": 23836,
+      "expected": {
+        "row": 269,
+        "column": 0
+      },
+      "actual": {
+        "row": 269,
+        "column": 0
+      },
+      "commits": 162,
+      "commitsPerKey": 2.02,
+      "observedTransitions": 13,
+      "inputDelayMs": {
+        "p50": 9679.1,
+        "p95": 18137.3,
+        "max": 18855.2
+      },
+      "frameGapMs": {
+        "p50": 3015.3,
+        "p95": 19250,
+        "max": 19250
+      },
+      "longTasks": {
+        "count": 4,
+        "totalMs": 22056,
+        "maxMs": 18621
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 69976576,
+        "peak": 168859552,
+        "after": 168859552,
+        "afterGc": 66482388
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 5132,
+          "jsEventListeners": 535
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 269,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 22124.822999999993,
+        "scriptMs": 22019.357,
+        "layoutMs": 18.123,
+        "styleMs": 13.298000000000004,
+        "layouts": 82
+      }
+    },
+    {
+      "name": "sustained-vertical-3",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 80,
+      "keysCaptured": 80,
+      "trustedKeys": 80,
+      "enqueueMs": 2641.8,
+      "drainMs": 19210,
+      "elapsedMs": 23945.1,
+      "expected": {
+        "row": 349,
+        "column": 0
+      },
+      "actual": {
+        "row": 349,
+        "column": 0
+      },
+      "commits": 162,
+      "commitsPerKey": 2.02,
+      "observedTransitions": 13,
+      "inputDelayMs": {
+        "p50": 9740.3,
+        "p95": 18223.9,
+        "max": 18948.6
+      },
+      "frameGapMs": {
+        "p50": 3066.7,
+        "p95": 19333.4,
+        "max": 19333.4
+      },
+      "longTasks": {
+        "count": 4,
+        "totalMs": 22163,
+        "maxMs": 18690
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 66502796,
+        "peak": 180415620,
+        "after": 162236212,
+        "afterGc": 67860660
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 5132,
+          "jsEventListeners": 536
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 349,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 22232.84099999998,
+        "scriptMs": 22122.917,
+        "layoutMs": 20.148,
+        "styleMs": 13.721999999999998,
+        "layouts": 82
+      }
+    },
+    {
+      "name": "shift-range",
+      "hz": 30,
+      "shift": true,
+      "keysSent": 45,
+      "keysCaptured": 45,
+      "trustedKeys": 45,
+      "enqueueMs": 1468,
+      "drainMs": 11094.6,
+      "elapsedMs": 13850.8,
+      "expected": {
+        "row": 394,
+        "column": 0
+      },
+      "actual": {
+        "row": 394,
+        "column": 0
+      },
+      "commits": 93,
+      "commitsPerKey": 2.07,
+      "observedTransitions": 13,
+      "inputDelayMs": {
+        "p50": 5590,
+        "p95": 10342.2,
+        "max": 10843.9
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 9716.6,
+        "max": 9716.6
+      },
+      "longTasks": {
+        "count": 4,
+        "totalMs": 12932,
+        "maxMs": 9348
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 67881068,
+        "peak": 115650500,
+        "after": 115650500,
+        "afterGc": 70046368
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 4428,
+          "jsEventListeners": 357
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 2444,
+          "jsEventListeners": 303
+        },
+        "mounted": {
+          "rows": 31,
+          "cells": 744,
+          "allDom": 1820,
+          "active": {
+            "row": 394,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 13004.933000000023,
+        "scriptMs": 12902.350999999982,
+        "layoutMs": 17.984000000000012,
+        "styleMs": 11.485999999999997,
+        "layouts": 47
+      }
+    }
+  ],
+  "errors": [],
+  "writes": []
+}

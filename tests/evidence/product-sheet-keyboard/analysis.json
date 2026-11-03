@@ -1,0 +1,1312 @@
+{
+  "head": "4d35d37238358fae63a87512b8e631bdf1a11446",
+  "sourceHashes": {
+    "src/components/product-sheet-grid.tsx": "a1d47177b20a8e711a420af736e84507d6147190176b8b56449e12d1e0e494ee",
+    "src/product-order-sheet.tsx": "a9fcc9757a1c9dadd97f95c6b05356d6d242e49b09b9aba52ee6ab4dfb945a09",
+    "src/components/data-table.tsx": "5e399e2ecdbd8cd15ef8bb8ab74c6cb839493cb82b979f8c998518a8a4cefab9",
+    "src/product-order-sheet.css": "c1dc237fb7bb82a50b7b8f0b47dbcd39795adb70fc6ee2867a28981e5481b55a"
+  },
+  "host": {
+    "cpu": "Intel(R) Core(TM) i5-14500",
+    "logicalCpus": 20,
+    "ramBytes": 16833298432
+  },
+  "modes": [
+    {
+      "mode": "production",
+      "browser": "156.0.8078.80",
+      "initialHeapMiB": 38.871925354003906,
+      "finalHeapMiB": 31.029094696044922,
+      "allPositionsCorrect": true,
+      "scenarios": [
+        {
+          "name": "paced-vertical",
+          "rate": 8,
+          "keys": 24,
+          "inputDelayP95Ms": 55.9,
+          "drainMs": 76,
+          "processedKeysPerSecond": 8.102906917856782,
+          "commits": 66,
+          "commitsPerKey": 2.75,
+          "peakHeapMiB": 186.82125091552734,
+          "afterGcHeapMiB": 44.230567932128906,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 2100.9759999999997,
+          "layoutMs": 6.321999999999999,
+          "styleMs": 11.324000000000002
+        },
+        {
+          "name": "fast-horizontal",
+          "rate": 60,
+          "keys": 144,
+          "inputDelayP95Ms": 7283.8,
+          "drainMs": 7703,
+          "processedKeysPerSecond": 14.268020807530345,
+          "commits": 290,
+          "commitsPerKey": 2.01,
+          "peakHeapMiB": 203.6635284423828,
+          "afterGcHeapMiB": 45.83131408691406,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 10031.511999999999,
+          "layoutMs": 16.675,
+          "styleMs": 25.796999999999997
+        },
+        {
+          "name": "fast-vertical",
+          "rate": 60,
+          "keys": 180,
+          "inputDelayP95Ms": 9884.5,
+          "drainMs": 10415.4,
+          "processedKeysPerSecond": 13.425622053821826,
+          "commits": 363,
+          "commitsPerKey": 2.02,
+          "peakHeapMiB": 165.85285568237305,
+          "afterGcHeapMiB": 30.1614990234375,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 13432.706,
+          "layoutMs": 26.535999999999998,
+          "styleMs": 17.334000000000003,
+          "cpu": {
+            "sampleTimeMs": 13815.702,
+            "topSelf": [
+              {
+                "function": "(garbage collector)",
+                "url": "",
+                "line": 0,
+                "selfMs": 1466.8140000000008,
+                "inclusiveMs": 1466.8140000000008
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 64,
+                "selfMs": 1038.8589999999995,
+                "inclusiveMs": 6271.771999999991
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 796.9439999999994,
+                "inclusiveMs": 851.2749999999995
+              },
+              {
+                "function": "Ic",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 700.9209999999998,
+                "inclusiveMs": 2399.792999999999
+              },
+              {
+                "function": "je",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 625.8140000000001,
+                "inclusiveMs": 700.06
+              },
+              {
+                "function": "Ys",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 580.0270000000002,
+                "inclusiveMs": 580.0270000000002
+              },
+              {
+                "function": "V",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 562.276,
+                "inclusiveMs": 563.929
+              },
+              {
+                "function": "wl",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 448.7980000000006,
+                "inclusiveMs": 455.18400000000065
+              },
+              {
+                "function": "gu",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 373.72600000000017,
+                "inclusiveMs": 453.3200000000002
+              },
+              {
+                "function": "jr",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 372.438,
+                "inclusiveMs": 1793.5910000000013
+              },
+              {
+                "function": "sp",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 10,
+                "selfMs": 353.46000000000004,
+                "inclusiveMs": 382.15600000000006
+              },
+              {
+                "function": "Fl",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 311.34800000000007,
+                "inclusiveMs": 693.504
+              },
+              {
+                "function": "js",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 295.465,
+                "inclusiveMs": 2845.866999999999
+              },
+              {
+                "function": "Vs",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 262.37999999999994,
+                "inclusiveMs": 262.37999999999994
+              },
+              {
+                "function": "e.createElement",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 251.09799999999984,
+                "inclusiveMs": 251.09799999999984
+              },
+              {
+                "function": "Vr",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 245.67099999999988,
+                "inclusiveMs": 637.4459999999998
+              },
+              {
+                "function": "_e",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 242.20200000000003,
+                "inclusiveMs": 351.904
+              },
+              {
+                "function": "_",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 215.4649999999999,
+                "inclusiveMs": 405.16600000000017
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 204.27200000000008,
+                "inclusiveMs": 620.2579999999998
+              },
+              {
+                "function": "(program)",
+                "url": "",
+                "line": 0,
+                "selfMs": 201.96299999999994,
+                "inclusiveMs": 201.96299999999994
+              },
+              {
+                "function": "As",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 198.02899999999994,
+                "inclusiveMs": 1156.8030000000006
+              },
+              {
+                "function": "Tr",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 192.43800000000005,
+                "inclusiveMs": 394.2239999999998
+              },
+              {
+                "function": "Xs",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 149.35600000000005,
+                "inclusiveMs": 581.934
+              },
+              {
+                "function": "ju",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 148.15399999999997,
+                "inclusiveMs": 1366.8120000000006
+              },
+              {
+                "function": "X",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 146.93899999999996,
+                "inclusiveMs": 401.6249999999997
+              },
+              {
+                "function": "qr",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 143.49099999999999,
+                "inclusiveMs": 296.07700000000006
+              },
+              {
+                "function": "G",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 134.62000000000003,
+                "inclusiveMs": 134.62000000000003
+              },
+              {
+                "function": "Ca",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 130.905,
+                "inclusiveMs": 130.905
+              },
+              {
+                "function": "Vu",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 113.93299999999999,
+                "inclusiveMs": 174.97299999999996
+              },
+              {
+                "function": "pl",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 113.41999999999997,
+                "inclusiveMs": 9545.430000000008
+              }
+            ],
+            "topInclusive": [
+              {
+                "function": "Ld",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 1.568,
+                "inclusiveMs": 11902.982000000016
+              },
+              {
+                "function": "Af",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 1.421,
+                "inclusiveMs": 11872.350000000017
+              },
+              {
+                "function": "Ff",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 0,
+                "inclusiveMs": 11870.929000000016
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 45.586,
+                "inclusiveMs": 11861.151000000023
+              },
+              {
+                "function": "Mf",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 0,
+                "inclusiveMs": 11830.187000000018
+              },
+              {
+                "function": "Yd",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 11.42,
+                "inclusiveMs": 9758.012000000002
+              },
+              {
+                "function": "Xd",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 9.392999999999999,
+                "inclusiveMs": 9743.652000000002
+              },
+              {
+                "function": "$d",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 107.06599999999999,
+                "inclusiveMs": 9734.259000000005
+              },
+              {
+                "function": "pl",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 113.41999999999997,
+                "inclusiveMs": 9545.430000000008
+              },
+              {
+                "function": "Kc",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 6.35,
+                "inclusiveMs": 6588.0909999999985
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 64,
+                "selfMs": 1038.8589999999995,
+                "inclusiveMs": 6271.771999999991
+              },
+              {
+                "function": "n",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 30.732,
+                "inclusiveMs": 5256.750999999991
+              },
+              {
+                "function": "dh",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 64,
+                "selfMs": 77.66000000000001,
+                "inclusiveMs": 3032.3450000000003
+              },
+              {
+                "function": "xh",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 64,
+                "selfMs": 30.510999999999996,
+                "inclusiveMs": 2948.287999999998
+              },
+              {
+                "function": "js",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 295.465,
+                "inclusiveMs": 2845.866999999999
+              },
+              {
+                "function": "Ic",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 700.9209999999998,
+                "inclusiveMs": 2399.792999999999
+              },
+              {
+                "function": "of",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 0,
+                "inclusiveMs": 2172.1509999999994
+              },
+              {
+                "function": "af",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 0,
+                "inclusiveMs": 2172.1509999999994
+              },
+              {
+                "function": "Rd",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 0,
+                "inclusiveMs": 2172.1509999999994
+              },
+              {
+                "function": "jr",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 372.438,
+                "inclusiveMs": 1793.5910000000013
+              },
+              {
+                "function": "(garbage collector)",
+                "url": "",
+                "line": 0,
+                "selfMs": 1466.8140000000008,
+                "inclusiveMs": 1466.8140000000008
+              },
+              {
+                "function": "ju",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 148.15399999999997,
+                "inclusiveMs": 1366.8120000000006
+              },
+              {
+                "function": "lf",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 0,
+                "inclusiveMs": 1366.8120000000006
+              },
+              {
+                "function": "ku",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 1.642,
+                "inclusiveMs": 1365.2460000000003
+              },
+              {
+                "function": "As",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 198.02899999999994,
+                "inclusiveMs": 1156.8030000000006
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 796.9439999999994,
+                "inclusiveMs": 851.2749999999995
+              },
+              {
+                "function": "je",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 1,
+                "selfMs": 625.8140000000001,
+                "inclusiveMs": 700.06
+              },
+              {
+                "function": "Fl",
+                "url": "/assets/index-CdcMA6CO.js",
+                "line": 9,
+                "selfMs": 311.34800000000007,
+                "inclusiveMs": 693.504
+              },
+              {
+                "function": "Vr",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 245.67099999999988,
+                "inclusiveMs": 637.4459999999998
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/assets/dates-DEWn0fca.js",
+                "line": 7,
+                "selfMs": 204.27200000000008,
+                "inclusiveMs": 620.2579999999998
+              }
+            ]
+          }
+        },
+        {
+          "name": "left-edge",
+          "rate": 60,
+          "keys": 120,
+          "inputDelayP95Ms": 6121.9,
+          "drainMs": 6415.6,
+          "processedKeysPerSecond": 14.288095634986783,
+          "commits": 240,
+          "commitsPerKey": 2,
+          "peakHeapMiB": 215.58713912963867,
+          "afterGcHeapMiB": 42.39243698120117,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 8385.526000000002,
+          "layoutMs": 0,
+          "styleMs": 0
+        },
+        {
+          "name": "sustained-vertical-1",
+          "rate": 30,
+          "keys": 150,
+          "inputDelayP95Ms": 5067.6,
+          "drainMs": 5383.8,
+          "processedKeysPerSecond": 14.49261359793625,
+          "commits": 303,
+          "commitsPerKey": 2.02,
+          "peakHeapMiB": 207.17588806152344,
+          "afterGcHeapMiB": 30.494518280029297,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 10364.177999999996,
+          "layoutMs": 24.638,
+          "styleMs": 20.516000000000005
+        },
+        {
+          "name": "sustained-vertical-2",
+          "rate": 30,
+          "keys": 150,
+          "inputDelayP95Ms": 5082.3,
+          "drainMs": 5388.3,
+          "processedKeysPerSecond": 14.484356894553882,
+          "commits": 303,
+          "commitsPerKey": 2.02,
+          "peakHeapMiB": 95.96915817260742,
+          "afterGcHeapMiB": 30.50735855102539,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 10361.173,
+          "layoutMs": 24.601,
+          "styleMs": 20.589999999999996
+        },
+        {
+          "name": "sustained-vertical-3",
+          "rate": 30,
+          "keys": 150,
+          "inputDelayP95Ms": 5646.7,
+          "drainMs": 5991.6,
+          "processedKeysPerSecond": 13.685132472082332,
+          "commits": 303,
+          "commitsPerKey": 2.02,
+          "peakHeapMiB": 86.46258926391602,
+          "afterGcHeapMiB": 30.53162384033203,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 10991.068,
+          "layoutMs": 25.603000000000016,
+          "styleMs": 21.037
+        },
+        {
+          "name": "shift-range",
+          "rate": 30,
+          "keys": 90,
+          "inputDelayP95Ms": 3439.2,
+          "drainMs": 3653.9,
+          "processedKeysPerSecond": 13.587571900901308,
+          "commits": 183,
+          "commitsPerKey": 2.03,
+          "peakHeapMiB": 133.69525146484375,
+          "afterGcHeapMiB": 30.545764923095703,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2438,
+          "afterGcListeners": 300,
+          "scriptMs": 6665.807000000001,
+          "layoutMs": 20.990999999999982,
+          "styleMs": 10.422999999999988
+        }
+      ]
+    },
+    {
+      "mode": "development",
+      "browser": "156.0.8078.80",
+      "initialHeapMiB": 67.43399429321289,
+      "finalHeapMiB": 67.28068923950195,
+      "allPositionsCorrect": true,
+      "scenarios": [
+        {
+          "name": "paced-vertical",
+          "rate": 8,
+          "keys": 24,
+          "inputDelayP95Ms": 3374.6,
+          "drainMs": 3801.6,
+          "processedKeysPerSecond": 3.5933522982482407,
+          "commits": 51,
+          "commitsPerKey": 2.13,
+          "peakHeapMiB": 220.7631378173828,
+          "afterGcHeapMiB": 64.44575500488281,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 6855.280000000001,
+          "layoutMs": 4.739999999999999,
+          "styleMs": 10.304
+        },
+        {
+          "name": "fast-horizontal",
+          "rate": 60,
+          "keys": 144,
+          "inputDelayP95Ms": 34073.3,
+          "drainMs": 36096.4,
+          "processedKeysPerSecond": 3.740881601097325,
+          "commits": 289,
+          "commitsPerKey": 2.01,
+          "peakHeapMiB": 275.7015037536621,
+          "afterGcHeapMiB": 69.63188934326172,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 38240.649,
+          "layoutMs": 20.926000000000002,
+          "styleMs": 28.255000000000003
+        },
+        {
+          "name": "fast-vertical",
+          "rate": 60,
+          "keys": 80,
+          "inputDelayP95Ms": 20825.4,
+          "drainMs": 21940,
+          "processedKeysPerSecond": 3.4387156397085685,
+          "commits": 163,
+          "commitsPerKey": 2.04,
+          "peakHeapMiB": 215.5774803161621,
+          "afterGcHeapMiB": 59.19624328613281,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 23443.399999999998,
+          "layoutMs": 23.692999999999998,
+          "styleMs": 15.814000000000002,
+          "cpu": {
+            "sampleTimeMs": 24898.156,
+            "topSelf": [
+              {
+                "function": "run",
+                "url": "",
+                "line": 0,
+                "selfMs": 4620.056999999988,
+                "inclusiveMs": 18570.069999999898
+              },
+              {
+                "function": "exports.createElement",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react.js?v=a28f718d",
+                "line": 624,
+                "selfMs": 1542.3210000000017,
+                "inclusiveMs": 2684.3049999999994
+              },
+              {
+                "function": "(garbage collector)",
+                "url": "",
+                "line": 0,
+                "selfMs": 1256.7689999999986,
+                "inclusiveMs": 1256.7689999999986
+              },
+              {
+                "function": "addObjectDiffToProperties",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 2562,
+                "selfMs": 1114.1009999999997,
+                "inclusiveMs": 1934.4700000000012
+              },
+              {
+                "function": "ReactElement",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react.js?v=a28f718d",
+                "line": 133,
+                "selfMs": 1055.583000000001,
+                "inclusiveMs": 1055.583000000001
+              },
+              {
+                "function": "addValueToProperties",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 2481,
+                "selfMs": 822.014000000001,
+                "inclusiveMs": 822.014000000001
+              },
+              {
+                "function": "exports.jsxDEV",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react_jsx-dev-runtime.js?v=a28f718d",
+                "line": 192,
+                "selfMs": 595.5549999999993,
+                "inclusiveMs": 1100.2480000000003
+              },
+              {
+                "function": "updateProperties",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 10733,
+                "selfMs": 569.0800000000004,
+                "inclusiveMs": 1015.6170000000003
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/rolldown-runtime-DC62tzP2.js?v=c59b304d",
+                "line": 22,
+                "selfMs": 523.2900000000005,
+                "inclusiveMs": 523.2900000000005
+              },
+              {
+                "function": "$bbaa08b3cd72f041$export$9d1611c77c2fe928",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useObjectRef-CSDvZw2J.js?v=c59b304d",
+                "line": 155,
+                "selfMs": 481.28600000000023,
+                "inclusiveMs": 481.28600000000023
+              },
+              {
+                "function": "updateEffectImpl",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 5068,
+                "selfMs": 478.0020000000002,
+                "inclusiveMs": 479.58200000000016
+              },
+              {
+                "function": "$d27d541f9569d26d$export$45712eceda6fad21",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/usePress-B_JQ5RNJ.js?v=c59b304d",
+                "line": 134,
+                "selfMs": 477.9180000000003,
+                "inclusiveMs": 1780.8339999999973
+              },
+              {
+                "function": "$7230ffa83bc0c2cf$var$DOMElement",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/utils-Bwq741SC.js?v=c59b304d",
+                "line": 113,
+                "selfMs": 444.3280000000001,
+                "inclusiveMs": 1102.090000000001
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+                "line": 4326,
+                "selfMs": 421.4960000000001,
+                "inclusiveMs": 5655.96900000001
+              },
+              {
+                "function": "useCallback",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 14551,
+                "selfMs": 410.15599999999966,
+                "inclusiveMs": 410.15599999999966
+              },
+              {
+                "function": "measure",
+                "url": "",
+                "line": 0,
+                "selfMs": 387.97899999999987,
+                "inclusiveMs": 387.97899999999987
+              },
+              {
+                "function": "ReactElement",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react_jsx-dev-runtime.js?v=a28f718d",
+                "line": 105,
+                "selfMs": 385.86999999999995,
+                "inclusiveMs": 385.86999999999995
+              },
+              {
+                "function": "logComponentRender",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 2634,
+                "selfMs": 337.261,
+                "inclusiveMs": 6397.200999999986
+              },
+              {
+                "function": "updateForwardRef",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 5625,
+                "selfMs": 318.74399999999997,
+                "inclusiveMs": 3344.3810000000053
+              },
+              {
+                "function": "validateProperty",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 1975,
+                "selfMs": 309.88500000000016,
+                "inclusiveMs": 309.88500000000016
+              },
+              {
+                "function": "(program)",
+                "url": "",
+                "line": 0,
+                "selfMs": 281.75100000000003,
+                "inclusiveMs": 281.75100000000003
+              },
+              {
+                "function": "now",
+                "url": "",
+                "line": 0,
+                "selfMs": 256.93500000000006,
+                "inclusiveMs": 256.93500000000006
+              },
+              {
+                "function": "$48a7d519b337145d$export$4eaf04e54aa8eed6",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useHover-DEBdiVLR.js?v=c59b304d",
+                "line": 6,
+                "selfMs": 236.33199999999997,
+                "inclusiveMs": 521.7830000000002
+              },
+              {
+                "function": "$390e54f620492c70$export$f680877a34711e37",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useObjectRef-CSDvZw2J.js?v=c59b304d",
+                "line": 50,
+                "selfMs": 217.43900000000005,
+                "inclusiveMs": 353.5660000000003
+              },
+              {
+                "function": "commitHookEffectListUnmount",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 6955,
+                "selfMs": 217.01800000000003,
+                "inclusiveMs": 231.27200000000008
+              },
+              {
+                "function": "$f6ba6936bfd098a0$export$ecf600387e221c37",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useCollection-BoYt4GlJ.js?v=c59b304d",
+                "line": 1387,
+                "selfMs": 191.23599999999985,
+                "inclusiveMs": 2663.1889999999994
+              },
+              {
+                "function": "reconcileChildFibersImpl",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 3974,
+                "selfMs": 191.009,
+                "inclusiveMs": 482.81899999999985
+              },
+              {
+                "function": "commitHookEffectListMount",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 6932,
+                "selfMs": 186.38499999999993,
+                "inclusiveMs": 500.65000000000015
+              },
+              {
+                "function": "TableCellElementType",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+                "line": 4315,
+                "selfMs": 168.67799999999997,
+                "inclusiveMs": 681.4620000000007
+              },
+              {
+                "function": "$fe16bffc7a557bf0$export$7f54fc3180508a52",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useEffectEvent-BGghQc_F.js?v=c59b304d",
+                "line": 7,
+                "selfMs": 133.61199999999997,
+                "inclusiveMs": 332.50900000000007
+              }
+            ],
+            "topInclusive": [
+              {
+                "function": "performWorkOnRoot",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 8699,
+                "selfMs": 0,
+                "inclusiveMs": 22132.721999999932
+              },
+              {
+                "function": "performSyncWorkOnRoot",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9876,
+                "selfMs": 0,
+                "inclusiveMs": 21973.96099999992
+              },
+              {
+                "function": "flushSyncWorkAcrossRoots_impl",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9781,
+                "selfMs": 0,
+                "inclusiveMs": 21973.96099999992
+              },
+              {
+                "function": "processRootScheduleInMicrotask",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9808,
+                "selfMs": 0,
+                "inclusiveMs": 21732.99599999993
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9890,
+                "selfMs": 0,
+                "inclusiveMs": 21732.99599999993
+              },
+              {
+                "function": "run",
+                "url": "",
+                "line": 0,
+                "selfMs": 4620.056999999988,
+                "inclusiveMs": 18570.069999999898
+              },
+              {
+                "function": "runWithFiberInDEV",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 941,
+                "selfMs": 121.986,
+                "inclusiveMs": 13983.63399999986
+              },
+              {
+                "function": "renderRootSync",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9025,
+                "selfMs": 7.867,
+                "inclusiveMs": 12610.813999999904
+              },
+              {
+                "function": "workLoopSync",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9081,
+                "selfMs": 2.001,
+                "inclusiveMs": 12523.408999999903
+              },
+              {
+                "function": "performUnitOfWork",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9184,
+                "selfMs": 4.859999999999999,
+                "inclusiveMs": 12521.407999999903
+              },
+              {
+                "function": "beginWork",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 6366,
+                "selfMs": 48.348000000000006,
+                "inclusiveMs": 11985.492999999931
+              },
+              {
+                "function": "renderWithHooks",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 4410,
+                "selfMs": 60.56399999999999,
+                "inclusiveMs": 10810.600999999953
+              },
+              {
+                "function": "completeRoot",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9292,
+                "selfMs": 0,
+                "inclusiveMs": 9606.988000000027
+              },
+              {
+                "function": "completeRootWhenReady",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 8818,
+                "selfMs": 0,
+                "inclusiveMs": 9606.988000000027
+              },
+              {
+                "function": "commitRoot",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9340,
+                "selfMs": 0,
+                "inclusiveMs": 9564.142000000023
+              },
+              {
+                "function": "updateFunctionComponent",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 5805,
+                "selfMs": 52.391999999999996,
+                "inclusiveMs": 8177.967000000016
+              },
+              {
+                "function": "flushSpawnedWork",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9494,
+                "selfMs": 0,
+                "inclusiveMs": 7261.031999999988
+              },
+              {
+                "function": "flushPendingEffects",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9577,
+                "selfMs": 1.591,
+                "inclusiveMs": 7158.974999999991
+              },
+              {
+                "function": "flushPassiveEffects",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 9584,
+                "selfMs": 0,
+                "inclusiveMs": 7157.383999999991
+              },
+              {
+                "function": "commitPassiveMountOnFiber",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 8341,
+                "selfMs": 58.268,
+                "inclusiveMs": 6911.2209999999895
+              },
+              {
+                "function": "recursivelyTraversePassiveMountEffects",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 8336,
+                "selfMs": 37.836000000000006,
+                "inclusiveMs": 6911.2209999999895
+              },
+              {
+                "function": "logComponentRender",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 2634,
+                "selfMs": 337.261,
+                "inclusiveMs": 6397.200999999986
+              },
+              {
+                "function": "Component",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/CollectionBuilder-CRiJNI4Z.js?v=c59b304d",
+                "line": 747,
+                "selfMs": 39.87200000000001,
+                "inclusiveMs": 5984.591000000007
+              },
+              {
+                "function": "(anonymous)",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+                "line": 4326,
+                "selfMs": 421.4960000000001,
+                "inclusiveMs": 5655.96900000001
+              },
+              {
+                "function": "setIsStrictModeForDevtools",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 990,
+                "selfMs": 7.915,
+                "inclusiveMs": 3509.8930000000055
+              },
+              {
+                "function": "updateForwardRef",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react-dom_client.js?v=7093360d",
+                "line": 5625,
+                "selfMs": 318.74399999999997,
+                "inclusiveMs": 3344.3810000000053
+              },
+              {
+                "function": "$a4d729ad50b8576a$export$c7e10bfc0c59f67c",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+                "line": 2682,
+                "selfMs": 58.75200000000002,
+                "inclusiveMs": 2818.7810000000027
+              },
+              {
+                "function": "$059e6e023d86289a$export$49571c903d73624c",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/Table-BxA1-9dD.js?v=c59b304d",
+                "line": 3036,
+                "selfMs": 36.958,
+                "inclusiveMs": 2766.1890000000008
+              },
+              {
+                "function": "exports.createElement",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/react.js?v=a28f718d",
+                "line": 624,
+                "selfMs": 1542.3210000000017,
+                "inclusiveMs": 2684.3049999999994
+              },
+              {
+                "function": "$f6ba6936bfd098a0$export$ecf600387e221c37",
+                "url": "/tests/.tmp/aria-browser-ETC94E/vite-cache/deps/useCollection-BoYt4GlJ.js?v=c59b304d",
+                "line": 1387,
+                "selfMs": 191.23599999999985,
+                "inclusiveMs": 2663.1889999999994
+              }
+            ]
+          }
+        },
+        {
+          "name": "left-edge",
+          "rate": 60,
+          "keys": 80,
+          "inputDelayP95Ms": 19066.3,
+          "drainMs": 20083,
+          "processedKeysPerSecond": 3.7376889868994008,
+          "commits": 160,
+          "commitsPerKey": 2,
+          "peakHeapMiB": 111.66181182861328,
+          "afterGcHeapMiB": 76.36113357543945,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 21216.125000000004,
+          "layoutMs": 0,
+          "styleMs": 0
+        },
+        {
+          "name": "sustained-vertical-1",
+          "rate": 30,
+          "keys": 80,
+          "inputDelayP95Ms": 18066.4,
+          "drainMs": 19014,
+          "processedKeysPerSecond": 3.6955256423285507,
+          "commits": 162,
+          "commitsPerKey": 2.02,
+          "peakHeapMiB": 387.33821868896484,
+          "afterGcHeapMiB": 66.71527099609375,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 21954.713999999996,
+          "layoutMs": 17.576999999999995,
+          "styleMs": 13.271999999999998
+        },
+        {
+          "name": "sustained-vertical-2",
+          "rate": 30,
+          "keys": 80,
+          "inputDelayP95Ms": 18137.3,
+          "drainMs": 19105.2,
+          "processedKeysPerSecond": 3.6793958432025464,
+          "commits": 162,
+          "commitsPerKey": 2.02,
+          "peakHeapMiB": 161.03701782226562,
+          "afterGcHeapMiB": 63.40254592895508,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 22019.357,
+          "layoutMs": 18.123,
+          "styleMs": 13.298000000000004
+        },
+        {
+          "name": "sustained-vertical-3",
+          "rate": 30,
+          "keys": 80,
+          "inputDelayP95Ms": 18223.9,
+          "drainMs": 19210,
+          "processedKeysPerSecond": 3.661025636332018,
+          "commits": 162,
+          "commitsPerKey": 2.02,
+          "peakHeapMiB": 172.05774307250977,
+          "afterGcHeapMiB": 64.71696853637695,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 22122.917,
+          "layoutMs": 20.148,
+          "styleMs": 13.721999999999998
+        },
+        {
+          "name": "shift-range",
+          "rate": 30,
+          "keys": 45,
+          "inputDelayP95Ms": 10342.2,
+          "drainMs": 11094.6,
+          "processedKeysPerSecond": 3.5820610383200933,
+          "commits": 93,
+          "commitsPerKey": 2.07,
+          "peakHeapMiB": 110.29291152954102,
+          "afterGcHeapMiB": 66.80142211914062,
+          "mountedRows": 31,
+          "mountedCells": 744,
+          "afterGcNodes": 2444,
+          "afterGcListeners": 303,
+          "scriptMs": 12902.350999999982,
+          "layoutMs": 17.984000000000012,
+          "styleMs": 11.485999999999997
+        }
+      ]
+    }
+  ],
+  "controls": [
+    {
+      "mode": "production",
+      "results": [
+        {
+          "name": "full-window-horizontal",
+          "keysSent": 144,
+          "keysReceived": 144,
+          "inputRate": 60,
+          "enqueueMs": 2394.0330000000004,
+          "drainMs": 7509.741499999999,
+          "inputDelayP95Ms": 7092.0999999996275,
+          "mountedCells": 744,
+          "heapBefore": 40383984,
+          "heapAfter": 156572960,
+          "heapAfterGc": 40952288,
+          "active": {
+            "row": 0,
+            "column": 0
+          }
+        },
+        {
+          "name": "full-window-vertical",
+          "keysSent": 180,
+          "keysReceived": 180,
+          "inputRate": 60,
+          "enqueueMs": 2982.2848999999987,
+          "drainMs": 9094.974800000002,
+          "inputDelayP95Ms": 8633.099999999627,
+          "mountedCells": 744,
+          "heapBefore": 41457360,
+          "heapAfter": 182760468,
+          "heapAfterGc": 31690108,
+          "active": {
+            "row": 180,
+            "column": 0
+          }
+        },
+        {
+          "name": "one-row-horizontal",
+          "keysSent": 144,
+          "keysReceived": 144,
+          "inputRate": 60,
+          "enqueueMs": 2383.3348000000005,
+          "drainMs": 9.17899999999645,
+          "inputDelayP95Ms": 2,
+          "mountedCells": 24,
+          "heapBefore": 14655620,
+          "heapAfter": 93994184,
+          "heapAfterGc": 14691264,
+          "active": {
+            "row": 0,
+            "column": 0
+          }
+        }
+      ],
+      "instrumentation": "No DevTools hook, no CPU profiler, no frame/DOM observers, key capture only; no data commands"
+    },
+    {
+      "mode": "development",
+      "results": [
+        {
+          "name": "full-window-horizontal",
+          "keysSent": 144,
+          "keysReceived": 144,
+          "inputRate": 60,
+          "enqueueMs": 2386.7678000000005,
+          "drainMs": 36285.5905,
+          "inputDelayP95Ms": 34332.199999999255,
+          "mountedCells": 744,
+          "heapBefore": 68373456,
+          "heapAfter": 69386064,
+          "heapAfterGc": 69068824,
+          "active": {
+            "row": 0,
+            "column": 0
+          }
+        },
+        {
+          "name": "full-window-vertical",
+          "keysSent": 80,
+          "keysReceived": 80,
+          "inputRate": 60,
+          "enqueueMs": 1320.3719999999958,
+          "drainMs": 20132.912900000003,
+          "inputDelayP95Ms": 19155.199999999255,
+          "mountedCells": 744,
+          "heapBefore": 69556724,
+          "heapAfter": 298886048,
+          "heapAfterGc": 58742252,
+          "active": {
+            "row": 80,
+            "column": 0
+          }
+        },
+        {
+          "name": "one-row-horizontal",
+          "keysSent": 144,
+          "keysReceived": 144,
+          "inputRate": 60,
+          "enqueueMs": 2393.988599999997,
+          "drainMs": 2792.394499999995,
+          "inputDelayP95Ms": 2664.800000000745,
+          "mountedCells": 24,
+          "heapBefore": 38194964,
+          "heapAfter": 84676872,
+          "heapAfterGc": 37507720,
+          "active": {
+            "row": 0,
+            "column": 0
+          }
+        }
+      ],
+      "hookInfo": {
+        "type": "object",
+        "customDiagnostic": "undefined"
+      },
+      "instrumentation": "No custom commit hook, no CPU profiler, no frame/DOM observers; Vite's usual Refresh hook remains in development; key capture only; no data commands"
+    }
+  ]
+}

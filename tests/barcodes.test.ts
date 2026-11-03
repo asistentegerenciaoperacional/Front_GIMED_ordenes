@@ -176,7 +176,7 @@ test("sin Asignado, Activo no habilita emisión; desactivación conserva órdene
     execute(store, "createOrder", {
       tipo_orden: "producto",
       id_proveedor: sid(1),
-      fecha_solicitada_entrega: "2026-11-01T12:00:00.000Z",
+      fecha_solicitada_entrega: "2099-11-01T12:00:00.000Z",
       lines: [
         {
           id_producto: sid(70),

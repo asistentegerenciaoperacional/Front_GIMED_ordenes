@@ -34,7 +34,7 @@ export function AppearanceSettings() {
               id={optionId + "-description"}
               className="appearance-option-description"
             >
-              Visualizar el formulario de creación de órdenes como el boceto de
+              Visualizar la creación y edición de órdenes como el boceto de
               elaboración.
             </span>
           </span>

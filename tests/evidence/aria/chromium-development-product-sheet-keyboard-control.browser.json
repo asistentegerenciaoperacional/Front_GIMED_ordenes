@@ -1,0 +1,72 @@
+{
+  "checks": [
+    "Control sin instrumentación propia de commits ni perfilador de CPU",
+    "full-window-horizontal: todas las teclas reales recibidas",
+    "full-window-vertical: todas las teclas reales recibidas",
+    "Mismo modelo con un solo lote visible para aislar el coste del render",
+    "one-row-horizontal: todas las teclas reales recibidas",
+    "Sin excepciones en los controles"
+  ],
+  "results": [
+    {
+      "name": "full-window-horizontal",
+      "keysSent": 144,
+      "keysReceived": 144,
+      "inputRate": 60,
+      "enqueueMs": 2386.7678000000005,
+      "drainMs": 36285.5905,
+      "inputDelayP95Ms": 34332.199999999255,
+      "mountedCells": 744,
+      "heapBefore": 68373456,
+      "heapAfter": 69386064,
+      "heapAfterGc": 69068824,
+      "active": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "name": "full-window-vertical",
+      "keysSent": 80,
+      "keysReceived": 80,
+      "inputRate": 60,
+      "enqueueMs": 1320.3719999999958,
+      "drainMs": 20132.912900000003,
+      "inputDelayP95Ms": 19155.199999999255,
+      "mountedCells": 744,
+      "heapBefore": 69556724,
+      "heapAfter": 298886048,
+      "heapAfterGc": 58742252,
+      "active": {
+        "row": 80,
+        "column": 0
+      }
+    },
+    {
+      "name": "one-row-horizontal",
+      "keysSent": 144,
+      "keysReceived": 144,
+      "inputRate": 60,
+      "enqueueMs": 2393.988599999997,
+      "drainMs": 2792.394499999995,
+      "inputDelayP95Ms": 2664.800000000745,
+      "mountedCells": 24,
+      "heapBefore": 38194964,
+      "heapAfter": 84676872,
+      "heapAfterGc": 37507720,
+      "active": {
+        "row": 0,
+        "column": 0
+      }
+    }
+  ],
+  "pageErrors": [],
+  "hookInfo": {
+    "type": "object",
+    "customDiagnostic": "undefined"
+  },
+  "instrumentation": "No custom commit hook, no CPU profiler, no frame/DOM observers; Vite's usual Refresh hook remains in development; key capture only; no data commands",
+  "mode": "development",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-VsVJOT\\database.json"
+}
