@@ -100,6 +100,9 @@ body:has(.product-order-sheet) .content {
   scroll-padding-top: 44px;
   position: relative;
 }
+.product-sheet-viewport:focus-visible:has(td[data-active]) {
+  outline: none;
+}
 .product-sheet-grid {
   table-layout: fixed;
   border-collapse: separate;
@@ -135,6 +138,11 @@ body:has(.product-order-sheet) .content {
   text-overflow: ellipsis;
   font-size: 12px;
   line-height: 18px;
+  user-select: none;
+}
+.product-sheet-grid tbody td input,
+.product-sheet-grid tbody td textarea {
+  user-select: text;
 }
 .product-sheet-grid [data-lot-state="cerrado"] td {
   background: #ecfdf3;
@@ -146,7 +154,7 @@ body:has(.product-order-sheet) .content {
   background: #eff6ff;
 }
 .product-sheet-grid td[data-range] {
-  box-shadow: inset 0 0 0 1px #93b4f6;
+  box-shadow: inset 0 0 0 1px #5e91f5;
 }
 .product-sheet-grid td[data-active] {
   outline: 2px solid var(--primary);

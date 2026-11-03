@@ -902,7 +902,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         />
         <Tool
           icon={Eye}
-          label="Detalle"
+          label="Ver detalle"
           disabled={!singleOrder}
           onClick={() =>
             cleanFirst(() => navigate(`ordenes/${singleOrder!.id}`))
@@ -1029,8 +1029,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       {recovery && !recoveryOpen && (
         <div className="notice" role="status">
           Hay una copia anterior con {recovery.changes.length} cambios, del{" "}
-          {new Date(recovery.timestamp).toLocaleString("es-CO")}. Recuperarla
-          reemplaza las ediciones de esta sesión.
+          {new Date(recovery.timestamp).toLocaleString("es-CO")} ¿Desea
+          recuperar los cambios?
           <Button onClick={() => setRecoveryOpen(true)}>
             Revisar copia guardada
           </Button>
