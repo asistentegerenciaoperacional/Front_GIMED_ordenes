@@ -1,0 +1,2617 @@
+{
+  "sent": [
+    {
+      "key": "ArrowRight",
+      "at": 0.005199999999604188
+    },
+    {
+      "key": "ArrowRight",
+      "at": 22.384399999999005
+    },
+    {
+      "key": "ArrowRight",
+      "at": 38.42269999999917
+    },
+    {
+      "key": "ArrowRight",
+      "at": 54.083699999999226
+    },
+    {
+      "key": "ArrowRight",
+      "at": 72.46680000000015
+    },
+    {
+      "key": "ArrowRight",
+      "at": 87.58489999999983
+    },
+    {
+      "key": "ArrowRight",
+      "at": 105.693299999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 121.72439999999915
+    },
+    {
+      "key": "ArrowRight",
+      "at": 141.99159999999938
+    },
+    {
+      "key": "ArrowRight",
+      "at": 158.05309999999918
+    },
+    {
+      "key": "ArrowRight",
+      "at": 172.54190000000017
+    },
+    {
+      "key": "ArrowRight",
+      "at": 183.70899999999892
+    },
+    {
+      "key": "ArrowRight",
+      "at": 204.20010000000002
+    },
+    {
+      "key": "ArrowRight",
+      "at": 217.29809999999998
+    },
+    {
+      "key": "ArrowRight",
+      "at": 235.6922999999988
+    },
+    {
+      "key": "ArrowRight",
+      "at": 251.77239999999983
+    },
+    {
+      "key": "ArrowRight",
+      "at": 266.9940999999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 287.5747999999985
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 313.34689999999864
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 319.3373999999985
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 337.41829999999936
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 355.6965999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 371.7086999999992
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 387.741399999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 408.8655999999992
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 424.9323999999997
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 439.1201000000001
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 459.7426999999989
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 476.007599999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 489.33849999999984
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 504.15369999999893
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 519.3873999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 532.5938999999998
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 549.6370999999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 565.5999999999985
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 589.166299999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 602.1196999999993
+    },
+    {
+      "key": "ArrowRight",
+      "at": 616.1480999999985
+    },
+    {
+      "key": "ArrowRight",
+      "at": 637.5069999999996
+    },
+    {
+      "key": "ArrowRight",
+      "at": 655.6700999999994
+    },
+    {
+      "key": "ArrowRight",
+      "at": 670.7568999999985
+    },
+    {
+      "key": "ArrowRight",
+      "at": 686.7660999999989
+    },
+    {
+      "key": "ArrowRight",
+      "at": 708.7016999999996
+    },
+    {
+      "key": "ArrowRight",
+      "at": 724.7044999999998
+    },
+    {
+      "key": "ArrowRight",
+      "at": 742.0888999999988
+    },
+    {
+      "key": "ArrowRight",
+      "at": 755.7039999999997
+    },
+    {
+      "key": "ArrowRight",
+      "at": 769.798499999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 784.4831999999988
+    },
+    {
+      "key": "ArrowRight",
+      "at": 807.3030999999992
+    },
+    {
+      "key": "ArrowRight",
+      "at": 822.9497999999985
+    },
+    {
+      "key": "ArrowRight",
+      "at": 838.4016999999985
+    },
+    {
+      "key": "ArrowRight",
+      "at": 853.6048999999985
+    },
+    {
+      "key": "ArrowRight",
+      "at": 865.5792000000001
+    },
+    {
+      "key": "ArrowRight",
+      "at": 883.3924999999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 899.7417999999998
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 916.1430999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 932.5636999999988
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 955.6563999999998
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 975.5163999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 989.0783999999985
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1008.8876999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1022.4455999999991
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1041.798999999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1057.4389999999985
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1066.6888
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1096.4748999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1113.8179999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1128.9884999999995
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1144.1922999999988
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1159.5860999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1175.618699999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1186.4863999999998
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1206.3683
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1215.6328999999987
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1233.4363999999987
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1254.6220999999987
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1275.4488999999994
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1289.0010999999995
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1308.7446
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1322.3835
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1342.1900999999998
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1355.7386999999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1372.6351999999988
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1387.7524999999987
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1402.0213999999996
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1415.5920999999998
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1432.6082999999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1455.1745999999985
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1476.6448
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1487.212599999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1504.3840999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1519.3714
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1534.004499999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1555.7344999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1571.4490999999998
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1587.4426999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1607.8315999999995
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1623.7227999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1641.1726999999992
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1654.4007000000001
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1670.9748999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1686.7136999999984
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1702.1021
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1718.159099999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1739.3077999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1754.8152999999984
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1770.8458999999984
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1786.6529999999984
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1803.6079999999984
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1823.3853999999992
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1839.0401999999995
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1858.8496999999988
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1875.5816999999988
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1891.1832999999988
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1908.9065999999984
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1925.561599999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1942.2245999999996
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1959.8450999999986
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1969.5221999999994
+    },
+    {
+      "key": "ArrowRight",
+      "at": 1984.4838999999993
+    },
+    {
+      "key": "ArrowRight",
+      "at": 2003.778699999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 2021.8702999999987
+    },
+    {
+      "key": "ArrowRight",
+      "at": 2038.490099999999
+    },
+    {
+      "key": "ArrowRight",
+      "at": 2054.1156999999985
+    },
+    {
+      "key": "ArrowRight",
+      "at": 2072.0634999999984
+    },
+    {
+      "key": "ArrowRight",
+      "at": 2087.3018999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2103.3329999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2129.6119
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2145.574499999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2155.646199999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2175.4416999999994
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2191.062099999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2208.7596999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2222.3329999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2242.203299999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2258.8863
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2274.8557999999994
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2287.5073999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2314.1898
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2318.2924999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2345.7887999999984
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2349.6930999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2365.7731999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 2382.597099999999
+    }
+  ],
+  "trace": {
+    "start": 5728.800000000745,
+    "keys": [
+      {
+        "key": "ArrowRight",
+        "repeat": false,
+        "trusted": true,
+        "at": 5729.400000002235,
+        "stamp": 5722.20000000298,
+        "delay": 7.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5752,
+        "stamp": 5744.10000000149,
+        "delay": 7.899999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5767.900000002235,
+        "stamp": 5760.10000000149,
+        "delay": 7.800000000745058
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5783.60000000149,
+        "stamp": 5776.10000000149,
+        "delay": 7.5
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5802.20000000298,
+        "stamp": 5794.20000000298,
+        "delay": 8
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5817,
+        "stamp": 5809.20000000298,
+        "delay": 7.799999997019768
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5835.20000000298,
+        "stamp": 5827.20000000298,
+        "delay": 8
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5851.10000000149,
+        "stamp": 5843.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5871.5,
+        "stamp": 5864.10000000149,
+        "delay": 7.399999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5912.800000000745,
+        "stamp": 5880.10000000149,
+        "delay": 32.69999999925494
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5912.900000002235,
+        "stamp": 5894.10000000149,
+        "delay": 18.800000000745058
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5946.60000000149,
+        "stamp": 5905.10000000149,
+        "delay": 41.5
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5946.70000000298,
+        "stamp": 5926.10000000149,
+        "delay": 20.600000001490116
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5981.900000002235,
+        "stamp": 5939.20000000298,
+        "delay": 42.69999999925494
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 5982.10000000149,
+        "stamp": 5957.10000000149,
+        "delay": 25
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6017.10000000149,
+        "stamp": 5973.10000000149,
+        "delay": 44
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6017.20000000298,
+        "stamp": 5989.20000000298,
+        "delay": 28
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6048.800000000745,
+        "stamp": 6009.10000000149,
+        "delay": 39.69999999925494
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": false,
+        "trusted": true,
+        "at": 6049,
+        "stamp": 6035.10000000149,
+        "delay": 13.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6051.5,
+        "stamp": 6041.10000000149,
+        "delay": 10.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6069.20000000298,
+        "stamp": 6059.20000000298,
+        "delay": 10
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6088.70000000298,
+        "stamp": 6077.20000000298,
+        "delay": 11.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6101.10000000149,
+        "stamp": 6093.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6117.20000000298,
+        "stamp": 6109.20000000298,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6138.400000002235,
+        "stamp": 6130.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6155.5,
+        "stamp": 6146.10000000149,
+        "delay": 9.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6172.400000002235,
+        "stamp": 6161.20000000298,
+        "delay": 11.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6218.20000000298,
+        "stamp": 6181.20000000298,
+        "delay": 37
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6218.400000002235,
+        "stamp": 6198.10000000149,
+        "delay": 20.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6251.10000000149,
+        "stamp": 6211.20000000298,
+        "delay": 39.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6251.20000000298,
+        "stamp": 6226.10000000149,
+        "delay": 25.100000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6251.20000000298,
+        "stamp": 6241.10000000149,
+        "delay": 10.100000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6278.900000002235,
+        "stamp": 6254.10000000149,
+        "delay": 24.800000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6294.400000002235,
+        "stamp": 6271.20000000298,
+        "delay": 23.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6308.70000000298,
+        "stamp": 6287.20000000298,
+        "delay": 21.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6321.5,
+        "stamp": 6311.10000000149,
+        "delay": 10.399999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": false,
+        "trusted": true,
+        "at": 6331.900000002235,
+        "stamp": 6324.10000000149,
+        "delay": 7.800000000745058
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6366.20000000298,
+        "stamp": 6338.10000000149,
+        "delay": 28.100000001490116
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6366.900000002235,
+        "stamp": 6359.20000000298,
+        "delay": 7.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6385.300000000745,
+        "stamp": 6377.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6400.20000000298,
+        "stamp": 6392.10000000149,
+        "delay": 8.100000001490116
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6416.300000000745,
+        "stamp": 6408.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6438.10000000149,
+        "stamp": 6430.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6455.5,
+        "stamp": 6446.10000000149,
+        "delay": 9.399999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6471.900000002235,
+        "stamp": 6464.20000000298,
+        "delay": 7.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6500.800000000745,
+        "stamp": 6477.20000000298,
+        "delay": 23.599999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6501,
+        "stamp": 6491.20000000298,
+        "delay": 9.799999997019768
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6520.5,
+        "stamp": 6506.10000000149,
+        "delay": 14.399999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6542.400000002235,
+        "stamp": 6529.20000000298,
+        "delay": 13.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6567.20000000298,
+        "stamp": 6544.10000000149,
+        "delay": 23.100000001490116
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6593.300000000745,
+        "stamp": 6560.20000000298,
+        "delay": 33.099999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6593.400000002235,
+        "stamp": 6575.10000000149,
+        "delay": 18.300000000745058
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6612.60000000149,
+        "stamp": 6587.20000000298,
+        "delay": 25.399999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6628.20000000298,
+        "stamp": 6605.20000000298,
+        "delay": 23
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": false,
+        "trusted": true,
+        "at": 6642.70000000298,
+        "stamp": 6621.20000000298,
+        "delay": 21.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6646.70000000298,
+        "stamp": 6638.10000000149,
+        "delay": 8.600000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6676.300000000745,
+        "stamp": 6654.10000000149,
+        "delay": 22.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6688.70000000298,
+        "stamp": 6677.10000000149,
+        "delay": 11.600000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6705.10000000149,
+        "stamp": 6697.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6722.20000000298,
+        "stamp": 6711.20000000298,
+        "delay": 11
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6739.20000000298,
+        "stamp": 6730.20000000298,
+        "delay": 9
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6755.800000000745,
+        "stamp": 6744.20000000298,
+        "delay": 11.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6796,
+        "stamp": 6763.10000000149,
+        "delay": 32.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6796.10000000149,
+        "stamp": 6779.20000000298,
+        "delay": 16.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6826.800000000745,
+        "stamp": 6788.10000000149,
+        "delay": 38.69999999925494
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6826.900000002235,
+        "stamp": 6818.10000000149,
+        "delay": 8.800000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6859.300000000745,
+        "stamp": 6835.10000000149,
+        "delay": 24.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6859.5,
+        "stamp": 6851.20000000298,
+        "delay": 8.299999997019768
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6888.800000000745,
+        "stamp": 6866.10000000149,
+        "delay": 22.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6915.60000000149,
+        "stamp": 6881.20000000298,
+        "delay": 34.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6915.70000000298,
+        "stamp": 6897.20000000298,
+        "delay": 18.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 6944.800000000745,
+        "stamp": 6908.20000000298,
+        "delay": 36.599999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": false,
+        "trusted": true,
+        "at": 6945,
+        "stamp": 6928.10000000149,
+        "delay": 16.899999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6947.10000000149,
+        "stamp": 6937.20000000298,
+        "delay": 9.899999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6963.10000000149,
+        "stamp": 6955.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 6984.5,
+        "stamp": 6976.10000000149,
+        "delay": 8.399999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7005,
+        "stamp": 6997.10000000149,
+        "delay": 7.899999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7022.20000000298,
+        "stamp": 7011.20000000298,
+        "delay": 11
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7038.400000002235,
+        "stamp": 7030.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7055.60000000149,
+        "stamp": 7044.10000000149,
+        "delay": 11.5
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7071.900000002235,
+        "stamp": 7064.20000000298,
+        "delay": 7.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7089.300000000745,
+        "stamp": 7077.10000000149,
+        "delay": 12.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7126.800000000745,
+        "stamp": 7094.20000000298,
+        "delay": 32.599999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7126.900000002235,
+        "stamp": 7109.20000000298,
+        "delay": 17.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7144.800000000745,
+        "stamp": 7124.10000000149,
+        "delay": 20.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7160.800000000745,
+        "stamp": 7137.20000000298,
+        "delay": 23.599999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7175.900000002235,
+        "stamp": 7154.20000000298,
+        "delay": 21.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7191.300000000745,
+        "stamp": 7177.10000000149,
+        "delay": 14.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7215.900000002235,
+        "stamp": 7198.20000000298,
+        "delay": 17.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7234.70000000298,
+        "stamp": 7209.20000000298,
+        "delay": 25.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": false,
+        "trusted": true,
+        "at": 7254.800000000745,
+        "stamp": 7226.20000000298,
+        "delay": 28.599999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7254.900000002235,
+        "stamp": 7241.10000000149,
+        "delay": 13.800000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7263.70000000298,
+        "stamp": 7256.10000000149,
+        "delay": 7.600000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7285.400000002235,
+        "stamp": 7277.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7300.900000002235,
+        "stamp": 7293.10000000149,
+        "delay": 7.800000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7317,
+        "stamp": 7309.20000000298,
+        "delay": 7.799999997019768
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7337.300000000745,
+        "stamp": 7329.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7355.20000000298,
+        "stamp": 7345.20000000298,
+        "delay": 10
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7383.60000000149,
+        "stamp": 7363.10000000149,
+        "delay": 20.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7399.900000002235,
+        "stamp": 7376.20000000298,
+        "delay": 23.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7401,
+        "stamp": 7393.10000000149,
+        "delay": 7.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7424,
+        "stamp": 7408.10000000149,
+        "delay": 15.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7438.70000000298,
+        "stamp": 7424.10000000149,
+        "delay": 14.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7454.20000000298,
+        "stamp": 7440.20000000298,
+        "delay": 14
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7475,
+        "stamp": 7461.10000000149,
+        "delay": 13.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7505.300000000745,
+        "stamp": 7476.20000000298,
+        "delay": 29.099999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7505.400000002235,
+        "stamp": 7492.10000000149,
+        "delay": 13.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7521.800000000745,
+        "stamp": 7508.20000000298,
+        "delay": 13.599999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": false,
+        "trusted": true,
+        "at": 7533.400000002235,
+        "stamp": 7525.20000000298,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7553.20000000298,
+        "stamp": 7545.20000000298,
+        "delay": 8
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7572,
+        "stamp": 7561.10000000149,
+        "delay": 10.899999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7588.800000000745,
+        "stamp": 7580.10000000149,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7605.300000000745,
+        "stamp": 7597.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7623.10000000149,
+        "stamp": 7613.20000000298,
+        "delay": 9.899999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7639,
+        "stamp": 7630.20000000298,
+        "delay": 8.799999997019768
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7655.5,
+        "stamp": 7647.20000000298,
+        "delay": 8.299999997019768
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7672.70000000298,
+        "stamp": 7664.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7700.800000000745,
+        "stamp": 7681.20000000298,
+        "delay": 19.599999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7701,
+        "stamp": 7691.10000000149,
+        "delay": 9.899999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7718.300000000745,
+        "stamp": 7706.20000000298,
+        "delay": 12.099999997764826
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7733.70000000298,
+        "stamp": 7725.10000000149,
+        "delay": 8.600000001490116
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7756.60000000149,
+        "stamp": 7743.20000000298,
+        "delay": 13.399999998509884
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7784.900000002235,
+        "stamp": 7760.20000000298,
+        "delay": 24.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7784.900000002235,
+        "stamp": 7776.20000000298,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7816.70000000298,
+        "stamp": 7794.20000000298,
+        "delay": 22.5
+      },
+      {
+        "key": "ArrowRight",
+        "repeat": true,
+        "trusted": true,
+        "at": 7842.400000002235,
+        "stamp": 7809.10000000149,
+        "delay": 33.30000000074506
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": false,
+        "trusted": true,
+        "at": 7842.5,
+        "stamp": 7825.10000000149,
+        "delay": 17.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7860.400000002235,
+        "stamp": 7851.20000000298,
+        "delay": 9.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7876.60000000149,
+        "stamp": 7867.10000000149,
+        "delay": 9.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7888.800000000745,
+        "stamp": 7877.20000000298,
+        "delay": 11.599999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7905.300000000745,
+        "stamp": 7897.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7921.900000002235,
+        "stamp": 7913.20000000298,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7939.10000000149,
+        "stamp": 7930.10000000149,
+        "delay": 9
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7955.60000000149,
+        "stamp": 7944.20000000298,
+        "delay": 11.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 7972.5,
+        "stamp": 7964.20000000298,
+        "delay": 8.299999997019768
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8016.400000002235,
+        "stamp": 7980.20000000298,
+        "delay": 36.19999999925494
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8016.5,
+        "stamp": 7996.10000000149,
+        "delay": 20.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8047.900000002235,
+        "stamp": 8009.10000000149,
+        "delay": 38.80000000074506
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8048,
+        "stamp": 8036.20000000298,
+        "delay": 11.799999997019768
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8079.300000000745,
+        "stamp": 8040.10000000149,
+        "delay": 39.19999999925494
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8079.400000002235,
+        "stamp": 8067.20000000298,
+        "delay": 12.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8111.70000000298,
+        "stamp": 8071.20000000298,
+        "delay": 40.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8111.800000000745,
+        "stamp": 8087.10000000149,
+        "delay": 24.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 8130.10000000149,
+        "stamp": 8104.20000000298,
+        "delay": 25.899999998509884
+      }
+    ],
+    "frames": [
+      -10.800000000745058,
+      16.800000000000182,
+      16.599999999999454,
+      16.5,
+      16.800000000000182,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      33.30000000000018,
+      33.30000000000018,
+      33.30000000000018,
+      33.30000000000018,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.800000000000182,
+      16.5,
+      16.699999999999818,
+      16.600000000000364,
+      16.799999999999272,
+      33.20000000000073,
+      33.5,
+      16.599999999999454,
+      16.600000000000364,
+      16.800000000000182,
+      16.599999999999454,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.799999999999272,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      33.30000000000018,
+      33.399999999999636,
+      33.30000000000018,
+      16.699999999999818,
+      33.30000000000018,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.700000000000728,
+      16.5,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.599999999999454,
+      16.800000000000182,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.700000000000728,
+      16.5,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.799999999999272,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.599999999999454,
+      16.800000000000182,
+      16.699999999999818,
+      16.700000000000728,
+      16.599999999999454,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.799999999999272,
+      16.600000000000364,
+      16.800000000000182,
+      16.5,
+      16.699999999999818,
+      33.30000000000018,
+      33.399999999999636,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.600000000000364,
+      16.800000000000182,
+      16.599999999999454,
+      16.699999999999818,
+      33.30000000000018,
+      33.30000000000018,
+      33.30000000000018,
+      16.699999999999818,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.699999999999818,
+      16.699999999999818,
+      16.600000000000364,
+      16.600000000000364,
+      16.69999999999891,
+      16.700000000000728,
+      16.700000000000728,
+      16.599999999998545,
+      16.700000000000728,
+      16.700000000000728,
+      16.599999999998545,
+      16.700000000000728,
+      16.700000000000728,
+      16.599999999998545,
+      16.700000000000728
+    ],
+    "longTasks": [],
+    "commits": 118,
+    "renderDurations": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      16.699999999254942,
+      17.899999998509884,
+      19.400000005960464,
+      19.400000005960464,
+      17.400000002235174,
+      0.09999999776482582,
+      0.09999999776482582,
+      0.10000000149011612,
+      0,
+      0,
+      0.09999999776482582,
+      0,
+      14.900000002235174,
+      17.5,
+      8.699999999254942,
+      4.2000000067055225,
+      3.900000002235174,
+      4.699999999254942,
+      2.899999998509884,
+      0,
+      0.10000000149011612,
+      0,
+      0,
+      0,
+      0,
+      0.09999999776482582,
+      4.099999997764826,
+      4.600000001490116,
+      4.800000004470348,
+      0,
+      4.399999994784594,
+      5.00000000372529,
+      5.700000002980232,
+      4.199999999254942,
+      4.00000000372529,
+      0,
+      0.10000000149011612,
+      0.09999999776482582,
+      0.20000000298023224,
+      0.10000000149011612,
+      0.10000000149011612,
+      0.10000000149011612,
+      13.099999997764826,
+      16.799999997019768,
+      17.599999994039536,
+      15.199999999254942,
+      14.49999999627471,
+      16,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0.10000000149011612,
+      13.100000001490116,
+      6.600000001490116,
+      5.200000002980232,
+      4.50000000372529,
+      3.9000000096857548,
+      4.100000001490116,
+      0,
+      3.3000000044703484,
+      3.899999998509884,
+      0,
+      0,
+      0.10000000149011612,
+      0,
+      0,
+      3.300000000745058,
+      4.50000000372529,
+      4.200000002980232,
+      3.4999999962747097,
+      4.499999992549419,
+      3.600000001490116,
+      0,
+      3.399999998509884,
+      4.200000002980232,
+      3.7000000029802322,
+      0,
+      0,
+      0,
+      0.09999999776482582,
+      0,
+      0,
+      0,
+      0,
+      0.09999999776482582,
+      4.099999997764826,
+      5.300000004470348,
+      3.699999999254942,
+      0,
+      4.400000002235174,
+      15,
+      17.599999997764826,
+      13.299999997019768,
+      0,
+      0.09999999776482582,
+      0,
+      0.09999999776482582,
+      0,
+      0,
+      0,
+      0,
+      13.399999994784594,
+      16.100000001490116,
+      15.99999999627471,
+      17.300000000745058,
+      6.399999998509884,
+      3.7999999970197678,
+      0
+    ],
+    "transitions": [
+      {
+        "time": 5736.70000000298,
+        "row": 29,
+        "column": 1
+      },
+      {
+        "time": 5770,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 5787.20000000298,
+        "row": 29,
+        "column": 4
+      },
+      {
+        "time": 5820.300000000745,
+        "row": 29,
+        "column": 6
+      },
+      {
+        "time": 5853.400000002235,
+        "row": 29,
+        "column": 8
+      },
+      {
+        "time": 5907.800000000745,
+        "row": 29,
+        "column": 9
+      },
+      {
+        "time": 5941,
+        "row": 29,
+        "column": 11
+      },
+      {
+        "time": 5975.800000000745,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 6010.60000000149,
+        "row": 29,
+        "column": 15
+      },
+      {
+        "time": 6043.20000000298,
+        "row": 29,
+        "column": 17
+      },
+      {
+        "time": 6052.900000002235,
+        "row": 29,
+        "column": 16
+      },
+      {
+        "time": 6071.10000000149,
+        "row": 29,
+        "column": 15
+      },
+      {
+        "time": 6103.400000002235,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 6120.300000000745,
+        "row": 29,
+        "column": 12
+      },
+      {
+        "time": 6153.60000000149,
+        "row": 29,
+        "column": 11
+      },
+      {
+        "time": 6170.60000000149,
+        "row": 29,
+        "column": 10
+      },
+      {
+        "time": 6208,
+        "row": 29,
+        "column": 9
+      },
+      {
+        "time": 6245.800000000745,
+        "row": 29,
+        "column": 7
+      },
+      {
+        "time": 6271.10000000149,
+        "row": 29,
+        "column": 4
+      },
+      {
+        "time": 6290,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 6303.900000002235,
+        "row": 29,
+        "column": 2
+      },
+      {
+        "time": 6317.5,
+        "row": 29,
+        "column": 1
+      },
+      {
+        "time": 6328.400000002235,
+        "row": 29,
+        "column": 0
+      },
+      {
+        "time": 6335.900000002235,
+        "row": 29,
+        "column": 1
+      },
+      {
+        "time": 6369.800000000745,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 6403.20000000298,
+        "row": 29,
+        "column": 5
+      },
+      {
+        "time": 6420.60000000149,
+        "row": 29,
+        "column": 6
+      },
+      {
+        "time": 6453.60000000149,
+        "row": 29,
+        "column": 7
+      },
+      {
+        "time": 6470.5,
+        "row": 29,
+        "column": 8
+      },
+      {
+        "time": 6495,
+        "row": 29,
+        "column": 9
+      },
+      {
+        "time": 6514.70000000298,
+        "row": 29,
+        "column": 11
+      },
+      {
+        "time": 6531.70000000298,
+        "row": 29,
+        "column": 12
+      },
+      {
+        "time": 6562,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 6579.300000000745,
+        "row": 29,
+        "column": 14
+      },
+      {
+        "time": 6606.800000000745,
+        "row": 29,
+        "column": 16
+      },
+      {
+        "time": 6623.400000002235,
+        "row": 29,
+        "column": 17
+      },
+      {
+        "time": 6637.800000000745,
+        "row": 29,
+        "column": 18
+      },
+      {
+        "time": 6643.70000000298,
+        "row": 29,
+        "column": 17
+      },
+      {
+        "time": 6652.5,
+        "row": 29,
+        "column": 16
+      },
+      {
+        "time": 6686.900000002235,
+        "row": 29,
+        "column": 15
+      },
+      {
+        "time": 6703.60000000149,
+        "row": 29,
+        "column": 14
+      },
+      {
+        "time": 6720.60000000149,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 6737,
+        "row": 29,
+        "column": 12
+      },
+      {
+        "time": 6754.10000000149,
+        "row": 29,
+        "column": 11
+      },
+      {
+        "time": 6790.20000000298,
+        "row": 29,
+        "column": 10
+      },
+      {
+        "time": 6821.70000000298,
+        "row": 29,
+        "column": 8
+      },
+      {
+        "time": 6853.800000000745,
+        "row": 29,
+        "column": 6
+      },
+      {
+        "time": 6883.400000002235,
+        "row": 29,
+        "column": 4
+      },
+      {
+        "time": 6911,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 6939.800000000745,
+        "row": 29,
+        "column": 1
+      },
+      {
+        "time": 6952,
+        "row": 29,
+        "column": 2
+      },
+      {
+        "time": 6970.400000002235,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 6987.10000000149,
+        "row": 29,
+        "column": 4
+      },
+      {
+        "time": 7020.400000002235,
+        "row": 29,
+        "column": 5
+      },
+      {
+        "time": 7036.900000002235,
+        "row": 29,
+        "column": 6
+      },
+      {
+        "time": 7053.800000000745,
+        "row": 29,
+        "column": 7
+      },
+      {
+        "time": 7070.400000002235,
+        "row": 29,
+        "column": 8
+      },
+      {
+        "time": 7087.300000000745,
+        "row": 29,
+        "column": 9
+      },
+      {
+        "time": 7121.60000000149,
+        "row": 29,
+        "column": 10
+      },
+      {
+        "time": 7140,
+        "row": 29,
+        "column": 12
+      },
+      {
+        "time": 7155.5,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 7171.400000002235,
+        "row": 29,
+        "column": 14
+      },
+      {
+        "time": 7186.10000000149,
+        "row": 29,
+        "column": 15
+      },
+      {
+        "time": 7201,
+        "row": 29,
+        "column": 16
+      },
+      {
+        "time": 7227.60000000149,
+        "row": 29,
+        "column": 17
+      },
+      {
+        "time": 7244.20000000298,
+        "row": 29,
+        "column": 18
+      },
+      {
+        "time": 7256.5,
+        "row": 29,
+        "column": 16
+      },
+      {
+        "time": 7270.20000000298,
+        "row": 29,
+        "column": 15
+      },
+      {
+        "time": 7303.20000000298,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 7320.20000000298,
+        "row": 29,
+        "column": 12
+      },
+      {
+        "time": 7353.400000002235,
+        "row": 29,
+        "column": 11
+      },
+      {
+        "time": 7378.20000000298,
+        "row": 29,
+        "column": 10
+      },
+      {
+        "time": 7394.60000000149,
+        "row": 29,
+        "column": 9
+      },
+      {
+        "time": 7412.60000000149,
+        "row": 29,
+        "column": 7
+      },
+      {
+        "time": 7433.900000002235,
+        "row": 29,
+        "column": 6
+      },
+      {
+        "time": 7449,
+        "row": 29,
+        "column": 5
+      },
+      {
+        "time": 7463.400000002235,
+        "row": 29,
+        "column": 4
+      },
+      {
+        "time": 7494.300000000745,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 7516.20000000298,
+        "row": 29,
+        "column": 1
+      },
+      {
+        "time": 7529.60000000149,
+        "row": 29,
+        "column": 0
+      },
+      {
+        "time": 7535.900000002235,
+        "row": 29,
+        "column": 1
+      },
+      {
+        "time": 7570.300000000745,
+        "row": 29,
+        "column": 2
+      },
+      {
+        "time": 7587.20000000298,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 7603.70000000298,
+        "row": 29,
+        "column": 4
+      },
+      {
+        "time": 7621.5,
+        "row": 29,
+        "column": 5
+      },
+      {
+        "time": 7637.400000002235,
+        "row": 29,
+        "column": 6
+      },
+      {
+        "time": 7653.900000002235,
+        "row": 29,
+        "column": 7
+      },
+      {
+        "time": 7670.900000002235,
+        "row": 29,
+        "column": 8
+      },
+      {
+        "time": 7695,
+        "row": 29,
+        "column": 9
+      },
+      {
+        "time": 7713.10000000149,
+        "row": 29,
+        "column": 11
+      },
+      {
+        "time": 7728.20000000298,
+        "row": 29,
+        "column": 12
+      },
+      {
+        "time": 7744.800000000745,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 7779.70000000298,
+        "row": 29,
+        "column": 14
+      },
+      {
+        "time": 7810.900000002235,
+        "row": 29,
+        "column": 16
+      },
+      {
+        "time": 7837.5,
+        "row": 29,
+        "column": 17
+      },
+      {
+        "time": 7869.800000000745,
+        "row": 29,
+        "column": 16
+      },
+      {
+        "time": 7886.900000002235,
+        "row": 29,
+        "column": 15
+      },
+      {
+        "time": 7903.70000000298,
+        "row": 29,
+        "column": 14
+      },
+      {
+        "time": 7920.10000000149,
+        "row": 29,
+        "column": 13
+      },
+      {
+        "time": 7936.70000000298,
+        "row": 29,
+        "column": 12
+      },
+      {
+        "time": 7953.70000000298,
+        "row": 29,
+        "column": 11
+      },
+      {
+        "time": 7970.60000000149,
+        "row": 29,
+        "column": 10
+      },
+      {
+        "time": 8006.400000002235,
+        "row": 29,
+        "column": 9
+      },
+      {
+        "time": 8042.10000000149,
+        "row": 29,
+        "column": 7
+      },
+      {
+        "time": 8074,
+        "row": 29,
+        "column": 5
+      },
+      {
+        "time": 8106.20000000298,
+        "row": 29,
+        "column": 3
+      },
+      {
+        "time": 8124.800000000745,
+        "row": 29,
+        "column": 1
+      },
+      {
+        "time": 8138.800000000745,
+        "row": 29,
+        "column": 0
+      }
+    ],
+    "missingActiveFrames": 0
+  },
+  "memorySamples": [
+    {
+      "at": 10321.2871,
+      "usedSize": 38196200,
+      "totalSize": 43606016,
+      "embedderHeapUsedSize": 8924136,
+      "backingStorageSize": 16162783
+    },
+    {
+      "at": 10574.069,
+      "usedSize": 36086276,
+      "totalSize": 51994624,
+      "embedderHeapUsedSize": 10310752,
+      "backingStorageSize": 16162617
+    },
+    {
+      "at": 10825.5823,
+      "usedSize": 38404852,
+      "totalSize": 51994624,
+      "embedderHeapUsedSize": 11512808,
+      "backingStorageSize": 16162848
+    },
+    {
+      "at": 11078.7936,
+      "usedSize": 29116504,
+      "totalSize": 52256768,
+      "embedderHeapUsedSize": 5540872,
+      "backingStorageSize": 16161900
+    },
+    {
+      "at": 11329.5015,
+      "usedSize": 38313752,
+      "totalSize": 69558272,
+      "embedderHeapUsedSize": 10684680,
+      "backingStorageSize": 16162676
+    },
+    {
+      "at": 11588.8866,
+      "usedSize": 36718428,
+      "totalSize": 69558272,
+      "embedderHeapUsedSize": 16809208,
+      "backingStorageSize": 16163364
+    },
+    {
+      "at": 11840.8217,
+      "usedSize": 46812308,
+      "totalSize": 69558272,
+      "embedderHeapUsedSize": 23790296,
+      "backingStorageSize": 16163689
+    },
+    {
+      "at": 12091.7825,
+      "usedSize": 47593376,
+      "totalSize": 71917568,
+      "embedderHeapUsedSize": 29589280,
+      "backingStorageSize": 16163932
+    },
+    {
+      "at": 12344.7858,
+      "usedSize": 60431764,
+      "totalSize": 84500480,
+      "embedderHeapUsedSize": 11081080,
+      "backingStorageSize": 16162709
+    }
+  ]
+}

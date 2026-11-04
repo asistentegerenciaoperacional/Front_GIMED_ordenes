@@ -1,0 +1,47 @@
+{
+  "mode": "development",
+  "results": [
+    {
+      "repetition": 1,
+      "name": "paced-vertical",
+      "hz": 8,
+      "keys": 24,
+      "enqueueMs": 2886.5537999999997,
+      "drainMs": 0.9994999999998981,
+      "renderedMs": 29.955299999999625,
+      "inputP95Ms": 171.19999999925494,
+      "frameP95Ms": 49.71399999999994,
+      "frameMaxMs": 283.6860000029801,
+      "scriptMs": 1338.2450000000001,
+      "mutations": 5,
+      "actual": {
+        "row": 24,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 1,
+      "name": "horizontal",
+      "hz": 60,
+      "keys": 144,
+      "enqueueMs": 2383.1941000000006,
+      "drainMs": 0.9981999999999971,
+      "renderedMs": 27.73439999999937,
+      "inputP95Ms": 48.399999998509884,
+      "frameP95Ms": 16.800000000000182,
+      "frameMaxMs": 166.70000000000073,
+      "scriptMs": 518.0730000000002,
+      "mutations": 0,
+      "actual": {
+        "row": 0,
+        "column": 0
+      }
+    }
+  ],
+  "checks": [
+    "1/paced-vertical: destino exacto",
+    "1/paced-vertical: todas las teclas reales recibidas",
+    "1/horizontal: destino exacto",
+    "1/horizontal: todas las teclas reales recibidas"
+  ]
+}

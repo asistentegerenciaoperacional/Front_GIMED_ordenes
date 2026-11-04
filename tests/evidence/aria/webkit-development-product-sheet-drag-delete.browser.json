@@ -1,0 +1,23 @@
+{
+  "checks": [
+    "El cursor dentro de las celdas es crosshair",
+    "Arrastrar selecciona un rectángulo de dos filas y dos columnas",
+    "Arrastrar selecciona ambas celdas sin perder el rango al soltar",
+    "Delete vacía ambas celdas seleccionadas",
+    "Los dos borrados quedan pendientes de guardar",
+    "Borrar no guarda automáticamente",
+    "Delete sobre una celda no modifica su vecina",
+    "La variante Supr también vacía la celda activa",
+    "La variante Del también vacía la celda activa",
+    "Un rango mixto vacía la cantidad opcional y conserva el precio obligatorio",
+    "El precio obligatorio rechazado se identifica",
+    "El lote obligatorio conserva su valor inválido al intentar vaciarlo",
+    "La celda protegida se señala sin modificarla",
+    "El valor obligatorio inválido se señala",
+    "Delete conserva la edición normal dentro del campo",
+    "Sin errores de JavaScript"
+  ],
+  "mode": "development",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-XEfskz\\database.json"
+}

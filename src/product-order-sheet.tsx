@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Dialog as AriaDialog, DialogTrigger } from "react-aria-components/Dialog";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Dialog as AriaDialog,
+  DialogTrigger,
+} from "react-aria-components/Dialog";
 import { Popover } from "react-aria-components/Popover";
 import {
   ChevronDown,
@@ -36,9 +39,9 @@ import {
 import {
   ProductSheetGrid,
   SheetCellHint,
-  rangeBounds,
-  type SheetRange,
 } from "./components/product-sheet-grid";
+import { SheetSelection, rangeBounds } from "./product-sheet-selection";
+import { SheetSelectionView } from "./components/sheet-selection-view";
 import { InvoicePicker, OrderForm, productLotFieldOrder } from "./forms";
 import { ActionTooltip } from "./components/overlays";
 import { customFilters, readCustomFilter } from "./order-filters";
@@ -174,8 +177,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         : null),
     [error, issues],
   );
-  const [range, setRange] = useState<SheetRange | null>(null),
-    [editing, setEditing] = useState<Editing | null>(null);
+  const [selection] = useState(() => new SheetSelection());
+  const [editing, setEditing] = useState<Editing | null>(null);
+  useEffect(() => () => selection.cancelPending(), [selection]);
   const [pendingInvoice, setPendingInvoice] = useState<string | null>(null);
   const [focusRequest, setFocusRequest] = useState<SheetCellIssue | null>(null);
   const [projection, setProjection] = useState<Database>(db);
@@ -190,6 +194,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   >([]);
   const [columnsOpen, setColumnsOpen] = useState(false),
     [openedColumn, setOpenedColumn] = useState<string | null>(null);
+  const columnsDialog = useRef<HTMLElement | null>(null);
   const [collapsed, setCollapsed] = useState(() =>
     readSheetLocal(
       "gimed:ui:product-sheet-collapsed",
@@ -279,20 +284,20 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   useEffect(() => {
     if (draftRef.current.length || editing) return;
     setProjection(db);
-    setRange(null);
+    selection.set(null);
   }, [db]);
   useEffect(() => {
     if (!focusRequest) return;
     const row = rows.findIndex((row) => row.key === focusRequest.rowKey),
       column = columns.findIndex((col) => col.key === focusRequest.column);
     if (row >= 0 && column >= 0) {
-      setRange({ anchor: { row, column }, focus: { row, column } });
+      selection.set({ anchor: { row, column }, focus: { row, column } });
       setFocusRequest(null);
     }
   }, [rows, hidden, focusRequest]);
   useEffect(() => {
     setHidden(loadHidden(view));
-    setRange(null);
+    selection.set(null);
     setEditing(null);
     setOpenedColumn(null);
   }, [view]);
@@ -320,24 +325,46 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     setTouched(true);
   };
   const display = (row: ProductSheetRow) => currentByKey.get(row.key) ?? row;
-  const selected = range
-    ? rows.slice(rangeBounds(range).top, rangeBounds(range).bottom + 1)
-    : [];
-  const orderIds = [...new Set(selected.map((row) => row.order.id))],
-    lineIds = [...new Set(selected.map((row) => row.line.id))],
-    lotIds = selected.flatMap((row) => (row.lot ? [row.lot.id] : []));
-  const selectedOrders =
-    view === "no_autorizadas" ? new Set(orderIds) : new Set<string>();
-  const singleOrder =
-    orderIds.length === 1
-      ? db.orden_compra.find((order) => order.id === orderIds[0])
-      : undefined;
-  const printSelected = () => {
+  const selectionTargets = () => {
+    const range = selection.read();
+    const selected = range
+      ? rows.slice(rangeBounds(range).top, rangeBounds(range).bottom + 1)
+      : [];
+    const orderIds = [...new Set(selected.map((row) => row.order.id))];
+    const lineIds = [...new Set(selected.map((row) => row.line.id))];
+    const lotIds = selected.flatMap((row) => (row.lot ? [row.lot.id] : []));
+    const singleOrder =
+      orderIds.length === 1
+        ? db.orden_compra.find((order) => order.id === orderIds[0])
+        : undefined;
+    return { range, selected, orderIds, lineIds, lotIds, singleOrder };
+  };
+  const orderCount = useMemo(
+    () => new Set(rows.map((row) => row.order.id)).size,
+    [rows],
+  );
+  const selectionSummary = useCallback(() => {
+    const range = selection.getSnapshot();
+    if (!range) return "";
+    const bounds = rangeBounds(range),
+      orders = new Set<string>();
+    let annulled = false,
+      hasLot = false;
+    for (let index = bounds.top; index <= bounds.bottom; index++) {
+      const row = rows[index];
+      if (!row) continue;
+      orders.add(row.order.id);
+      annulled ||= row.line.estado === "anulada";
+      hasLot ||= !!row.lot;
+    }
+    return `${bounds.bottom - bounds.top + 1}/${[...orders].join(",")}/${annulled}/${hasLot}`;
+  }, [selection, rows]);
+  const printSelected = (orderId: string) => {
     const viewport = document.querySelector<HTMLElement>(
       ".product-sheet-viewport",
     );
     navigate(
-      `ordenes/${singleOrder!.id}/imprimir?${new URLSearchParams({ returnTo: location.pathname + location.search, returnScroll: String(Math.round(window.scrollY)), returnTableScroll: String(Math.round(viewport?.scrollLeft ?? 0)) })}`,
+      `ordenes/${orderId}/imprimir?${new URLSearchParams({ returnTo: location.pathname + location.search, returnScroll: String(Math.round(window.scrollY)), returnTableScroll: String(Math.round(viewport?.scrollLeft ?? 0)) })}`,
     );
   };
   const changeQuery = (values: Record<string, string>) => {
@@ -349,7 +376,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     );
     setProjectionDay(day);
     setProjectionRevision((value) => value + 1);
-    setRange(null);
+    selection.set(null);
     setEditing(null);
     const next = new URLSearchParams(params);
     Object.entries(values).forEach(([key, value]) =>
@@ -384,7 +411,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       setProjectionDay(day);
       draft([]);
       setIssues([]);
-      setRange(null);
+      selection.set(null);
       setEditing(null);
       setProjectionRevision((value) => value + 1);
       return true;
@@ -492,6 +519,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     }
   }, [db, pendingInvoice]);
   function copy(event?: React.ClipboardEvent) {
+    const range = selection.read();
     if (!range) return;
     const bounds = rangeBounds(range);
     const matrix = rows
@@ -513,6 +541,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         );
   }
   function paste(value: string) {
+    const range = selection.read();
     if (!range) {
       notify("Selecciona primero la celda de destino.", true);
       return;
@@ -555,6 +584,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       notify(`${overflow} celdas fuera de la hoja no se pegaron.`, true);
   }
   function clearSelection() {
+    const range = selection.read();
     if (!range) return;
     const bounds = rangeBounds(range);
     const inputs = rows
@@ -572,7 +602,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   function updateHidden(next: string[]) {
     if (editing && !commit()) return;
     setHidden(next);
-    setRange(null);
+    selection.set(null);
     try {
       localStorage.setItem(localVisibility + view, JSON.stringify(next));
     } catch {
@@ -580,6 +610,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     }
   }
   function hideSelectedColumns() {
+    const range = selection.read();
     if (!range) return;
     const { left, right } = rangeBounds(range);
     const selectedColumns = columns.slice(left, right + 1);
@@ -587,9 +618,16 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       notify("Debe permanecer visible al menos una columna.", true);
       return;
     }
-    updateHidden([...new Set([...hidden, ...selectedColumns.map((col) => col.key)])]);
+    updateHidden([
+      ...new Set([...hidden, ...selectedColumns.map((col) => col.key)]),
+    ]);
   }
-  async function states(scope: "lot" | "line", state: string) {
+  async function states(
+    scope: "lot" | "line",
+    state: string,
+    targets: ReturnType<typeof selectionTargets>,
+  ) {
+    const { lotIds, lineIds } = targets;
     const ids = scope === "lot" ? lotIds : lineIds;
     if (!ids.length) return;
     setBusy(true);
@@ -671,7 +709,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           else return;
         }
       }
-      setRange(null);
+      selection.set(null);
     } catch (failure) {
       setError(problemFrom(failure));
     } finally {
@@ -791,254 +829,373 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         />
       );
   }
-  const toolbar = (
-    <>
-      <div className="product-sheet-toolbar-top">
-        <div className="product-sheet-tabs" aria-label="Hojas de OC">
-          {(
-            [
-              ["no_autorizadas", "No autorizadas"],
-              ["seguimiento", "En seguimiento"],
-              ["anuladas", "Anuladas"],
-            ] as const
-          ).map(([id, label]) => (
-            <Button
-              key={id}
-              aria-pressed={view === id}
-              variant={view === id ? "primary" : "ghost"}
-              onClick={() => changeQuery({ vista: id })}
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
-        <div className="inline">
-          <Button
-            icon={Save}
-            variant="primary"
-            disabled={(!changes.length && !editing) || busy}
-            onClick={() => {
-              if (commit()) void save();
-            }}
-          >
-            Guardar{changes.length ? ` ${changes.length} cambios` : ""}
-          </Button>
-          <Button
-            icon={Undo2}
-            disabled={(!changes.length && !editing) || busy}
-            onClick={async () => {
-              if (
-                await confirmAction(
-                  "¿Descartar las ediciones pendientes de la hoja?",
-                  "Descartar",
-                )
-              )
-                discard();
-            }}
-          >
-            Descartar
-          </Button>
-          <Button
-            icon={ChevronUp}
-            aria-label="Ocultar barra de herramientas"
-            onClick={() => {
-              setCollapsed(true);
-              try {
-                localStorage.setItem(
-                  "gimed:ui:product-sheet-collapsed",
-                  "true",
-                );
-              } catch {}
-            }}
-          />
-        </div>
-      </div>
-      <div className="product-sheet-tools">
-        <Button icon={Plus} onClick={() => cleanFirst(() => setCreating(true))}>
-          Nueva OC
-        </Button>
-        <Button
-          icon={Plus}
-          disabled={
-            view === "no_autorizadas" ||
-            !lineIds.length ||
-            selected.some((row) => row.line.estado === "anulada")
-          }
-          onClick={() => cleanFirst(() => setNewLots(lineIds))}
-        >
-          Nuevo lote
-        </Button>
-        <ControlSelect
-          aria-label="Estado del lote"
-          value=""
-          disabled={!lotIds.length || busy}
-          onChange={(event) => {
-            const value = event.target.value;
-            if (value) cleanFirst(() => void states("lot", value));
-          }}
-        >
-          <option value="">Lotes</option>
-          <option value="cerrado">Cerrar lotes</option>
-          <option value="anulado">Anular lotes</option>
-          <option value="en_seguimiento">Reabrir lotes</option>
-        </ControlSelect>
-        <ControlSelect
-          aria-label="Seguimiento del producto"
-          value=""
-          disabled={view === "no_autorizadas" || !lineIds.length || busy}
-          onChange={(event) => {
-            const value = event.target.value;
-            if (value) cleanFirst(() => void states("line", value));
-          }}
-        >
-          <option value="">Productos</option>
-          <option value="cerrada">Cerrar productos</option>
-          <option value="anulada">Anular productos</option>
-          <option value="en_seguimiento">Reabrir productos</option>
-        </ControlSelect>
-        <Button
-          disabled={view !== "no_autorizadas" || !orderIds.length || busy}
-          onClick={() => cleanFirst(() => setAuthorize(orderIds))}
-        >
-          Autorizar{orderIds.length ? ` ${orderIds.length} OC` : ""}
-        </Button>
-        <Tool
-          icon={FileText}
-          label="Ver orden escaneada"
-          disabled={
-            !singleOrder ||
-            !db.documento.some(
-              (doc) =>
-                doc.tipo_entidad === "orden_compra" &&
-                doc.id_entidad === singleOrder.id &&
-                doc.tipo_documento === "orden_compra_escaneada",
-            )
-          }
-          onClick={() => {
-            const doc = db.documento.find(
-              (doc) =>
-                doc.tipo_entidad === "orden_compra" &&
-                doc.id_entidad === singleOrder?.id &&
-                doc.tipo_documento === "orden_compra_escaneada",
-            );
-            if (doc)
-              cleanFirst(() =>
-                window.open(
-                  `/api/documents/${doc.id}/content`,
-                  "_blank",
-                  "noopener",
-                ),
+  const renderCell = useCallback(
+    (projected: ProductSheetRow, col: SheetColumn) => {
+      const row = display(projected),
+        target = sheetTarget(row, col),
+        modified = target && modifiedKeys.has(changeKey(target));
+      const invalid = invalidKeys.has(`${row.key}/${col.key}`);
+      if (col.key === "ocm")
+        return (
+          <div className="sheet-ocm-links">
+            {[...new Set(row.supply.map((item) => item.order.id))].map((id) => {
+              const items = row.supply.filter((item) => item.order.id === id);
+              return (
+                <SheetCellHint
+                  key={id}
+                  label={`OCM ${items[0].order.no_orden}: ${items.map((item) => `${item.material} · ${count(item.quantity)} unidades`).join("; ")}`}
+                >
+                  {items[0].order.no_orden}
+                </SheetCellHint>
               );
-          }}
-        />
-        <Tool
-          icon={Printer}
-          label="Imprimir"
-          disabled={!singleOrder}
-          onClick={() => cleanFirst(printSelected)}
-        />
-        <Tool
-          icon={Eye}
-          label="Ver detalle"
-          disabled={!singleOrder}
-          onClick={() =>
-            cleanFirst(() => navigate(`ordenes/${singleOrder!.id}`))
-          }
-        />
-        <Tool
-          icon={Pencil}
-          label="Editar orden"
-          disabled={!singleOrder}
-          onClick={() => cleanFirst(() => setEditingOrder(singleOrder!.id))}
-        />
-        <Button
-          icon={Copy}
-          aria-label="Copiar rango"
-          title="Copiar rango (Ctrl+C)"
-          disabled={!range}
-          onClick={() => copy()}
-        />
-        <Button
-          icon={ClipboardPaste}
-          aria-label="Pegar rango"
-          title="Pegar rango (Ctrl+V)"
-          disabled={!range}
-          onClick={() =>
-            navigator.clipboard
-              .readText()
-              .then(paste)
-              .catch(() => notify("Usa Ctrl+V sobre la hoja para pegar.", true))
-          }
-        />
-        <CustomFilterSelect
-          style={{ width: 200, flex: "0 0 200px" }}
-          aria-label="Filtro personalizado de la hoja"
-          value={filter}
-          onChange={(event) => changeQuery({ filtro: event.target.value })}
+            })}
+          </div>
+        );
+      let value = sheetValue(viewDb, row, col);
+      return (
+        <span
+          className={`sheet-cell-value ${col.kind === "integer" || col.kind === "decimal" ? "num" : ""}`}
+          data-modified={modified || undefined}
+          data-rejected={invalid || undefined}
+          title={value}
         >
-          <option value="">Sin filtro personalizado</option>
-          {customFilters.map((group) => (
-            <optgroup key={group.id} label={group.name}>
-              {group.options.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </CustomFilterSelect>
-        {(filter || Object.values(tableState.filters).some(hasFilter)) && (
-          <Tool
-            icon={FilterX}
-            label="Limpiar filtros"
-            onClick={() => changeQuery({ filtro: "", filtros: "" })}
-          />
-        )}
-        <DialogTrigger isOpen={columnsOpen} onOpenChange={setColumnsOpen}>
-          <Button icon={ChevronDown}>Columnas</Button>
-          <Popover className="product-sheet-column-popover" placement="bottom start" offset={4}>
-            <AriaDialog className="product-sheet-column-menu" aria-label="Columnas visibles">
-              <div className="product-sheet-column-menu-header">
-                <strong>Columnas visibles</strong>
-                <Button variant="link" disabled={hidden.length === 0} onClick={() => updateHidden([])}>
-                  Seleccionar todas
-                </Button>
-              </div>
-              <Button
-                className="product-sheet-hide-columns"
-                disabled={!range}
-                aria-keyshortcuts="Alt+Shift+H"
-                onClick={hideSelectedColumns}
-              >
-                Ocultar columnas seleccionadas <span>Alt+Mayús+H</span>
-              </Button>
-              <div className="product-sheet-column-list">
-                {allColumns.map((col) => (
-                  <CheckChoice
-                    key={col.key}
-                    checked={!hidden.includes(col.key)}
-                    disabled={!hidden.includes(col.key) && columns.length === 1}
-                    onChange={(checked) => updateHidden(checked
-                      ? hidden.filter((key) => key !== col.key)
-                      : [...hidden, col.key])}
+          {value || ""}
+          {col.key === "cantidad_solicitada" && row.excess > 0 && (
+            <SheetCellHint
+              indicator
+              label={`${count(row.excess)} unidades recibidas de más en lotes anteriores`}
+            >
+              Sobreentrega
+            </SheetCellHint>
+          )}
+        </span>
+      );
+    },
+    [currentByKey, viewDb, modifiedKeys, invalidKeys],
+  );
+  const invalidCell = useCallback(
+    (row: ProductSheetRow, col: SheetColumn) =>
+      invalidKeys.has(`${row.key}/${col.key}`),
+    [invalidKeys],
+  );
+  const toolbar = (
+    <SheetSelectionView selection={selection} snapshot={selectionSummary}>
+      {() => {
+        const { range, selected, lineIds, lotIds, orderIds, singleOrder } =
+          selectionTargets();
+        return (
+          <>
+            <div className="product-sheet-toolbar-top">
+              <div className="product-sheet-tabs" aria-label="Hojas de OC">
+                {(
+                  [
+                    ["no_autorizadas", "No autorizadas"],
+                    ["seguimiento", "En seguimiento"],
+                    ["anuladas", "Anuladas"],
+                  ] as const
+                ).map(([id, label]) => (
+                  <Button
+                    key={id}
+                    aria-pressed={view === id}
+                    variant={view === id ? "primary" : "ghost"}
+                    onClick={() => changeQuery({ vista: id })}
                   >
-                    {col.label}
-                  </CheckChoice>
+                    {label}
+                  </Button>
                 ))}
               </div>
-            </AriaDialog>
-          </Popover>
-        </DialogTrigger>
-        <ControlInput
-          className="control product-sheet-search"
-          aria-label="Buscar en la hoja de OC"
-          type="search"
-          value={params.get("q") ?? ""}
-          placeholder="Buscar en la hoja…"
-          onChange={(event) => changeQuery({ q: event.target.value })}
-        />
-      </div>
-    </>
+              <div className="inline">
+                <Button
+                  icon={Save}
+                  variant="primary"
+                  disabled={(!changes.length && !editing) || busy}
+                  onClick={() => {
+                    if (commit()) void save();
+                  }}
+                >
+                  Guardar{changes.length ? ` ${changes.length} cambios` : ""}
+                </Button>
+                <Button
+                  icon={Undo2}
+                  disabled={(!changes.length && !editing) || busy}
+                  onClick={async () => {
+                    if (
+                      await confirmAction(
+                        "¿Descartar las ediciones pendientes de la hoja?",
+                        "Descartar",
+                      )
+                    )
+                      discard();
+                  }}
+                >
+                  Descartar
+                </Button>
+                <Button
+                  icon={ChevronUp}
+                  aria-label="Ocultar barra de herramientas"
+                  onClick={() => {
+                    setCollapsed(true);
+                    try {
+                      localStorage.setItem(
+                        "gimed:ui:product-sheet-collapsed",
+                        "true",
+                      );
+                    } catch {}
+                  }}
+                />
+              </div>
+            </div>
+            <div className="product-sheet-tools">
+              <Button
+                icon={Plus}
+                onClick={() => cleanFirst(() => setCreating(true))}
+              >
+                Nueva OC
+              </Button>
+              <Button
+                icon={Plus}
+                disabled={
+                  view === "no_autorizadas" ||
+                  !lineIds.length ||
+                  selected.some((row) => row.line.estado === "anulada")
+                }
+                onClick={() => {
+                  const ids = selectionTargets().lineIds;
+                  cleanFirst(() => setNewLots(ids));
+                }}
+              >
+                Nuevo lote
+              </Button>
+              <ControlSelect
+                aria-label="Estado del lote"
+                value=""
+                disabled={!lotIds.length || busy}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  const targets = selectionTargets();
+                  if (value)
+                    cleanFirst(() => void states("lot", value, targets));
+                }}
+              >
+                <option value="">Lotes</option>
+                <option value="cerrado">Cerrar lotes</option>
+                <option value="anulado">Anular lotes</option>
+                <option value="en_seguimiento">Reabrir lotes</option>
+              </ControlSelect>
+              <ControlSelect
+                aria-label="Seguimiento del producto"
+                value=""
+                disabled={view === "no_autorizadas" || !lineIds.length || busy}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  const targets = selectionTargets();
+                  if (value)
+                    cleanFirst(() => void states("line", value, targets));
+                }}
+              >
+                <option value="">Productos</option>
+                <option value="cerrada">Cerrar productos</option>
+                <option value="anulada">Anular productos</option>
+                <option value="en_seguimiento">Reabrir productos</option>
+              </ControlSelect>
+              <Button
+                disabled={view !== "no_autorizadas" || !orderIds.length || busy}
+                onClick={() => {
+                  const ids = selectionTargets().orderIds;
+                  cleanFirst(() => setAuthorize(ids));
+                }}
+              >
+                Autorizar{orderIds.length ? ` ${orderIds.length} OC` : ""}
+              </Button>
+              <Tool
+                icon={FileText}
+                label="Ver orden escaneada"
+                disabled={
+                  !singleOrder ||
+                  !db.documento.some(
+                    (doc) =>
+                      doc.tipo_entidad === "orden_compra" &&
+                      doc.id_entidad === singleOrder.id &&
+                      doc.tipo_documento === "orden_compra_escaneada",
+                  )
+                }
+                onClick={() => {
+                  const { singleOrder } = selectionTargets();
+                  const doc = db.documento.find(
+                    (doc) =>
+                      doc.tipo_entidad === "orden_compra" &&
+                      doc.id_entidad === singleOrder?.id &&
+                      doc.tipo_documento === "orden_compra_escaneada",
+                  );
+                  if (doc)
+                    cleanFirst(() =>
+                      window.open(
+                        `/api/documents/${doc.id}/content`,
+                        "_blank",
+                        "noopener",
+                      ),
+                    );
+                }}
+              />
+              <Tool
+                icon={Printer}
+                label="Imprimir"
+                disabled={!singleOrder}
+                onClick={() => {
+                  const order = selectionTargets().singleOrder;
+                  if (order) cleanFirst(() => printSelected(order.id));
+                }}
+              />
+              <Tool
+                icon={Eye}
+                label="Ver detalle"
+                disabled={!singleOrder}
+                onClick={() => {
+                  const order = selectionTargets().singleOrder;
+                  if (order) cleanFirst(() => navigate(`ordenes/${order.id}`));
+                }}
+              />
+              <Tool
+                icon={Pencil}
+                label="Editar orden"
+                disabled={!singleOrder}
+                onClick={() => {
+                  const order = selectionTargets().singleOrder;
+                  if (order) cleanFirst(() => setEditingOrder(order.id));
+                }}
+              />
+              <Button
+                icon={Copy}
+                aria-label="Copiar rango"
+                title="Copiar rango (Ctrl+C)"
+                disabled={!range}
+                onClick={() => copy()}
+              />
+              <Button
+                icon={ClipboardPaste}
+                aria-label="Pegar rango"
+                title="Pegar rango (Ctrl+V)"
+                disabled={!range}
+                onClick={() =>
+                  navigator.clipboard
+                    .readText()
+                    .then(paste)
+                    .catch(() =>
+                      notify("Usa Ctrl+V sobre la hoja para pegar.", true),
+                    )
+                }
+              />
+              <CustomFilterSelect
+                style={{ width: 200, flex: "0 0 200px" }}
+                aria-label="Filtro personalizado de la hoja"
+                value={filter}
+                onChange={(event) =>
+                  changeQuery({ filtro: event.target.value })
+                }
+              >
+                <option value="">Sin filtro personalizado</option>
+                {customFilters.map((group) => (
+                  <optgroup key={group.id} label={group.name}>
+                    {group.options.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </CustomFilterSelect>
+              {(filter ||
+                Object.values(tableState.filters).some(hasFilter)) && (
+                <Tool
+                  icon={FilterX}
+                  label="Limpiar filtros"
+                  onClick={() => changeQuery({ filtro: "", filtros: "" })}
+                />
+              )}
+              <DialogTrigger isOpen={columnsOpen} onOpenChange={setColumnsOpen}>
+                <Button icon={ChevronDown}>Columnas</Button>
+                <Popover
+                  className="product-sheet-column-popover"
+                  placement="bottom start"
+                  offset={4}
+                >
+                  <AriaDialog
+                    className="product-sheet-column-menu"
+                    aria-label="Columnas visibles"
+                    ref={(node) => {
+                      columnsDialog.current = node;
+                      if (!node) return;
+                      const dismiss = (event: KeyboardEvent) => {
+                        if (event.key === "Escape") {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setColumnsOpen(false);
+                        }
+                      };
+                      node.addEventListener("keydown", dismiss, true);
+                      return () => {
+                        columnsDialog.current = null;
+                        node.removeEventListener("keydown", dismiss, true);
+                      };
+                    }}
+                  >
+                    <div className="product-sheet-column-menu-header">
+                      <strong>Columnas visibles</strong>
+                      <Button
+                        variant="link"
+                        disabled={hidden.length === 0}
+                        onClick={() => {
+                          columnsDialog.current?.focus({ preventScroll: true });
+                          updateHidden([]);
+                        }}
+                      >
+                        Seleccionar todas
+                      </Button>
+                    </div>
+                    <Button
+                      className="product-sheet-hide-columns"
+                      disabled={!range}
+                      aria-keyshortcuts="Alt+Shift+H"
+                      onClick={hideSelectedColumns}
+                    >
+                      Ocultar columnas seleccionadas <span>Alt+Mayús+H</span>
+                    </Button>
+                    <div className="product-sheet-column-list">
+                      {allColumns.map((col) => (
+                        <CheckChoice
+                          key={col.key}
+                          checked={!hidden.includes(col.key)}
+                          disabled={
+                            !hidden.includes(col.key) && columns.length === 1
+                          }
+                          onChange={(checked) =>
+                            updateHidden(
+                              checked
+                                ? hidden.filter((key) => key !== col.key)
+                                : [...hidden, col.key],
+                            )
+                          }
+                        >
+                          {col.label}
+                        </CheckChoice>
+                      ))}
+                    </div>
+                  </AriaDialog>
+                </Popover>
+              </DialogTrigger>
+              <ControlInput
+                className="control product-sheet-search"
+                aria-label="Buscar en la hoja de OC"
+                type="search"
+                value={params.get("q") ?? ""}
+                placeholder="Buscar en la hoja…"
+                onChange={(event) => changeQuery({ q: event.target.value })}
+              />
+            </div>
+          </>
+        );
+      }}
+    </SheetSelectionView>
   );
   return (
     <section
@@ -1162,18 +1319,24 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         {changes.length
           ? `${changes.length} cambios sin guardar · ${storageError ? "Sin copia local actualizada" : "Copia local del borrador"}`
           : "Sin cambios pendientes"}
-        {view === "no_autorizadas" && orderIds.length
-          ? ` · ${orderIds.length} OC completas seleccionadas, incluidos sus renglones ocultos`
-          : selected.length
-            ? ` · ${selected.length} filas seleccionadas`
-            : ""}
+        <SheetSelectionView selection={selection} snapshot={selectionSummary}>
+          {() => {
+            const { orderIds, selected } = selectionTargets();
+            return view === "no_autorizadas" && orderIds.length
+              ? ` · ${orderIds.length} OC completas seleccionadas, incluidos sus renglones ocultos`
+              : selected.length
+                ? ` · ${selected.length} filas seleccionadas`
+                : "";
+          }}
+        </SheetSelectionView>
       </div>
       <ProductSheetGrid
-        invalid={(row, col) => invalidKeys.has(`${row.key}/${col.key}`)}
+        invalid={invalidCell}
         rows={rows}
         columns={columns}
-        range={range}
-        onRange={setRange}
+        selection={selection}
+        view={view}
+        pinnedColumn={openedColumn}
         onEdit={edit}
         editing={editing}
         editor={editor}
@@ -1183,7 +1346,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         onPaste={paste}
         onClear={clearSelection}
         onHideColumns={hideSelectedColumns}
-        selectedOrders={selectedOrders}
         renderHeader={(col) => (
           <ColumnHeader
             asContent
@@ -1207,60 +1369,20 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             }
           />
         )}
-        renderCell={(projected, col) => {
-          const row = display(projected),
-            target = sheetTarget(row, col),
-            modified = target && modifiedKeys.has(changeKey(target));
-          const invalid = invalidKeys.has(`${row.key}/${col.key}`);
-          if (col.key === "ocm")
-            return (
-              <div className="sheet-ocm-links">
-                {[...new Set(row.supply.map((item) => item.order.id))].map(
-                  (id) => {
-                    const items = row.supply.filter(
-                      (item) => item.order.id === id,
-                    );
-                    return (
-                      <SheetCellHint
-                        key={id}
-                        label={`OCM ${items[0].order.no_orden}: ${items.map((item) => `${item.material} · ${count(item.quantity)} unidades`).join("; ")}`}
-                      >
-                        {items[0].order.no_orden}
-                      </SheetCellHint>
-                    );
-                  },
-                )}
-              </div>
-            );
-          let value = sheetValue(viewDb, row, col);
-          return (
-            <span
-              className={`sheet-cell-value ${col.kind === "integer" || col.kind === "decimal" ? "num" : ""}`}
-              data-modified={modified || undefined}
-              data-rejected={invalid || undefined}
-              title={value}
-            >
-              {value || ""}
-              {col.key === "cantidad_solicitada" && row.excess > 0 && (
-                <SheetCellHint
-                  indicator
-                  label={`${count(row.excess)} unidades recibidas de más en lotes anteriores`}
-                >
-                  Sobreentrega
-                </SheetCellHint>
-              )}
-            </span>
-          );
-        }}
+        renderCell={renderCell}
       />
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
-        {range && rows[range.focus.row] && columns[range.focus.column]
-          ? `Fila ${range.focus.row + 1} de ${rows.length}, ${columns[range.focus.column].label}: ${sheetValue(viewDb, display(rows[range.focus.row]), columns[range.focus.column])}`
-          : ""}
+        <SheetSelectionView selection={selection}>
+          {(range) =>
+            range && rows[range.focus.row] && columns[range.focus.column]
+              ? `Fila ${range.focus.row + 1} de ${rows.length}, ${columns[range.focus.column].label}: ${sheetValue(viewDb, display(rows[range.focus.row]), columns[range.focus.column])}`
+              : ""
+          }
+        </SheetSelectionView>
       </div>
       <div className="product-sheet-footer">
         {rows.length} {view === "no_autorizadas" ? "renglones" : "lotes"} ·{" "}
-        {new Set(rows.map((row) => row.order.id)).size} OC
+        {orderCount} OC
       </div>
       {recovery && recoveryOpen && (
         <Dialog
@@ -1364,7 +1486,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           onClose={() => setAuthorize(null)}
           onAuthorized={() => {
             setAuthorize(null);
-            setRange(null);
+            selection.set(null);
           }}
         />
       )}

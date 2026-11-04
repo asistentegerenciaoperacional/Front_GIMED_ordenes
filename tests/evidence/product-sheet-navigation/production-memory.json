@@ -1,0 +1,133 @@
+{
+  "mode": "production",
+  "snapshots": [
+    {
+      "cycle": 1,
+      "heapMiB": 8.710643768310547,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 2,
+      "heapMiB": 8.97216796875,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 3,
+      "heapMiB": 9.159351348876953,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 4,
+      "heapMiB": 9.264019012451172,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 5,
+      "heapMiB": 9.301284790039062,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 6,
+      "heapMiB": 9.331108093261719,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 7,
+      "heapMiB": 9.3995361328125,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 8,
+      "heapMiB": 9.410961151123047,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 9,
+      "heapMiB": 9.420089721679688,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    },
+    {
+      "cycle": 10,
+      "heapMiB": 9.421066284179688,
+      "dom": {
+        "documents": 2,
+        "nodes": 1027,
+        "jsEventListeners": 255
+      },
+      "mounted": 230,
+      "rows": 23
+    }
+  ],
+  "peakMiB": 17.88723373413086,
+  "checks": [
+    "Recorrido 1: virtualización de filas y columnas acotada",
+    "Recorrido 2: virtualización de filas y columnas acotada",
+    "Recorrido 3: virtualización de filas y columnas acotada",
+    "Recorrido 4: virtualización de filas y columnas acotada",
+    "Recorrido 5: virtualización de filas y columnas acotada",
+    "Recorrido 6: virtualización de filas y columnas acotada",
+    "Recorrido 7: virtualización de filas y columnas acotada",
+    "Recorrido 8: virtualización de filas y columnas acotada",
+    "Recorrido 9: virtualización de filas y columnas acotada",
+    "Recorrido 10: virtualización de filas y columnas acotada",
+    "Los tres últimos heaps difieren menos de 10 MiB",
+    "Los nodos se estabilizan tras los recorridos",
+    "Los listeners se estabilizan tras los recorridos",
+    "Sin excepciones en diez recorridos consecutivos"
+  ],
+  "errors": []
+}

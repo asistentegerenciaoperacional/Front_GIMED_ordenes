@@ -33,7 +33,7 @@ const child = spawn(
   [
     "scripts/verify-aria-browser.mjs",
     process.argv[2] ?? "tests/product-order-sheet-virtual.browser.js",
-    "chromium",
+    process.argv[3] ?? "chromium",
   ],
   {
     env: { ...process.env, PROTOTIPO_BROWSER_SEED_FILE: file },

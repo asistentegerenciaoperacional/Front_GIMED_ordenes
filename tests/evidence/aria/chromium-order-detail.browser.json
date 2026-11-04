@@ -71,14 +71,15 @@
     "lines": 7,
     "lots": 280,
     "toggles": 4,
-    "measuredFrames": 58,
+    "measuredFrames": 55,
     "frameMedianMs": 16.700000000000045,
-    "frameP95Ms": 33.399999999999864,
-    "frameMaxMs": 50,
-    "layoutMs": 7.13,
-    "styleMs": 41.438,
-    "scriptMs": 196.17499999999998
+    "frameP95Ms": 50,
+    "frameMaxMs": 66.69999999999993,
+    "layoutMs": 6.777,
+    "styleMs": 45.11,
+    "scriptMs": 199.49900000000002
   },
+  "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-SO0WgT\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-1Edi4s\\database.json"
 }

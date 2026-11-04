@@ -1,0 +1,29 @@
+{
+  "checks": [
+    "Seguimiento muestra los lotes abierto y cerrado, excluyendo el anulado",
+    "El cierre manual explica la desviación fuera del margen",
+    "Cancelar el cierre por tolerancia no escribe",
+    "Producto en cerrada",
+    "Cerrar el producto no cierra automáticamente sus lotes",
+    "Producto en en_seguimiento",
+    "Reabrir un producto cerrado conserva los estados y datos de sus lotes",
+    "Anular los últimos lotes explica la anulación del producto",
+    "Abrir la confirmación masiva no escribe",
+    "Cancelar la anulación masiva conserva la base completa",
+    "Cancelar conserva el rango seleccionado",
+    "Producto en anulada",
+    "Anular el conjunto anula sus lotes y producto atómicamente",
+    "Anuladas conserva las tres filas con sus mismos lotes",
+    "Reabrir producto anulado explica que incluye cerrados y anulados",
+    "Cancelar la reapertura no modifica estados ni datos",
+    "Producto en en_seguimiento",
+    "Reabrir producto abre todos sus lotes conservados",
+    "Las acciones conservan íntegramente IDs, recepción, fechas, ubicación y demás datos",
+    "Anular un lote conserva activo el producto mientras queden otros",
+    "Reabrir un lote desde la hoja reactiva solo el destino y mantiene sus hermanos",
+    "Sin errores de JavaScript durante las transiciones de la hoja"
+  ],
+  "mode": "development",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-mrk1WE\\database.json"
+}

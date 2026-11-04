@@ -1,0 +1,1177 @@
+{
+  "environment": {
+    "browser": "156.0.8078.80",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "instrumentation": "CDP trusted keydown, explicit timestamp, independent sender, frame/long-task observers, commit hook, heap before/after forced GC; CPU profile only fast-vertical"
+  },
+  "initial": {
+    "heap": {
+      "usedSize": 8339784,
+      "totalSize": 9244672,
+      "embedderHeapUsedSize": 2682224,
+      "backingStorageSize": 956974
+    },
+    "dom": {
+      "documents": 2,
+      "nodes": 1039,
+      "jsEventListeners": 242
+    },
+    "metrics": {
+      "Timestamp": 21342.846967,
+      "AudioHandlers": 0,
+      "AudioWorkletProcessors": 0,
+      "Documents": 2,
+      "Frames": 1,
+      "JSEventListeners": 242,
+      "LayoutObjects": 932,
+      "MediaKeySessions": 0,
+      "MediaKeys": 0,
+      "Nodes": 1039,
+      "Resources": 5,
+      "ContextLifecycleStateObservers": 6,
+      "V8PerContextDatas": 2,
+      "WorkerGlobalScopes": 0,
+      "UACSSResources": 0,
+      "RTCPeerConnections": 0,
+      "ResourceFetchers": 2,
+      "AdSubframes": 0,
+      "DetachedScriptStates": 0,
+      "ArrayBufferContents": 0,
+      "LayoutCount": 1,
+      "RecalcStyleCount": 4,
+      "LayoutDuration": 0.000982,
+      "RecalcStyleDuration": 0.000807,
+      "DevToolsCommandDuration": 0.003187,
+      "ScriptDuration": 0.008054,
+      "V8CompileDuration": 0,
+      "TaskDuration": 0.034999,
+      "TaskOtherDuration": 0.021969,
+      "ThreadTime": 0.035096,
+      "ProcessTime": 0.462506,
+      "JSHeapUsedSize": 8339784,
+      "JSHeapTotalSize": 9244672,
+      "FirstMeaningfulPaint": 21341.146005,
+      "DomContentLoaded": 21340.70791,
+      "NavigationStart": 21340.667876
+    },
+    "visible": {
+      "rows": 23,
+      "cells": 230,
+      "allDom": 728,
+      "active": {
+        "row": 5,
+        "column": 0
+      }
+    }
+  },
+  "final": {
+    "heap": {
+      "usedSize": 10361476,
+      "totalSize": 11149312,
+      "embedderHeapUsedSize": 4060528,
+      "backingStorageSize": 988296
+    },
+    "dom": {
+      "documents": 2,
+      "nodes": 1211,
+      "jsEventListeners": 255
+    },
+    "metrics": {
+      "Timestamp": 21375.796309,
+      "AudioHandlers": 0,
+      "AudioWorkletProcessors": 0,
+      "Documents": 2,
+      "Frames": 1,
+      "JSEventListeners": 255,
+      "LayoutObjects": 1106,
+      "MediaKeySessions": 0,
+      "MediaKeys": 0,
+      "Nodes": 1211,
+      "Resources": 5,
+      "ContextLifecycleStateObservers": 9,
+      "V8PerContextDatas": 2,
+      "WorkerGlobalScopes": 0,
+      "UACSSResources": 0,
+      "RTCPeerConnections": 0,
+      "ResourceFetchers": 2,
+      "AdSubframes": 0,
+      "DetachedScriptStates": 0,
+      "ArrayBufferContents": 0,
+      "LayoutCount": 844,
+      "RecalcStyleCount": 2407,
+      "LayoutDuration": 0.259911,
+      "RecalcStyleDuration": 0.290473,
+      "DevToolsCommandDuration": 0.119499,
+      "ScriptDuration": 1.088273,
+      "V8CompileDuration": 0,
+      "TaskDuration": 4.670537,
+      "TaskOtherDuration": 2.912381,
+      "ThreadTime": 4.638122,
+      "ProcessTime": 7.341365,
+      "JSHeapUsedSize": 10361476,
+      "JSHeapTotalSize": 11149312,
+      "FirstMeaningfulPaint": 21341.146005,
+      "DomContentLoaded": 21340.70791,
+      "NavigationStart": 21340.667876
+    },
+    "visible": {
+      "rows": 29,
+      "cells": 290,
+      "allDom": 862,
+      "active": {
+        "row": 749,
+        "column": 0
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "name": "paced-vertical",
+      "hz": 8,
+      "shift": false,
+      "keysSent": 24,
+      "keysCaptured": 24,
+      "trustedKeys": 24,
+      "enqueueMs": 2882.9,
+      "drainMs": 1.1,
+      "elapsedMs": 3423.8,
+      "expected": {
+        "row": 29,
+        "column": 0
+      },
+      "actual": {
+        "row": 29,
+        "column": 0
+      },
+      "commits": 26,
+      "commitsPerKey": 1.08,
+      "observedTransitions": 24,
+      "inputDelayMs": {
+        "p50": 1.4,
+        "p95": 2,
+        "max": 2
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.9
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 8506704,
+        "peak": 9566420,
+        "after": 9566420,
+        "afterGc": 8620756
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1039,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1332,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 29,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 118.12999999999998,
+        "scriptMs": 21.567000000000004,
+        "layoutMs": 3.8659999999999997,
+        "styleMs": 7.178999999999999,
+        "layouts": 24
+      }
+    },
+    {
+      "name": "fast-horizontal",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 144,
+      "keysCaptured": 144,
+      "trustedKeys": 144,
+      "enqueueMs": 2382.6,
+      "drainMs": 4.7,
+      "elapsedMs": 2960,
+      "expected": {
+        "row": 29,
+        "column": 0
+      },
+      "actual": {
+        "row": 29,
+        "column": 0
+      },
+      "commits": 146,
+      "commitsPerKey": 1.01,
+      "observedTransitions": 118,
+      "inputDelayMs": {
+        "p50": 2,
+        "p95": 6.4,
+        "max": 8.8
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.8
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 8640360,
+        "peak": 16987992,
+        "after": 15987368,
+        "afterGc": 9272344
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 4700,
+          "jsEventListeners": 589
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1206,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 29,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 922.438,
+        "scriptMs": 228.543,
+        "layoutMs": 118.442,
+        "styleMs": 45.943,
+        "layouts": 118
+      }
+    },
+    {
+      "name": "fast-vertical",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 180,
+      "keysCaptured": 180,
+      "trustedKeys": 180,
+      "enqueueMs": 2984.3,
+      "drainMs": 1.1,
+      "elapsedMs": 3539.7,
+      "expected": {
+        "row": 209,
+        "column": 0
+      },
+      "actual": {
+        "row": 209,
+        "column": 0
+      },
+      "commits": 186,
+      "commitsPerKey": 1.03,
+      "observedTransitions": 162,
+      "inputDelayMs": {
+        "p50": 1.4,
+        "p95": 4.5,
+        "max": 8.8
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.8
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9291584,
+        "peak": 12818652,
+        "after": 12012196,
+        "afterGc": 9393136
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1206,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 2824,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 209,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 727.581,
+        "scriptMs": 141.65,
+        "layoutMs": 33.08000000000001,
+        "styleMs": 58.707,
+        "layouts": 162
+      },
+      "cpu": {
+        "sampleTimeMs": 3343.03,
+        "topSelf": [
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "selfMs": 489.85999999999945,
+            "inclusiveMs": 489.85999999999945
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/assets/product-order-sheet-KdbmlNqD.js",
+            "line": 1,
+            "selfMs": 79.923,
+            "inclusiveMs": 105.53700000000003
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "selfMs": 14.046999999999999,
+            "inclusiveMs": 14.046999999999999
+          },
+          {
+            "function": "removeChild",
+            "url": "",
+            "line": 0,
+            "selfMs": 7.9559999999999995,
+            "inclusiveMs": 7.9559999999999995
+          },
+          {
+            "function": "ju",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 4.683,
+            "inclusiveMs": 15.728
+          },
+          {
+            "function": "requestAnimationFrame",
+            "url": "",
+            "line": 0,
+            "selfMs": 4.615,
+            "inclusiveMs": 4.615
+          },
+          {
+            "function": "jn",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 4.473,
+            "inclusiveMs": 4.473
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 4.432,
+            "inclusiveMs": 71.24300000000001
+          },
+          {
+            "function": "setAttribute",
+            "url": "",
+            "line": 0,
+            "selfMs": 4.34,
+            "inclusiveMs": 4.34
+          },
+          {
+            "function": "hasAttribute",
+            "url": "",
+            "line": 0,
+            "selfMs": 4.005000000000001,
+            "inclusiveMs": 4.005000000000001
+          },
+          {
+            "function": "H",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 3.2270000000000003,
+            "inclusiveMs": 3.2270000000000003
+          },
+          {
+            "function": "X",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 10,
+            "selfMs": 3.167,
+            "inclusiveMs": 5.9639999999999995
+          },
+          {
+            "function": "sp",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 10,
+            "selfMs": 3.089,
+            "inclusiveMs": 3.089
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "selfMs": 3.089,
+            "inclusiveMs": 3.089
+          },
+          {
+            "function": "(anonymous)",
+            "url": "",
+            "line": 0,
+            "selfMs": 3.0839999999999996,
+            "inclusiveMs": 3.0839999999999996
+          },
+          {
+            "function": "lc",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 3.075,
+            "inclusiveMs": 3.075
+          },
+          {
+            "function": "t",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 2.817,
+            "inclusiveMs": 2.817
+          },
+          {
+            "function": "Mf",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 2.79,
+            "inclusiveMs": 49.151
+          },
+          {
+            "function": "getAttribute",
+            "url": "",
+            "line": 0,
+            "selfMs": 1.911,
+            "inclusiveMs": 1.911
+          },
+          {
+            "function": "queueMicrotask",
+            "url": "",
+            "line": 0,
+            "selfMs": 1.755,
+            "inclusiveMs": 1.755
+          },
+          {
+            "function": "getSnapshot",
+            "url": "/assets/product-order-sheet-KdbmlNqD.js",
+            "line": 1,
+            "selfMs": 1.665,
+            "inclusiveMs": 1.665
+          },
+          {
+            "function": "zi",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.615,
+            "inclusiveMs": 1.615
+          },
+          {
+            "function": "Ft",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.59,
+            "inclusiveMs": 1.59
+          },
+          {
+            "function": "fl",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.59,
+            "inclusiveMs": 1.59
+          },
+          {
+            "function": "es",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.587,
+            "inclusiveMs": 9.407
+          },
+          {
+            "function": "me",
+            "url": "/assets/product-order-sheet-KdbmlNqD.js",
+            "line": 1,
+            "selfMs": 1.584,
+            "inclusiveMs": 3.122
+          },
+          {
+            "function": "publish",
+            "url": "/assets/product-order-sheet-KdbmlNqD.js",
+            "line": 1,
+            "selfMs": 1.574,
+            "inclusiveMs": 40.013
+          },
+          {
+            "function": "x",
+            "url": "/assets/product-order-sheet-KdbmlNqD.js",
+            "line": 1,
+            "selfMs": 1.565,
+            "inclusiveMs": 5.57
+          },
+          {
+            "function": "(anonymous)",
+            "url": "",
+            "line": 14,
+            "selfMs": 1.56,
+            "inclusiveMs": 4.649
+          },
+          {
+            "function": "preventDefault",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.56,
+            "inclusiveMs": 1.56
+          }
+        ],
+        "topInclusive": [
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "selfMs": 489.85999999999945,
+            "inclusiveMs": 489.85999999999945
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/assets/product-order-sheet-KdbmlNqD.js",
+            "line": 1,
+            "selfMs": 79.923,
+            "inclusiveMs": 105.53700000000003
+          },
+          {
+            "function": "(anonymous)",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 4.432,
+            "inclusiveMs": 71.24300000000001
+          },
+          {
+            "function": "Ld",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 51.263000000000005
+          },
+          {
+            "function": "Mf",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 2.79,
+            "inclusiveMs": 49.151
+          },
+          {
+            "function": "Ff",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 46.361000000000004
+          },
+          {
+            "function": "Af",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 46.361000000000004
+          },
+          {
+            "function": "publish",
+            "url": "/assets/product-order-sheet-KdbmlNqD.js",
+            "line": 1,
+            "selfMs": 1.574,
+            "inclusiveMs": 40.013
+          },
+          {
+            "function": "of",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 29.793000000000006
+          },
+          {
+            "function": "af",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 29.793000000000006
+          },
+          {
+            "function": "Rd",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 29.793000000000006
+          },
+          {
+            "function": "$d",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 21.47
+          },
+          {
+            "function": "Xd",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 21.47
+          },
+          {
+            "function": "Yd",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 21.47
+          },
+          {
+            "function": "Yf",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.316,
+            "inclusiveMs": 19.119
+          },
+          {
+            "function": "bh",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 10,
+            "selfMs": 0,
+            "inclusiveMs": 19.119
+          },
+          {
+            "function": "ku",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 15.728
+          },
+          {
+            "function": "ju",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 4.683,
+            "inclusiveMs": 15.728
+          },
+          {
+            "function": "lf",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 15.728
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "selfMs": 14.046999999999999,
+            "inclusiveMs": 14.046999999999999
+          },
+          {
+            "function": "pl",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 13.998
+          },
+          {
+            "function": "yh",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 10,
+            "selfMs": 0,
+            "inclusiveMs": 12.845
+          },
+          {
+            "function": "Kc",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.386,
+            "inclusiveMs": 10.793
+          },
+          {
+            "function": "es",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.587,
+            "inclusiveMs": 9.407
+          },
+          {
+            "function": "Wf",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 1.162,
+            "inclusiveMs": 8.921
+          },
+          {
+            "function": "removeChild",
+            "url": "",
+            "line": 0,
+            "selfMs": 7.9559999999999995,
+            "inclusiveMs": 7.9559999999999995
+          },
+          {
+            "function": "wu",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 7.9559999999999995
+          },
+          {
+            "function": "Cu",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 7.9559999999999995
+          },
+          {
+            "function": "gu",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 7.638000000000001
+          },
+          {
+            "function": "Iu",
+            "url": "/assets/index-XHpHWiuz.js",
+            "line": 9,
+            "selfMs": 0,
+            "inclusiveMs": 7.638000000000001
+          }
+        ]
+      }
+    },
+    {
+      "name": "left-edge",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 120,
+      "keysCaptured": 120,
+      "trustedKeys": 120,
+      "enqueueMs": 1991.4,
+      "drainMs": 0.6,
+      "elapsedMs": 2515,
+      "expected": {
+        "row": 209,
+        "column": 0
+      },
+      "actual": {
+        "row": 209,
+        "column": 0
+      },
+      "commits": 0,
+      "commitsPerKey": 0,
+      "observedTransitions": 0,
+      "inputDelayMs": {
+        "p50": 1.5,
+        "p95": 2.4,
+        "max": 3.2
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.9,
+        "max": 17.1
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9411884,
+        "peak": 10211208,
+        "after": 10211208,
+        "afterGc": 9394420
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 209,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 61.42200000000009,
+        "scriptMs": 15.039999999999997,
+        "layoutMs": 0,
+        "styleMs": 0,
+        "layouts": 0
+      }
+    },
+    {
+      "name": "sustained-vertical-1",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 150,
+      "keysCaptured": 150,
+      "trustedKeys": 150,
+      "enqueueMs": 4970.2,
+      "drainMs": 1.1,
+      "elapsedMs": 5520.9,
+      "expected": {
+        "row": 359,
+        "column": 0
+      },
+      "actual": {
+        "row": 359,
+        "column": 0
+      },
+      "commits": 165,
+      "commitsPerKey": 1.1,
+      "observedTransitions": 149,
+      "inputDelayMs": {
+        "p50": 1.4,
+        "p95": 2.5,
+        "max": 3.1
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 17.4
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9413168,
+        "peak": 11267900,
+        "after": 11178036,
+        "afterGc": 9479960
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1501,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 359,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 678.1899999999998,
+        "scriptMs": 119.64100000000005,
+        "layoutMs": 27.945999999999998,
+        "styleMs": 53.216,
+        "layouts": 149
+      }
+    },
+    {
+      "name": "sustained-vertical-2",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 150,
+      "keysCaptured": 150,
+      "trustedKeys": 150,
+      "enqueueMs": 4976.2,
+      "drainMs": 1,
+      "elapsedMs": 5532.3,
+      "expected": {
+        "row": 509,
+        "column": 0
+      },
+      "actual": {
+        "row": 509,
+        "column": 0
+      },
+      "commits": 169,
+      "commitsPerKey": 1.13,
+      "observedTransitions": 150,
+      "inputDelayMs": {
+        "p50": 1.3,
+        "p95": 2.2,
+        "max": 2.9
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.8
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9498708,
+        "peak": 11404236,
+        "after": 10980768,
+        "afterGc": 9518796
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1354,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 509,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 653.4779999999998,
+        "scriptMs": 111.1669999999999,
+        "layoutMs": 27.334999999999997,
+        "styleMs": 51.209,
+        "layouts": 150
+      }
+    },
+    {
+      "name": "sustained-vertical-3",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 150,
+      "keysCaptured": 150,
+      "trustedKeys": 150,
+      "enqueueMs": 4967.5,
+      "drainMs": 0.7,
+      "elapsedMs": 5521.4,
+      "expected": {
+        "row": 659,
+        "column": 0
+      },
+      "actual": {
+        "row": 659,
+        "column": 0
+      },
+      "commits": 168,
+      "commitsPerKey": 1.12,
+      "observedTransitions": 150,
+      "inputDelayMs": {
+        "p50": 1.3,
+        "p95": 2,
+        "max": 3
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 17
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9537544,
+        "peak": 11297868,
+        "after": 10990052,
+        "afterGc": 9525616
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1354,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 659,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 645.2019999999999,
+        "scriptMs": 108.70400000000002,
+        "layoutMs": 27.43799999999999,
+        "styleMs": 51.22100000000002,
+        "layouts": 150
+      }
+    },
+    {
+      "name": "shift-range",
+      "hz": 30,
+      "shift": true,
+      "keysSent": 90,
+      "keysCaptured": 90,
+      "trustedKeys": 90,
+      "enqueueMs": 2974.9,
+      "drainMs": 1.8,
+      "elapsedMs": 3525.3,
+      "expected": {
+        "row": 749,
+        "column": 0
+      },
+      "actual": {
+        "row": 749,
+        "column": 0
+      },
+      "commits": 180,
+      "commitsPerKey": 2,
+      "observedTransitions": 90,
+      "inputDelayMs": {
+        "p50": 1.3,
+        "p95": 2.2,
+        "max": 2.7
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 17
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9544364,
+        "peak": 22869796,
+        "after": 22869796,
+        "afterGc": 9874548
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1501,
+          "jsEventListeners": 475
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 749,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 668.024,
+        "scriptMs": 333.83400000000006,
+        "layoutMs": 20.822000000000006,
+        "styleMs": 21.82499999999998,
+        "layouts": 90
+      }
+    }
+  ],
+  "errors": [],
+  "writes": []
+}

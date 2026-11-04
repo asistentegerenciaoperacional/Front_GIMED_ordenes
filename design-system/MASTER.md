@@ -2,7 +2,7 @@
 
 Registro de las decisiones visuales implementadas y verificadas. Se aplica a una herramienta de operación con tablas, formularios y seguimiento.
 
-Actualizado el 27 de octubre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
+Actualizado el 3 de noviembre de 2026. Complementa la [cobertura](../COBERTURA.md) y las [evidencias de verificación](../VERIFICACION.md).
 
 ## Bases
 
@@ -16,7 +16,7 @@ Toda interfaz interactiva debe usar la capa compartida basada en **React Aria Co
 - Fechas: campo continuo `dd/mm/aaaa` con separadores automáticos, edición y pegado, más `Popover` y `Calendar`. Conservar fechas parciales hasta que puedan validarse y señalar las inexistentes.
 - Diálogos y navegación flotante: `ModalOverlay`, `Modal` y `Dialog`. React Aria controla foco, cierre, apilamiento y bloqueo del fondo. Las confirmaciones de eliminación, navegación y descarte usan el diálogo compartido. Un diálogo anidado no debe enviar el formulario exterior.
 - Casillas, filtros, ayudas, pestañas y desplegados: `CheckboxGroup`, `Checkbox`, `Popover`, `Tooltip`, `Tabs` y `Disclosure`. Los filtros de columna son no modales y cierran al salir con Tab; los menús de filtros personalizados usan `MenuTrigger`, `Menu`, `MenuSection` y `MenuItem` con selección exclusiva. Los formularios modales retienen el foco. La selección de recepciones debe mantener el desplazamiento.
-- Tablas: todas las tablas operativas, históricas, de lotes e impresión se componen con `Table`, `TableHeader`, `Column`, `TableBody`, `Row` y `Cell`, mediante `DataTable`. Mantener columnas, ordenamiento, filtros, paginación, acciones agrupadas y formato de impresión. Las flechas recorren filas y celdas según React Aria; Tab permite entrar y salir de la tabla.
+- Tablas: las tablas operativas, históricas, de lotes e impresión se componen con `Table`, `TableHeader`, `Column`, `TableBody`, `Row` y `Cell`, mediante `DataTable`. La hoja alternativa de OC de productos constituye la excepción estructural y de navegación descrita en su apartado; conserva los controles compartidos. Mantener columnas, ordenamiento, filtros, paginación, acciones agrupadas y formato de impresión. Las flechas recorren filas y celdas según React Aria en las tablas generales; Tab permite entrar y salir de la tabla.
 
 Los menús de opciones de formularios y autocompletados son compactos: superficie blanca, borde sencillo, separación reducida, selección azul y texto blanco. Los filtros personalizados siguen el estándar específico siguiente. Comparten tipografía, tamaños y tokens existentes, sin un tema visual distinto por pantalla. Deben mostrarse foco visible, selección, errores, bloqueo y carga. Teclado, cierre y posicionamiento pertenecen a React Aria; no duplicar esos mecanismos con listeners o mediciones propios.
 
@@ -372,7 +372,7 @@ Especificación de datos, recuperación y pruebas: [CODIGOS-BARRAS.md](../CODIGO
 
 Usa el ancho disponible, una cinta compacta de dos filas en escritorio y ninguna tarjeta de resumen. Las acciones agrupan creación, lotes, seguimiento del producto, autorización, documentos, impresión, edición, portapapeles, filtros y columnas. Los iconos tienen nombre accesible y tooltip. La cinta se oculta y recupera desde un control siempre disponible. Los filtros conservan el estándar global y los encabezados reutilizan `ColumnHeader`.
 
-El cuerpo constituye una excepción de densidad: texto de 12 px, filas de 32 px, bordes finos y cifras alineadas a la derecha. Los encabezados permanecen visibles verticalmente; todas las columnas se desplazan horizontalmente. Sin paginación: se montan las filas visibles y unas seis de margen por lado, comunicando total y posiciones globales a las ayudas de accesibilidad. En móvil el desplazamiento es interno.
+El cuerpo constituye una excepción de densidad: texto de 14 px, filas de 32 px, bordes finos y cifras alineadas a la derecha. Los encabezados permanecen visibles verticalmente; todas las columnas se desplazan horizontalmente. Sin paginación: se montan las filas visibles y unas seis de margen por lado, comunicando total y posiciones globales a las ayudas de accesibilidad. En móvil el desplazamiento es interno.
 
 En seguimiento presenta lotes abiertos y cerrados de OC autorizadas; Anuladas presenta sus lotes anulados. Blanco representa seguimiento; verde suave (`#ecfdf3`), cierre; rojo suave (`#fff1f2`), anulación. La selección añade bordes azules y conserva esos colores. El estado también figura en la etiqueta accesible de la fila. No se añaden columnas de estado de cabecera o renglón. No autorizadas presenta un registro por renglón con nueve columnas; las otras hojas tienen las 24 columnas de [HOJA-OC-PRODUCTOS.md](../HOJA-OC-PRODUCTOS.md). La elección de columnas se recuerda por hoja y siempre queda una visible.
 
@@ -388,6 +388,12 @@ El ciclo global conserva IDs y datos al anular o reabrir. La confirmación del �
 
 ### Respuesta de la hoja y colecciones extensas
 
-Los cambios de consulta, hoja, columnas, borrador y datos guardados deben mantener la interfaz operable sin recarga. Validar la aplicación tanto en producción como en desarrollo con StrictMode. Los modelos de celdas deben soportar inspección de propiedades ajenas a las columnas sin efectos ni excepciones; los cálculos se hacen bajo demanda y los filtros solo leen columnas activas. Conservar modelos y referencias cuando no cambian sus datos, e indexar los marcadores de edición/error. El scroll cambia la ventana únicamente cuando cruza una fila.
+Los cambios de consulta, hoja, columnas, borrador y datos guardados deben mantener la interfaz operable sin recarga. Validar la aplicación tanto en producción como en desarrollo con StrictMode. Los modelos de celdas deben soportar inspección de propiedades ajenas a las columnas sin efectos ni excepciones; los cálculos se hacen bajo demanda y los filtros solo leen columnas activas. Conservar modelos y referencias cuando no cambian sus datos, e indexar los marcadores de edición/error.
+
+Esta hoja utiliza una tabla HTML con semántica `grid`, filas/celdas memoizadas y controles React Aria dentro de sus celdas y encabezados. La excepción evita reconstruir la colección por cada movimiento; el `DataTable` compartido permanece independiente. El foco de navegación pertenece al grid y su celda activa debe estar conectada y correctamente referenciada. Totales, índices globales y `aria-sort` deben describir la matriz completa, aunque parte del DOM esté desmontada.
+
+La selección pertenece a un controlador por instancia: procesa cada movimiento sincrónicamente y publica su representación como máximo una vez por frame. Las acciones leen el destino lógico más reciente. El cursor no invalida el contenido y los límites inmóviles no publican cambios. La capa de selección es la única propietaria de sus marcas visuales/accesibles; React administra contenido y editores. Cambiar consulta, hoja o columnas cancela los frames y arrastres pendientes y limpia la selección.
+
+La ventana vertical se conserva mientras tenga al menos dos filas de margen; al renovarse restablece seis por lado. Horizontalmente se montan las columnas visibles y una adicional por lado, manteniendo el ancho completo con espacios de presentación excluidos de accesibilidad. Un editor o encabezado con filtro abierto conserva su montaje hasta terminar la interacción, sin fijarse visualmente ni montar filas/columnas intermedias. El desplazamiento es inmediato, se agrupa por frame y utiliza una sola operación de revelado. Las referencias DOM, suscripciones y listeners se liberan al desmontar.
 
 En menús de filtros con más de 50 valores se muestran grupos de 50 con Anterior/Siguiente y conteo. Buscar abarca todas las opciones y las selecciones sobreviven al cambio de grupo. En resúmenes extensos se montan hasta 50 enlaces de error, con acceso al resto y localización de su celda. Las filas de datos siguen sin paginación: su ventana virtual, selección y borrador conservan el estándar anterior. El aviso de error mantiene su identidad hasta que cambian los errores para no repetir el movimiento de foco.

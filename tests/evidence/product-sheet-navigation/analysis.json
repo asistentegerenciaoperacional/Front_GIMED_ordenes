@@ -1,0 +1,1121 @@
+{
+  "head": "ef493cbb49bb6f5b48d27fb49075150ed2be452d",
+  "date": "2026-11-03T21:05:33.476Z",
+  "host": {
+    "cpu": "Intel(R) Core(TM) i5-14500",
+    "ramBytes": 16833298432
+  },
+  "chosen": "B",
+  "sourceHashes": {
+    "src/product-order-sheet.tsx": "c447db6727fd2d6d1b80c85a5d2198ca2f7c73806db1dd9a58182cc293d79a14",
+    "src/components/product-sheet-grid.tsx": "a54ac59e01ba5b280d90fb9cda8def23951b7be15347b18e05cb7c8c366983af",
+    "src/components/product-sheet-table.tsx": "4db5818c12ec3d46b6ebaf3c19a85954aa35b1fcded5ec8f969cf52a3317225c",
+    "src/product-sheet-selection.ts": "a38fc949a014e6b9b7bf1af423433adc7a234ac43333e41c8ff2ba910af088a0",
+    "src/components/sheet-selection-view.tsx": "a5e67a7b24ebe0934d02f65434823787015b4a4662016af340552807ffea2aca",
+    "src/product-order-sheet.css": "1c0aee1bfd9d89842494bbefb7373f788fa97de97eaa6ab9ccd23076f845bec2",
+    "src/components/data-table.tsx": "5e399e2ecdbd8cd15ef8bb8ab74c6cb839493cb82b979f8c998518a8a4cefab9"
+  },
+  "modes": [
+    {
+      "mode": "production",
+      "browser": "156.0.8078.80",
+      "budgets": {
+        "input": 50,
+        "drain": 150,
+        "max": 500
+      },
+      "phases": [
+        {
+          "name": "horizontal",
+          "beforeKeys": 144,
+          "afterKeys": 144,
+          "beforeInputP95Ms": 7092.0999999996275,
+          "beforeDrainMs": 7509.741499999999,
+          "inputP95MedianMs": 7.800000000745058,
+          "drainMedianMs": 4.365799999999581,
+          "drainMaxMs": 5.385000000000218
+        },
+        {
+          "name": "vertical",
+          "beforeKeys": 180,
+          "afterKeys": 180,
+          "beforeInputP95Ms": 8633.099999999627,
+          "beforeDrainMs": 9094.974800000002,
+          "inputP95MedianMs": 5.699999999254942,
+          "drainMedianMs": 1.8286000000007334,
+          "drainMaxMs": 3.1599999999998545
+        }
+      ],
+      "memoryTail": [
+        {
+          "cycle": 8,
+          "heapMiB": 9.410961151123047,
+          "dom": {
+            "documents": 2,
+            "nodes": 1027,
+            "jsEventListeners": 255
+          },
+          "mounted": 230,
+          "rows": 23
+        },
+        {
+          "cycle": 9,
+          "heapMiB": 9.420089721679688,
+          "dom": {
+            "documents": 2,
+            "nodes": 1027,
+            "jsEventListeners": 255
+          },
+          "mounted": 230,
+          "rows": 23
+        },
+        {
+          "cycle": 10,
+          "heapMiB": 9.421066284179688,
+          "dom": {
+            "documents": 2,
+            "nodes": 1027,
+            "jsEventListeners": 255
+          },
+          "mounted": 230,
+          "rows": 23
+        }
+      ],
+      "memoryPeakMiB": 17.88723373413086,
+      "profile": {
+        "beforePeakHeapMiB": 215.58713912963867,
+        "afterPeakHeapMiB": 21.81033706665039,
+        "beforeVertical": {
+          "tasksMs": 13630.794,
+          "scriptMs": 13432.706,
+          "layoutMs": 26.535999999999998,
+          "styleMs": 17.334000000000003,
+          "layouts": 183
+        },
+        "afterVertical": {
+          "tasksMs": 727.581,
+          "scriptMs": 141.65,
+          "layoutMs": 33.08000000000001,
+          "styleMs": 58.707,
+          "layouts": 162
+        },
+        "cpu": {
+          "sampleTimeMs": 3343.03,
+          "topSelf": [
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "selfMs": 489.85999999999945,
+              "inclusiveMs": 489.85999999999945
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/assets/product-order-sheet-KdbmlNqD.js",
+              "line": 1,
+              "selfMs": 79.923,
+              "inclusiveMs": 105.53700000000003
+            },
+            {
+              "function": "(garbage collector)",
+              "url": "",
+              "line": 0,
+              "selfMs": 14.046999999999999,
+              "inclusiveMs": 14.046999999999999
+            },
+            {
+              "function": "removeChild",
+              "url": "",
+              "line": 0,
+              "selfMs": 7.9559999999999995,
+              "inclusiveMs": 7.9559999999999995
+            },
+            {
+              "function": "ju",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 4.683,
+              "inclusiveMs": 15.728
+            },
+            {
+              "function": "requestAnimationFrame",
+              "url": "",
+              "line": 0,
+              "selfMs": 4.615,
+              "inclusiveMs": 4.615
+            },
+            {
+              "function": "jn",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 4.473,
+              "inclusiveMs": 4.473
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 4.432,
+              "inclusiveMs": 71.24300000000001
+            },
+            {
+              "function": "setAttribute",
+              "url": "",
+              "line": 0,
+              "selfMs": 4.34,
+              "inclusiveMs": 4.34
+            },
+            {
+              "function": "hasAttribute",
+              "url": "",
+              "line": 0,
+              "selfMs": 4.005000000000001,
+              "inclusiveMs": 4.005000000000001
+            },
+            {
+              "function": "H",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 3.2270000000000003,
+              "inclusiveMs": 3.2270000000000003
+            },
+            {
+              "function": "X",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 10,
+              "selfMs": 3.167,
+              "inclusiveMs": 5.9639999999999995
+            },
+            {
+              "function": "sp",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 10,
+              "selfMs": 3.089,
+              "inclusiveMs": 3.089
+            },
+            {
+              "function": "querySelector",
+              "url": "",
+              "line": 0,
+              "selfMs": 3.089,
+              "inclusiveMs": 3.089
+            },
+            {
+              "function": "(anonymous)",
+              "url": "",
+              "line": 0,
+              "selfMs": 3.0839999999999996,
+              "inclusiveMs": 3.0839999999999996
+            },
+            {
+              "function": "lc",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 3.075,
+              "inclusiveMs": 3.075
+            },
+            {
+              "function": "t",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 2.817,
+              "inclusiveMs": 2.817
+            },
+            {
+              "function": "Mf",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 2.79,
+              "inclusiveMs": 49.151
+            },
+            {
+              "function": "getAttribute",
+              "url": "",
+              "line": 0,
+              "selfMs": 1.911,
+              "inclusiveMs": 1.911
+            },
+            {
+              "function": "queueMicrotask",
+              "url": "",
+              "line": 0,
+              "selfMs": 1.755,
+              "inclusiveMs": 1.755
+            },
+            {
+              "function": "getSnapshot",
+              "url": "/assets/product-order-sheet-KdbmlNqD.js",
+              "line": 1,
+              "selfMs": 1.665,
+              "inclusiveMs": 1.665
+            },
+            {
+              "function": "zi",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.615,
+              "inclusiveMs": 1.615
+            },
+            {
+              "function": "Ft",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.59,
+              "inclusiveMs": 1.59
+            },
+            {
+              "function": "fl",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.59,
+              "inclusiveMs": 1.59
+            },
+            {
+              "function": "es",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.587,
+              "inclusiveMs": 9.407
+            },
+            {
+              "function": "me",
+              "url": "/assets/product-order-sheet-KdbmlNqD.js",
+              "line": 1,
+              "selfMs": 1.584,
+              "inclusiveMs": 3.122
+            },
+            {
+              "function": "publish",
+              "url": "/assets/product-order-sheet-KdbmlNqD.js",
+              "line": 1,
+              "selfMs": 1.574,
+              "inclusiveMs": 40.013
+            },
+            {
+              "function": "x",
+              "url": "/assets/product-order-sheet-KdbmlNqD.js",
+              "line": 1,
+              "selfMs": 1.565,
+              "inclusiveMs": 5.57
+            },
+            {
+              "function": "(anonymous)",
+              "url": "",
+              "line": 14,
+              "selfMs": 1.56,
+              "inclusiveMs": 4.649
+            },
+            {
+              "function": "preventDefault",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.56,
+              "inclusiveMs": 1.56
+            }
+          ],
+          "topInclusive": [
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "selfMs": 489.85999999999945,
+              "inclusiveMs": 489.85999999999945
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/assets/product-order-sheet-KdbmlNqD.js",
+              "line": 1,
+              "selfMs": 79.923,
+              "inclusiveMs": 105.53700000000003
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 4.432,
+              "inclusiveMs": 71.24300000000001
+            },
+            {
+              "function": "Ld",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 51.263000000000005
+            },
+            {
+              "function": "Mf",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 2.79,
+              "inclusiveMs": 49.151
+            },
+            {
+              "function": "Ff",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 46.361000000000004
+            },
+            {
+              "function": "Af",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 46.361000000000004
+            },
+            {
+              "function": "publish",
+              "url": "/assets/product-order-sheet-KdbmlNqD.js",
+              "line": 1,
+              "selfMs": 1.574,
+              "inclusiveMs": 40.013
+            },
+            {
+              "function": "of",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 29.793000000000006
+            },
+            {
+              "function": "af",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 29.793000000000006
+            },
+            {
+              "function": "Rd",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 29.793000000000006
+            },
+            {
+              "function": "$d",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 21.47
+            },
+            {
+              "function": "Xd",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 21.47
+            },
+            {
+              "function": "Yd",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 21.47
+            },
+            {
+              "function": "Yf",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.316,
+              "inclusiveMs": 19.119
+            },
+            {
+              "function": "bh",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 10,
+              "selfMs": 0,
+              "inclusiveMs": 19.119
+            },
+            {
+              "function": "ku",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 15.728
+            },
+            {
+              "function": "ju",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 4.683,
+              "inclusiveMs": 15.728
+            },
+            {
+              "function": "lf",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 15.728
+            },
+            {
+              "function": "(garbage collector)",
+              "url": "",
+              "line": 0,
+              "selfMs": 14.046999999999999,
+              "inclusiveMs": 14.046999999999999
+            },
+            {
+              "function": "pl",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 13.998
+            },
+            {
+              "function": "yh",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 10,
+              "selfMs": 0,
+              "inclusiveMs": 12.845
+            },
+            {
+              "function": "Kc",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.386,
+              "inclusiveMs": 10.793
+            },
+            {
+              "function": "es",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.587,
+              "inclusiveMs": 9.407
+            },
+            {
+              "function": "Wf",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 1.162,
+              "inclusiveMs": 8.921
+            },
+            {
+              "function": "removeChild",
+              "url": "",
+              "line": 0,
+              "selfMs": 7.9559999999999995,
+              "inclusiveMs": 7.9559999999999995
+            },
+            {
+              "function": "wu",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 7.9559999999999995
+            },
+            {
+              "function": "Cu",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 7.9559999999999995
+            },
+            {
+              "function": "gu",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 7.638000000000001
+            },
+            {
+              "function": "Iu",
+              "url": "/assets/index-XHpHWiuz.js",
+              "line": 9,
+              "selfMs": 0,
+              "inclusiveMs": 7.638000000000001
+            }
+          ]
+        }
+      },
+      "summaries": [
+        {
+          "name": "paced-vertical",
+          "inputP95MedianMs": 1.800000000745058,
+          "drainMedianMs": 1.018000000000029,
+          "drainMaxMs": 1.0869999999995343
+        },
+        {
+          "name": "horizontal",
+          "inputP95MedianMs": 7.800000000745058,
+          "drainMedianMs": 4.365799999999581,
+          "drainMaxMs": 5.385000000000218
+        },
+        {
+          "name": "vertical",
+          "inputP95MedianMs": 5.699999999254942,
+          "drainMedianMs": 1.8286000000007334,
+          "drainMaxMs": 3.1599999999998545
+        },
+        {
+          "name": "edge",
+          "inputP95MedianMs": 2.5,
+          "drainMedianMs": 0.9270000000033178,
+          "drainMaxMs": 2.0082000000002154
+        },
+        {
+          "name": "sustained",
+          "inputP95MedianMs": 2.399999998509884,
+          "drainMedianMs": 0.8921000000045751,
+          "drainMaxMs": 0.9475000000020373
+        },
+        {
+          "name": "shift-range",
+          "inputP95MedianMs": 1.8999999985098839,
+          "drainMedianMs": 0.751300000003539,
+          "drainMaxMs": 0.7513999999973748
+        }
+      ]
+    },
+    {
+      "mode": "development",
+      "browser": "156.0.8078.80",
+      "budgets": {
+        "input": 100,
+        "drain": 300,
+        "max": 1000
+      },
+      "phases": [
+        {
+          "name": "horizontal",
+          "beforeKeys": 144,
+          "afterKeys": 144,
+          "beforeInputP95Ms": 34332.199999999255,
+          "beforeDrainMs": 36285.5905,
+          "inputP95MedianMs": 27,
+          "drainMedianMs": 11.13550000000032,
+          "drainMaxMs": 25.910800000001473
+        },
+        {
+          "name": "vertical",
+          "beforeKeys": 80,
+          "afterKeys": 180,
+          "beforeInputP95Ms": 19155.199999999255,
+          "beforeDrainMs": 20132.912900000003,
+          "inputP95MedianMs": 12.600000001490116,
+          "drainMedianMs": 1.9672999999966123,
+          "drainMaxMs": 5.134099999999307
+        }
+      ],
+      "memoryTail": [
+        {
+          "cycle": 8,
+          "heapMiB": 28.50605010986328,
+          "dom": {
+            "documents": 2,
+            "nodes": 1033,
+            "jsEventListeners": 258
+          },
+          "mounted": 230,
+          "rows": 23
+        },
+        {
+          "cycle": 9,
+          "heapMiB": 27.833160400390625,
+          "dom": {
+            "documents": 2,
+            "nodes": 1033,
+            "jsEventListeners": 258
+          },
+          "mounted": 230,
+          "rows": 23
+        },
+        {
+          "cycle": 10,
+          "heapMiB": 27.780986785888672,
+          "dom": {
+            "documents": 2,
+            "nodes": 1033,
+            "jsEventListeners": 258
+          },
+          "mounted": 230,
+          "rows": 23
+        }
+      ],
+      "memoryPeakMiB": 57.09100341796875,
+      "profile": {
+        "beforePeakHeapMiB": 387.33821868896484,
+        "afterPeakHeapMiB": 57.63222122192383,
+        "beforeVertical": {
+          "tasksMs": 23699.988999999994,
+          "scriptMs": 23443.399999999998,
+          "layoutMs": 23.692999999999998,
+          "styleMs": 15.814000000000002,
+          "layouts": 82
+        },
+        "afterVertical": {
+          "tasksMs": 643.321,
+          "scriptMs": 306.8900000000001,
+          "layoutMs": 14.766000000000002,
+          "styleMs": 28.184000000000008,
+          "layouts": 74
+        },
+        "cpu": {
+          "sampleTimeMs": 1736.285,
+          "topSelf": [
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "selfMs": 269.59399999999994,
+              "inclusiveMs": 269.59399999999994
+            },
+            {
+              "function": "run",
+              "url": "",
+              "line": 0,
+              "selfMs": 85.20400000000001,
+              "inclusiveMs": 173.36200000000005
+            },
+            {
+              "function": "prepareFreshStack",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8898,
+              "selfMs": 65.846,
+              "inclusiveMs": 67.431
+            },
+            {
+              "function": "exports.jsxDEV",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react_jsx-dev-runtime.js?v=7e4587a9",
+              "line": 192,
+              "selfMs": 51.831,
+              "inclusiveMs": 61.114000000000004
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/src/components/product-sheet-grid.tsx",
+              "line": 150,
+              "selfMs": 36.626,
+              "inclusiveMs": 39.98899999999999
+            },
+            {
+              "function": "(garbage collector)",
+              "url": "",
+              "line": 0,
+              "selfMs": 9.427,
+              "inclusiveMs": 9.427
+            },
+            {
+              "function": "jsxDEVImpl",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react_jsx-dev-runtime.js?v=7e4587a9",
+              "line": 149,
+              "selfMs": 7.667,
+              "inclusiveMs": 7.667
+            },
+            {
+              "function": "exports.unstable_now",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 126,
+              "selfMs": 6.494,
+              "inclusiveMs": 6.494
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/src/components/product-sheet-grid.tsx",
+              "line": 265,
+              "selfMs": 4.4239999999999995,
+              "inclusiveMs": 6.686
+            },
+            {
+              "function": "(anonymous)",
+              "url": "",
+              "line": 14,
+              "selfMs": 4.182,
+              "inclusiveMs": 4.182
+            },
+            {
+              "function": "SyntheticBaseEvent",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 2201,
+              "selfMs": 4.09,
+              "inclusiveMs": 4.09
+            },
+            {
+              "function": "resolveUpdatePriority",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 1218,
+              "selfMs": 3.363,
+              "inclusiveMs": 3.363
+            },
+            {
+              "function": "postMessage",
+              "url": "",
+              "line": 0,
+              "selfMs": 3.169,
+              "inclusiveMs": 3.169
+            },
+            {
+              "function": "commitPassiveUnmountEffectsInsideOfDeletedTree_begin",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8605,
+              "selfMs": 3.088,
+              "inclusiveMs": 3.088
+            },
+            {
+              "function": "(anonymous)",
+              "url": "",
+              "line": 0,
+              "selfMs": 3.04,
+              "inclusiveMs": 3.04
+            },
+            {
+              "function": "ProductSheetGrid",
+              "url": "/src/components/product-sheet-grid.tsx",
+              "line": 60,
+              "selfMs": 2.979,
+              "inclusiveMs": 2.979
+            },
+            {
+              "function": "getListener",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 2153,
+              "selfMs": 2.815,
+              "inclusiveMs": 2.815
+            },
+            {
+              "function": "commitTextUpdate",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 11422,
+              "selfMs": 2.6879999999999997,
+              "inclusiveMs": 2.6879999999999997
+            },
+            {
+              "function": "commitMutationEffectsOnFiber",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 7879,
+              "selfMs": 1.673,
+              "inclusiveMs": 9.013
+            },
+            {
+              "function": "completeRoot",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9292,
+              "selfMs": 1.669,
+              "inclusiveMs": 103.92699999999999
+            },
+            {
+              "function": "getTaskName",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react_jsx-dev-runtime.js?v=7e4587a9",
+              "line": 65,
+              "selfMs": 1.616,
+              "inclusiveMs": 1.616
+            },
+            {
+              "function": "setValueForStyles",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 1909,
+              "selfMs": 1.615,
+              "inclusiveMs": 1.615
+            },
+            {
+              "function": "sheetValue",
+              "url": "/src/product-order-sheet-model.ts",
+              "line": 90,
+              "selfMs": 1.59,
+              "inclusiveMs": 1.59
+            },
+            {
+              "function": "completeWork",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 6572,
+              "selfMs": 1.579,
+              "inclusiveMs": 6.2860000000000005
+            },
+            {
+              "function": "updatedAncestorInfoDev",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 1745,
+              "selfMs": 1.577,
+              "inclusiveMs": 1.577
+            },
+            {
+              "function": "push",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 607,
+              "selfMs": 1.572,
+              "inclusiveMs": 1.572
+            },
+            {
+              "function": "safelyDetachRef",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 7052,
+              "selfMs": 1.558,
+              "inclusiveMs": 1.558
+            },
+            {
+              "function": "disconnectPassiveEffect",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8584,
+              "selfMs": 1.557,
+              "inclusiveMs": 1.557
+            },
+            {
+              "function": "updateProperties",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 10733,
+              "selfMs": 1.552,
+              "inclusiveMs": 1.552
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/src/components/product-sheet-grid.tsx",
+              "line": 121,
+              "selfMs": 1.548,
+              "inclusiveMs": 1.548
+            }
+          ],
+          "topInclusive": [
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "selfMs": 269.59399999999994,
+              "inclusiveMs": 269.59399999999994
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9890,
+              "selfMs": 1.543,
+              "inclusiveMs": 255.0100000000001
+            },
+            {
+              "function": "performSyncWorkOnRoot",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9876,
+              "selfMs": 0,
+              "inclusiveMs": 253.46700000000007
+            },
+            {
+              "function": "flushSyncWorkAcrossRoots_impl",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9781,
+              "selfMs": 0,
+              "inclusiveMs": 253.46700000000007
+            },
+            {
+              "function": "processRootScheduleInMicrotask",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9808,
+              "selfMs": 0,
+              "inclusiveMs": 253.46700000000007
+            },
+            {
+              "function": "performWorkOnRoot",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8699,
+              "selfMs": 0,
+              "inclusiveMs": 253.46200000000007
+            },
+            {
+              "function": "run",
+              "url": "",
+              "line": 0,
+              "selfMs": 85.20400000000001,
+              "inclusiveMs": 173.36200000000005
+            },
+            {
+              "function": "renderRootSync",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9025,
+              "selfMs": 0,
+              "inclusiveMs": 148.46399999999997
+            },
+            {
+              "function": "completeRoot",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9292,
+              "selfMs": 1.669,
+              "inclusiveMs": 103.92699999999999
+            },
+            {
+              "function": "completeRootWhenReady",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8818,
+              "selfMs": 0,
+              "inclusiveMs": 103.92699999999999
+            },
+            {
+              "function": "commitRoot",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9340,
+              "selfMs": 0,
+              "inclusiveMs": 99.11499999999998
+            },
+            {
+              "function": "runWithFiberInDEV",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 941,
+              "selfMs": 0,
+              "inclusiveMs": 91.14100000000002
+            },
+            {
+              "function": "performUnitOfWork",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9184,
+              "selfMs": 0,
+              "inclusiveMs": 79.40700000000002
+            },
+            {
+              "function": "workLoopSync",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9081,
+              "selfMs": 0,
+              "inclusiveMs": 79.40700000000002
+            },
+            {
+              "function": "beginWork",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 6366,
+              "selfMs": 0,
+              "inclusiveMs": 70.138
+            },
+            {
+              "function": "prepareFreshStack",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8898,
+              "selfMs": 65.846,
+              "inclusiveMs": 67.431
+            },
+            {
+              "function": "renderWithHooks",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 4410,
+              "selfMs": 0,
+              "inclusiveMs": 66.98899999999999
+            },
+            {
+              "function": "updateFunctionComponent",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 5805,
+              "selfMs": 0,
+              "inclusiveMs": 66.98899999999999
+            },
+            {
+              "function": "react_stack_bottom_frame",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 14176,
+              "selfMs": 0,
+              "inclusiveMs": 65.556
+            },
+            {
+              "function": "updateSimpleMemoComponent",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 5665,
+              "selfMs": 0,
+              "inclusiveMs": 62.70400000000001
+            },
+            {
+              "function": "flushPassiveEffects",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9584,
+              "selfMs": 0,
+              "inclusiveMs": 61.65500000000001
+            },
+            {
+              "function": "flushPendingEffects",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9577,
+              "selfMs": 0,
+              "inclusiveMs": 61.65500000000001
+            },
+            {
+              "function": "flushSpawnedWork",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 9494,
+              "selfMs": 0,
+              "inclusiveMs": 61.65500000000001
+            },
+            {
+              "function": "exports.jsxDEV",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react_jsx-dev-runtime.js?v=7e4587a9",
+              "line": 192,
+              "selfMs": 51.831,
+              "inclusiveMs": 61.114000000000004
+            },
+            {
+              "function": "updateMemoComponent",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 5643,
+              "selfMs": 0,
+              "inclusiveMs": 52.405
+            },
+            {
+              "function": "logComponentRender",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 2634,
+              "selfMs": 0,
+              "inclusiveMs": 40.706
+            },
+            {
+              "function": "commitPassiveMountOnFiber",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8341,
+              "selfMs": 0,
+              "inclusiveMs": 40.706
+            },
+            {
+              "function": "recursivelyTraversePassiveMountEffects",
+              "url": "/tests/.tmp/aria-browser-vx8p55/vite-cache/deps/react-dom_client.js?v=0b0c1922",
+              "line": 8336,
+              "selfMs": 0,
+              "inclusiveMs": 40.706
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/src/components/product-sheet-grid.tsx",
+              "line": 150,
+              "selfMs": 36.626,
+              "inclusiveMs": 39.98899999999999
+            },
+            {
+              "function": "(anonymous)",
+              "url": "/src/components/product-sheet-grid.tsx",
+              "line": 177,
+              "selfMs": 0,
+              "inclusiveMs": 37.727
+            }
+          ]
+        }
+      },
+      "summaries": [
+        {
+          "name": "paced-vertical",
+          "inputP95MedianMs": 2.199999999254942,
+          "drainMedianMs": 0.9527000000016415,
+          "drainMaxMs": 0.9811999999983527
+        },
+        {
+          "name": "horizontal",
+          "inputP95MedianMs": 27,
+          "drainMedianMs": 11.13550000000032,
+          "drainMaxMs": 25.910800000001473
+        },
+        {
+          "name": "vertical",
+          "inputP95MedianMs": 12.600000001490116,
+          "drainMedianMs": 1.9672999999966123,
+          "drainMaxMs": 5.134099999999307
+        },
+        {
+          "name": "edge",
+          "inputP95MedianMs": 3,
+          "drainMedianMs": 1.4617999999973108,
+          "drainMaxMs": 1.9544000000023516
+        },
+        {
+          "name": "sustained",
+          "inputP95MedianMs": 3.5,
+          "drainMedianMs": 1.6134999999994761,
+          "drainMaxMs": 1.6445999999996275
+        },
+        {
+          "name": "shift-range",
+          "inputP95MedianMs": 9.5,
+          "drainMedianMs": 0.8917999999976018,
+          "drainMaxMs": 0.9714999999996508
+        }
+      ]
+    }
+  ],
+  "method": "Trusted CDP input at 8/30/60 Hz; 3 repetitions, no CPU profiler for budgets. Separate CPU profiles and 10 memory traversals with forced GC only in tests. No DOM handles retained by waits. Temporary databases only."
+}

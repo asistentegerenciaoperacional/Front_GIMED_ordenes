@@ -1,0 +1,1113 @@
+{
+  "sent": [
+    {
+      "key": "ArrowLeft",
+      "at": 0.0011999999987892807
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 18.033299999999144
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 33.20129999999881
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 51.88730000000032
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 67.94919999999911
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 99.00199999999859
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 101.44959999999992
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 130.6255999999994
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 133.15660000000025
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 152.6269999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 168.16510000000017
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 183.4987999999994
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 201.61369999999988
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 217.04379999999946
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 234.8252999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 250.76950000000033
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 267.9483
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 282.8117000000002
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 299.8684999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 315.84629999999925
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 347.96999999999935
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 350.40549999999894
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 368.0015999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 383.4938999999995
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 401.384
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 417.16769999999997
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 434.5232999999989
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 452.3120999999992
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 468.41809999999896
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 483.83699999999953
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 501.0738999999994
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 517.3966999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 533.3513999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 552.671699999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 568.7595000000001
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 584.5061999999998
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 600.1161999999986
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 616.0337
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 635.6989999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 651.0757999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 667.5731999999989
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 683.0134999999991
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 699.2248
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 730.5008999999991
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 732.557499999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 752.6624999999985
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 768.1564999999991
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 783.7560999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 801.3694999999989
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 819.2682999999997
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 834.8842999999997
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 850.7217999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 866.7824
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 883.5545999999995
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 901.0659999999989
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 917.5978999999988
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 934.1665999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 964.1399000000001
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 966.5012999999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 984.4897000000001
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 999.887999999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1015.3055999999997
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1045.6761999999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1062.855599999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1079.091199999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1095.9219999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1113.1574999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1129.4620999999988
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1145.5967999999993
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1162.2546999999995
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1179.2848999999987
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1185.9599999999991
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1202.1579000000002
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1217.5470999999998
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1233.955399999999
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1250.6473999999998
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1268.5604999999996
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1283.8292999999994
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1301.5784000000003
+    },
+    {
+      "key": "ArrowLeft",
+      "at": 1316.8364999999994
+    }
+  ],
+  "trace": {
+    "start": 10682.10000000149,
+    "keys": [
+      {
+        "key": "ArrowLeft",
+        "repeat": false,
+        "trusted": true,
+        "at": 10682.800000000745,
+        "stamp": 10675.20000000298,
+        "delay": 7.599999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10701.10000000149,
+        "stamp": 10693.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10716.70000000298,
+        "stamp": 10708.10000000149,
+        "delay": 8.600000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10735.70000000298,
+        "stamp": 10727.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10751.800000000745,
+        "stamp": 10743.10000000149,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10782.900000002235,
+        "stamp": 10774.10000000149,
+        "delay": 8.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10785.300000000745,
+        "stamp": 10776.10000000149,
+        "delay": 9.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10814.60000000149,
+        "stamp": 10805.10000000149,
+        "delay": 9.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10816.800000000745,
+        "stamp": 10808.20000000298,
+        "delay": 8.599999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10836.300000000745,
+        "stamp": 10827.10000000149,
+        "delay": 9.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10852,
+        "stamp": 10843.10000000149,
+        "delay": 8.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10867.10000000149,
+        "stamp": 10858.10000000149,
+        "delay": 9
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10885.400000002235,
+        "stamp": 10876.20000000298,
+        "delay": 9.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10900.60000000149,
+        "stamp": 10892.10000000149,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10918.60000000149,
+        "stamp": 10910.20000000298,
+        "delay": 8.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10934.60000000149,
+        "stamp": 10926.10000000149,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10951.20000000298,
+        "stamp": 10943.10000000149,
+        "delay": 8.100000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10966.5,
+        "stamp": 10958.20000000298,
+        "delay": 8.299999997019768
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10983.20000000298,
+        "stamp": 10975.20000000298,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 10999.400000002235,
+        "stamp": 10991.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11031.70000000298,
+        "stamp": 11023.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11033.900000002235,
+        "stamp": 11025.10000000149,
+        "delay": 8.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11051.400000002235,
+        "stamp": 11043.20000000298,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11067.300000000745,
+        "stamp": 11058.20000000298,
+        "delay": 9.099999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11085.20000000298,
+        "stamp": 11076.10000000149,
+        "delay": 9.100000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11100.900000002235,
+        "stamp": 11092.20000000298,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11117.800000000745,
+        "stamp": 11109.10000000149,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11135.800000000745,
+        "stamp": 11127.20000000298,
+        "delay": 8.599999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11152.20000000298,
+        "stamp": 11143.10000000149,
+        "delay": 9.100000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11167.70000000298,
+        "stamp": 11159.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11184.10000000149,
+        "stamp": 11176.20000000298,
+        "delay": 7.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11200.300000000745,
+        "stamp": 11192.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11216.10000000149,
+        "stamp": 11208.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11235.60000000149,
+        "stamp": 11228.20000000298,
+        "delay": 7.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11251.70000000298,
+        "stamp": 11244.10000000149,
+        "delay": 7.600000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11267.300000000745,
+        "stamp": 11259.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11282.900000002235,
+        "stamp": 11275.10000000149,
+        "delay": 7.800000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11298.800000000745,
+        "stamp": 11291.10000000149,
+        "delay": 7.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11318.800000000745,
+        "stamp": 11311.10000000149,
+        "delay": 7.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11333.900000002235,
+        "stamp": 11326.10000000149,
+        "delay": 7.800000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11350.400000002235,
+        "stamp": 11342.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11366.20000000298,
+        "stamp": 11358.20000000298,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11382.60000000149,
+        "stamp": 11374.10000000149,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11414.20000000298,
+        "stamp": 11405.10000000149,
+        "delay": 9.100000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11415.900000002235,
+        "stamp": 11407.20000000298,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11436.5,
+        "stamp": 11428.10000000149,
+        "delay": 8.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11451.70000000298,
+        "stamp": 11443.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11467.300000000745,
+        "stamp": 11459.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11484.800000000745,
+        "stamp": 11476.20000000298,
+        "delay": 8.599999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11502.70000000298,
+        "stamp": 11494.10000000149,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11518.800000000745,
+        "stamp": 11510.20000000298,
+        "delay": 8.599999997764826
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11533.900000002235,
+        "stamp": 11526.10000000149,
+        "delay": 7.800000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11550.10000000149,
+        "stamp": 11542.10000000149,
+        "delay": 8
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11567,
+        "stamp": 11558.10000000149,
+        "delay": 8.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11584.60000000149,
+        "stamp": 11576.10000000149,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11601.60000000149,
+        "stamp": 11592.10000000149,
+        "delay": 9.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11617.70000000298,
+        "stamp": 11609.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11648,
+        "stamp": 11639.10000000149,
+        "delay": 8.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11650.300000000745,
+        "stamp": 11641.20000000298,
+        "delay": 9.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11668.20000000298,
+        "stamp": 11659.10000000149,
+        "delay": 9.100000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11682.70000000298,
+        "stamp": 11675.10000000149,
+        "delay": 7.600000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11698.10000000149,
+        "stamp": 11690.20000000298,
+        "delay": 7.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11729.400000002235,
+        "stamp": 11721.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11746.300000000745,
+        "stamp": 11738.10000000149,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11762.60000000149,
+        "stamp": 11754.10000000149,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11779.400000002235,
+        "stamp": 11771.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11796.70000000298,
+        "stamp": 11788.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11813.10000000149,
+        "stamp": 11804.20000000298,
+        "delay": 8.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11829.10000000149,
+        "stamp": 11820.20000000298,
+        "delay": 8.899999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11845.70000000298,
+        "stamp": 11837.20000000298,
+        "delay": 8.5
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11862.60000000149,
+        "stamp": 11854.20000000298,
+        "delay": 8.399999998509884
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11869.5,
+        "stamp": 11861.20000000298,
+        "delay": 8.299999997019768
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11885.900000002235,
+        "stamp": 11877.20000000298,
+        "delay": 8.699999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11901.300000000745,
+        "stamp": 11892.10000000149,
+        "delay": 9.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11917.70000000298,
+        "stamp": 11909.10000000149,
+        "delay": 8.600000001490116
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11934.400000002235,
+        "stamp": 11926.20000000298,
+        "delay": 8.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11952.400000002235,
+        "stamp": 11943.20000000298,
+        "delay": 9.199999999254942
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11967.400000002235,
+        "stamp": 11959.10000000149,
+        "delay": 8.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 11985.400000002235,
+        "stamp": 11976.10000000149,
+        "delay": 9.300000000745058
+      },
+      {
+        "key": "ArrowLeft",
+        "repeat": true,
+        "trusted": true,
+        "at": 12000.900000002235,
+        "stamp": 11992.10000000149,
+        "delay": 8.800000000745058
+      }
+    ],
+    "frames": [
+      -14.100000001490116,
+      16.799999999999272,
+      16.5,
+      16.700000000000728,
+      16.799999999999272,
+      16.700000000000728,
+      16.700000000000728,
+      16.599999999998545,
+      17,
+      16.30000000000109,
+      16.600000000000364,
+      16.69999999999891,
+      16.700000000000728,
+      16.5,
+      16.799999999999272,
+      16.600000000000364,
+      16.700000000000728,
+      16.69999999999891,
+      16.600000000000364,
+      16.799999999999272,
+      16.700000000000728,
+      16.700000000000728,
+      16.599999999998545,
+      16.600000000000364,
+      16.700000000000728,
+      16.600000000000364,
+      16.69999999999891,
+      16.700000000000728,
+      16.799999999999272,
+      16.600000000000364,
+      16.700000000000728,
+      16.5,
+      16.69999999999891,
+      16.80000000000109,
+      16.599999999998545,
+      16.5,
+      16.700000000000728,
+      16.600000000000364,
+      16.69999999999891,
+      16.600000000000364,
+      16.80000000000109,
+      16.599999999998545,
+      16.700000000000728,
+      16.799999999999272,
+      16.700000000000728,
+      16.5,
+      16.700000000000728,
+      16.69999999999891,
+      16.700000000000728,
+      16.69999999999891,
+      16.600000000000364,
+      16.600000000000364,
+      16.700000000000728,
+      16.599999999998545,
+      16.80000000000109,
+      16.600000000000364,
+      16.69999999999891,
+      16.600000000000364,
+      16.799999999999272,
+      16.5,
+      16.80000000000109,
+      16.5,
+      16.799999999999272,
+      16.600000000000364,
+      16.700000000000728,
+      16.69999999999891,
+      16.600000000000364,
+      16.700000000000728,
+      16.69999999999891,
+      16.700000000000728,
+      16.600000000000364,
+      16.599999999998545,
+      16.700000000000728,
+      16.700000000000728,
+      16.799999999999272,
+      16.5,
+      16.799999999999272,
+      16.600000000000364,
+      16.600000000000364,
+      16.799999999999272,
+      16.600000000000364,
+      16.80000000000109,
+      16.5,
+      16.599999999998545,
+      16.700000000000728,
+      16.799999999999272,
+      16.600000000000364,
+      16.600000000000364,
+      16.700000000000728,
+      16.69999999999891,
+      16.700000000000728,
+      16.600000000000364,
+      16.69999999999891,
+      16.600000000000364,
+      16.700000000000728,
+      16.69999999999891,
+      16.600000000000364,
+      16.700000000000728,
+      16.599999999998545,
+      16.700000000000728
+    ],
+    "longTasks": [],
+    "commits": 0,
+    "renderDurations": [],
+    "transitions": [],
+    "missingActiveFrames": 0
+  },
+  "memorySamples": [
+    {
+      "at": 15274.1302,
+      "usedSize": 30127008,
+      "totalSize": 31285248,
+      "embedderHeapUsedSize": 4497296,
+      "backingStorageSize": 16164843
+    },
+    {
+      "at": 15524.2858,
+      "usedSize": 30148600,
+      "totalSize": 31285248,
+      "embedderHeapUsedSize": 4497296,
+      "backingStorageSize": 16164843
+    },
+    {
+      "at": 15776.0816,
+      "usedSize": 30169400,
+      "totalSize": 31285248,
+      "embedderHeapUsedSize": 4497296,
+      "backingStorageSize": 16164843
+    },
+    {
+      "at": 16038.0474,
+      "usedSize": 30194868,
+      "totalSize": 31285248,
+      "embedderHeapUsedSize": 4497296,
+      "backingStorageSize": 16164843
+    },
+    {
+      "at": 16291.2388,
+      "usedSize": 30214656,
+      "totalSize": 31285248,
+      "embedderHeapUsedSize": 4497296,
+      "backingStorageSize": 16164843
+    }
+  ]
+}

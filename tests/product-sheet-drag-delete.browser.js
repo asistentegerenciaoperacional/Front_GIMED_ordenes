@@ -62,8 +62,12 @@ async (page) => {
     localStorage.setItem("gimed:ui:product-order-sheet", "true"),
   );
   await page.goto(origin + "/ordenes/productos?q=" + order.no_orden);
-  const cell = (row, key) =>
-    page.locator(`[data-sheet-row="${row}"][data-column-key="${key}"]`);
+  const { sheetCell, revealSheetColumn } = await import(
+    (await import("node:url")).pathToFileURL(
+      (await import("node:path")).resolve("tests/sheet-locator.mjs"),
+    ).href
+  );
+  const cell = (row, key) => sheetCell(page, row, key);
   await cell(0, "ubicacion").waitFor();
   await cell(0, "ubicacion").scrollIntoViewIfNeeded();
   check(
@@ -142,17 +146,15 @@ async (page) => {
     .getByRole("button", { name: "Descartar", exact: true })
     .click();
   await cell(0, "ubicacion").click();
-  await page
-    .locator(".product-sheet-viewport")
-    .evaluate((element) =>
-      element.dispatchEvent(
-        new KeyboardEvent("keydown", {
-          key: "Supr",
-          bubbles: true,
-          cancelable: true,
-        }),
-      ),
-    );
+  await page.locator(".product-sheet-viewport").evaluate((element) =>
+    element.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Supr",
+        bubbles: true,
+        cancelable: true,
+      }),
+    ),
+  );
   check(
     (await cell(0, "ubicacion").innerText()).trim() === "",
     "La variante Supr también vacía la celda activa",
@@ -163,17 +165,15 @@ async (page) => {
     .getByRole("button", { name: "Descartar", exact: true })
     .click();
   await cell(0, "ubicacion").click();
-  await page
-    .locator(".product-sheet-viewport")
-    .evaluate((element) =>
-      element.dispatchEvent(
-        new KeyboardEvent("keydown", {
-          key: "Del",
-          bubbles: true,
-          cancelable: true,
-        }),
-      ),
-    );
+  await page.locator(".product-sheet-viewport").evaluate((element) =>
+    element.dispatchEvent(
+      new KeyboardEvent("keydown", {
+        key: "Del",
+        bubbles: true,
+        cancelable: true,
+      }),
+    ),
+  );
   check(
     (await cell(0, "ubicacion").innerText()).trim() === "",
     "La variante Del también vacía la celda activa",

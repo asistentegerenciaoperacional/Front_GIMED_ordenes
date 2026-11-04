@@ -1,0 +1,416 @@
+{
+  "mode": "development",
+  "budgets": {
+    "input": 100,
+    "drain": 300,
+    "max": 1000
+  },
+  "summaries": [
+    {
+      "name": "paced-vertical",
+      "inputP95MedianMs": 2.199999999254942,
+      "drainMedianMs": 0.9527000000016415,
+      "drainMaxMs": 0.9811999999983527
+    },
+    {
+      "name": "horizontal",
+      "inputP95MedianMs": 27,
+      "drainMedianMs": 11.13550000000032,
+      "drainMaxMs": 25.910800000001473
+    },
+    {
+      "name": "vertical",
+      "inputP95MedianMs": 12.600000001490116,
+      "drainMedianMs": 1.9672999999966123,
+      "drainMaxMs": 5.134099999999307
+    },
+    {
+      "name": "edge",
+      "inputP95MedianMs": 3,
+      "drainMedianMs": 1.4617999999973108,
+      "drainMaxMs": 1.9544000000023516
+    },
+    {
+      "name": "sustained",
+      "inputP95MedianMs": 3.5,
+      "drainMedianMs": 1.6134999999994761,
+      "drainMaxMs": 1.6445999999996275
+    },
+    {
+      "name": "shift-range",
+      "inputP95MedianMs": 9.5,
+      "drainMedianMs": 0.8917999999976018,
+      "drainMaxMs": 0.9714999999996508
+    }
+  ],
+  "passed": true,
+  "results": [
+    {
+      "repetition": 1,
+      "name": "paced-vertical",
+      "hz": 8,
+      "keys": 24,
+      "enqueueMs": 2877.4210999999987,
+      "drainMs": 0.9527000000016415,
+      "renderedMs": 22.990100000000893,
+      "inputP95Ms": 2.899999998509884,
+      "frameP95Ms": 16.799999999999727,
+      "frameMaxMs": 16.800000000000182,
+      "scriptMs": 91.26200000000001,
+      "mutations": 5,
+      "actual": {
+        "row": 24,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 1,
+      "name": "horizontal",
+      "hz": 60,
+      "keys": 144,
+      "enqueueMs": 2396.9433999999983,
+      "drainMs": 25.910800000001473,
+      "renderedMs": 69.69820000000072,
+      "inputP95Ms": 30,
+      "frameP95Ms": 33.30000000000018,
+      "frameMaxMs": 33.5,
+      "scriptMs": 1079.853,
+      "mutations": 7504,
+      "actual": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 1,
+      "name": "vertical",
+      "hz": 60,
+      "keys": 180,
+      "enqueueMs": 2982.970300000001,
+      "drainMs": 5.134099999999307,
+      "renderedMs": 33.49549999999908,
+      "inputP95Ms": 13.100000001490116,
+      "frameP95Ms": 16.799999999999272,
+      "frameMaxMs": 16.80000000000109,
+      "scriptMs": 631.4250000000002,
+      "mutations": 370,
+      "actual": {
+        "row": 180,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 1,
+      "name": "edge",
+      "hz": 60,
+      "keys": 120,
+      "enqueueMs": 1983.4559999999983,
+      "drainMs": 1.9544000000023516,
+      "renderedMs": 33.34360000000015,
+      "inputP95Ms": 3.100000001490116,
+      "frameP95Ms": 16.80000000000109,
+      "frameMaxMs": 17.099999999998545,
+      "scriptMs": 16.886999999999873,
+      "mutations": 0,
+      "actual": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 1,
+      "name": "sustained",
+      "hz": 30,
+      "keys": 150,
+      "enqueueMs": 4981.1201,
+      "drainMs": 0.8842999999978929,
+      "renderedMs": 32.062199999996665,
+      "inputP95Ms": 4.699999999254942,
+      "frameP95Ms": 16.799999999999272,
+      "frameMaxMs": 16.80000000000291,
+      "scriptMs": 554.1649999999998,
+      "mutations": 255,
+      "actual": {
+        "row": 30,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 1,
+      "name": "shift-range",
+      "hz": 30,
+      "keys": 81,
+      "enqueueMs": 2671.1368,
+      "drainMs": 0.8051000000014028,
+      "renderedMs": 32.09310000000187,
+      "inputP95Ms": 9.600000001490116,
+      "frameP95Ms": 16.80000000000291,
+      "frameMaxMs": 33.400000000001455,
+      "scriptMs": 1002.8520000000003,
+      "mutations": 2255,
+      "actual": {
+        "row": 45,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 2,
+      "name": "paced-vertical",
+      "hz": 8,
+      "keys": 24,
+      "enqueueMs": 2876.744200000001,
+      "drainMs": 0.9811999999983527,
+      "renderedMs": 23.14979999999923,
+      "inputP95Ms": 2.199999999254942,
+      "frameP95Ms": 16.799999999999272,
+      "frameMaxMs": 16.80000000000291,
+      "scriptMs": 83.33600000000007,
+      "mutations": 5,
+      "actual": {
+        "row": 24,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 2,
+      "name": "horizontal",
+      "hz": 60,
+      "keys": 144,
+      "enqueueMs": 2394.640900000002,
+      "drainMs": 11.13550000000032,
+      "renderedMs": 54.62739999999758,
+      "inputP95Ms": 27,
+      "frameP95Ms": 33.29999999999927,
+      "frameMaxMs": 33.400000000001455,
+      "scriptMs": 958.4259999999998,
+      "mutations": 7504,
+      "actual": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 2,
+      "name": "vertical",
+      "hz": 60,
+      "keys": 180,
+      "enqueueMs": 2986.679,
+      "drainMs": 1.9672999999966123,
+      "renderedMs": 29.11609999999928,
+      "inputP95Ms": 12.600000001490116,
+      "frameP95Ms": 16.799999999999272,
+      "frameMaxMs": 16.80000000000291,
+      "scriptMs": 582.1439999999996,
+      "mutations": 370,
+      "actual": {
+        "row": 180,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 2,
+      "name": "edge",
+      "hz": 60,
+      "keys": 120,
+      "enqueueMs": 1986.193100000004,
+      "drainMs": 0.8398999999990338,
+      "renderedMs": 30.137699999999313,
+      "inputP95Ms": 2.899999998509884,
+      "frameP95Ms": 16.799999999999272,
+      "frameMaxMs": 16.900000000001455,
+      "scriptMs": 14.857999999999372,
+      "mutations": 0,
+      "actual": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 2,
+      "name": "sustained",
+      "hz": 30,
+      "keys": 150,
+      "enqueueMs": 4973.739999999998,
+      "drainMs": 1.6445999999996275,
+      "renderedMs": 34.59730000000127,
+      "inputP95Ms": 3.399999998509884,
+      "frameP95Ms": 16.799999999995634,
+      "frameMaxMs": 16.80000000000291,
+      "scriptMs": 507.4319999999997,
+      "mutations": 255,
+      "actual": {
+        "row": 30,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 2,
+      "name": "shift-range",
+      "hz": 30,
+      "keys": 81,
+      "enqueueMs": 2670.563000000002,
+      "drainMs": 0.9714999999996508,
+      "renderedMs": 29.455199999996694,
+      "inputP95Ms": 7.899999998509884,
+      "frameP95Ms": 16.80000000000291,
+      "frameMaxMs": 33.400000000001455,
+      "scriptMs": 1027.8939999999998,
+      "mutations": 2255,
+      "actual": {
+        "row": 45,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 3,
+      "name": "paced-vertical",
+      "hz": 8,
+      "keys": 24,
+      "enqueueMs": 2877.453699999998,
+      "drainMs": 0.8732000000018161,
+      "renderedMs": 21.806200000006356,
+      "inputP95Ms": 2,
+      "frameP95Ms": 16.80000000000291,
+      "frameMaxMs": 16.80000000000291,
+      "scriptMs": 84.1819999999993,
+      "mutations": 5,
+      "actual": {
+        "row": 24,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 3,
+      "name": "horizontal",
+      "hz": 60,
+      "keys": 144,
+      "enqueueMs": 2385.2638000000006,
+      "drainMs": 10.895099999994272,
+      "renderedMs": 51.99989999999525,
+      "inputP95Ms": 25.399999998509884,
+      "frameP95Ms": 33.299999999995634,
+      "frameMaxMs": 33.400000000001455,
+      "scriptMs": 1000.4660000000011,
+      "mutations": 7784,
+      "actual": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 3,
+      "name": "vertical",
+      "hz": 60,
+      "keys": 180,
+      "enqueueMs": 2984.7534000000014,
+      "drainMs": 1.0533999999970547,
+      "renderedMs": 29.519000000000233,
+      "inputP95Ms": 5.899999998509884,
+      "frameP95Ms": 16.799999999995634,
+      "frameMaxMs": 16.900000000001455,
+      "scriptMs": 594.3679999999994,
+      "mutations": 370,
+      "actual": {
+        "row": 180,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 3,
+      "name": "edge",
+      "hz": 60,
+      "keys": 120,
+      "enqueueMs": 1993.3176000000021,
+      "drainMs": 1.4617999999973108,
+      "renderedMs": 23.300199999997858,
+      "inputP95Ms": 3,
+      "frameP95Ms": 16.80000000000291,
+      "frameMaxMs": 17,
+      "scriptMs": 15.732999999999109,
+      "mutations": 0,
+      "actual": {
+        "row": 0,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 3,
+      "name": "sustained",
+      "hz": 30,
+      "keys": 150,
+      "enqueueMs": 4974.716500000002,
+      "drainMs": 1.6134999999994761,
+      "renderedMs": 35.70079999999871,
+      "inputP95Ms": 3.5,
+      "frameP95Ms": 16.80000000000291,
+      "frameMaxMs": 16.80000000000291,
+      "scriptMs": 520.6080000000011,
+      "mutations": 255,
+      "actual": {
+        "row": 30,
+        "column": 0
+      }
+    },
+    {
+      "repetition": 3,
+      "name": "shift-range",
+      "hz": 30,
+      "keys": 81,
+      "enqueueMs": 2671.4738999999972,
+      "drainMs": 0.8917999999976018,
+      "renderedMs": 28.79740000000311,
+      "inputP95Ms": 9.5,
+      "frameP95Ms": 16.80000000000291,
+      "frameMaxMs": 33.400000000001455,
+      "scriptMs": 1021.2029999999999,
+      "mutations": 2255,
+      "actual": {
+        "row": 45,
+        "column": 0
+      }
+    }
+  ],
+  "checks": [
+    "1/paced-vertical: destino exacto",
+    "1/paced-vertical: todas las teclas reales recibidas",
+    "1/horizontal: destino exacto",
+    "1/horizontal: todas las teclas reales recibidas",
+    "1/vertical: destino exacto",
+    "1/vertical: todas las teclas reales recibidas",
+    "1/edge: destino exacto",
+    "1/edge: todas las teclas reales recibidas",
+    "El borde inmóvil no reconstruye el cuerpo",
+    "1/sustained: destino exacto",
+    "1/sustained: todas las teclas reales recibidas",
+    "1/shift-range: destino exacto",
+    "1/shift-range: todas las teclas reales recibidas",
+    "2/paced-vertical: destino exacto",
+    "2/paced-vertical: todas las teclas reales recibidas",
+    "2/horizontal: destino exacto",
+    "2/horizontal: todas las teclas reales recibidas",
+    "2/vertical: destino exacto",
+    "2/vertical: todas las teclas reales recibidas",
+    "2/edge: destino exacto",
+    "2/edge: todas las teclas reales recibidas",
+    "El borde inmóvil no reconstruye el cuerpo",
+    "2/sustained: destino exacto",
+    "2/sustained: todas las teclas reales recibidas",
+    "2/shift-range: destino exacto",
+    "2/shift-range: todas las teclas reales recibidas",
+    "3/paced-vertical: destino exacto",
+    "3/paced-vertical: todas las teclas reales recibidas",
+    "3/horizontal: destino exacto",
+    "3/horizontal: todas las teclas reales recibidas",
+    "3/vertical: destino exacto",
+    "3/vertical: todas las teclas reales recibidas",
+    "3/edge: destino exacto",
+    "3/edge: todas las teclas reales recibidas",
+    "El borde inmóvil no reconstruye el cuerpo",
+    "3/sustained: destino exacto",
+    "3/sustained: todas las teclas reales recibidas",
+    "3/shift-range: destino exacto",
+    "3/shift-range: todas las teclas reales recibidas"
+  ],
+  "pageErrors": [],
+  "writes": []
+}

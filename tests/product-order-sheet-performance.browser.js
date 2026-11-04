@@ -24,8 +24,12 @@ async (page) => {
     (await page.locator(".product-sheet-footer").innerText()).includes("500"),
     "La prueba utiliza más de 5000 lotes",
   );
-  const cell = (row, key) =>
-    page.locator(`[data-sheet-row="${row}"][data-column-key="${key}"]`);
+  const { sheetCell, revealSheetColumn } = await import(
+    (await import("node:url")).pathToFileURL(
+      (await import("node:path")).resolve("tests/sheet-locator.mjs"),
+    ).href
+  );
+  const cell = (row, key) => sheetCell(page, row, key);
   const settle = () =>
     page.evaluate(
       () =>
@@ -112,11 +116,12 @@ async (page) => {
       .getByRole("button", { name: "Quitar ordenamiento", exact: true })
       .click();
   });
-  await measure("abrir columna con 5000 valores", () =>
-    page
+  await measure("abrir columna con 5000 valores", async () => {
+    await revealSheetColumn(page, "numero_lote");
+    await page
       .getByRole("button", { name: "Filtrar y ordenar Lote", exact: true })
-      .click(),
-  );
+      .click();
+  });
   const choices = () =>
     page.locator(".column-value-list").getByRole("checkbox");
   check(
@@ -127,11 +132,9 @@ async (page) => {
     process.env.PROTOTIPO_BROWSER_MODE === "development"
       ? "development"
       : "production";
-  await page
-    .locator(".column-filter-panel")
-    .screenshot({
-      path: `tests/evidence/product-sheet-performance/${mode}-5000-values.png`,
-    });
+  await page.locator(".column-filter-panel").screenshot({
+    path: `tests/evidence/product-sheet-performance/${mode}-5000-values.png`,
+  });
   await page
     .getByRole("button", { name: "Siguientes valores", exact: true })
     .click();
@@ -179,17 +182,17 @@ async (page) => {
   await measure("ocultar y mostrar columna", async () => {
     await page.getByRole("button", { name: "Columnas", exact: true }).click();
     const invoice = page
-      .getByRole("group", { name: "Columnas visibles", exact: true })
+      .getByRole("dialog", { name: "Columnas visibles", exact: true })
       .getByRole("checkbox", { name: "Factura", exact: true });
     await invoice.uncheck();
     check(
-      (await page.locator("thead th").count()) === 23,
+      Number(
+        await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
+      ) === 23,
       "La columna se oculta sin recargar",
     );
     await invoice.check();
-    await page
-      .getByRole("button", { name: "Cerrar columnas", exact: true })
-      .click();
+    await page.keyboard.press("Escape");
   });
   await measure("selección y teclado", async () => {
     await cell(0, "precio_unitario").click();
@@ -248,11 +251,9 @@ async (page) => {
     (await page.locator(".product-sheet-errors button").count()) === 50,
     "El resumen conserva todos los errores con un DOM limitado a 50 enlaces",
   );
-  await page
-    .locator(".product-order-sheet")
-    .screenshot({
-      path: `tests/evidence/product-sheet-performance/${mode}-5000-errors.png`,
-    });
+  await page.locator(".product-order-sheet").screenshot({
+    path: `tests/evidence/product-sheet-performance/${mode}-5000-errors.png`,
+  });
   await page
     .getByRole("button", { name: "Siguientes errores", exact: true })
     .click();

@@ -23,6 +23,7 @@
     "Reabrir un lote desde la hoja reactiva solo el destino y mantiene sus hermanos",
     "Sin errores de JavaScript durante las transiciones de la hoja"
   ],
+  "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-Es3YXB\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-7AagK0\\database.json"
 }

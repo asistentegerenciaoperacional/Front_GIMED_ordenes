@@ -1,23 +1,25 @@
 import {
-  cloneElement,
-  isValidElement,
+  useCallback,
   useEffect,
+  useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
-  type CSSProperties,
   type KeyboardEvent,
   type ReactNode,
-  type ReactElement,
 } from "react";
+import { ProductSheetTable } from "./product-sheet-table";
 import {
-  DataTable,
-  TableHead,
-  TableRows,
-  TableRow,
-  TableColumn,
-  TableCell,
-} from "./data-table";
+  SheetSelection,
+  rangeBounds,
+  type SheetPoint,
+} from "../product-sheet-selection";
+export {
+  rangeBounds,
+  type SheetRange,
+  type SheetPoint,
+} from "../product-sheet-selection";
 import type {
   ProductSheetRow,
   SheetColumn,
@@ -68,21 +70,14 @@ export function SheetCellHint({
   );
 }
 
-export type SheetPoint = { row: number; column: number };
-export type SheetRange = { anchor: SheetPoint; focus: SheetPoint };
-export const rangeBounds = (range: SheetRange) => ({
-  top: Math.min(range.anchor.row, range.focus.row),
-  bottom: Math.max(range.anchor.row, range.focus.row),
-  left: Math.min(range.anchor.column, range.focus.column),
-  right: Math.max(range.anchor.column, range.focus.column),
-});
 const rowHeight = 32,
   headerHeight = 44;
 export function ProductSheetGrid({
   rows,
   columns,
-  range,
-  onRange,
+  selection,
+  view,
+  pinnedColumn,
   renderCell,
   renderHeader,
   onEdit,
@@ -94,13 +89,13 @@ export function ProductSheetGrid({
   onPaste,
   onClear,
   onHideColumns,
-  selectedOrders,
   invalid,
 }: {
   rows: ProductSheetRow[];
   columns: SheetColumn[];
-  range: SheetRange | null;
-  onRange: (range: SheetRange) => void;
+  selection: SheetSelection;
+  view: string;
+  pinnedColumn?: string | null;
   renderCell: (row: ProductSheetRow, col: SheetColumn) => ReactNode;
   renderHeader: (col: SheetColumn) => ReactNode;
   onEdit: (row: ProductSheetRow, col: SheetColumn, initial?: string) => void;
@@ -112,10 +107,152 @@ export function ProductSheetGrid({
   onPaste: (text: string) => void;
   onClear: () => void;
   onHideColumns: () => void;
-  selectedOrders: Set<string>;
   invalid?: (row: ProductSheetRow, col: SheetColumn) => boolean;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const cells = useRef(new Map<HTMLTableCellElement, SheetPoint>());
+  const rowNodes = useRef(
+    new Map<HTMLTableRowElement, { index: number; orderId: string }>(),
+  );
+  const live = useRef({ rows, columns, editing, view });
+  live.current = { rows, columns, editing, view };
+  const rowKeys = useMemo(() => rows.map((row) => row.key), [rows]);
+  const columnKeys = useMemo(() => columns.map((col) => col.key), [columns]);
+  const offsets = useMemo(() => {
+    let x = 0;
+    return columns.map((col) => {
+      const left = x;
+      x += col.width;
+      return left;
+    });
+  }, [columns]);
+  const width = useMemo(
+    () => columns.reduce((sum, col) => sum + col.width, 0),
+    [columns],
+  );
+  const setFlag = (node: Element, name: string, value: boolean) => {
+    if (node.hasAttribute(name) !== value) {
+      if (value) node.setAttribute(name, "true");
+      else node.removeAttribute(name);
+    }
+  };
+  const paint = useCallback(() => {
+    const range = selection.read(),
+      bounds = range && rangeBounds(range);
+    const selectedOrders = new Set<string>();
+    if (bounds && live.current.view === "no_autorizadas")
+      for (let index = bounds.top; index <= bounds.bottom; index++) {
+        const row = live.current.rows[index];
+        if (row) selectedOrders.add(row.order.id);
+      }
+    let active: HTMLTableCellElement | null = null;
+    for (const [node, point] of cells.current) {
+      const selected =
+        !!bounds &&
+        point.row >= bounds.top &&
+        point.row <= bounds.bottom &&
+        point.column >= bounds.left &&
+        point.column <= bounds.right;
+      const focused =
+        range?.focus.row === point.row && range.focus.column === point.column;
+      setFlag(node, "data-range", selected);
+      setFlag(node, "data-active", focused);
+      if (node.getAttribute("aria-selected") !== String(selected))
+        node.setAttribute("aria-selected", String(selected));
+      if (focused) active = node;
+    }
+    for (const [node, row] of rowNodes.current) {
+      setFlag(
+        node,
+        "data-active-row",
+        !!bounds &&
+          bounds.top === row.index &&
+          bounds.bottom === row.index &&
+          bounds.left === bounds.right,
+      );
+      setFlag(node, "data-order-selected", selectedOrders.has(row.orderId));
+    }
+    const table = viewport.current?.querySelector("table");
+    if (active?.isConnected) {
+      if (!active.id)
+        active.id =
+          id + "-" + active.dataset.sheetKey + "-" + active.dataset.columnKey;
+      if (table?.getAttribute("aria-activedescendant") !== active.id)
+        table?.setAttribute("aria-activedescendant", active.id);
+    } else table?.removeAttribute("aria-activedescendant");
+  }, [selection, id]);
+  const registerCell = useCallback((node: HTMLTableCellElement) => {
+    cells.current.set(node, {
+      row: Number(node.dataset.sheetRow),
+      column: Number(node.dataset.sheetColumn),
+    });
+    return () => {
+      cells.current.delete(node);
+    };
+  }, []);
+  const registerRow = useCallback((node: HTMLTableRowElement) => {
+    node.setAttribute("aria-rowindex", node.dataset.globalRowIndex!);
+    rowNodes.current.set(node, {
+      index: Number(node.dataset.rowIndex),
+      orderId: node.dataset.orderId!,
+    });
+    return () => {
+      rowNodes.current.delete(node);
+    };
+  }, []);
+  const [windowRange, setWindowRange] = useState({ start: 0, end: 32 });
+  const [columnRange, setColumnRange] = useState({ start: 0, end: 12 });
+  const windowFrame = useRef<number | null>(null);
+  const previousRows = useRef<readonly string[] | null>(null);
+  const updateWindow = useCallback((force = false) => {
+    const el = viewport.current;
+    if (!el) return;
+    const first = Math.max(0, Math.floor(el.scrollTop / rowHeight));
+    const last = Math.min(
+      live.current.rows.length,
+      Math.ceil((el.scrollTop + el.clientHeight - headerHeight) / rowHeight),
+    );
+    setWindowRange((previous) => {
+      const covered =
+        previous.start <= Math.max(0, first - 2) &&
+        previous.end >= Math.min(live.current.rows.length, last + 2);
+      if (!force && covered) return previous;
+      const next = {
+        start: Math.max(0, first - 6),
+        end: Math.min(live.current.rows.length, last + 6),
+      };
+      return previous.start === next.start && previous.end === next.end
+        ? previous
+        : next;
+    });
+    const cols = live.current.columns;
+    let firstColumn = 0,
+      left = 0;
+    while (
+      firstColumn < cols.length &&
+      left + cols[firstColumn].width <= el.scrollLeft
+    )
+      left += cols[firstColumn++].width;
+    let lastColumn = firstColumn,
+      right = left;
+    while (lastColumn < cols.length && right < el.scrollLeft + el.clientWidth)
+      right += cols[lastColumn++].width;
+    const start = Math.max(0, firstColumn - 1),
+      end = Math.min(cols.length, lastColumn + 1);
+    setColumnRange((previous) =>
+      previous.start === start && previous.end === end
+        ? previous
+        : { start, end },
+    );
+  }, []);
+  const scheduleWindow = useCallback(() => {
+    if (windowFrame.current !== null) return;
+    windowFrame.current = requestAnimationFrame(() => {
+      windowFrame.current = null;
+      updateWindow();
+    });
+  }, [updateWindow]);
   const drag = useRef<{
     anchor: SheetPoint;
     last: SheetPoint;
@@ -159,7 +296,7 @@ export function ProductSheetGrid({
         ) {
           dragged.current = true;
           state.last = point;
-          onRange({ anchor: state.anchor, focus: point });
+          selection.set({ anchor: state.anchor, focus: point });
         }
       }
       if (dx || dy) frame = requestAnimationFrame(tick);
@@ -188,55 +325,79 @@ export function ProductSheetGrid({
       window.removeEventListener("pointercancel", end);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [onRange]);
-  const [windowStart, setWindowStart] = useState(0),
-    [height, setHeight] = useState(550);
-  useEffect(() => {
-    const element = viewport.current!;
-    const resize = new ResizeObserver(() => setHeight(element.clientHeight));
-    resize.observe(element);
-    return () => resize.disconnect();
-  }, []);
+  }, [selection, rowKeys, columnKeys, view]);
   useLayoutEffect(() => {
-    viewport.current!.scrollTop = 0;
-    setWindowStart(0);
-  }, [rows]);
+    drag.current = null;
+    selection.configure(rowKeys, columnKeys, view);
+    if (viewport.current && previousRows.current !== rowKeys)
+      viewport.current.scrollTop = 0;
+    previousRows.current = rowKeys;
+    updateWindow(true);
+  }, [rowKeys, columnKeys, view, selection, updateWindow]);
   useEffect(() => {
-    if (range && !editing) reveal(range.focus);
-  }, [range, editing?.rowKey, editing?.column]);
+    const observer = new ResizeObserver(() => updateWindow(true));
+    if (viewport.current) observer.observe(viewport.current);
+    return () => {
+      observer.disconnect();
+      if (windowFrame.current !== null)
+        cancelAnimationFrame(windowFrame.current);
+      windowFrame.current = null;
+    };
+  }, [updateWindow]);
+  const reveal = useCallback(
+    (point: SheetPoint, focusGrid = true) => {
+      const el = viewport.current;
+      if (!el || !live.current.columns[point.column]) return;
+      const y = point.row * rowHeight,
+        bottom = y + rowHeight + headerHeight;
+      if (y < el.scrollTop) el.scrollTop = y;
+      else if (bottom > el.scrollTop + el.clientHeight)
+        el.scrollTop = bottom - el.clientHeight;
+      const x = offsets[point.column],
+        right = x + live.current.columns[point.column].width;
+      if (x < el.scrollLeft) el.scrollLeft = x;
+      else if (right > el.scrollLeft + el.clientWidth)
+        el.scrollLeft = right - el.clientWidth;
+      updateWindow();
+      const table = el.querySelector("table");
+      if (focusGrid && document.activeElement !== table)
+        table?.focus({ preventScroll: true });
+    },
+    [offsets, updateWindow],
+  );
+  useLayoutEffect(
+    () =>
+      selection.subscribe(() => {
+        const range = selection.read();
+        if (range && !live.current.editing) reveal(range.focus);
+        paint();
+      }),
+    [selection, reveal, paint],
+  );
+  useLayoutEffect(() => {
+    paint();
+  });
   useEffect(() => {
     if (!editing) return;
+    const row = rowKeys.indexOf(editing.rowKey),
+      column = columnKeys.indexOf(editing.column);
+    if (row >= 0 && column >= 0) reveal({ row, column }, false);
     viewport.current
       ?.querySelector<HTMLInputElement>("[data-active] input")
       ?.focus({ preventScroll: true });
-  }, [editing?.rowKey, editing?.column]);
-  const start = Math.min(windowStart, Math.max(0, rows.length - 1));
-  const end = Math.min(rows.length, start + Math.ceil(height / rowHeight) + 13);
-  const bounds = range && rangeBounds(range);
-  function reveal(point: SheetPoint) {
-    const element = viewport.current!;
-    const y = headerHeight + point.row * rowHeight;
-    if (y < element.scrollTop + headerHeight)
-      element.scrollTop = y - headerHeight;
-    else if (y + rowHeight > element.scrollTop + element.clientHeight)
-      element.scrollTop = y + rowHeight - element.clientHeight;
-    const x = columns
-      .slice(0, point.column)
-      .reduce((sum, col) => sum + col.width, 0);
-    if (x < element.scrollLeft) element.scrollLeft = x;
-    else if (
-      x + columns[point.column].width >
-      element.scrollLeft + element.clientWidth
-    )
-      element.scrollLeft =
-        x + columns[point.column].width - element.clientWidth;
-    element.focus({ preventScroll: true });
-  }
+  }, [editing?.rowKey, editing?.column, rowKeys, columnKeys, reveal]);
+  const start = Math.min(windowRange.start, Math.max(0, rows.length - 1));
+  const end = Math.min(rows.length, windowRange.end);
   function navigate(event: KeyboardEvent<HTMLDivElement>) {
+    const range = selection.read();
     if (event.key === "Tab" && !editing) return;
     if (
-      !editing && event.altKey && event.shiftKey && !event.ctrlKey &&
-      !event.metaKey && event.key.toLowerCase() === "h"
+      !editing &&
+      event.altKey &&
+      event.shiftKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      event.key.toLowerCase() === "h"
     ) {
       event.preventDefault();
       event.stopPropagation();
@@ -263,7 +424,9 @@ export function ProductSheetGrid({
       event.preventDefault();
       event.stopPropagation();
       onCancel();
-      viewport.current?.focus();
+      viewport.current
+        ?.querySelector<HTMLTableElement>("table")
+        ?.focus({ preventScroll: true });
       return;
     }
     if (
@@ -323,14 +486,13 @@ export function ProductSheetGrid({
         row: Math.max(0, Math.min(rows.length - 1, row)),
         column: Math.max(0, Math.min(columns.length - 1, column)),
       };
-      onRange({
+      selection.set({
         anchor:
           event.shiftKey && event.key !== "Tab"
             ? (range?.anchor ?? current)
             : point,
         focus: point,
       });
-      reveal(point);
       return;
     }
     if (!editing && event.key.length === 1) {
@@ -338,24 +500,14 @@ export function ProductSheetGrid({
       onEdit(rows[current.row], columns[current.column], event.key);
     }
   }
-  const width = columns.reduce((sum, col) => sum + col.width, 0);
   return (
     <div
       ref={viewport}
       className="product-sheet-viewport table-scroll"
       role="region"
       aria-label="Hoja de órdenes de productos"
-      tabIndex={0}
-      onScroll={(event) =>
-        setWindowStart(
-          Math.max(
-            0,
-            Math.floor(
-              (event.currentTarget.scrollTop - headerHeight) / rowHeight,
-            ) - 6,
-          ),
-        )
-      }
+      tabIndex={-1}
+      onScroll={scheduleWindow}
       onKeyDownCapture={navigate}
       onPointerDownCapture={(event) => {
         if (event.pointerType !== "mouse" || event.button !== 0) return;
@@ -367,7 +519,9 @@ export function ProductSheetGrid({
           row: Number(cell.dataset.sheetRow),
           column: Number(cell.dataset.sheetColumn),
         };
-        const anchor = event.shiftKey ? (range?.anchor ?? point) : point;
+        const anchor = event.shiftKey
+          ? (selection.read()?.anchor ?? point)
+          : point;
         drag.current = {
           anchor,
           last: point,
@@ -375,8 +529,10 @@ export function ProductSheetGrid({
           y: event.clientY,
         };
         dragged.current = false;
-        onRange({ anchor, focus: point });
-        viewport.current?.focus({ preventScroll: true });
+        selection.set({ anchor, focus: point });
+        viewport.current
+          ?.querySelector<HTMLTableElement>("table")
+          ?.focus({ preventScroll: true });
         event.preventDefault();
       }}
       onCopy={(event) => {
@@ -403,11 +559,13 @@ export function ProductSheetGrid({
           row: Number(cell.dataset.sheetRow),
           column: Number(cell.dataset.sheetColumn),
         };
-        onRange({
-          anchor: event.shiftKey ? (range?.anchor ?? point) : point,
+        selection.set({
+          anchor: event.shiftKey ? (selection.read()?.anchor ?? point) : point,
           focus: point,
         });
-        viewport.current?.focus({ preventScroll: true });
+        viewport.current
+          ?.querySelector<HTMLTableElement>("table")
+          ?.focus({ preventScroll: true });
         event.stopPropagation();
       }}
       onDoubleClick={(event) => {
@@ -422,118 +580,23 @@ export function ProductSheetGrid({
           );
       }}
     >
-      <DataTable
-        manualKeyboardNavigation
-        className="data-table product-sheet-grid"
-        aria-label="Órdenes de productos por lote"
-        aria-rowcount={rows.length + 1}
-        style={{ width, minWidth: width }}
-      >
-        <TableHead>
-          <TableRow>
-            {columns.map((col) => {
-              const header = renderHeader(col);
-              return isValidElement(header) ? (
-                cloneElement(
-                  header as ReactElement<{ style?: CSSProperties }>,
-                  { key: col.key, style: { width: col.width } },
-                )
-              ) : (
-                <TableColumn key={col.key} style={{ width: col.width }}>
-                  {header}
-                </TableColumn>
-              );
-            })}
-          </TableRow>
-        </TableHead>
-        <TableRows>
-          {start > 0 && (
-            <TableRow
-              key="before"
-              className="sheet-spacer"
-              aria-hidden="true"
-              style={{ "--spacer": `${start * rowHeight}px` } as CSSProperties}
-            >
-              <TableCell colSpan={columns.length} />
-            </TableRow>
-          )}
-          {rows.slice(start, end).map((row, offset) => {
-            const index = start + offset;
-            return (
-              <TableRow
-                key={row.key}
-                aria-rowindex={index + 2}
-                data-global-row-index={index + 2}
-                aria-label={
-                  row.lot
-                    ? `OC ${row.order.no_orden}, lote ${row.lot.numero_lote ?? "sin número"}, ${row.lot.estado.replaceAll("_", " ")}`
-                    : undefined
-                }
-                data-lot-state={row.lot?.estado}
-                data-active-row={
-                  (bounds?.top === index &&
-                    bounds.bottom === index &&
-                    bounds.left === bounds.right) ||
-                  undefined
-                }
-                data-order-selected={
-                  selectedOrders.has(row.order.id) || undefined
-                }
-              >
-                {columns.map((col, column) => (
-                  <TableCell
-                    key={col.key}
-                    data-sheet-key={row.key}
-                    data-sheet-row={index}
-                    data-sheet-column={column}
-                    data-column-key={col.key}
-                    data-rejected={invalid?.(row, col) || undefined}
-                    aria-invalid={invalid?.(row, col) || undefined}
-                    data-range={
-                      (!!bounds &&
-                        index >= bounds.top &&
-                        index <= bounds.bottom &&
-                        column >= bounds.left &&
-                        column <= bounds.right) ||
-                      undefined
-                    }
-                    data-active={
-                      (range?.focus.row === index &&
-                        range.focus.column === column) ||
-                      undefined
-                    }
-                  >
-                    {editing?.rowKey === row.key && editing.column === col.key
-                      ? editor
-                      : renderCell(row, col)}
-                  </TableCell>
-                ))}
-              </TableRow>
-            );
-          })}
-          {end < rows.length && (
-            <TableRow
-              key="after"
-              className="sheet-spacer"
-              aria-hidden="true"
-              style={
-                {
-                  "--spacer": `${(rows.length - end) * rowHeight}px`,
-                } as CSSProperties
-              }
-            >
-              <TableCell colSpan={columns.length} />
-            </TableRow>
-          )}
-          {!rows.length && (
-            <TableRow>
-              <TableCell colSpan={columns.length}>
-                No hay filas que coincidan con esta hoja y sus filtros.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableRows>
-      </DataTable>
+      <ProductSheetTable
+        rows={rows}
+        columns={columns}
+        start={start}
+        end={end}
+        columnStart={columnRange.start}
+        columnEnd={columnRange.end}
+        pinnedColumn={pinnedColumn}
+        width={width}
+        renderCell={renderCell}
+        renderHeader={renderHeader}
+        editing={editing}
+        editor={editor}
+        invalid={invalid}
+        registerCell={registerCell}
+        registerRow={registerRow}
+      />
     </div>
   );
 }

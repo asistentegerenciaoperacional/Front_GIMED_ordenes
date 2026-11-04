@@ -35,6 +35,7 @@ async (page) => {
     .locator('[data-sheet-row="0"][data-column-key="no_orden"]')
     .click();
   await page.keyboard.press("ArrowDown");
+  await page.locator('[data-active][data-sheet-row="1"]').waitFor();
   check(
     (await page.locator("[data-active]").getAttribute("data-sheet-row")) ===
       "1",
@@ -104,6 +105,7 @@ async (page) => {
     .click();
   for (let index = 0; index < 70; index++)
     await page.keyboard.press("ArrowDown");
+  await page.locator('[data-active][data-sheet-row="70"]').waitFor();
   check(
     (await page.locator("[data-active]").getAttribute("data-sheet-row")) ===
       "70",
@@ -148,6 +150,9 @@ async (page) => {
     element.scrollLeft = 0;
     element.scrollTop = 0;
   });
+  await page
+    .locator('[data-sheet-row="0"][data-column-key="no_orden"]')
+    .waitFor();
   await page.screenshot({ path: "tests/evidence/aria/product-sheet-1440.png" });
   const base = await (await page.request.get(origin + "/api/state")).json();
   const changes = base.lote_producto

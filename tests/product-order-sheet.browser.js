@@ -25,7 +25,9 @@ async (page) => {
   await page.goto(origin + "/ordenes/productos");
   await page.locator(".product-sheet-grid").waitFor();
   check(
-    (await page.locator(".product-sheet-grid thead th").count()) === 24,
+    Number(
+      await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
+    ) === 24,
     "Seguimiento presenta las 24 columnas",
   );
   check(
@@ -65,7 +67,9 @@ async (page) => {
     .getByRole("button", { name: "No autorizadas", exact: true })
     .click();
   check(
-    (await page.locator(".product-sheet-grid thead th").count()) === 9,
+    Number(
+      await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
+    ) === 9,
     "No autorizadas presenta nueve columnas",
   );
   await page.getByRole("button", { name: "Anuladas", exact: true }).click();

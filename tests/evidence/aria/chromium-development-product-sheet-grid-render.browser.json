@@ -1,0 +1,12 @@
+{
+  "checks": [
+    "Copiar, pegar, borrar y editar leen todas las teclas antes del frame visual",
+    "Moverse dentro de la ventana no vuelve a ejecutar renderCell",
+    "La representación alcanza la selección lógica exacta",
+    "Reiniciar mientras hay un frame pendiente no resucita la selección",
+    "120 flechas contra el borde no renderizan contenido"
+  ],
+  "mode": "development",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-ZF4mtE\\database.json"
+}

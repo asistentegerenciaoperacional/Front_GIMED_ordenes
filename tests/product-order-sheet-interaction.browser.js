@@ -90,8 +90,12 @@ async (page) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto(origin + "/ordenes/productos?q=" + owner.no_orden);
   await page.locator(".product-sheet-grid").waitFor();
-  const cell = (row, key) =>
-    page.locator(`[data-sheet-row="${row}"][data-column-key="${key}"]`);
+  const { sheetCell, revealSheetColumn } = await import(
+    (await import("node:url")).pathToFileURL(
+      (await import("node:path")).resolve("tests/sheet-locator.mjs"),
+    ).href
+  );
+  const cell = (row, key) => sheetCell(page, row, key);
   const grid = () => page.locator(".product-sheet-viewport");
   const search = () =>
     page.getByRole("searchbox", { name: "Buscar en la hoja de OC" });
@@ -110,15 +114,27 @@ async (page) => {
   );
   await cell(0, "precio_unitario").click();
   await page.keyboard.press("Shift+ArrowDown");
+  await page.waitForFunction(
+    () => document.querySelectorAll("[data-range]").length === 2,
+  );
   check(
     (await page.locator("[data-range]").count()) === 2,
     "Shift+flechas selecciona un rango rectangular",
   );
-  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.evaluate(() => {
+    window.__sheetCopiedText = "";
+    document.addEventListener(
+      "copy",
+      (event) => {
+        window.__sheetCopiedText = event.clipboardData.getData("text/plain");
+      },
+      { once: true },
+    );
+  });
   await page.keyboard.press("Control+C");
   check(
-    (await page.evaluate(() => navigator.clipboard.readText())).split("\n")
-      .length === 2,
+    (await page.evaluate(() => window.__sheetCopiedText)).split("\n").length ===
+      2,
     "Ctrl+C copia una matriz compatible con Excel",
   );
   await paste("5,00\n6,00");
@@ -269,15 +285,19 @@ async (page) => {
     .locator(".product-sheet-column-menu label")
     .filter({ hasText: /^Factura$/ })
     .click();
-  await page.getByRole("button", { name: "Cerrar columnas" }).click();
+  await page.keyboard.press("Escape");
   check(
-    (await page.locator(".product-sheet-grid thead th").count()) === 23,
+    Number(
+      await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
+    ) === 23,
     "El menú oculta una columna de esta hoja",
   );
   await page.reload();
   await page.locator(".product-sheet-grid").waitFor();
   check(
-    (await page.locator(".product-sheet-grid thead th").count()) === 23,
+    Number(
+      await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
+    ) === 23,
     "Las columnas visibles persisten al recargar",
   );
   await page
@@ -293,7 +313,9 @@ async (page) => {
     "Autorizar selecciona la OC completa aunque el filtro oculte un renglón",
   );
   check(
-    (await page.locator(".product-sheet-grid thead th").count()) === 9,
+    Number(
+      await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
+    ) === 9,
     "La visibilidad de columnas es independiente para No autorizadas",
   );
   await page
@@ -391,7 +413,7 @@ async (page) => {
     .locator(".product-sheet-column-menu label")
     .filter({ hasText: /^Factura$/ })
     .click();
-  await page.getByRole("button", { name: "Cerrar columnas" }).click();
+  await page.keyboard.press("Escape");
   await cell(0, "id_factura").dblclick();
   const invoice = initial.factura.find(
     (invoice) => invoice.id_proveedor === product.id_maquilador,

@@ -1,0 +1,23 @@
+{
+  "checks": [
+    "La celda editada se conserva fuera de ambas ventanas virtuales",
+    "Desplazarse no pierde el foco del editor",
+    "Fijar el montaje de un editor no monta las filas intermedias",
+    "Confirmar conserva el borrador y vuelve a la fila siguiente",
+    "La navegación y el editor no escriben datos automáticamente",
+    "F2 inmediatamente después de una ráfaga revela el editor de la celda lógica",
+    "Escape conserva el desplazamiento de la celda editada",
+    "Copiar en el mismo turno utiliza el destino lógico más reciente",
+    "Ocultar columnas cancela la selección pendiente del frame",
+    "Se oculta la columna de la selección lógica",
+    "El grid enfocado referencia una celda activa montada y propia",
+    "Un filtro abierto conserva su encabezado al desplazar columnas",
+    "Cambiar de hoja cancela el frame anterior y conserva el borrador",
+    "Guardar cancela el movimiento pendiente sin restaurar una selección antigua",
+    "Guardar conserva el destino estable del borrador tras cambiar de hoja",
+    "Sin errores de página en las carreras de selección y virtualización"
+  ],
+  "mode": "development",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-CwfsL0\\database.json"
+}

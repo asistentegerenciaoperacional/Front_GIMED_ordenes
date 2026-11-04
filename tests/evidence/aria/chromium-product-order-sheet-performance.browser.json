@@ -96,115 +96,115 @@
   "timings": [
     {
       "name": "filtro personalizado",
-      "ms": 331
+      "ms": 160
     },
     {
       "name": "quitar filtro",
-      "ms": 162
+      "ms": 80
     },
     {
       "name": "cambiar a Anuladas",
-      "ms": 129
+      "ms": 81
     },
     {
       "name": "cambiar a No autorizadas",
-      "ms": 97
+      "ms": 81
     },
     {
       "name": "cambiar a En seguimiento",
-      "ms": 197
+      "ms": 98
     },
     {
       "name": "buscar",
-      "ms": 460
+      "ms": 231
     },
     {
       "name": "limpiar búsqueda",
-      "ms": 196
+      "ms": 64
     },
     {
       "name": "filtro de columna",
-      "ms": 880
+      "ms": 282
     },
     {
       "name": "limpiar condición de columna",
-      "ms": 274
+      "ms": 81
     },
     {
       "name": "ordenar",
-      "ms": 562
+      "ms": 131
     },
     {
       "name": "quitar ordenamiento",
-      "ms": 460
+      "ms": 131
     },
     {
       "name": "abrir columna con 5000 valores",
-      "ms": 261
+      "ms": 214
     },
     {
       "name": "aplicar selección de valores",
-      "ms": 349
+      "ms": 181
     },
     {
       "name": "quitar selección de valores",
-      "ms": 146
+      "ms": 81
     },
     {
       "name": "ocultar y mostrar columna",
-      "ms": 813
+      "ms": 214
     },
     {
       "name": "selección y teclado",
-      "ms": 678
+      "ms": 166
     },
     {
       "name": "editar y confirmar",
-      "ms": 912
-    },
-    {
-      "name": "guardar sin recargar",
       "ms": 397
     },
     {
+      "name": "guardar sin recargar",
+      "ms": 198
+    },
+    {
       "name": "pegar datos válidos",
-      "ms": 246
+      "ms": 221
     },
     {
       "name": "descartar borrador",
-      "ms": 213
+      "ms": 99
     },
     {
       "name": "pegar 5000 celdas protegidas",
-      "ms": 364
+      "ms": 225
     },
     {
       "name": "corregir y retirar errores",
-      "ms": 814
+      "ms": 277
     },
     {
       "name": "preparar pegado válido de 5000 lotes",
-      "ms": 1060
+      "ms": 548
     },
     {
       "name": "descartar 5000 cambios",
-      "ms": 312
+      "ms": 98
     },
     {
       "name": "abrir y cancelar nuevos lotes",
-      "ms": 478
+      "ms": 131
     },
     {
       "name": "abrir y cancelar nueva OC",
-      "ms": 471
+      "ms": 131
     },
     {
       "name": "ocultar y recuperar herramientas",
-      "ms": 730
+      "ms": 100
     }
   ],
   "pageErrors": [],
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-WdyM7U\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-F998rH\\database.json"
 }

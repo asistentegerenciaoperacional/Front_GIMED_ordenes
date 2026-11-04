@@ -1,0 +1,670 @@
+{
+  "checks": [
+    "paced-vertical: el navegador recibe todas las teclas reales",
+    "paced-vertical: eventos de teclado confiables enviados por el navegador",
+    "paced-vertical: el DOM de filas se mantiene acotado",
+    "paced-vertical: la posición final coincide con todas las flechas enviadas",
+    "fast-horizontal: el navegador recibe todas las teclas reales",
+    "fast-horizontal: eventos de teclado confiables enviados por el navegador",
+    "fast-horizontal: el DOM de filas se mantiene acotado",
+    "fast-horizontal: la posición final coincide con todas las flechas enviadas",
+    "fast-vertical: el navegador recibe todas las teclas reales",
+    "fast-vertical: eventos de teclado confiables enviados por el navegador",
+    "fast-vertical: el DOM de filas se mantiene acotado",
+    "fast-vertical: la posición final coincide con todas las flechas enviadas",
+    "left-edge: el navegador recibe todas las teclas reales",
+    "left-edge: eventos de teclado confiables enviados por el navegador",
+    "left-edge: el DOM de filas se mantiene acotado",
+    "left-edge: la posición final coincide con todas las flechas enviadas",
+    "sustained-vertical-1: el navegador recibe todas las teclas reales",
+    "sustained-vertical-1: eventos de teclado confiables enviados por el navegador",
+    "sustained-vertical-1: el DOM de filas se mantiene acotado",
+    "sustained-vertical-1: la posición final coincide con todas las flechas enviadas",
+    "sustained-vertical-2: el navegador recibe todas las teclas reales",
+    "sustained-vertical-2: eventos de teclado confiables enviados por el navegador",
+    "sustained-vertical-2: el DOM de filas se mantiene acotado",
+    "sustained-vertical-2: la posición final coincide con todas las flechas enviadas",
+    "sustained-vertical-3: el navegador recibe todas las teclas reales",
+    "sustained-vertical-3: eventos de teclado confiables enviados por el navegador",
+    "sustained-vertical-3: el DOM de filas se mantiene acotado",
+    "sustained-vertical-3: la posición final coincide con todas las flechas enviadas",
+    "shift-range: el navegador recibe todas las teclas reales",
+    "shift-range: eventos de teclado confiables enviados por el navegador",
+    "shift-range: el DOM de filas se mantiene acotado",
+    "shift-range: la posición final coincide con todas las flechas enviadas",
+    "La navegación no ejecuta comandos de datos",
+    "Sin excepciones durante las pruebas de teclado"
+  ],
+  "environment": {
+    "browser": "156.0.8078.80",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "instrumentation": "CDP trusted keydown, explicit timestamp, independent sender, frame/long-task observers, commit hook, heap before/after forced GC; CPU profile only fast-vertical"
+  },
+  "initialHeapMB": 7.953437805175781,
+  "finalHeapMB": 9.881473541259766,
+  "scenarios": [
+    {
+      "name": "paced-vertical",
+      "hz": 8,
+      "shift": false,
+      "keysSent": 24,
+      "keysCaptured": 24,
+      "trustedKeys": 24,
+      "enqueueMs": 2882.9,
+      "drainMs": 1.1,
+      "elapsedMs": 3423.8,
+      "expected": {
+        "row": 29,
+        "column": 0
+      },
+      "actual": {
+        "row": 29,
+        "column": 0
+      },
+      "commits": 26,
+      "commitsPerKey": 1.08,
+      "observedTransitions": 24,
+      "inputDelayMs": {
+        "p50": 1.4,
+        "p95": 2,
+        "max": 2
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.9
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 8506704,
+        "peak": 9566420,
+        "after": 9566420,
+        "afterGc": 8620756
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1039,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1332,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 29,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 118.12999999999998,
+        "scriptMs": 21.567000000000004,
+        "layoutMs": 3.8659999999999997,
+        "styleMs": 7.178999999999999,
+        "layouts": 24
+      }
+    },
+    {
+      "name": "fast-horizontal",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 144,
+      "keysCaptured": 144,
+      "trustedKeys": 144,
+      "enqueueMs": 2382.6,
+      "drainMs": 4.7,
+      "elapsedMs": 2960,
+      "expected": {
+        "row": 29,
+        "column": 0
+      },
+      "actual": {
+        "row": 29,
+        "column": 0
+      },
+      "commits": 146,
+      "commitsPerKey": 1.01,
+      "observedTransitions": 118,
+      "inputDelayMs": {
+        "p50": 2,
+        "p95": 6.4,
+        "max": 8.8
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.8
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 8640360,
+        "peak": 16987992,
+        "after": 15987368,
+        "afterGc": 9272344
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 4700,
+          "jsEventListeners": 589
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1206,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 29,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 922.438,
+        "scriptMs": 228.543,
+        "layoutMs": 118.442,
+        "styleMs": 45.943,
+        "layouts": 118
+      }
+    },
+    {
+      "name": "fast-vertical",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 180,
+      "keysCaptured": 180,
+      "trustedKeys": 180,
+      "enqueueMs": 2984.3,
+      "drainMs": 1.1,
+      "elapsedMs": 3539.7,
+      "expected": {
+        "row": 209,
+        "column": 0
+      },
+      "actual": {
+        "row": 209,
+        "column": 0
+      },
+      "commits": 186,
+      "commitsPerKey": 1.03,
+      "observedTransitions": 162,
+      "inputDelayMs": {
+        "p50": 1.4,
+        "p95": 4.5,
+        "max": 8.8
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.8
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9291584,
+        "peak": 12818652,
+        "after": 12012196,
+        "afterGc": 9393136
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1206,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 2824,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 209,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 727.581,
+        "scriptMs": 141.65,
+        "layoutMs": 33.08000000000001,
+        "styleMs": 58.707,
+        "layouts": 162
+      }
+    },
+    {
+      "name": "left-edge",
+      "hz": 60,
+      "shift": false,
+      "keysSent": 120,
+      "keysCaptured": 120,
+      "trustedKeys": 120,
+      "enqueueMs": 1991.4,
+      "drainMs": 0.6,
+      "elapsedMs": 2515,
+      "expected": {
+        "row": 209,
+        "column": 0
+      },
+      "actual": {
+        "row": 209,
+        "column": 0
+      },
+      "commits": 0,
+      "commitsPerKey": 0,
+      "observedTransitions": 0,
+      "inputDelayMs": {
+        "p50": 1.5,
+        "p95": 2.4,
+        "max": 3.2
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.9,
+        "max": 17.1
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9411884,
+        "peak": 10211208,
+        "after": 10211208,
+        "afterGc": 9394420
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 209,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 61.42200000000009,
+        "scriptMs": 15.039999999999997,
+        "layoutMs": 0,
+        "styleMs": 0,
+        "layouts": 0
+      }
+    },
+    {
+      "name": "sustained-vertical-1",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 150,
+      "keysCaptured": 150,
+      "trustedKeys": 150,
+      "enqueueMs": 4970.2,
+      "drainMs": 1.1,
+      "elapsedMs": 5520.9,
+      "expected": {
+        "row": 359,
+        "column": 0
+      },
+      "actual": {
+        "row": 359,
+        "column": 0
+      },
+      "commits": 165,
+      "commitsPerKey": 1.1,
+      "observedTransitions": 149,
+      "inputDelayMs": {
+        "p50": 1.4,
+        "p95": 2.5,
+        "max": 3.1
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 17.4
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9413168,
+        "peak": 11267900,
+        "after": 11178036,
+        "afterGc": 9479960
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1501,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 359,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 678.1899999999998,
+        "scriptMs": 119.64100000000005,
+        "layoutMs": 27.945999999999998,
+        "styleMs": 53.216,
+        "layouts": 149
+      }
+    },
+    {
+      "name": "sustained-vertical-2",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 150,
+      "keysCaptured": 150,
+      "trustedKeys": 150,
+      "enqueueMs": 4976.2,
+      "drainMs": 1,
+      "elapsedMs": 5532.3,
+      "expected": {
+        "row": 509,
+        "column": 0
+      },
+      "actual": {
+        "row": 509,
+        "column": 0
+      },
+      "commits": 169,
+      "commitsPerKey": 1.13,
+      "observedTransitions": 150,
+      "inputDelayMs": {
+        "p50": 1.3,
+        "p95": 2.2,
+        "max": 2.9
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 16.8
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9498708,
+        "peak": 11404236,
+        "after": 10980768,
+        "afterGc": 9518796
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1354,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 509,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 653.4779999999998,
+        "scriptMs": 111.1669999999999,
+        "layoutMs": 27.334999999999997,
+        "styleMs": 51.209,
+        "layouts": 150
+      }
+    },
+    {
+      "name": "sustained-vertical-3",
+      "hz": 30,
+      "shift": false,
+      "keysSent": 150,
+      "keysCaptured": 150,
+      "trustedKeys": 150,
+      "enqueueMs": 4967.5,
+      "drainMs": 0.7,
+      "elapsedMs": 5521.4,
+      "expected": {
+        "row": 659,
+        "column": 0
+      },
+      "actual": {
+        "row": 659,
+        "column": 0
+      },
+      "commits": 168,
+      "commitsPerKey": 1.12,
+      "observedTransitions": 150,
+      "inputDelayMs": {
+        "p50": 1.3,
+        "p95": 2,
+        "max": 3
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 17
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9537544,
+        "peak": 11297868,
+        "after": 10990052,
+        "afterGc": 9525616
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1354,
+          "jsEventListeners": 244
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 659,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 645.2019999999999,
+        "scriptMs": 108.70400000000002,
+        "layoutMs": 27.43799999999999,
+        "styleMs": 51.22100000000002,
+        "layouts": 150
+      }
+    },
+    {
+      "name": "shift-range",
+      "hz": 30,
+      "shift": true,
+      "keysSent": 90,
+      "keysCaptured": 90,
+      "trustedKeys": 90,
+      "enqueueMs": 2974.9,
+      "drainMs": 1.8,
+      "elapsedMs": 3525.3,
+      "expected": {
+        "row": 749,
+        "column": 0
+      },
+      "actual": {
+        "row": 749,
+        "column": 0
+      },
+      "commits": 180,
+      "commitsPerKey": 2,
+      "observedTransitions": 90,
+      "inputDelayMs": {
+        "p50": 1.3,
+        "p95": 2.2,
+        "max": 2.7
+      },
+      "frameGapMs": {
+        "p50": 16.7,
+        "p95": 16.8,
+        "max": 17
+      },
+      "longTasks": {
+        "count": 0,
+        "totalMs": 0,
+        "maxMs": 0
+      },
+      "missingActiveFrames": 0,
+      "heap": {
+        "before": 9544364,
+        "peak": 22869796,
+        "after": 22869796,
+        "afterGc": 9874548
+      },
+      "dom": {
+        "before": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "after": {
+          "documents": 2,
+          "nodes": 1501,
+          "jsEventListeners": 475
+        },
+        "afterGc": {
+          "documents": 2,
+          "nodes": 1207,
+          "jsEventListeners": 242
+        },
+        "mounted": {
+          "rows": 29,
+          "cells": 290,
+          "allDom": 862,
+          "active": {
+            "row": 749,
+            "column": 0
+          }
+        }
+      },
+      "work": {
+        "tasksMs": 668.024,
+        "scriptMs": 333.83400000000006,
+        "layoutMs": 20.822000000000006,
+        "styleMs": 21.82499999999998,
+        "layouts": 90
+      }
+    }
+  ],
+  "pageErrors": [],
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-U9gDGw\\database.json"
+}

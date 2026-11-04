@@ -205,7 +205,7 @@ body:has(.product-order-sheet) .content {
   background: #f2f6ff;
 }
 .product-sheet-grid [data-active-row][data-lot-state="cerrado"] td {
-  background: #d6f5e3;
+  background: #caf5dc;
 }
 .product-sheet-grid [data-active-row][data-lot-state="anulado"] td {
   background: #ffe1e5;
@@ -216,6 +216,13 @@ body:has(.product-order-sheet) .content {
 .product-sheet-grid td[data-active] {
   outline: 2px solid var(--primary);
   outline-offset: -2px;
+}
+.product-sheet-grid:focus-visible:has(td[data-active]) {
+  outline: none;
+}
+.product-sheet-grid .sheet-column-spacer {
+  padding: 0;
+  border: 0;
 }
 .product-sheet-grid td:has([data-rejected]),
 .product-sheet-grid td[data-rejected] {

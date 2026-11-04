@@ -170,7 +170,9 @@ async (page) => {
       `Filtro ${id}: coincide con los lotes correctos y conserva las cabeceras`,
     );
     check(
-      (await page.locator(".product-sheet-grid thead th").count()) === 24,
+      Number(
+        await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
+      ) === 24,
       `Cabeceras disponibles en ${id}`,
     );
   }
@@ -192,16 +194,19 @@ async (page) => {
     .click();
   await page.locator('thead th[aria-sort="ascending"]').waitFor();
   const sortedIds = await page
-    .locator('[data-column-key="no_orden"]')
-    .evaluateAll((cells) =>
-      cells.map((cell) => cell.dataset.sheetKey.slice(4)),
+    .locator("tbody tr[data-lot-state]")
+    .evaluateAll((rows) =>
+      rows.map((row) =>
+        row.querySelector("[data-sheet-key]").dataset.sheetKey.slice(4),
+      ),
     );
   const prices = sortedIds.map((id) => {
     const lot = db.lote_producto.find((lot) => lot.id === id);
     return Number(lines.get(lot.id_orden_producto).precio_unitario);
   });
   check(
-    prices.every((price, index) => index === 0 || price >= prices[index - 1]),
+    prices.length === lots.length &&
+      prices.every((price, index) => index === 0 || price >= prices[index - 1]),
     "El filtro de una columna nueva ordena por el valor numérico",
   );
   check(
@@ -210,6 +215,12 @@ async (page) => {
   );
   await page.goto(origin + "/ordenes/productos");
   await page.locator(".product-sheet-grid").waitFor();
+  const { revealSheetColumn } = await import(
+    (await import("node:url")).pathToFileURL(
+      (await import("node:path")).resolve("tests/sheet-locator.mjs"),
+    ).href
+  );
+  await revealSheetColumn(page, "ocm");
   const link = page.locator(".sheet-ocm-number").first();
   await link.click();
   await page.getByRole("tooltip").waitFor();
