@@ -44,6 +44,55 @@ body:has(.product-order-sheet) .content {
   border-top: 1px solid var(--border);
   padding: 8px;
 }
+.sheet-order-actions {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+}
+.product-sheet-tools .sheet-order-actions > .btn {
+  border: 0;
+  border-radius: 0;
+  height: 30px;
+  min-height: 30px;
+  box-shadow: none;
+}
+.product-sheet-tools .sheet-order-actions > .btn:nth-child(2) {
+  padding-inline: 7px;
+}
+.aria-options.sheet-order-menu {
+  width: var(--trigger-width);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+  box-shadow: none;
+}
+.sheet-order-menu .aria-option-list {
+  padding: 0;
+}
+.sheet-order-menu .sheet-order-menu-item {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  box-sizing: border-box;
+  padding: 6px 7px;
+  border-radius: 0 0 5px 5px;
+  color: var(--ink);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.sheet-order-menu .sheet-order-menu-item[data-hovered]:not([data-disabled]),
+.sheet-order-menu .sheet-order-menu-item[data-focused]:not([data-disabled]) {
+  background: var(--soft);
+}
+.sheet-order-menu .sheet-order-menu-item[data-focus-visible] {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
 .product-sheet-tools .btn {
   box-sizing: border-box;
   height: 32px;

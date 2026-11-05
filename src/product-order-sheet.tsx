@@ -5,6 +5,7 @@ import {
   DialogTrigger,
 } from "react-aria-components/Dialog";
 import { Popover } from "react-aria-components/Popover";
+import { Menu, MenuItem, MenuTrigger } from "react-aria-components/Menu";
 import {
   ChevronDown,
   ChevronUp,
@@ -180,6 +181,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [columnsOpen, setColumnsOpen] = useState(false),
     [openedColumn, setOpenedColumn] = useState<string | null>(null);
   const columnsDialog = useRef<HTMLElement | null>(null);
+  const orderActionsRef = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState(() =>
     readSheetLocal(
       "gimed:ui:product-sheet-collapsed",
@@ -924,12 +926,27 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               </div>
             </div>
             <div className="product-sheet-tools">
+              <div className="sheet-order-actions" ref={orderActionsRef}>
               <Button
                 icon={Plus}
                 onClick={() => cleanFirst(() => setCreating(true))}
               >
                 Nueva OC
               </Button>
+              <MenuTrigger>
+                <Button icon={ChevronDown} aria-label="Más acciones de órdenes" />
+                <Popover triggerRef={orderActionsRef} className="aria-options custom-filter-options sheet-order-menu" placement="bottom start" offset={4}>
+                  <Menu className="aria-option-list" aria-label="Acciones de órdenes" onAction={() => {
+                    const ids = selectionTargets().orderIds;
+                    if (view === "no_autorizadas" && ids.length && !busy) cleanFirst(() => setAuthorize(ids));
+                  }}>
+                    <MenuItem id="autorizar" className="aria-option sheet-order-menu-item" isDisabled={view !== "no_autorizadas" || !orderIds.length || busy}>
+                      <span>Autorizar{orderIds.length && view === "no_autorizadas" ? ` ${orderIds.length} OC` : ""}</span>
+                    </MenuItem>
+                  </Menu>
+                </Popover>
+              </MenuTrigger>
+              </div>
               <ControlSelect
                 aria-label="Estado del lote"
                 value=""
@@ -947,15 +964,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 <option value="anulado">Anular lotes</option>
                 <option value="en_seguimiento">Reabrir lotes</option>
               </ControlSelect>
-              <Button
-                disabled={view !== "no_autorizadas" || !orderIds.length || busy}
-                onClick={() => {
-                  const ids = selectionTargets().orderIds;
-                  cleanFirst(() => setAuthorize(ids));
-                }}
-              >
-                Autorizar{orderIds.length ? ` ${orderIds.length} OC` : ""}
-              </Button>
               <Tool
                 icon={FileText}
                 label="Ver orden escaneada"

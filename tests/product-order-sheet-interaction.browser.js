@@ -318,9 +318,8 @@ async (page) => {
     ) === 9,
     "La visibilidad de columnas es independiente para No autorizadas",
   );
-  await page
-    .getByRole("button", { name: "Autorizar 1 OC", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Más acciones de órdenes", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Autorizar 1 OC", exact: true }).click();
   const authorization = page.getByRole("dialog", {
     name: "Autorizar órdenes",
     exact: true,
