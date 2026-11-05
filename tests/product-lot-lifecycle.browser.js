@@ -139,11 +139,14 @@ async (page) => {
   );
 
   await card().getByRole("button", { name: "Anular", exact: true }).click();
-  const cancelProduct = lineDialog("Anular producto");
+  const cancelProduct = page.getByRole("alertdialog", {
+    name: "Confirmar acción",
+    exact: true,
+  });
   await cancelProduct.waitFor();
   check(
     (await cancelProduct.innerText()).includes(
-      "Se conservarán sus identificadores",
+      "La información de los lotes se conservará.",
     ),
     "La confirmación de anulación explica que conservará datos",
   );
@@ -179,23 +182,58 @@ async (page) => {
   );
   await screenshot("producto-anulado");
 
-  await card().getByRole("button", { name: "Reabrir", exact: true }).click();
-  const reopen = lineDialog("Reabrir producto");
-  await reopen.waitFor();
   check(
-    (await reopen.innerText()).includes(
-      "incluidos los que estaban cerrados o anulados",
-    ),
-    "Reabrir advierte que todos los lotes pasarán a seguimiento",
+    (await card()
+      .locator(".line-card-actions")
+      .getByRole("button", { name: /^(Cerrar|Reabrir)$/ })
+      .count()) === 0,
+    "El detalle no ofrece cierre ni reapertura directa del producto",
   );
-  await reopen.getByRole("button", { name: "Cancelar", exact: true }).click();
-  await reopen.waitFor({ state: "hidden" });
-  same(await state(), annulled, "Cancelar la reapertura tampoco escribe");
-  await card().getByRole("button", { name: "Reabrir", exact: true }).click();
-  await reopen
-    .getByRole("button", { name: "Reabrir producto y lotes", exact: true })
+  await card()
+    .getByRole("button", { name: "Agregar lote", exact: true })
     .click();
-  await reopen.waitFor({ state: "hidden" });
+  const add = page.getByRole("dialog", { name: /Nuevo lote|Agregar lote/ });
+  await add.waitFor();
+  await add.locator('[data-field-path="numero_lote"]').fill("LC-NUEVO");
+  await save(add);
+  await add.waitFor({ state: "hidden" });
+  const addedState = await state();
+  const added = addedState.lote_producto.find(
+    (lot) => lot.numero_lote === "LC-NUEVO",
+  );
+  check(
+    !!added &&
+      addedState.orden_producto.find((item) => item.id === line.id).estado ===
+        "en_seguimiento",
+    "Agregar un lote desde el detalle reactiva un producto anulado",
+  );
+  same(
+    addedState.lote_producto.filter((lot) => lot.id !== added.id),
+    annulled.lote_producto,
+    "Crear el nuevo lote conserva íntegros todos los lotes anteriores",
+  );
+  await card()
+    .getByRole("button", {
+      name: "Eliminar lote LC-NUEVO del producto 1",
+      exact: true,
+    })
+    .click();
+  const deletion = lineDialog("Eliminar lote");
+  await deletion
+    .getByRole("button", { name: "Eliminar lote", exact: true })
+    .click();
+  await deletion.waitFor({ state: "hidden" });
+  same(
+    await state(),
+    annulled,
+    "Eliminar el nuevo lote devuelve el producto a anulado sin alterar los demás",
+  );
+  for (const lot of [first, second, third]) {
+    const dialog = await edit(lot.numero_lote);
+    await chooseState(dialog, "En seguimiento");
+    await save(dialog);
+    await dialog.waitFor({ state: "hidden" });
+  }
   const reopened = expectedStates(
     before,
     line.id,
@@ -205,14 +243,14 @@ async (page) => {
   same(
     await state(),
     reopened,
-    "Reabrir producto abre todos sus lotes, incluidos cerrados/anulados previos, sin recrear ni perder datos",
+    "Reabrir cada lote conserva sus datos y reactiva el producto",
   );
   await page.reload();
   await card().waitFor();
   same(
     await state(),
     reopened,
-    "Recargar conserva los mismos lotes y datos reabiertos",
+    "Recargar conserva los estados persistidos sin recalcularlos",
   );
   await screenshot("producto-reabierto");
 
@@ -220,13 +258,21 @@ async (page) => {
     const dialog = await edit(lot.numero_lote);
     await chooseState(dialog, "Anulado");
     await save(dialog);
-    await dialog.waitFor({ state: "hidden" });
+    const confirmation = page.getByRole("alertdialog", {
+      name: "Confirmar acción",
+      exact: true,
+    });
+    await confirmation.waitFor();
     check(
-      (await page.getByRole("alertdialog").count()) === 0,
-      "Anular " +
-        lot.numero_lote +
-        " no requiere confirmar mientras quede otro lote activo",
+      (await confirmation.innerText()).includes(
+        "Se anulará el lote seleccionado.",
+      ) && !(await confirmation.innerText()).includes("también el producto"),
+      "Anular un lote no último solicita confirmación sin advertir anulación de producto",
     );
+    await confirmation
+      .getByRole("button", { name: "Anular lote", exact: true })
+      .click();
+    await dialog.waitFor({ state: "hidden" });
   }
   const partial = expectedStates(reopened, line.id, "en_seguimiento", {
     [first.id]: "anulado",
@@ -249,7 +295,7 @@ async (page) => {
   });
   await confirmation.waitFor();
   check(
-    (await confirmation.innerText()).includes("también anulará el producto"),
+    (await confirmation.innerText()).includes("también el producto"),
     "El formulario del último lote explica la anulación del producto",
   );
   same(
@@ -272,13 +318,13 @@ async (page) => {
     "Cancelar conserva abierto el formulario del lote",
   );
   check(
-      (await last.locator('[data-field-path="ubicacion"]').inputValue()) ===
+    (await last.locator('[data-field-path="ubicacion"]').inputValue()) ===
       "Edición pendiente que solo debe guardarse al confirmar",
     "Cancelar conserva la edición pendiente para decidir después",
   );
   await save(last);
   await confirmation
-    .getByRole("button", { name: "Anular lote y producto", exact: true })
+    .getByRole("button", { name: "Anular lote", exact: true })
     .click();
   await confirmation.waitFor({ state: "hidden" });
   await last.waitFor({ state: "hidden" });
@@ -309,7 +355,8 @@ async (page) => {
   same(
     errors,
     [],
-    "Sin errores de JavaScript durante el ciclo clásico completo",
+    "Sin errores de JavaScript durante el ciclo clásico completo: " +
+      JSON.stringify(errors),
   );
   return {
     checks,

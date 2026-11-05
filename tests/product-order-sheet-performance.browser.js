@@ -248,20 +248,19 @@ async (page) => {
     await paste(Array(5000).fill("no interpretar").join("\n"));
   });
   check(
-    (await page.locator(".product-sheet-errors button").count()) === 50,
-    "El resumen conserva todos los errores con un DOM limitado a 50 enlaces",
+    (await page.locator(".product-sheet-error-notice").innerText()).includes("5000 celdas") &&
+      (await page.locator(".product-sheet-errors").count()) === 0,
+    "Los errores se resumen en un único aviso sin lista adicional",
   );
   await page.locator(".product-order-sheet").screenshot({
     path: `tests/evidence/product-sheet-performance/${mode}-5000-errors.png`,
   });
-  await page
-    .getByRole("button", { name: "Siguientes errores", exact: true })
-    .click();
-  await page.locator(".product-sheet-errors button").first().click();
+  await page.getByRole("button", { name: "Cerrar aviso de error" }).click();
+  await cell(50, "no_orden").click();
   await page.locator('[data-active][data-sheet-row="50"]').waitFor();
   check(
-    true,
-    "Un error fuera de la ventana enfoca su celda estable sin bloquear",
+    (await cell(50, "no_orden").getAttribute("data-rejected")) === null,
+    "Cerrar el aviso retira las marcas también fuera de la ventana",
   );
   await measure("corregir y retirar errores", async () => {
     await cell(50, "precio_unitario").dblclick();
@@ -286,12 +285,10 @@ async (page) => {
       .getByRole("button", { name: "Descartar", exact: true })
       .click();
   });
-  await measure("abrir y cancelar nuevos lotes", async () => {
-    await page.getByRole("button", { name: "Nuevo lote", exact: true }).click();
-    await page
-      .getByRole("dialog")
-      .getByRole("button", { name: "Cancelar", exact: true })
-      .click();
+  await measure("abrir y cerrar menú de lotes", async () => {
+    await page.getByRole("button", { name: "Estado del lote", exact: true }).click();
+    await page.getByRole("option", { name: "Nuevo lote", exact: true }).waitFor();
+    await page.keyboard.press("Escape");
   });
   await measure("abrir y cancelar nueva OC", async () => {
     await page.getByRole("button", { name: "Nueva OC", exact: true }).click();

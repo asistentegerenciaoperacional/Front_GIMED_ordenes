@@ -663,6 +663,7 @@ const barcodeSteps = [
   { status: "verificado_sistema", label: "Verificado en sistema" },
   { status: "activo", label: "Activo" },
   { status: "asignado", label: "Asignado" },
+  { status: "inactivo", label: "Inactivo" },
 ];
 
 type BarcodeFilterRow = ColumnRow<string> & {
@@ -976,7 +977,7 @@ export function CodesPage() {
                     <TableCell>{c.codigo}</TableCell>
                     <TableCell>
                       {db.productos.find((p) => p.id === c.id_producto)
-                        ?.nombre_producto ?? "Sin producto asignado"}
+                        ?.nombre_producto ?? "-"}
                     </TableCell>
                     <TableCell>
                       <Badge

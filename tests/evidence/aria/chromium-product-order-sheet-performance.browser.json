@@ -71,8 +71,8 @@
     "Sin errores ni bloqueo después de pegar 5000 celdas protegidas",
     "pegar 5000 celdas protegidas responde dentro del presupuesto de 4 s con 5000 lotes",
     "DOM de filas acotado después de pegar 5000 celdas protegidas",
-    "El resumen conserva todos los errores con un DOM limitado a 50 enlaces",
-    "Un error fuera de la ventana enfoca su celda estable sin bloquear",
+    "Los errores se resumen en un único aviso sin lista adicional",
+    "Cerrar el aviso retira las marcas también fuera de la ventana",
     "Sin errores ni bloqueo después de corregir y retirar errores",
     "corregir y retirar errores responde dentro del presupuesto de 4 s con 5000 lotes",
     "DOM de filas acotado después de corregir y retirar errores",
@@ -96,43 +96,43 @@
   "timings": [
     {
       "name": "filtro personalizado",
-      "ms": 160
+      "ms": 153
     },
     {
       "name": "quitar filtro",
-      "ms": 80
+      "ms": 77
     },
     {
       "name": "cambiar a Anuladas",
-      "ms": 81
+      "ms": 83
     },
     {
       "name": "cambiar a No autorizadas",
-      "ms": 81
+      "ms": 79
     },
     {
       "name": "cambiar a En seguimiento",
-      "ms": 98
+      "ms": 96
     },
     {
       "name": "buscar",
-      "ms": 231
+      "ms": 198
     },
     {
       "name": "limpiar búsqueda",
-      "ms": 64
+      "ms": 46
     },
     {
       "name": "filtro de columna",
-      "ms": 282
+      "ms": 231
     },
     {
       "name": "limpiar condición de columna",
-      "ms": 81
+      "ms": 82
     },
     {
       "name": "ordenar",
-      "ms": 131
+      "ms": 130
     },
     {
       "name": "quitar ordenamiento",
@@ -140,7 +140,7 @@
     },
     {
       "name": "abrir columna con 5000 valores",
-      "ms": 214
+      "ms": 199
     },
     {
       "name": "aplicar selección de valores",
@@ -148,19 +148,19 @@
     },
     {
       "name": "quitar selección de valores",
-      "ms": 81
+      "ms": 82
     },
     {
       "name": "ocultar y mostrar columna",
-      "ms": 214
+      "ms": 196
     },
     {
       "name": "selección y teclado",
-      "ms": 166
+      "ms": 165
     },
     {
       "name": "editar y confirmar",
-      "ms": 397
+      "ms": 381
     },
     {
       "name": "guardar sin recargar",
@@ -168,27 +168,27 @@
     },
     {
       "name": "pegar datos válidos",
-      "ms": 221
+      "ms": 171
     },
     {
       "name": "descartar borrador",
-      "ms": 99
+      "ms": 131
     },
     {
       "name": "pegar 5000 celdas protegidas",
-      "ms": 225
+      "ms": 199
     },
     {
       "name": "corregir y retirar errores",
-      "ms": 277
+      "ms": 199
     },
     {
       "name": "preparar pegado válido de 5000 lotes",
-      "ms": 548
+      "ms": 492
     },
     {
       "name": "descartar 5000 cambios",
-      "ms": 98
+      "ms": 115
     },
     {
       "name": "abrir y cancelar nuevos lotes",
@@ -196,15 +196,15 @@
     },
     {
       "name": "abrir y cancelar nueva OC",
-      "ms": 131
+      "ms": 130
     },
     {
       "name": "ocultar y recuperar herramientas",
-      "ms": 100
+      "ms": 99
     }
   ],
   "pageErrors": [],
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-F998rH\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-BmBYO7\\database.json"
 }

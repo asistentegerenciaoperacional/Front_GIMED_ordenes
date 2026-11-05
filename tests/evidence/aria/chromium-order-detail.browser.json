@@ -51,10 +51,10 @@
     "Reabrir OCM anulada rechaza restaurar cobertura duplicada",
     "El rechazo conserva visible Reabrir y muestra su causa",
     "La reapertura rechazada conserva íntegra la base temporal",
-    "setLineState aceptado por el servicio",
+    "setProductLotStates aceptado por el servicio",
     "Texto secundario legible en OC en_seguimiento",
     "Fondo de OC en_seguimiento correcto",
-    "setLineState aceptado por el servicio",
+    "setProductLotStates aceptado por el servicio",
     "Texto secundario legible en OC cerrada",
     "Fondo de OC cerrada correcto",
     "setLineState aceptado por el servicio",
@@ -67,19 +67,19 @@
     "Sin errores de navegador: "
   ],
   "performance": {
-    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.0.0 Safari/537.36",
     "lines": 7,
     "lots": 280,
     "toggles": 4,
-    "measuredFrames": 55,
-    "frameMedianMs": 16.700000000000045,
-    "frameP95Ms": 50,
-    "frameMaxMs": 66.69999999999993,
-    "layoutMs": 6.777,
-    "styleMs": 45.11,
-    "scriptMs": 199.49900000000002
+    "measuredFrames": 58,
+    "frameMedianMs": 16.699999999999932,
+    "frameP95Ms": 33.5,
+    "frameMaxMs": 50.10000000000002,
+    "layoutMs": 5.799,
+    "styleMs": 41.491,
+    "scriptMs": 186.29399999999998
   },
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-1Edi4s\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-EwT7wy\\database.json"
 }

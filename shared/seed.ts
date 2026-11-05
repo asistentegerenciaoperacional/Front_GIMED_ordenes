@@ -1,3 +1,4 @@
+import { syncProductLineStates } from "./product-line-state";
 import type { Database } from "./models";
 import { emptyDatabase, blankRow, type Entity, type Row } from "./schema";
 export const sid = (n: number) => n.toString(16).padStart(24, "0");
@@ -478,5 +479,9 @@ export function makeSeed(): Database {
     destinatario: "compras1@proveedor.example",
     tipo_destinatario: "para",
   });
+  syncProductLineStates(
+    db,
+    db.orden_producto.map((line) => line.id),
+  );
   return db;
 }

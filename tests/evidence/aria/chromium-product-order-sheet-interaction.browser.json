@@ -23,6 +23,7 @@
     "Autorizar selecciona la OC completa aunque el filtro oculte un renglón",
     "La visibilidad de columnas es independiente para No autorizadas",
     "La firma autoriza toda la cabecera, no solo el renglón visible",
+    "La creación en la hoja no abre un diálogo",
     "Nuevo lote crea uno por cada renglón distinto de la selección",
     "Guardar y continuar usa los originales actualizados para la acción de estado",
     "El selector de factura reutilizado prepara la relación sin guardarla",
@@ -36,5 +37,5 @@
   ],
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-1FtBiV\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-U20Dk8\\database.json"
 }

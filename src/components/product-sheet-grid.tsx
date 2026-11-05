@@ -100,7 +100,7 @@ export function ProductSheetGrid({
   renderHeader: (col: SheetColumn) => ReactNode;
   onEdit: (row: ProductSheetRow, col: SheetColumn, initial?: string) => void;
   editor: ReactNode;
-  editing: { rowKey: string; column: string } | null;
+  editing: { rowKey: string; column: string; deferredClear?: boolean } | null;
   onCommit: () => boolean;
   onCancel: () => void;
   onCopy: (event?: React.ClipboardEvent) => void;
@@ -459,11 +459,6 @@ export function ProductSheetGrid({
         "Tab",
       ].includes(event.key)
     ) {
-      if (editing && !onCommit()) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
       event.preventDefault();
       event.stopPropagation();
       let row = current.row,
@@ -486,6 +481,8 @@ export function ProductSheetGrid({
         row: Math.max(0, Math.min(rows.length - 1, row)),
         column: Math.max(0, Math.min(columns.length - 1, column)),
       };
+      if (editing?.deferredClear && point.row === current.row && point.column === current.column) return;
+      if (editing && !onCommit()) return;
       selection.set({
         anchor:
           event.shiftKey && event.key !== "Tab"
@@ -514,7 +511,9 @@ export function ProductSheetGrid({
         const target = event.target as Element;
         if (target.closest('button, a, input, [role="combobox"]')) return;
         const cell = target.closest<HTMLElement>("[data-sheet-row]");
-        if (!cell || (editing && !onCommit())) return;
+        if (!cell) return;
+        if (editing?.deferredClear && cell.dataset.sheetKey === editing.rowKey && cell.dataset.columnKey === editing.column) return;
+        if (editing && !onCommit()) return;
         const point = {
           row: Number(cell.dataset.sheetRow),
           column: Number(cell.dataset.sheetColumn),
@@ -554,6 +553,7 @@ export function ProductSheetGrid({
         if (element.closest('button, a, input, [role="combobox"]')) return;
         const cell = element.closest<HTMLElement>("[data-sheet-row]");
         if (!cell) return;
+        if (editing?.deferredClear && cell.dataset.sheetKey === editing.rowKey && cell.dataset.columnKey === editing.column) return;
         if (editing && !onCommit()) return;
         const point = {
           row: Number(cell.dataset.sheetRow),

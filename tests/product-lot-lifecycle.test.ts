@@ -193,7 +193,7 @@ test("eliminar físicamente el último lote no anulado anula el renglón sin bor
   assert.deepEqual(store.snapshot(), expected);
 });
 
-test("anular/reabrir renglón propaga estados sin alterar cantidades, facturas, fechas, documentos, vínculos u orden de lotes", async (t) => {
+test("anular renglón conserva datos y reabrir un lote reactiva solo ese lote sin alterar cantidades, facturas, fechas, documentos, vínculos u orden de lotes", async (t) => {
   const store = await fixture(t);
   const before = store.snapshot();
   const expected = productLotLifecycleSnapshot(before, [sid(110)]);
@@ -219,27 +219,30 @@ test("anular/reabrir renglón propaga estados sin alterar cantidades, facturas, 
       { [sid(110)]: "anulada" },
     ),
   );
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: sid(110),
+  await rejected(
+    store,
+    "setLineState",
+    {
+      entity: "orden_producto",
+      id: sid(110),
+      estado: "en_seguimiento",
+      confirm: true,
+    },
+    "VALIDATION",
+  );
+  await execute(store, "setProductLotStates", {
+    ids: [sid(160)],
     estado: "en_seguimiento",
     expected: productLotLifecycleSnapshot(annulled, [sid(110)]),
   });
   assert.deepEqual(
     store.snapshot(),
     changedStates(
-      before,
-      { [sid(160)]: "en_seguimiento", [sid(161)]: "en_seguimiento" },
+      annulled,
+      { [sid(160)]: "en_seguimiento" },
       { [sid(110)]: "en_seguimiento" },
     ),
   );
-  const reopened = store.snapshot();
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: sid(110),
-    estado: "en_seguimiento",
-  });
-  assert.deepEqual(store.snapshot(), reopened);
 });
 
 test("saveLot clásico comparte confirmación del último lote y reapertura inversa sin recrearlo", async (t) => {
@@ -380,7 +383,7 @@ test("acciones masivas rechazan selección duplicada, ausente, sin autorización
   );
 });
 
-test("cerrar lotes conserva el cierre manual del renglón y revierte el conjunto si un lote carece de número", async (t) => {
+test("cerrar el último lote abierto cierra automáticamente el renglón y revierte el conjunto si un lote carece de número", async (t) => {
   const store = await fixture(t);
   const empty = store
     .snapshot()
@@ -398,7 +401,7 @@ test("cerrar lotes conserva el cierre manual del renglón y revierte el conjunto
   assert.equal(
     store.snapshot().orden_producto.find((line) => line.id === sid(110))!
       .estado,
-    "en_seguimiento",
+    "cerrada",
   );
 });
 
@@ -434,7 +437,7 @@ test("el snapshot acepta orden diferente y rechaza omisiones, duplicados o propi
   );
 });
 
-test("acciones masivas de producto confirman antes de mutar y anulan/reabren todos los lotes del rango", async (t) => {
+test("acciones masivas de producto conservan la anulación y rechazan cierre y reapertura directos", async (t) => {
   const store = await fixture(t);
   const before = store.snapshot();
   const ids = [sid(110), sid(115)];
@@ -469,65 +472,37 @@ test("acciones masivas de producto confirman antes de mutar y anulan/reabren tod
       { [sid(110)]: "anulada", [sid(115)]: "anulada" },
     ),
   );
-  const after = productLotLifecycleSnapshot(store.snapshot(), ids);
-  await execute(store, "setProductLineStates", {
-    ids,
-    estado: "en_seguimiento",
-    expected: after,
-  });
-  assert.deepEqual(
-    store.snapshot(),
-    changedStates(
-      before,
+  for (const estado of ["en_seguimiento", "cerrada"])
+    await rejected(
+      store,
+      "setProductLineStates",
       {
-        [sid(160)]: "en_seguimiento",
-        [sid(161)]: "en_seguimiento",
-        [sid(162)]: "en_seguimiento",
+        ids,
+        estado,
+        expected: productLotLifecycleSnapshot(store.snapshot(), ids),
+        confirm: true,
       },
-      { [sid(110)]: "en_seguimiento", [sid(115)]: "en_seguimiento" },
-    ),
-  );
+      "VALIDATION",
+    );
 });
 
-test("cierre masivo agrega advertencias de tolerancia y una confirmación obsoleta no modifica ningún producto", async (t) => {
+test("cierre automático fuera de tolerancia no exige confirmación y cierre directo queda rechazado", async (t) => {
   const store = await fixture(t);
-  const before = store.snapshot();
-  const ids = [sid(110), sid(115)];
-  const expected = productLotLifecycleSnapshot(before, ids);
-  const confirmation = await rejected(
-    store,
-    "setProductLineStates",
-    { ids, estado: "cerrada", expected },
-    "TOLERANCE",
-  );
-  assert.equal(confirmation.details.deviations.length, 1);
-  assert.equal(confirmation.details.deviations[0].id, sid(110));
-  assert.equal(confirmation.details.deviations[0].deviation, -50);
   await execute(store, "setProductLotStates", {
     ids: [sid(161)],
     estado: "cerrado",
   });
-  await rejected(
-    store,
-    "setProductLineStates",
-    { ids, estado: "cerrada", expected, confirm: true },
-    "LOT_STATE_CHANGED",
+  assert.equal(
+    store.snapshot().orden_producto.find((row) => row.id === sid(110))!.estado,
+    "cerrada",
   );
-  const updated = store.snapshot();
-  await execute(store, "setProductLineStates", {
-    ids,
-    estado: "cerrada",
-    expected: productLotLifecycleSnapshot(updated, ids),
-    confirm: true,
-  });
-  assert.deepEqual(
-    store.snapshot(),
-    changedStates(
-      updated,
-      {},
-      { [sid(110)]: "cerrada", [sid(115)]: "cerrada" },
-    ),
-  );
+  for (const estado of ["cerrada", "en_seguimiento"])
+    await rejected(
+      store,
+      "setLineState",
+      { entity: "orden_producto", id: sid(110), estado, confirm: true },
+      "VALIDATION",
+    );
 });
 
 test("estado masivo de producto rechaza selección inválida, falta de autorización o transición de anulado a cerrado atómicamente", async (t) => {
@@ -565,7 +540,7 @@ test("estado masivo de producto rechaza selección inválida, falta de autorizac
   );
 });
 
-test("la confirmación de tolerancia queda obsoleta si cambia una cantidad recibida o solicitada aunque los estados coincidan", async (t) => {
+test("la confirmación de anulación queda obsoleta si cambia una cantidad recibida o solicitada aunque los estados coincidan", async (t) => {
   const store = await fixture(t);
   const before = store.snapshot();
   const ids = [sid(110)];
@@ -575,7 +550,7 @@ test("la confirmación de tolerancia queda obsoleta si cambia una cantidad recib
   await rejected(
     store,
     "setProductLineStates",
-    { ids, estado: "cerrada", expected, confirm: true },
+    { ids, estado: "anulada", expected, confirm: true },
     "LOT_STATE_CHANGED",
   );
   const current = store.snapshot();
@@ -592,7 +567,7 @@ test("la confirmación de tolerancia queda obsoleta si cambia una cantidad recib
   await rejected(
     store,
     "setProductLineStates",
-    { ids, estado: "cerrada", expected: afterReceipt, confirm: true },
+    { ids, estado: "anulada", expected: afterReceipt, confirm: true },
     "LOT_STATE_CHANGED",
   );
   const afterQuantity = productLotLifecycleSnapshot(store.snapshot(), ids);
@@ -602,7 +577,7 @@ test("la confirmación de tolerancia queda obsoleta si cambia una cantidad recib
   await rejected(
     store,
     "setProductLineStates",
-    { ids, estado: "cerrada", expected: afterQuantity, confirm: true },
+    { ids, estado: "anulada", expected: afterQuantity, confirm: true },
     "LOT_STATE_CHANGED",
   );
 });

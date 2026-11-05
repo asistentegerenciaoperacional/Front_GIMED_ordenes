@@ -337,12 +337,21 @@ async (page) => {
     fullPage: false,
   });
   for (const status of ["en_seguimiento", "cerrada", "anulada"]) {
-    await command("setLineState", {
-      entity: "orden_producto",
-      id: productLines[0].id,
-      estado: status,
-      confirm: true,
-    });
+    const lotIds = (await state()).lote_producto
+      .filter((lot) => lot.id_orden_producto === productLines[0].id)
+      .map((lot) => lot.id);
+    if (status === "anulada")
+      await command("setLineState", {
+        entity: "orden_producto",
+        id: productLines[0].id,
+        estado: status,
+        confirm: true,
+      });
+    else
+      await command("setProductLotStates", {
+        ids: lotIds,
+        estado: status === "cerrada" ? "cerrado" : status,
+      });
     await go(productOrder.id);
     const colors = await first().evaluate((el) => {
       const style = getComputedStyle(el.querySelector(".line-card-head"));

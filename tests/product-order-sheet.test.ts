@@ -90,6 +90,33 @@ test("la edición posterior conserva un original null y no borra la detección d
   ]);
   assert.equal(second.changes[0].expected, null);
 });
+test("los precios negativos se rechazan en la hoja y en el guardado atómico", async () => {
+  const { db, row } = fixture();
+  const proposed = proposeSheetInput(
+    db,
+    [],
+    [{ row, column: column("precio_unitario"), text: "-3" }],
+  );
+  assert.equal(proposed.changes.length, 0);
+  assert.match(proposed.issues[0].message, /negativo/);
+  await assert.rejects(
+    command(db, "saveProductOrderSheet", {
+      changes: [
+        {
+          entity: "orden_producto",
+          id: row.line.id,
+          field: "precio_unitario",
+          expected: row.line.precio_unitario,
+          value: "-3.00",
+        },
+      ],
+    }),
+  );
+  assert.equal(
+    db.orden_producto.find((line) => line.id === row.line.id)!.precio_unitario,
+    row.line.precio_unitario,
+  );
+});
 test("las fechas y filtros usan el día de Bogotá, incluido el límite UTC", () => {
   const { db, row } = fixture();
   row.order.fecha_elaboracion = "2027-01-11T02:00:00.000Z";
@@ -437,8 +464,6 @@ test("las 17 variantes de filtros usan condiciones por lote y vínculos por reng
   lot.fecha_entrega_batch_record = "2027-01-10T12:00:00.000Z";
   assert.equal(matchesSheetFilter(row, "inspeccion_pendiente", today), true);
   lot.estado = "cerrado";
-  row.ready = true;
-  assert.equal(matchesSheetFilter(row, "seguimiento_por_cerrar", today), true);
   lot.estado = "anulado";
   assert.equal(matchesSheetFilter(row, "entrega_vencida", today), false);
 });

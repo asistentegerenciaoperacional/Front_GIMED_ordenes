@@ -1,3 +1,4 @@
+import { confirmProductCancellation } from "./product-cancellation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog as AriaDialog,
@@ -17,6 +18,8 @@ import {
   Undo2,
   Pencil,
   FilterX,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import { blankRow, labels, meta, type Row } from "../shared/schema";
 import type { Database } from "../shared/models";
@@ -99,7 +102,12 @@ import {
 import "./product-order-sheet.css";
 
 type SavedDraft = { version: 1; timestamp: string; changes: SheetChange[] };
-type Editing = { rowKey: string; column: string; value: string };
+type Editing = {
+  rowKey: string;
+  column: string;
+  value: string;
+  deferredClear?: boolean;
+};
 const localVisibility = "gimed:ui:product-sheet-columns:";
 function loadHidden(view: SheetView): string[] {
   const saved = readSheetLocal<unknown>(localVisibility + view, []);
@@ -116,16 +124,6 @@ const problemFrom = (failure: unknown) =>
             ? failure.message
             : "No se pudo completar la operación. El borrador se conserva.",
       });
-function transitionPrompt(problem: ApiError) {
-  const affected: Row[] = Array.isArray(problem.details.deviations)
-    ? problem.details.deviations
-    : Array.isArray(problem.details.products)
-      ? problem.details.products
-      : [];
-  return affected.length
-    ? `${problem.message} ${affected.map((product) => `OC ${product.no_orden}, ${product.producto}, renglón ${product.posicion}${typeof product.deviation === "number" ? `: ${product.deviation.toFixed(2)} %` : ""}`).join("; ")}.`
-    : problem.message;
-}
 function Tool({
   label,
   ...props
@@ -156,17 +154,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [storageError, setStorageError] = useState(false),
     [error, setError] = useState<ApiError | null>(null),
     [issues, setIssues] = useState<SheetCellIssue[]>([]);
-  const [issuePage, setIssuePage] = useState(0);
-  useEffect(() => setIssuePage(0), [issues]);
-  const issuePageSize = 50;
-  const currentIssuePage = Math.min(
-    issuePage,
-    Math.max(0, Math.ceil(issues.length / issuePageSize) - 1),
-  );
-  const visibleIssues = issues.slice(
-    currentIssuePage * issuePageSize,
-    (currentIssuePage + 1) * issuePageSize,
-  );
   const errorNotice = useMemo(
     () =>
       error ??
@@ -181,13 +168,11 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [editing, setEditing] = useState<Editing | null>(null);
   useEffect(() => () => selection.cancelPending(), [selection]);
   const [pendingInvoice, setPendingInvoice] = useState<string | null>(null);
-  const [focusRequest, setFocusRequest] = useState<SheetCellIssue | null>(null);
   const [projection, setProjection] = useState<Database>(db);
   const [busy, setBusy] = useState(false),
     [creating, setCreating] = useState(false),
     [editingOrder, setEditingOrder] = useState<string | null>(null);
-  const [newLots, setNewLots] = useState<string[] | null>(null),
-    [authorize, setAuthorize] = useState<string[] | null>(null);
+  const [authorize, setAuthorize] = useState<string[] | null>(null);
   const [pending, setPending] = useState<(() => void) | null>(null);
   const [replacements, setReplacements] = useState<
     { orderId: string; providerId: string }[]
@@ -287,15 +272,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     selection.set(null);
   }, [db]);
   useEffect(() => {
-    if (!focusRequest) return;
-    const row = rows.findIndex((row) => row.key === focusRequest.rowKey),
-      column = columns.findIndex((col) => col.key === focusRequest.column);
-    if (row >= 0 && column >= 0) {
-      selection.set({ anchor: { row, column }, focus: { row, column } });
-      setFocusRequest(null);
-    }
-  }, [rows, hidden, focusRequest]);
-  useEffect(() => {
     setHidden(loadHidden(view));
     selection.set(null);
     setEditing(null);
@@ -348,16 +324,14 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     if (!range) return "";
     const bounds = rangeBounds(range),
       orders = new Set<string>();
-    let annulled = false,
-      hasLot = false;
+    let hasLot = false;
     for (let index = bounds.top; index <= bounds.bottom; index++) {
       const row = rows[index];
       if (!row) continue;
       orders.add(row.order.id);
-      annulled ||= row.line.estado === "anulada";
       hasLot ||= !!row.lot;
     }
-    return `${bounds.bottom - bounds.top + 1}/${[...orders].join(",")}/${annulled}/${hasLot}`;
+    return `${bounds.bottom - bounds.top + 1}/${[...orders].join(",")}/${hasLot}`;
   }, [selection, rows]);
   const printSelected = (orderId: string) => {
     const viewport = document.querySelector<HTMLElement>(
@@ -368,7 +342,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     );
   };
   const changeQuery = (values: Record<string, string>) => {
-    if (editing && !commit()) return;
+    if (editing && !commit(undefined, true)) return;
     setProjection(
       draftRef.current === changes
         ? viewDb
@@ -386,7 +360,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     replaceRoute("/ordenes/productos" + (next.size ? "?" + next : ""));
   };
   const cleanFirst = (action: () => void) => {
-    if (editing && !commit()) return;
+    if (editing && !commit(undefined, true)) return;
     if (draftRef.current.length) setPending(() => action);
     else action();
   };
@@ -456,6 +430,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     const current = display(row),
       denied = cellPermission(db, current, col);
     if (denied) {
+      setError(null);
       setIssues([
         { rowKey: row.key, column: col.key, message: denied, protected: true },
       ]);
@@ -474,7 +449,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             : String(raw)),
     });
   }
-  function commit(value?: string): boolean {
+  function commit(value?: string, allowRejected = false): boolean {
     if (!editing) return true;
     const row = currentByKey.get(editing.rowKey),
       col = allColumns.find((col) => col.key === editing.column);
@@ -485,8 +460,19 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     const result = proposeSheetInput(db, changes, [
       { row, column: col, text: value ?? editing.value },
     ]);
-    setIssues(result.issues);
-    if (result.issues.length) return false;
+    setError(null);
+    setIssues((previous) => {
+      const remaining = previous.filter(
+        (issue) => issue.rowKey !== row.key || issue.column !== col.key,
+      );
+      return remaining.length === previous.length && !result.issues.length
+        ? previous
+        : [...remaining, ...result.issues];
+    });
+    if (result.issues.length) {
+      setEditing(null);
+      return allowRejected;
+    }
     if (col.key === "id_proveedor") {
       setEditing(null);
       const provider = result.changes.find(
@@ -563,6 +549,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       }),
     );
     const result = proposeSheetInput(db, changes, inputs);
+    setError(null);
     const replacement = result.changes.filter(
       (change) => change.field === "id_proveedor",
     );
@@ -587,6 +574,29 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     const range = selection.read();
     if (!range) return;
     const bounds = rangeBounds(range);
+    if (bounds.top === bounds.bottom && bounds.left === bounds.right) {
+      const row = rows[bounds.top],
+        column = columns[bounds.left];
+      if (
+        row &&
+        column &&
+        (column.kind === "integer" || column.kind === "decimal") &&
+        !cellPermission(db, display(row), column)
+      ) {
+        setIssues((previous) =>
+          previous.filter(
+            (issue) => issue.rowKey !== row.key || issue.column !== column.key,
+          ),
+        );
+        setEditing({
+          rowKey: row.key,
+          column: column.key,
+          value: "",
+          deferredClear: true,
+        });
+        return;
+      }
+    }
     const inputs = rows
       .slice(bounds.top, bounds.bottom + 1)
       .flatMap((row) =>
@@ -600,7 +610,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     setError(null);
   }
   function updateHidden(next: string[]) {
-    if (editing && !commit()) return;
+    if (editing && !commit(undefined, true)) return;
     setHidden(next);
     selection.set(null);
     try {
@@ -623,92 +633,48 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     ]);
   }
   async function states(
-    scope: "lot" | "line",
     state: string,
     targets: ReturnType<typeof selectionTargets>,
   ) {
     const { lotIds, lineIds } = targets;
-    const ids = scope === "lot" ? lotIds : lineIds;
-    if (!ids.length) return;
+    if (!lotIds.length) return;
     setBusy(true);
     setError(null);
     const expected = productLotLifecycleSnapshot(operationDb.current, lineIds);
     try {
-      if (scope === "line" && state === "en_seguimiento") {
-        const annulled = expected.filter((line) => line.estado === "anulada");
-        if (
-          annulled.length &&
-          !(await confirmAction(
-            `${annulled.length} ${annulled.length === 1 ? "producto anulado volverá" : "productos anulados volverán"} a seguimiento con todos sus lotes conservados, incluidos los cerrados o anulados. No se eliminarán ni recrearán lotes. ¿Reabrir la selección?`,
-            "Reabrir productos y lotes",
-          ))
-        )
-          return;
-      }
-      if (scope === "lot") {
-        try {
-          await run(
-            "setProductLotStates",
-            { ids, estado: state, expected },
-            "Estados de lote actualizados",
-          );
-        } catch (failure) {
-          const problem = problemFrom(failure);
-          if (problem.code !== "CONFIRMATION") throw failure;
-          if (
-            await confirmAction(
-              transitionPrompt(problem),
-              lotIds.length > 1
-                ? "Anular lotes y productos"
-                : "Anular lote y producto",
-              true,
-            )
-          )
-            await run(
-              "setProductLotStates",
-              {
-                ids,
-                estado: state,
-                expected: problem.details.expected,
-                confirm: true,
-              },
-              "Lotes y productos anulados",
-            );
-          else return;
-        }
-      } else {
-        try {
-          await run(
-            "setProductLineStates",
-            { ids, estado: state, expected },
-            "Seguimiento de productos actualizado",
-          );
-        } catch (failure) {
-          const problem = problemFrom(failure);
-          if (!["CONFIRMATION", "TOLERANCE"].includes(problem.code))
-            throw failure;
-          if (
-            await confirmAction(
-              transitionPrompt(problem),
-              state === "anulada"
-                ? "Anular productos y lotes"
-                : "Confirmar cierre",
-              state === "anulada",
-            )
-          )
-            await run(
-              "setProductLineStates",
-              {
-                ids,
-                estado: state,
-                expected: problem.details.expected,
-                confirm: true,
-              },
-              "Seguimiento de productos actualizado",
-            );
-          else return;
-        }
-      }
+      if (
+        state === "anulado" &&
+        !(await confirmProductCancellation(
+          operationDb.current,
+          "lot",
+          expected,
+          lotIds,
+        ))
+      )
+        return;
+      await run(
+        "setProductLotStates",
+        { ids: lotIds, estado: state, expected, confirm: state === "anulado" },
+        "Estados de lote actualizados",
+      );
+      selection.set(null);
+    } catch (failure) {
+      setError(problemFrom(failure));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function createLots(ids: string[]) {
+    setBusy(true);
+    setError(null);
+    try {
+      const current = operationDb.current;
+      const rows = ids.map((id) => {
+        const line = current.orden_producto.find((item) => item.id === id)!;
+        const order = current.orden_compra.find((item) => item.id === line.id_orden_compra)!;
+        return { ...blankRow("lote_producto"), id_orden_producto: id, fecha_estimada_batch_record: order.fecha_solicitada_entrega };
+      });
+      await run("createProductLots", { rows }, "Lotes creados");
       selection.set(null);
     } catch (failure) {
       setError(problemFrom(failure));
@@ -729,58 +695,70 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     };
     if (editCol.key === "id_proveedor")
       editor = (
-        <ProviderPicker
-          aria-label={editCol.label}
-          autoFocus
-          providers={db.proveedor.filter((provider) => provider.Es_maquila)}
-          value={String(editRow.order.id_proveedor)}
-          onChange={(id) => {
-            if (id) commit(id);
-          }}
-          onQueryChange={(value) =>
-            setEditing((old) => (old ? { ...old, value } : old))
-          }
-        />
+        <div className="sheet-reference-editor">
+          <ProviderPicker
+            aria-label={editCol.label}
+            autoFocus
+            providers={db.proveedor.filter((provider) => provider.Es_maquila)}
+            value={String(editRow.order.id_proveedor)}
+            onChange={(id) => {
+              if (id) commit(id);
+            }}
+            onQueryChange={(value) =>
+              setEditing((old) => (old ? { ...old, value } : old))
+            }
+          />
+        </div>
       );
     else if (editCol.key === "id_producto")
       editor = (
-        <ProductPicker
-          aria-label={editCol.label}
-          autoFocus
-          products={db.productos.filter(
-            (product) =>
-              product.id_maquilador === editRow.order.id_proveedor &&
-              product.activo,
-          )}
-          value={String(editRow.line.id_producto)}
-          onChange={(id) => {
-            if (id) commit(id);
-          }}
-          onQueryChange={(value) =>
-            setEditing((old) => (old ? { ...old, value } : old))
-          }
-        />
+        <div className="sheet-reference-editor">
+          <ProductPicker
+            aria-label={editCol.label}
+            autoFocus
+            products={db.productos.filter(
+              (product) =>
+                product.id_maquilador === editRow.order.id_proveedor &&
+                product.activo,
+            )}
+            value={String(editRow.line.id_producto)}
+            onChange={(id) => {
+              if (id) commit(id);
+            }}
+            onQueryChange={(value) =>
+              setEditing((old) => (old ? { ...old, value } : old))
+            }
+          />
+        </div>
       );
     else if (editCol.key === "ref_corrugado")
       editor = (
-        <MaterialPicker
-          aria-label={editCol.label}
-          autoFocus
-          materials={db.materiales.filter(
-            (material) => materialRole(db, material.id) === "corrugado",
-          )}
-          value={editing.value}
-          onChange={(id) => {
-            if (id) commit(id);
-          }}
-        />
+        <div className="sheet-reference-editor">
+          <MaterialPicker
+            aria-label={editCol.label}
+            autoFocus
+            materials={db.materiales.filter(
+              (material) => materialRole(db, material.id) === "corrugado",
+            )}
+            value={String(editRow.line.ref_corrugado ?? "")}
+            onChange={(id) => {
+              if (id) commit(id);
+            }}
+            onQueryChange={(value) =>
+              setEditing((old) => (old ? { ...old, value } : old))
+            }
+          />
+        </div>
       );
     else if (editCol.key === "id_factura")
       editor = (
         <div className="sheet-reference-editor">
           <InvoicePicker
             provider={editRow.order.id_proveedor}
-            value={editing.value || null}
+            value={editRow.lot?.id_factura ?? null}
+            onSearchChange={(value) =>
+              setEditing((old) => (old ? { ...old, value } : old))
+            }
             onChange={(id) => {
               if (id && !db.factura.some((invoice) => invoice.id === id))
                 setPendingInvoice(id);
@@ -952,20 +930,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               >
                 Nueva OC
               </Button>
-              <Button
-                icon={Plus}
-                disabled={
-                  view === "no_autorizadas" ||
-                  !lineIds.length ||
-                  selected.some((row) => row.line.estado === "anulada")
-                }
-                onClick={() => {
-                  const ids = selectionTargets().lineIds;
-                  cleanFirst(() => setNewLots(ids));
-                }}
-              >
-                Nuevo lote
-              </Button>
               <ControlSelect
                 aria-label="Estado del lote"
                 value=""
@@ -973,30 +937,15 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 onChange={(event) => {
                   const value = event.target.value;
                   const targets = selectionTargets();
-                  if (value)
-                    cleanFirst(() => void states("lot", value, targets));
+                  if (value === "nuevo") cleanFirst(() => void createLots(targets.lineIds));
+                  else if (value) cleanFirst(() => void states(value, targets));
                 }}
               >
                 <option value="">Lotes</option>
+                <option value="nuevo">Nuevo lote</option>
                 <option value="cerrado">Cerrar lotes</option>
                 <option value="anulado">Anular lotes</option>
                 <option value="en_seguimiento">Reabrir lotes</option>
-              </ControlSelect>
-              <ControlSelect
-                aria-label="Seguimiento del producto"
-                value=""
-                disabled={view === "no_autorizadas" || !lineIds.length || busy}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  const targets = selectionTargets();
-                  if (value)
-                    cleanFirst(() => void states("line", value, targets));
-                }}
-              >
-                <option value="">Productos</option>
-                <option value="cerrada">Cerrar productos</option>
-                <option value="anulada">Anular productos</option>
-                <option value="en_seguimiento">Reabrir productos</option>
               </ControlSelect>
               <Button
                 disabled={view !== "no_autorizadas" || !orderIds.length || busy}
@@ -1264,55 +1213,19 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           sesión hasta guardar los cambios.
         </div>
       )}
-      <ErrorNotice error={errorNotice} />
-      {!!issues.length && (
-        <div className="product-sheet-errors" aria-label="Celdas rechazadas">
-          {visibleIssues.map((issue, index) => (
-            <Button
-              key={index}
-              variant="link"
-              onClick={() => {
-                setHidden((previous) =>
-                  previous.filter((key) => key !== issue.column),
-                );
-                setFocusRequest(issue);
-                if (!rows.some((row) => row.key === issue.rowKey))
-                  changeQuery({ q: "", filtro: "", filtros: "" });
-              }}
-            >
-              {issue.protected ? "Celda protegida" : "Dato rechazado"}:{" "}
-              {allColumns.find((col) => col.key === issue.column)?.label} ·{" "}
-              {issue.message}
-            </Button>
-          ))}
-        </div>
-      )}
-      {issues.length > issuePageSize && (
-        <div
-          className="inline product-sheet-error-pages"
-          aria-label="Páginas de errores"
-        >
+      {errorNotice && (
+        <div className="error-notice product-sheet-error-notice" role="alert">
+          <AlertCircle size={18} aria-hidden="true" />
+          <strong>{errorNotice.message}</strong>
           <Button
-            className="small"
-            disabled={!currentIssuePage}
-            onClick={() => setIssuePage(currentIssuePage - 1)}
-            aria-label="Errores anteriores"
-          >
-            Anterior
-          </Button>
-          <span role="status">
-            Errores {currentIssuePage * issuePageSize + 1}–
-            {Math.min((currentIssuePage + 1) * issuePageSize, issues.length)} de{" "}
-            {issues.length}
-          </span>
-          <Button
-            className="small"
-            disabled={(currentIssuePage + 1) * issuePageSize >= issues.length}
-            onClick={() => setIssuePage(currentIssuePage + 1)}
-            aria-label="Siguientes errores"
-          >
-            Siguiente
-          </Button>
+            icon={X}
+            variant="ghost"
+            aria-label="Cerrar aviso de error"
+            onClick={() => {
+              setError(null);
+              setIssues([]);
+            }}
+          />
         </div>
       )}
       <div className="product-sheet-status" role="status">
@@ -1340,7 +1253,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         onEdit={edit}
         editing={editing}
         editor={editor}
-        onCommit={() => commit()}
+        onCommit={() => commit(undefined, true)}
         onCancel={() => setEditing(null)}
         onCopy={copy}
         onPaste={paste}
@@ -1476,9 +1389,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           onClose={() => setReplacements((queue) => queue.slice(1))}
         />
       )}
-      {newLots && (
-        <NewProductLots lineIds={newLots} onClose={() => setNewLots(null)} />
-      )}
       {authorize && (
         <OrderAuthorizationDialog
           ids={authorize}
@@ -1491,167 +1401,5 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         />
       )}
     </section>
-  );
-}
-
-function NewProductLots({
-  lineIds,
-  onClose,
-}: {
-  lineIds: string[];
-  onClose: () => void;
-}) {
-  const { db, run } = useApp();
-  const [rows, setRows] = useState<Row[]>(() =>
-    lineIds.map((id) => {
-      const line = db.orden_producto.find((line) => line.id === id)!;
-      const order = db.orden_compra.find(
-        (order) => order.id === line.id_orden_compra,
-      )!;
-      return {
-        ...blankRow("lote_producto"),
-        id_orden_producto: id,
-        fecha_estimada_batch_record: order.fecha_solicitada_entrega,
-      };
-    }),
-  );
-  const [busy, setBusy] = useState(false),
-    [error, setError] = useState<ApiError | null>(null);
-  const [dirty, setDirty] = useState(false);
-  return (
-    <Dialog
-      title={`Nuevos lotes · ${rows.length} productos`}
-      onClose={onClose}
-      wide
-      dirty={dirty}
-      busy={busy}
-    >
-      <ControlForm
-        noValidate
-        fieldErrors={error?.fields}
-        onSubmit={async (event) => {
-          event.preventDefault();
-          setBusy(true);
-          setError(null);
-          try {
-            await run("createProductLots", { rows }, "Lotes creados");
-            onClose();
-          } catch (failure) {
-            setError(problemFrom(failure));
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        <div className="dialog-body">
-          <ErrorNotice error={error} />
-          {rows.map((row, index) => {
-            const line = db.orden_producto.find(
-              (line) => line.id === row.id_orden_producto,
-            )!;
-            const order = db.orden_compra.find(
-              (order) => order.id === line.id_orden_compra,
-            )!;
-            const update = (field: string, value: unknown) => {
-              setDirty(true);
-              setRows((previous) =>
-                previous.map((old, i) =>
-                  i === index ? { ...old, [field]: value } : old,
-                ),
-              );
-            };
-            return (
-              <section key={line.id} className="order-form-line">
-                <h3>
-                  OC {order.no_orden} · Renglón {line.posicion} ·{" "}
-                  {
-                    db.productos.find(
-                      (product) => product.id === line.id_producto,
-                    )?.nombre_producto
-                  }
-                </h3>
-                <div className="form-grid three">
-                  {Object.entries(meta.tables.lote_producto.fields)
-                    .filter(
-                      ([field]) =>
-                        !["id", "id_orden_producto", "id_factura"].includes(
-                          field,
-                        ),
-                    )
-                    .sort(
-                      ([a], [b]) =>
-                        productLotFieldOrder.indexOf(a) -
-                        productLotFieldOrder.indexOf(b),
-                    )
-                    .map(([field, spec]) => (
-                      <Field
-                        key={field}
-                        id={`field-rows.${index}.${field}`}
-                        label={labels[field] ?? field}
-                        error={error?.fields[`rows.${index}.${field}`]}
-                      >
-                        {meta.enums[spec.type] ? (
-                          <ControlSelect
-                            id={`field-rows.${index}.${field}`}
-                            value={row[field] ?? ""}
-                            onChange={(event) =>
-                              update(field, event.target.value)
-                            }
-                          >
-                            {meta.enums[spec.type].map((value) => (
-                              <option key={value} value={value}>
-                                {text(value)}
-                              </option>
-                            ))}
-                          </ControlSelect>
-                        ) : spec.type === "datetime" ? (
-                          <DateInput
-                            id={`field-rows.${index}.${field}`}
-                            value={row[field]?.slice(0, 10) ?? ""}
-                            onChange={(value) => update(field, isoDate(value))}
-                          />
-                        ) : (
-                          <ControlInput
-                            id={`field-rows.${index}.${field}`}
-                            type={spec.type === "integer" ? "number" : "text"}
-                            value={row[field] ?? ""}
-                            onChange={(event) =>
-                              update(
-                                field,
-                                spec.type === "integer"
-                                  ? event.target.value === ""
-                                    ? null
-                                    : Number(event.target.value)
-                                  : event.target.value || null,
-                              )
-                            }
-                          />
-                        )}
-                      </Field>
-                    ))}
-                  <Field
-                    id={`field-rows.${index}.id_factura`}
-                    error={error?.fields[`rows.${index}.id_factura`]}
-                    label="Factura (opcional)"
-                  >
-                    <InvoicePicker
-                      provider={order.id_proveedor}
-                      value={row.id_factura}
-                      onChange={(value) => update("id_factura", value)}
-                    />
-                  </Field>
-                </div>
-              </section>
-            );
-          })}
-        </div>
-        <div className="dialog-footer">
-          <CancelButton onClick={onClose}>Cancelar</CancelButton>
-          <Button type="submit" variant="primary" disabled={busy}>
-            Crear lotes
-          </Button>
-        </div>
-      </ControlForm>
-    </Dialog>
   );
 }

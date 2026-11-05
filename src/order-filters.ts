@@ -12,7 +12,6 @@ export type CustomFilterId =
   | "inspeccion_pendiente"
   | "recibidos_sin_inspeccion"
   | "confirmacion_pendiente"
-  | "seguimiento_por_cerrar"
   | "vinculos_con"
   | "vinculos_sin"
   | "ocm_pendientes";
@@ -110,16 +109,6 @@ export const customFilters: readonly FilterDefinition[] = [
     productOnly: true,
     options: [
       { id: "confirmacion_pendiente", label: "Confirmación pendiente" },
-    ],
-  },
-  {
-    id: "por_cerrar",
-    name: "Seguimiento por cerrar",
-    description:
-      "Órdenes con productos aún en seguimiento pero que todos sus lotes ya fueron cerrados.",
-    productOnly: true,
-    options: [
-      { id: "seguimiento_por_cerrar", label: "Seguimiento por cerrar" },
     ],
   },
   {

@@ -1,3 +1,4 @@
+import { confirmProductCancellation } from "./product-cancellation";
 import {
   ArrowLeft,
   Ban,
@@ -1034,10 +1035,7 @@ export function OrderDetail({
   const [lot, setLot] = useState<{ line: Row; record?: Row } | null>(null),
     [receipt, setReceipt] = useState<Row | null>(null),
     [mail, setMail] = useState<Row | null>(null);
-  type LotAction =
-    | { kind: "delete"; line: Row; record: Row }
-    | { kind: "anular" | "reabrir"; line: Row }
-    | null;
+  type LotAction = { kind: "delete"; line: Row; record: Row } | null;
   const [pendingAction, setPendingActionValue] = useState<
     | (NonNullable<LotAction> & {
         expected: ReturnType<typeof productLotLifecycleSnapshot>;
@@ -1108,20 +1106,10 @@ export function OrderDetail({
     }
     let confirm = false;
     if (s === "anulada" && o!.tipo_orden === "producto") {
-      setActionError(undefined);
-      setPendingAction({ kind: "anular", line: l });
-      return;
+      if (!(await confirmProductCancellation(db, "product", expected!))) return;
+      confirm = true;
     }
-    if (
-      s === "en_seguimiento" &&
-      o!.tipo_orden === "producto" &&
-      l.estado === "anulada"
-    ) {
-      setActionError(undefined);
-      setPendingAction({ kind: "reabrir", line: l });
-      return;
-    }
-    if (s === "anulada") {
+    if (s === "anulada" && o!.tipo_orden !== "producto") {
       if (
         !(await confirmAction(
           `¿Anular este ${orderItemLabel(o!.tipo_orden)}? La orden conservará su número.`,
@@ -1131,18 +1119,6 @@ export function OrderDetail({
       )
         return;
       confirm = true;
-    }
-    if (s === "cerrada" && o?.tipo_orden === "producto") {
-      const d = deviation(db, l);
-      if (d !== null && Math.abs(d) > tolerance(db)) {
-        if (
-          !(await confirmAction(
-            `La desviación del producto es ${d.toFixed(2)} %, fuera del margen ±${tolerance(db)} %. ¿Confirmar el cierre del producto?`,
-          ))
-        )
-          return;
-        confirm = true;
-      }
     }
     try {
       await run(
@@ -1165,27 +1141,15 @@ export function OrderDetail({
     setActionBusy(true);
     setActionError(undefined);
     try {
-      if (pendingAction.kind === "delete")
-        await run(
-          "deleteLot",
-          { id: pendingAction.record.id, confirm: true },
-          "Lote eliminado",
-        );
-      else
-        await run(
-          "setLineState",
-          {
-            entity: "orden_producto",
-            id: pendingAction.line.id,
-            estado:
-              pendingAction.kind === "anular" ? "anulada" : "en_seguimiento",
-            confirm: true,
-            expected: pendingAction.expected,
-          },
-          pendingAction.kind === "anular"
-            ? "Producto y lotes anulados; datos conservados"
-            : "Producto y lotes reabiertos",
-        );
+      await run(
+        "deleteLot",
+        {
+          id: pendingAction.record.id,
+          confirm: true,
+          expected: pendingAction.expected,
+        },
+        "Lote eliminado",
+      );
       setPendingAction(null);
     } catch (e) {
       setActionError((e as Error).message);
@@ -1387,15 +1351,45 @@ export function OrderDetail({
                           </div>
                           <div className="inline line-card-actions">
                             <Badge value={l.estado} />
-                            {l.estado === "en_seguimiento" && (
-                              <>
+                            {o.tipo_orden !== "producto" &&
+                              l.estado === "en_seguimiento" && (
+                                <>
+                                  <Button
+                                    className="small"
+                                    disabled={!authorized}
+                                    onClick={() =>
+                                      void changeState(l, "cerrada")
+                                    }
+                                  >
+                                    Cerrar
+                                  </Button>
+                                  <Button
+                                    className="small"
+                                    variant="ghost"
+                                    disabled={!authorized}
+                                    onClick={() =>
+                                      void changeState(l, "anulada")
+                                    }
+                                  >
+                                    Anular
+                                  </Button>
+                                </>
+                              )}
+                            {o.tipo_orden !== "producto" &&
+                              (l.estado === "cerrada" ||
+                                l.estado === "anulada") && (
                                 <Button
                                   className="small"
                                   disabled={!authorized}
-                                  onClick={() => void changeState(l, "cerrada")}
+                                  onClick={() =>
+                                    void changeState(l, "en_seguimiento")
+                                  }
                                 >
-                                  Cerrar
+                                  Reabrir
                                 </Button>
+                              )}
+                            {o.tipo_orden === "producto" &&
+                              l.estado !== "anulada" && (
                                 <Button
                                   className="small"
                                   variant="ghost"
@@ -1404,20 +1398,7 @@ export function OrderDetail({
                                 >
                                   Anular
                                 </Button>
-                              </>
-                            )}
-                            {(l.estado === "cerrada" ||
-                              l.estado === "anulada") && (
-                              <Button
-                                className="small"
-                                disabled={!authorized}
-                                onClick={() =>
-                                  void changeState(l, "en_seguimiento")
-                                }
-                              >
-                                Reabrir
-                              </Button>
-                            )}
+                              )}
                             {o.tipo_orden !== "otro" && (
                               <Button
                                 className="small line-disclosure-toggle"
@@ -1527,9 +1508,7 @@ export function OrderDetail({
                                 <Button
                                   icon={Plus}
                                   className="small"
-                                  disabled={
-                                    !authorized || l.estado === "anulada"
-                                  }
+                                  disabled={!authorized}
                                   onClick={() => setLot({ line: l })}
                                 >
                                   Agregar lote
@@ -1737,7 +1716,7 @@ export function OrderDetail({
                                     style={{ marginTop: 14 }}
                                   >
                                     {l.estado === "anulada"
-                                      ? "Producto anulado. Reábrelo para registrar un lote."
+                                      ? "Producto anulado. Agrega un lote en seguimiento para reactivarlo."
                                       : "No se encontraron lotes para este producto."}
                                   </p>
                                 )}
@@ -1944,75 +1923,39 @@ export function OrderDetail({
       {mail && <MailForm context={mail} onClose={() => setMail(null)} />}{" "}
       {pendingAction && (
         <ConfirmationDialog
-          title={
-            pendingAction.kind === "delete"
-              ? "Eliminar lote"
-              : pendingAction.kind === "anular"
-                ? "Anular producto"
-                : "Reabrir producto"
-          }
-          confirmLabel={
-            pendingAction.kind === "delete"
-              ? "Eliminar lote"
-              : pendingAction.kind === "anular"
-                ? "Anular producto"
-                : "Reabrir producto y lotes"
-          }
+          title="Eliminar lote"
+          confirmLabel="Eliminar lote"
           onConfirm={confirmLotAction}
           onClose={() => setPendingAction(null)}
           busy={actionBusy}
-          destructive={
-            pendingAction.kind === "delete" || pendingAction.kind === "anular"
-          }
+          destructive
           error={actionError}
         >
-          {pendingAction.kind === "delete" ? (
-            <>
-              <p>
-                Se eliminará el lote{" "}
-                <strong>
-                  {pendingAction.record.numero_lote ?? "sin número"}
-                </strong>{" "}
-                del producto {pendingAction.line.posicion}, incluidos sus datos
-                de recepción, Batch record e inspección. Esta acción no se puede
-                deshacer.
+          <>
+            <p>
+              Se eliminará el lote{" "}
+              <strong>
+                {pendingAction.record.numero_lote ?? "sin número"}
+              </strong>{" "}
+              del producto {pendingAction.line.posicion}, incluidos sus datos de
+              recepción, Batch record e inspección. Esta acción no se puede
+              deshacer.
+            </p>
+            {db.lote_producto
+              .filter(
+                (record) => record.id_orden_producto === pendingAction.line.id,
+              )
+              .filter(
+                (record) =>
+                  record.id !== pendingAction.record.id &&
+                  record.estado !== "anulado",
+              ).length === 0 && (
+              <p className="notice warning">
+                No quedarán lotes activos de este producto. Al eliminarlo, el
+                producto quedará anulado.
               </p>
-              {db.lote_producto
-                .filter(
-                  (record) =>
-                    record.id_orden_producto === pendingAction.line.id,
-                )
-                .filter(
-                  (record) =>
-                    record.id !== pendingAction.record.id &&
-                    record.estado !== "anulado",
-                ).length === 0 && (
-                <p className="notice warning">
-                  No quedarán lotes activos de este producto. Al eliminarlo, el
-                  producto quedará anulado.
-                </p>
-              )}
-            </>
-          ) : pendingAction.kind === "anular" ? (
-            <p>
-              Se anulará el producto {pendingAction.line.posicion} y todos sus
-              lotes (
-              {
-                db.lote_producto.filter(
-                  (record) =>
-                    record.id_orden_producto === pendingAction.line.id,
-                ).length
-              }
-              ). Se conservarán sus identificadores, datos de recepción, Batch
-              record, inspección y vínculos de abastecimiento.
-            </p>
-          ) : (
-            <p>
-              El producto y todos sus lotes conservados pasarán a seguimiento,
-              incluidos los que estaban cerrados o anulados. Sus datos no se
-              reemplazarán.
-            </p>
-          )}
+            )}
+          </>
           <p>Las facturas y sus documentos se conservarán.</p>
         </ConfirmationDialog>
       )}

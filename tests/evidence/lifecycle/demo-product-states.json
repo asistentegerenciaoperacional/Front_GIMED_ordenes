@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-05T17:13:54.774Z",
+  "file": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\database.json",
+  "backup": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\data\\database.json.before-product-states-1793898834769.bak",
+  "changes": [
+    {
+      "id": "00000000000000000000006e",
+      "before": "en_seguimiento",
+      "after": "cerrada"
+    },
+    {
+      "id": "000000000000000000000073",
+      "before": "en_seguimiento",
+      "after": "cerrada"
+    }
+  ],
+  "previousSha256": "e0f597ff418be797f72bffeff23e1e479e79630e1cf957bbe1ebf8a5cb00e2ed",
+  "backupSha256": "e0f597ff418be797f72bffeff23e1e479e79630e1cf957bbe1ebf8a5cb00e2ed",
+  "updatedSha256": "671af918cdae66b043f0a7f0e322f673eb094d879601c1f1bcc6c15a73868cff",
+  "onlyProductStatesChanged": true
+}

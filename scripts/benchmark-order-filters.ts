@@ -199,20 +199,6 @@ function referenceOrders(
           order.tipo_orden === "producto" &&
           lots.some((lot) => physical(lot) && !lot.fecha_confirmacion)
         );
-      case "seguimiento_por_cerrar":
-        return (
-          order.tipo_orden === "producto" &&
-          lines.some((line) => {
-            const rows = (data.groupedLots.get(line.id) ?? []).filter(
-              (lot) => lot.estado !== "anulado",
-            );
-            return (
-              line.estado === "en_seguimiento" &&
-              rows.length > 0 &&
-              rows.every((lot) => lot.estado === "cerrado")
-            );
-          })
-        );
       case "vinculos_con":
         return links.length > 0;
       case "vinculos_sin":

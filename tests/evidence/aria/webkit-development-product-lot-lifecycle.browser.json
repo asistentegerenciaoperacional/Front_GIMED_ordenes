@@ -1,0 +1,46 @@
+{
+  "checks": [
+    "La base temporal tiene un producto utilizable",
+    "La factura del fixture pertenece al proveedor de la orden",
+    "El detalle clásico muestra los tres lotes conservados",
+    "La confirmación de anulación explica que conservará datos",
+    "Abrir la confirmación de anulación no escribe",
+    "Cancelar la anulación del producto conserva la base completa",
+    "Anular producto cambia únicamente sus estados y conserva IDs, cantidades, factura, fechas, documentos y vínculos",
+    "Anular el producto mantiene visibles sus tres lotes",
+    "El detalle no ofrece cierre ni reapertura directa del producto",
+    "Agregar un lote desde el detalle reactiva un producto anulado",
+    "Crear el nuevo lote conserva íntegros todos los lotes anteriores",
+    "Eliminar el nuevo lote devuelve el producto a anulado sin alterar los demás",
+    "Reabrir cada lote conserva sus datos y reactiva el producto",
+    "Recargar conserva los estados persistidos sin recalcularlos",
+    "Anular un lote no último solicita confirmación sin advertir anulación de producto",
+    "Anular un lote no último solicita confirmación sin advertir anulación de producto",
+    "Anular parte de los lotes conserva activo el producto y todos los demás datos",
+    "El formulario del último lote explica la anulación del producto",
+    "La primera solicitud del último lote no guarda ni su estado ni la ubicación pendiente",
+    "Cancelar la confirmación del último lote no escribe absolutamente ningún dato",
+    "Cancelar conserva abierto el formulario del lote",
+    "Cancelar conserva la edición pendiente para decidir después",
+    "Confirmar guarda el último lote y anula el producto atómicamente sin modificar los lotes hermanos",
+    "Reabrir un lote desde su formulario reactiva el producto y mantiene anulados los otros lotes",
+    "Sin errores de JavaScript durante el ciclo clásico completo: []"
+  ],
+  "screenshots": [
+    "tests/evidence/aria/webkit-lifecycle-producto-anulado.png",
+    "tests/evidence/aria/webkit-lifecycle-producto-reabierto.png",
+    "tests/evidence/aria/webkit-lifecycle-ultimo-lote-confirmacion.png",
+    "tests/evidence/aria/webkit-lifecycle-lote-reabierto.png"
+  ],
+  "orderId": "a7bc4b05f53bd3f6f069918b",
+  "productLineId": "b7efd645af6bb4ca45a38745",
+  "lotIds": [
+    "6a9dbc93cd3cf7b0c5bcb66b",
+    "eb2a5e97bb2afbd06f472adc",
+    "de1c8a6e3f44110b8551eba4"
+  ],
+  "pageErrors": [],
+  "mode": "development",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-u0Y5yx\\database.json"
+}

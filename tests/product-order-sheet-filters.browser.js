@@ -100,12 +100,6 @@ async (page) => {
             return received && !lot.fecha_inspeccion;
           case "confirmacion_pendiente":
             return received && !lot.fecha_confirmacion;
-          case "seguimiento_por_cerrar":
-            return (
-              line.estado === "en_seguimiento" &&
-              siblings.length > 0 &&
-              siblings.every((item) => item.estado === "cerrado")
-            );
           case "vinculos_con":
             return links.length > 0;
           case "vinculos_sin":
@@ -144,7 +138,6 @@ async (page) => {
     "inspeccion_pendiente",
     "recibidos_sin_inspeccion",
     "confirmacion_pendiente",
-    "seguimiento_por_cerrar",
     "vinculos_con",
     "vinculos_sin",
     "ocm_pendientes",
@@ -178,7 +171,7 @@ async (page) => {
   }
   check(
     writes.length === 0,
-    "Aplicar los 17 filtros no guarda ni emite comandos",
+    "Aplicar los 16 filtros no guarda ni emite comandos",
   );
   await page
     .getByRole("button", { name: "Limpiar filtros", exact: true })

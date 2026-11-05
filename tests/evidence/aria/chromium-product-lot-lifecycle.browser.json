@@ -8,12 +8,14 @@
     "Cancelar la anulación del producto conserva la base completa",
     "Anular producto cambia únicamente sus estados y conserva IDs, cantidades, factura, fechas, documentos y vínculos",
     "Anular el producto mantiene visibles sus tres lotes",
-    "Reabrir advierte que todos los lotes pasarán a seguimiento",
-    "Cancelar la reapertura tampoco escribe",
-    "Reabrir producto abre todos sus lotes, incluidos cerrados/anulados previos, sin recrear ni perder datos",
-    "Recargar conserva los mismos lotes y datos reabiertos",
-    "Anular LC-CERRADO no requiere confirmar mientras quede otro lote activo",
-    "Anular LC-ABIERTO no requiere confirmar mientras quede otro lote activo",
+    "El detalle no ofrece cierre ni reapertura directa del producto",
+    "Agregar un lote desde el detalle reactiva un producto anulado",
+    "Crear el nuevo lote conserva íntegros todos los lotes anteriores",
+    "Eliminar el nuevo lote devuelve el producto a anulado sin alterar los demás",
+    "Reabrir cada lote conserva sus datos y reactiva el producto",
+    "Recargar conserva los estados persistidos sin recalcularlos",
+    "Anular un lote no último solicita confirmación sin advertir anulación de producto",
+    "Anular un lote no último solicita confirmación sin advertir anulación de producto",
     "Anular parte de los lotes conserva activo el producto y todos los demás datos",
     "El formulario del último lote explica la anulación del producto",
     "La primera solicitud del último lote no guarda ni su estado ni la ubicación pendiente",
@@ -30,14 +32,15 @@
     "tests/evidence/aria/chromium-lifecycle-ultimo-lote-confirmacion.png",
     "tests/evidence/aria/chromium-lifecycle-lote-reabierto.png"
   ],
-  "orderId": "ee7d676acf1d4fd4bffddbc6",
-  "productLineId": "5b429f0086f9230087c87d73",
+  "orderId": "f05ff574b5e0835e4199cdce",
+  "productLineId": "13504211f7ff45df387aaeaf",
   "lotIds": [
-    "09e78d665c2e65dbb67caa33",
-    "e0960a058a0b9c5f7837878e",
-    "bdf4bae04cb404322fd478b1"
+    "d6d1d4a79927c95c5a492d8d",
+    "c6ef995ff4d4abf4f738da52",
+    "53f1bf4446be7e33924a1c82"
   ],
   "pageErrors": [],
+  "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-ekVRqU\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-Mibn3M\\database.json"
 }

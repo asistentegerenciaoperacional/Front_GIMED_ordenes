@@ -168,7 +168,6 @@ export type ProductSheetRow = {
   excess: number;
   globalRemaining: number;
   supply: SupplyItem[];
-  ready: boolean;
   documentId?: string;
   cells: Record<string, ColumnCell>;
 };
@@ -361,10 +360,6 @@ export function buildProductSheet(
     const globalRemaining =
       line.cantidad_solicitada -
       active.reduce((sum, lot) => sum + (lot.cantidad_recibida ?? 0), 0);
-    const ready =
-      line.estado === "en_seguimiento" &&
-      active.length > 0 &&
-      active.every((lot) => lot.estado === "cerrado");
     let received = 0;
     const append = (lot: lote_producto | undefined, first: boolean) => {
       const row: ProductSheetRow = {
@@ -378,7 +373,6 @@ export function buildProductSheet(
         excess: Math.max(0, received - line.cantidad_solicitada),
         globalRemaining,
         supply: supply.get(line.id) ?? [],
-        ready,
         documentId: documents.get(order.id),
         cells: {},
       };
@@ -445,8 +439,6 @@ export function matchesSheetFilter(
       return received && !lot?.fecha_inspeccion;
     case "confirmacion_pendiente":
       return received && !lot?.fecha_confirmacion;
-    case "seguimiento_por_cerrar":
-      return row.ready;
     case "vinculos_con":
       return row.supply.length > 0;
     case "vinculos_sin":

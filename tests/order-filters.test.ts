@@ -70,13 +70,13 @@ const get = (db: Database) => buildOrderReadModel(db).orders[0];
 const matches = (db: Database, filter: CustomFilterId) =>
   matchesCustomFilter(get(db), filter, day);
 
-test("catálogo: trece filtros, diecisiete variantes y descripciones iguales a filtros.md", async () => {
-  assert.equal(customFilters.length, 13);
+test("catálogo: doce filtros, dieciséis variantes y descripciones iguales a filtros.md", async () => {
+  assert.equal(customFilters.length, 12);
   const ids = customFilters.flatMap((filter) =>
     filter.options.map((option) => option.id),
   );
-  assert.equal(ids.length, 17);
-  assert.equal(new Set(ids).size, 17);
+  assert.equal(ids.length, 16);
+  assert.equal(new Set(ids).size, 16);
   const doc = await readFile(
     new URL("../../filtros.md", import.meta.url),
     "utf8",
@@ -274,20 +274,8 @@ test("anulados no generan pendientes; cerrados sí pueden conservar pendientes d
   assert.equal(matches(db, "sin_recepciones"), false);
 });
 
-test("seguimiento por cerrar requiere lotes efectivos, todos cerrados en un renglón abierto", () => {
-  const { db, lot, line } = fixture();
-  assert.equal(matches(db, "seguimiento_por_cerrar"), false);
-  lot.estado = "cerrado";
-  assert.equal(matches(db, "seguimiento_por_cerrar"), true);
-  db.lote_producto.push({ ...lot, id: "ignored", estado: "anulado" });
-  assert.equal(matches(db, "seguimiento_por_cerrar"), true);
-  line.estado = "cerrada";
-  assert.equal(matches(db, "seguimiento_por_cerrar"), false);
-  line.estado = "en_seguimiento";
-  db.lote_producto = [];
-  assert.equal(matches(db, "seguimiento_por_cerrar"), false);
-  db.lote_producto = [{ ...lot, estado: "anulado" }];
-  assert.equal(matches(db, "seguimiento_por_cerrar"), false);
+test("el filtro retirado seguimiento_por_cerrar vuelve a Sin filtro personalizado", () => {
+  assert.equal(readCustomFilter("seguimiento_por_cerrar", "productos"), "");
 });
 
 test("OCM compartida: solo aparece la OC cuyo renglón vinculado está pendiente", () => {

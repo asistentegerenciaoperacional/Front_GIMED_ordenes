@@ -223,7 +223,8 @@ export function sheetRecordIssue(
       );
   if (entity === "orden_producto") {
     try {
-      decimal(row.precio_unitario);
+      if (Number(decimal(row.precio_unitario)) < 0)
+        issues.precio_unitario = "El precio no puede ser negativo.";
     } catch {
       issues.precio_unitario = "Introduce un precio con hasta dos decimales.";
     }

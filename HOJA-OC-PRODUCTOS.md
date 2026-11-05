@@ -87,7 +87,6 @@ Se combinan con búsqueda y filtros de columna en la hoja actual. Las fechas cor
 | Inspección pendiente | Entrega de batch existente y fecha de inspección vacía. |
 | Recibidos sin inspección | Lote recibido sin fecha de inspección. |
 | Confirmación pendiente | Lote recibido sin fecha de confirmación. |
-| Seguimiento por cerrar | Renglón abierto, con lotes no anulados y todos ellos cerrados. |
 | Con / sin vínculos | Vínculos del renglón. |
 | OCM vinculadas pendientes | Material vinculado en seguimiento, aunque tenga toda su cantidad recibida. |
 
@@ -97,7 +96,7 @@ Se combinan con búsqueda y filtros de columna en la hoja actual. Las fechas cor
 
 Conflictos de originales o snapshots responden HTTP 409 con `SHEET_CHANGED` o `LOT_STATE_CHANGED`. El proveedor utiliza su flujo de reemplazo confirmado. Los errores incluyen destinos para localizar las celdas.
 
-Anular conserva lotes y datos; anular el último lote vigente exige confirmar también la anulación del producto. Reabrir un producto anulado abre todos sus lotes conservados; reabrir lotes concretos reactiva el renglón sin cambiar sus hermanos. El cierre del producto sigue siendo manual, con confirmación de tolerancias. Eliminar físicamente es una operación diferente. La semilla conserva los lotes anulados. Detalles y snapshots: [CICLO-LOTES.md](CICLO-LOTES.md).
+Anular conserva lotes y datos. El estado del producto se guarda al cambiar sus lotes: alguno abierto lo mantiene en seguimiento; ninguno abierto y alguno cerrado lo cierra; todos anulados o ningún lote lo anulan. Reabrir un lote o crear uno abierto reactiva el producto sin cambiar sus hermanos. Se elimina el menú Productos y el filtro Seguimiento por cerrar; la tolerancia queda informativa. Nuevo lote admite productos cerrados/anulados autorizados. Eliminar físicamente sigue siendo una operación distinta. Detalles y snapshots: [CICLO-LOTES.md](CICLO-LOTES.md).
 
 ## Virtualización y verificación
 

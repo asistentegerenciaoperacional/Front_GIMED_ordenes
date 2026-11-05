@@ -760,33 +760,25 @@ test("lote precarga batch record desde la entrega de la cabecera; cantidad no pr
     "en_seguimiento",
   );
 });
-test("cierre: solo lotes cerrados, por producto, advertencia confirmable y tolerancia histórica", async (t) => {
+test("cierre automático: la desviación usa solo lotes cerrados y la tolerancia queda informativa", async (t) => {
   const store = await fixture(t);
-  assert.equal(
-    deviation(
-      store.snapshot(),
-      store.snapshot().orden_producto.find((l) => l.id === sid(110))!,
-    ),
-    -50,
-  );
+  const line = () =>
+    store.snapshot().orden_producto.find((l) => l.id === sid(110))!;
+  assert.equal(deviation(store.snapshot(), line()), -50);
   await assert.rejects(
     execute(store, "setLineState", {
       entity: "orden_producto",
       id: sid(110),
       estado: "cerrada",
+      confirm: true,
     }),
-    fails("TOLERANCE"),
+    fails("VALIDATION"),
   );
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: sid(110),
-    estado: "cerrada",
-    confirm: true,
+  await execute(store, "setProductLotStates", {
+    ids: [sid(161)],
+    estado: "cerrado",
   });
-  assert.equal(
-    store.snapshot().orden_producto.find((l) => l.id === sid(110))!.estado,
-    "cerrada",
-  );
+  assert.equal(line().estado, "cerrada");
   assert.equal(
     orderState(
       store.snapshot(),
@@ -794,20 +786,21 @@ test("cierre: solo lotes cerrados, por producto, advertencia confirmable y toler
     ),
     "autorizada",
   );
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: sid(110),
+  await execute(store, "setProductLotStates", {
+    ids: [sid(161)],
     estado: "en_seguimiento",
   });
+  assert.equal(line().estado, "en_seguimiento");
   await execute(store, "setTolerance", { value: 60 });
   assert.equal(tolerance(store.snapshot()), 60);
   assert.equal(store.snapshot().parametros_seguimiento.length, 2);
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: sid(110),
-    estado: "cerrada",
+  await execute(store, "setProductLotStates", {
+    ids: [sid(161)],
+    estado: "cerrado",
   });
+  assert.equal(line().estado, "cerrada");
 });
+
 test("código elegido explícitamente, no numéricamente mayor; condiciones históricas conservadas al editar", async (t) => {
   const store = await fixture(t);
   await store.transaction((db) => {

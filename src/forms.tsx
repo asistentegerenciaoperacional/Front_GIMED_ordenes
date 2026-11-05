@@ -1,3 +1,5 @@
+import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
+import { confirmProductCancellation } from "./product-cancellation";
 import {
   ArrowLeft,
   Check,
@@ -880,6 +882,7 @@ export function InvoicePicker({
   provider,
   value,
   onChange,
+  onSearchChange,
   id = "field-id_factura",
   layout = "inline",
   ...inputProps
@@ -887,6 +890,7 @@ export function InvoicePicker({
   provider: string;
   value: string | null;
   onChange: (id: string | null) => void;
+  onSearchChange?: (query: string) => void;
   layout?: "inline" | "stacked";
 } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
   const { db } = useApp();
@@ -918,7 +922,10 @@ export function InvoicePicker({
           options={options}
           value={value ?? ""}
           onChange={(id) => onChange(id || null)}
-          onQueryChange={setSearch}
+          onQueryChange={(query) => {
+            setSearch(query);
+            onSearchChange?.(query);
+          }}
           clearOptionId="__sin_factura__"
           {...inputProps}
           id={id}
@@ -1020,17 +1027,13 @@ export function LotForm({
     e.preventDefault();
     setBusy(true);
     try {
-      const payload = { ...row, id_orden_producto: line.id, id: record?.id };
+      const payload: Row = { ...row, id_orden_producto: line.id, id: record?.id };
       delete payload.id;
       if (record) payload.id = record.id;
-      try {
-        await run("saveLot", { row: payload }, "Lote guardado");
-      } catch (failure) {
-        const problem = failure as ApiError;
-        if (problem.code !== "CONFIRMATION") throw failure;
-        if (!await confirmAction(problem.message, "Anular lote y producto", true)) return;
-        await run("saveLot", { row: payload, confirm: true, expected: problem.details.expected }, "Lote y producto anulados");
-      }
+      const cancelling = payload.estado === "anulado" && record?.estado !== "anulado";
+      const expected = cancelling ? productLotLifecycleSnapshot(db, [line.id]) : undefined;
+      if (expected && !(await confirmProductCancellation(db, "lot", expected, record?.id ? [record.id] : []))) return;
+      await run("saveLot", { row: payload, ...(expected ? { confirm: true, expected } : {}) }, "Lote guardado");
       onClose();
     } catch (e) {
       catchError(e);

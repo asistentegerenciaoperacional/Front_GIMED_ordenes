@@ -8,6 +8,7 @@ import {
   quotationTemplateSchema,
 } from "../shared/material-quotation";
 import type { Database } from "../shared/models";
+import { syncProductLineStates } from "../shared/product-line-state";
 import {
   materialSupplyLinkSchema,
   materialSupplySelection,
@@ -48,8 +49,6 @@ import {
   orderItemLabel,
   recommendations,
   assignedBarcode,
-  tolerance,
-  deviation,
   isInitialProductLot,
   canonical,
   materialCodeRequired,
@@ -259,12 +258,14 @@ function header(db: Database, p: Row): Row {
   });
 }
 function createInitialProductLot(db: Database, line: Row): Row {
-  return push(db, "lote_producto", {
+  const lot = push(db, "lote_producto", {
     id_orden_producto: line.id,
     fecha_estimada_batch_record: findRecord(db, "orden_compra", {
       id: line.id_orden_compra,
     }).fecha_solicitada_entrega,
   });
+  syncProductLineStates(db, [line.id]);
+  return lot;
 }
 function selectBarcode(db: Database, product: string): string {
   const code = assignedBarcode(db, product);
@@ -707,7 +708,6 @@ function saveProductLotChanges(
     expected?: unknown;
     confirm?: unknown;
     requireExpected?: boolean;
-    reopenLines?: string[];
   },
 ) {
   const lineIds = [
@@ -777,11 +777,7 @@ function saveProductLotChanges(
     if (old) Object.assign(old, lot);
     else push(db, "lote_producto", lot);
   }
-  const reopening = new Set(options.reopenLines ?? []);
-  for (const line of lines) {
-    if (allAnnulled.get(line.id) === true) line.estado = "anulada";
-    else if (reopening.has(line.id)) line.estado = "en_seguimiento";
-  }
+  syncProductLineStates(db, lineIds);
   return { rows: changes, productIds: lines.map((line) => line.id) };
 }
 
@@ -813,18 +809,14 @@ export function setProductLotStates(db: Database, payload: Row): Row {
     expected: payload.expected,
     confirm: payload.confirm,
     requireExpected: true,
-    reopenLines:
-      payload.estado === "en_seguimiento"
-        ? changes.map((lot: Row) => lot.id_orden_producto)
-        : [],
   });
 }
 
-function applyProductLineState(line: Row, lots: Row[], estado: string) {
-  if (estado === "anulada") for (const lot of lots) lot.estado = "anulado";
-  else if (line.estado === "anulada" && estado === "en_seguimiento")
-    for (const lot of lots) lot.estado = "en_seguimiento";
-  line.estado = estado;
+function annulProductLines(db: Database, lines: Row[]) {
+  const ids = new Set(lines.map((line) => line.id));
+  for (const lot of db.lote_producto)
+    if (ids.has(lot.id_orden_producto)) lot.estado = "anulado";
+  syncProductLineStates(db, ids);
 }
 
 export async function setProductLineStates(
@@ -845,8 +837,8 @@ export async function setProductLineStates(
     },
   );
   check(
-    ["en_seguimiento", "cerrada", "anulada"].includes(payload.estado),
-    "Estado de producto inválido.",
+    payload.estado === "anulada",
+    "El estado del producto depende de sus lotes. Cierra o reabre sus lotes, o agrega un lote en seguimiento.",
     "VALIDATION",
     { estado: "Selecciona un estado de seguimiento válido." },
   );
@@ -855,20 +847,10 @@ export async function setProductLineStates(
   const names = new Map(
     db.productos.map((product) => [product.id, product.nombre_producto]),
   );
-  const lotsByLine = new Map<string, Database["lote_producto"]>();
-  for (const lot of db.lote_producto) {
-    const lots = lotsByLine.get(lot.id_orden_producto) ?? [];
-    lots.push(lot);
-    lotsByLine.set(lot.id_orden_producto, lots);
-  }
   const lines = payload.ids.map((id: string) => {
     const line = available.get(id);
     check(line, "El producto de la orden ya no existe.", "NOT_FOUND");
     requireAuthorized(db, line, orders);
-    check(
-      line.estado !== "anulada" || payload.estado !== "cerrada",
-      "Reabre el producto anulado antes de cerrar su seguimiento.",
-    );
     return line;
   });
   const expected = validateLotStateExpectation(
@@ -891,27 +873,7 @@ export async function setProductLineStates(
       {},
       { products, expected },
     );
-  if (payload.estado === "cerrada") {
-    const margin = tolerance(db);
-    const deviations = products.flatMap((product: Row) => {
-      const delta = deviation(
-        { ...db, lote_producto: lotsByLine.get(product.id) ?? [] },
-        available.get(product.id)!,
-      );
-      return delta !== null && Math.abs(delta) > margin
-        ? [{ ...product, deviation: delta }]
-        : [];
-    });
-    check(
-      !deviations.length || payload.confirm === true,
-      `Hay ${deviations.length} productos fuera del margen ±${margin} %. Confirma el cierre manual del conjunto.`,
-      "TOLERANCE",
-      {},
-      { deviations, expected },
-    );
-  }
-  for (const line of lines)
-    applyProductLineState(line, lotsByLine.get(line.id) ?? [], payload.estado);
+  annulProductLines(db, lines);
   return { productIds: lines.map((line: Row) => line.id) };
 }
 export function mailPreview(db: Database, p: Row): Row {
@@ -1346,7 +1308,9 @@ export async function command(
     case "editOrder":
       return saveOrder(db, p, true);
     case "saveProductOrderSheet":
-      return saveProductOrderSheet(db, p, command, (database,lots) => saveProductLotChanges(database,lots,{}));
+      return saveProductOrderSheet(db, p, command, (database, lots) =>
+        saveProductLotChanges(database, lots, {}),
+      );
     case "createProductLots":
       return createProductLots(db, p, command);
     case "setProductLotStates":
@@ -1371,37 +1335,20 @@ export async function command(
       requireAuthorized(db, l);
       if (table === "orden_producto")
         validateLotStateExpectation(db, [l.id], p.expected);
-      check(
-        table !== "orden_producto" ||
-          l.estado !== "anulada" ||
-          p.estado !== "cerrada",
-        "Reabre el producto anulado antes de cerrar su seguimiento.",
-      );
-      if (table === "orden_producto" && p.estado === "anulada") {
+      if (table === "orden_producto") {
+        check(
+          p.estado === "anulada",
+          "El estado del producto depende de sus lotes. Cierra o reabre sus lotes, o agrega un lote en seguimiento.",
+          "VALIDATION",
+          { estado: "Gestiona el estado desde los lotes del producto." },
+        );
         check(
           p.confirm === true,
           "Confirma la anulación del producto y todos sus lotes. Se conservarán sus datos.",
           "CONFIRMATION",
         );
-      }
-      if (p.estado === "cerrada" && table === "orden_producto") {
-        const delta = deviation(db, l);
-        if (delta !== null && Math.abs(delta) > tolerance(db))
-          check(
-            p.confirm === true,
-            `La desviación es ${delta.toFixed(2)} %, fuera del margen ±${tolerance(db)} %. Confirma el cierre manual.`,
-            "TOLERANCE",
-            {},
-            { deviation: delta },
-          );
-      }
-      if (table === "orden_producto")
-        applyProductLineState(
-          l,
-          db.lote_producto.filter((lot) => lot.id_orden_producto === l.id),
-          p.estado,
-        );
-      else l.estado = p.estado;
+        annulProductLines(db, [l]);
+      } else l.estado = p.estado;
       return {};
     }
     case "saveLot": {
@@ -1412,12 +1359,6 @@ export async function command(
       const old = p.row.id
         ? findRecord(db, "lote_producto", { id: p.row.id })
         : null;
-      check(
-        old || line.estado !== "anulada",
-        "Reabre el producto anulado antes de agregar lotes.",
-        "VALIDATION",
-        { id_orden_producto: "Este producto está anulado." },
-      );
       if (old)
         check(
           old.id_orden_producto === line.id,
@@ -1440,12 +1381,6 @@ export async function command(
       saveProductLotChanges(db, [value], {
         expected: p.expected,
         confirm: p.confirm,
-        reopenLines:
-          old &&
-          old.estado !== "en_seguimiento" &&
-          value.estado === "en_seguimiento"
-            ? [line.id]
-            : [],
       });
       return { row: value };
     }
@@ -1460,15 +1395,9 @@ export async function command(
         "Confirma la eliminación del lote.",
         "CONFIRMATION",
       );
+      validateLotStateExpectation(db, [line.id], p.expected);
       db.lote_producto = db.lote_producto.filter((row) => row.id !== lot.id);
-      const remaining = db.lote_producto.filter(
-        (row) => row.id_orden_producto === line.id,
-      );
-      if (
-        !remaining.length ||
-        remaining.every((row) => row.estado === "anulado")
-      )
-        line.estado = "anulada";
+      syncProductLineStates(db, [line.id]);
       return {};
     }
     case "saveReceipt": {

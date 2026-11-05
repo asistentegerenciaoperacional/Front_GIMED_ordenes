@@ -37,7 +37,6 @@ export type OrderSummary = orden_compra & {
   pendingInspection: boolean;
   receivedWithoutInspection: boolean;
   pendingConfirmation: boolean;
-  readyToClose: boolean;
   hasSupplyLinks: boolean;
   hasPendingMaterial: boolean;
   hasOrderDocument: boolean;
@@ -145,14 +144,12 @@ export function buildOrderReadModel(db: Database) {
       pendingInspection: false,
       receivedWithoutInspection: false,
       pendingConfirmation: false,
-      readyToClose: false,
       hasSupplyLinks: false,
       hasPendingMaterial: false,
       hasOrderDocument: documentByOrderId.has(order.id),
     };
   });
   const ordersById = byId(orders);
-  const openLotsByLine = new Map<string, { count: number; unclosed: number }>();
   for (const lot of db.lote_producto) {
     append(lotsByLine, lot.id_orden_producto, lot);
     const line = productLines.get(lot.id_orden_producto);
@@ -179,22 +176,6 @@ export function buildOrderReadModel(db: Database) {
       const day = calendarDay(lot.fecha_estimada_batch_record);
       if (day && (!order.pendingBatchDay || day < order.pendingBatchDay))
         order.pendingBatchDay = day;
-    }
-    const state = openLotsByLine.get(line.id) ?? { count: 0, unclosed: 0 };
-    state.count++;
-    if (lot.estado !== "cerrado") state.unclosed++;
-    openLotsByLine.set(line.id, state);
-  }
-  for (const line of db.orden_producto) {
-    const state = openLotsByLine.get(line.id);
-    if (
-      line.estado === "en_seguimiento" &&
-      state &&
-      state.count > 0 &&
-      state.unclosed === 0
-    ) {
-      const order = ordersById.get(line.id_orden_compra);
-      if (order) order.readyToClose = true;
     }
   }
   for (const lines of [db.orden_material, db.orden_otro]) {
@@ -275,8 +256,6 @@ export function matchesCustomFilter(
       return order.receivedWithoutInspection;
     case "confirmacion_pendiente":
       return order.pendingConfirmation;
-    case "seguimiento_por_cerrar":
-      return order.readyToClose;
     case "vinculos_con":
       return order.hasSupplyLinks;
     case "vinculos_sin":

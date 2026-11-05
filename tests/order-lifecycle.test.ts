@@ -671,7 +671,7 @@ test("deleteLot exige autorización y confirmación; permite eliminar lotes cerr
   assert.equal(deviation(store.snapshot(), line), -100);
 });
 
-test("borrar un lote conserva el estado cerrado del producto mientras queden otros; borrar el último lo anula", async (t) => {
+test("borrar un lote recalcula el producto según los restantes; borrar el último lo anula", async (t) => {
   const store = await fixture(t);
   const line = store
     .snapshot()
@@ -683,7 +683,7 @@ test("borrar un lote conserva el estado cerrado del producto mientras queden otr
   await execute(store, "deleteLot", { id: old.id, confirm: true });
   assert.equal(
     store.snapshot().orden_producto.find((row) => row.id === line.id)!.estado,
-    "cerrada",
+    "en_seguimiento",
   );
   assert.equal(deviation(store.snapshot(), line), -100);
   await execute(store, "deleteLot", { id: extra.row.id, confirm: true });
@@ -693,7 +693,7 @@ test("borrar un lote conserva el estado cerrado del producto mientras queden otr
   );
 });
 
-test("anular conserva todos los datos y lotes; reabrir el producto anulado reactiva los mismos lotes sin crear otros", async (t) => {
+test("anular conserva los datos y crear un lote reactiva el producto conservando los anteriores anulados", async (t) => {
   const store = await fixture(t);
   const line = store
     .snapshot()
@@ -711,121 +711,50 @@ test("anular conserva todos los datos y lotes; reabrir el producto anulado react
     estado: "anulada",
     confirm: true,
   });
-  assert.equal(
-    store
-      .snapshot()
-      .lote_producto.filter((lot) => lot.id_orden_producto === line.id).length,
-    before.lote_producto.filter((lot) => lot.id_orden_producto === line.id)
-      .length,
-  );
+  const annulled = store.snapshot();
   assert.deepEqual(
-    store.snapshot().orden_producto.find((row) => row.id === line.id),
-    { ...line, estado: "anulada" },
-  );
-  assert.deepEqual(
-    store.snapshot().abastecimiento_material,
+    annulled.abastecimiento_material,
     before.abastecimiento_material,
   );
-  assert.deepEqual(store.snapshot().factura, before.factura);
-  assert.deepEqual(store.snapshot().documento, before.documento);
-  await rejectedUnchanged(
-    store,
-    "saveLot",
-    { row: { id_orden_producto: line.id } },
-    "VALIDATION",
-  );
-  await rejectedUnchanged(
-    store,
-    "setLineState",
-    { entity: "orden_producto", id: line.id, estado: "cerrada", confirm: true },
-    "VALIDATION",
-  );
-  await execute(
-    store,
-    "editOrder",
-    product({
-      id: line.id_orden_compra,
-      fecha_solicitada_entrega: newDelivery,
-      lines: orderLines(store.snapshot(), line.id_orden_compra),
-    }),
-  );
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: line.id,
-    estado: "en_seguimiento",
+  assert.deepEqual(annulled.factura, before.factura);
+  assert.deepEqual(annulled.documento, before.documento);
+  for (const estado of ["cerrada", "en_seguimiento"])
+    await rejectedUnchanged(
+      store,
+      "setLineState",
+      { entity: "orden_producto", id: line.id, estado, confirm: true },
+      "VALIDATION",
+    );
+  const created = await execute(store, "saveLot", {
+    row: { id_orden_producto: line.id },
   });
-  const reopenedLots = store
-    .snapshot()
-    .lote_producto.filter((lot) => lot.id_orden_producto === line.id);
-  assert.deepEqual(
-    reopenedLots,
-    before.lote_producto
-      .filter((lot) => lot.id_orden_producto === line.id)
-      .map((lot) => ({ ...lot, estado: "en_seguimiento" })),
+  const after = store.snapshot();
+  assert.equal(
+    after.orden_producto.find((row) => row.id === line.id)!.estado,
+    "en_seguimiento",
   );
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: line.id,
-    estado: "en_seguimiento",
-  });
   assert.deepEqual(
-    store
-      .snapshot()
-      .lote_producto.filter((lot) => lot.id_orden_producto === line.id),
-    reopenedLots,
+    after.lote_producto.filter((lot) => lot.id !== created.row.id),
+    annulled.lote_producto,
   );
 });
 
-test("reabrir un producto anulado conserva sus lotes existentes y abre todos; reabrir cerrado conserva sus lotes", async (t) => {
+test("reabrir un lote conserva hermanos y reactiva únicamente su producto", async (t) => {
   const store = await fixture(t);
-  const line = store
-    .snapshot()
-    .orden_producto.find((row) => row.id === sid(113))!;
-  await store.transaction((db) => {
-    db.lote_producto.push({
-      ...db.lote_producto[0],
-      id: sid(5001),
-      id_orden_producto: line.id,
-      numero_lote: "LEGACY",
-    });
+  const before = store.snapshot();
+  const lot = before.lote_producto.find((row) => row.id === sid(164))!;
+  await execute(store, "saveLot", {
+    row: { ...lot, estado: "en_seguimiento" },
   });
-  const originalLots = store
-    .snapshot()
-    .lote_producto.filter((lot) => lot.id_orden_producto === line.id);
-  const independent = store
-    .snapshot()
-    .lote_producto.filter((lot) => lot.id_orden_producto !== line.id);
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: line.id,
-    estado: "en_seguimiento",
-    confirm: true,
-  });
-  assert.deepEqual(
-    store
-      .snapshot()
-      .lote_producto.filter((lot) => lot.id_orden_producto === line.id),
-    originalLots.map((lot) => ({ ...lot, estado: "en_seguimiento" })),
+  const after = store.snapshot();
+  assert.equal(
+    after.orden_producto.find((row) => row.id === lot.id_orden_producto)!
+      .estado,
+    "en_seguimiento",
   );
   assert.deepEqual(
-    store
-      .snapshot()
-      .lote_producto.filter((lot) => lot.id_orden_producto !== line.id),
-    independent,
-  );
-  const closedLots = store
-    .snapshot()
-    .lote_producto.filter((lot) => lot.id_orden_producto === sid(115));
-  await execute(store, "setLineState", {
-    entity: "orden_producto",
-    id: sid(115),
-    estado: "en_seguimiento",
-  });
-  assert.deepEqual(
-    store
-      .snapshot()
-      .lote_producto.filter((lot) => lot.id_orden_producto === sid(115)),
-    closedLots,
+    after.lote_producto.filter((row) => row.id !== lot.id),
+    before.lote_producto.filter((row) => row.id !== lot.id),
   );
 });
 

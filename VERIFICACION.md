@@ -1003,3 +1003,31 @@ Los recorridos de navegador pasaron en Chromium de producción y WebKit de desar
 El recorrido funcional completo de interacción terminó también en WebKit de producción, pero el runner lo rechazó por una advertencia del navegador sobre la precarga de `dates-*.js`; no se presenta esa ejecución como aprobada. La misma interacción pasó en WebKit de desarrollo. La comprobación de copia captura el evento nativo y su matriz, sin solicitar permisos de portapapeles incompatibles con WebKit.
 
 Resultados y comandos: [informe de optimización](OPTIMIZACION-NAVEGACION-OC.md), [mediciones y hashes](tests/evidence/product-sheet-navigation/analysis.json), [producción](tests/evidence/product-sheet-navigation/production-acceptance.json), [desarrollo](tests/evidence/product-sheet-navigation/development-acceptance.json), [memoria de producción](tests/evidence/product-sheet-navigation/production-memory.json), [memoria de desarrollo](tests/evidence/product-sheet-navigation/development-memory.json), [invariantes Chromium](tests/evidence/aria/chromium-development-product-sheet-grid-render.browser.json), [WebKit](tests/evidence/aria/webkit-development-product-sheet-grid-render.browser.json), [interacción](tests/evidence/aria/chromium-product-order-sheet-interaction.browser.json), [interacción WebKit](tests/evidence/aria/webkit-development-product-order-sheet-interaction.browser.json), [virtualización y móvil](tests/evidence/aria/chromium-product-order-sheet-virtual.browser.json) y [foco y carreras WebKit](tests/evidence/aria/webkit-development-product-sheet-navigation-behavior.browser.json).
+
+
+## Estado del producto derivado de sus lotes — 5 de noviembre de 2026
+
+Implementado en `codex/hoja-oc-productos`, preservando los cambios locales anteriores. El estado guardado de cada renglón se sincroniza en la transacción de lotes: alguno abierto → seguimiento; ninguno abierto y alguno cerrado → cerrado; todos anulados o ninguno → anulado. Crear/reabrir un lote reactiva el producto sin modificar hermanos. No se añade cálculo al arranque, consultas, renderizado ni navegación. Se eliminan el cierre/reapertura directa, el menú Productos de la hoja y Seguimiento por cerrar; permanece Anular producto en el detalle y las acciones de lotes. La tolerancia queda informativa.
+
+**Compilación aprobada y 327 pruebas automatizadas aprobadas.** Cubren combinaciones de estados, un cerrado y tres anulados, cero lotes, creación individual/múltiple sobre cerrados/anulados, cierre automático fuera de tolerancia, eliminación, propietarios independientes, confirmaciones, conflictos concurrentes, snapshots obsoletos, datos preservados y transacciones sin escrituras parciales. `git diff --check` sin errores. Revisión de React: sin nuevas suscripciones ni cálculos de estado por celda; se retiran los cálculos de disponibilidad del filtro obsoleto de ambos modelos de lectura.
+
+Recorridos actuales aprobados en **Chromium de producción**, con bases temporales:
+
+| Recorrido | Comprobaciones | Evidencia |
+|---|---:|---|
+| Detalle y formulario clásico: anular, cancelar, crear sobre anulado, borrar, reabrir lotes y recargar | 25 | [Ciclo clásico](tests/evidence/aria/chromium-product-lot-lifecycle.browser.json) |
+| Hoja: cierre automático, tolerancia informativa, resultado de anulación, nuevo lote y filtros retirados | 22 | [Estados de la hoja](tests/evidence/aria/chromium-product-order-sheet-states.browser.json) |
+| Todas las 16 variantes vigentes de filtros | 41 | [Filtros](tests/evidence/aria/chromium-product-order-sheet-filters.browser.json) |
+| Rangos, edición, controles, guardado/descartado y conflictos de la hoja | 34 | [Interacción](tests/evidence/aria/chromium-product-order-sheet-interaction.browser.json) |
+| Detalle a 375/799/1440 px; regresión de estados y recepciones OCM; despliegue de 280 lotes | 65 | [Detalle y OCM](tests/evidence/aria/chromium-order-detail.browser.json) |
+| Creación/revisión/regreso/edición/impresión, tipos de orden y preferencias | 70 | [Creación](tests/evidence/aria/chromium-order-entry-sheet.browser.json) |
+| Abastecimiento, vínculos y OCM | 76 | [Abastecimiento](tests/evidence/ocm/chromium-material-demand.browser.json) |
+| Navegación/virtualización con más de 5.000 lotes, DOM acotado y móvil | 20 | [Virtualización](tests/evidence/aria/chromium-product-order-sheet-virtual.browser.json) |
+
+**WebKit:** 22 comprobaciones de estados de la hoja aprobadas en producción y 25 del ciclo clásico aprobadas en desarrollo, sin errores ni advertencias de consola en esas ejecuciones. [Hoja](tests/evidence/aria/webkit-product-order-sheet-states.browser.json), [ciclo clásico](tests/evidence/aria/webkit-development-product-lot-lifecycle.browser.json). Se revisó visualmente la captura de detalle con Anular y Agregar lote, sin Cerrar/Reabrir producto.
+
+Limitaciones de recorridos adicionales: el ciclo clásico de WebKit en producción completa las acciones pero su runner rechaza la advertencia preexistente de precarga no utilizada de `dates-*.js`; no se declara aprobado ese recorrido en producción. El recorrido histórico `order-authorization.browser.js` se detiene buscando «Continuar autorización», botón ausente también en el HEAD anterior a este cambio; no se modifica la aplicación para satisfacer esa expectativa. La autorización y los bloqueos del servicio quedan cubiertos por la suite unitaria y la interacción actual de la hoja.
+
+La base local se ajustó una sola vez con `npx tsx scripts/sync-demo-product-states.ts --apply`, con el servicio detenido: **dos estados de producto actualizados** y todos los demás datos conservados. El respaldo exacto y sus hashes se verificaron antes de reemplazar el archivo. [Respaldo, hashes y diferencias](tests/evidence/lifecycle/demo-product-states.json). No se reinició la demo ni se incorporó una migración al arranque.
+
+Reproducción: `npm test`; `npm run build`; `node scripts/verify-aria-browser.mjs tests/product-lot-lifecycle.browser.js chromium`; `node scripts/verify-aria-browser.mjs tests/product-order-sheet-states.browser.js chromium`; `npx tsx scripts/verify-product-sheet-large.ts`.

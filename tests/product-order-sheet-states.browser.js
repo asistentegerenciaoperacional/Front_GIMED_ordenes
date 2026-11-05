@@ -113,116 +113,121 @@ async (page) => {
     (await rows().count()) === 2,
     "Seguimiento muestra los lotes abierto y cerrado, excluyendo el anulado",
   );
-  await cell(0).click();
-  await choose("Seguimiento del producto", "Cerrar productos");
-  await confirm().waitFor();
   check(
-    (await confirm().innerText()).includes("-50.00 %"),
-    "El cierre manual explica la desviación fuera del margen",
+    (await page
+      .getByRole("button", { name: "Seguimiento del producto", exact: true })
+      .count()) === 0,
+    "La hoja no contiene el menú de acciones del producto",
   );
-  await confirm()
-    .getByRole("button", { name: "Cancelar", exact: true })
-    .click();
+  const lotCell = (name) =>
+    page
+      .locator('[data-column-key="numero_lote"]')
+      .filter({ hasText: name })
+      .first();
+  await lotCell("HOJA-ESTADO-2").click();
+  await choose("Estado del lote", "Cerrar lotes");
+  let current = await waitLine("cerrada");
   check(
-    JSON.stringify(await state()) === JSON.stringify(baseline),
-    "Cancelar el cierre por tolerancia no escribe",
+    (await confirm().count()) === 0,
+    "Cerrar el último abierto no solicita confirmación por tolerancia",
   );
-  await choose("Seguimiento del producto", "Cerrar productos");
-  await confirm()
-    .getByRole("button", { name: "Confirmar cierre", exact: true })
-    .click();
-  let closed = await waitLine("cerrada");
   check(
-    closed.lote_producto
-      .filter((lot) => lot.id_orden_producto === line.id)
-      .every(
-        (lot) =>
-          lot.estado ===
-          baseline.lote_producto.find((old) => old.id === lot.id).estado,
-      ),
-    "Cerrar el producto no cierra automáticamente sus lotes",
+    current.lote_producto.find((lot) => lot.id === first.id).estado ===
+      "cerrado",
+    "El hermano cerrado conserva su estado",
   );
-  await cell(0).click();
-  await choose("Seguimiento del producto", "Reabrir productos");
+  await lotCell("HOJA-ESTADO-2").click();
+  await choose("Estado del lote", "Reabrir lotes");
   await waitLine("en_seguimiento");
   check(
     JSON.stringify(await state()) === JSON.stringify(baseline),
-    "Reabrir un producto cerrado conserva los estados y datos de sus lotes",
+    "Reabrir un lote restaura su estado sin modificar hermanos",
   );
-  await cell(0).click();
-  await cell(1).click({ modifiers: ["Shift"] });
+
+  await lotCell("HOJA-ESTADO-2").click();
   await choose("Estado del lote", "Anular lotes");
   await confirm().waitFor();
   check(
-    (await confirm().innerText()).includes("producto"),
-    "Anular los últimos lotes explica la anulación del producto",
-  );
-  check(
-    JSON.stringify(await state()) === JSON.stringify(baseline),
-    "Abrir la confirmación masiva no escribe",
+    (await confirm().innerText()).includes("producto quedará cerrado"),
+    "El aviso distingue el cierre del producto al quedar un hermano cerrado",
   );
   await confirm()
     .getByRole("button", { name: "Cancelar", exact: true })
     .click();
   check(
     JSON.stringify(await state()) === JSON.stringify(baseline),
-    "Cancelar la anulación masiva conserva la base completa",
-  );
-  check(
-    (await page.locator("[data-range]").count()) === 2,
-    "Cancelar conserva el rango seleccionado",
+    "Cancelar conserva íntegra la base",
   );
   await choose("Estado del lote", "Anular lotes");
   await confirm()
-    .getByRole("button", { name: "Anular lotes y productos", exact: true })
+    .getByRole("button", { name: "Anular lote", exact: true })
     .click();
+  current = await waitLine("cerrada");
+  await rows().first().waitFor();
   await page.waitForFunction(
     () =>
       document.querySelectorAll(".product-sheet-grid tbody tr[data-lot-state]")
-        .length === 0,
+        .length === 1,
   );
-  let current = await waitLine("anulada");
+  await lotCell("HOJA-ESTADO-1").click();
+  await choose("Estado del lote", "Anular lotes");
+  await confirm().waitFor();
   check(
-    current.lote_producto
-      .filter((lot) => lot.id_orden_producto === line.id)
-      .every((lot) => lot.estado === "anulado"),
-    "Anular el conjunto anula sus lotes y producto atómicamente",
+    (await confirm().innerText()).includes("también el producto"),
+    "Anular el último no anulado explica la anulación del producto",
   );
+  await confirm()
+    .getByRole("button", { name: "Anular lote", exact: true })
+    .click();
+  current = await waitLine("anulada");
   await page.getByRole("button", { name: "Anuladas", exact: true }).click();
+  await page.waitForFunction(
+    () =>
+      document.querySelectorAll(".product-sheet-grid tbody tr[data-lot-state]")
+        .length === 3,
+  );
   check(
     (await rows().count()) === 3,
-    "Anuladas conserva las tres filas con sus mismos lotes",
+    "Anuladas conserva los tres lotes con sus mismos datos",
   );
-  await cell(0).click();
-  await choose("Seguimiento del producto", "Reabrir productos");
-  await confirm().waitFor();
+  await lotCell("HOJA-ESTADO-1").click();
+  await page.getByRole("button", { name: "Nuevo lote", exact: true }).click();
+  const annulledCreate = page.getByRole("dialog", { name: /Nuevos lotes/ });
+  await annulledCreate.waitFor();
   check(
-    (await confirm().innerText()).includes("todos sus lotes"),
-    "Reabrir producto anulado explica que incluye cerrados y anulados",
+    await annulledCreate.isVisible(),
+    "Nuevo lote está habilitado sobre un producto anulado",
   );
-  const cancelled = await state();
-  await confirm()
+  await annulledCreate
     .getByRole("button", { name: "Cancelar", exact: true })
     .click();
-  check(
-    JSON.stringify(await state()) === JSON.stringify(cancelled),
-    "Cancelar la reapertura no modifica estados ni datos",
-  );
-  await choose("Seguimiento del producto", "Reabrir productos");
-  await confirm()
-    .getByRole("button", { name: "Reabrir productos y lotes", exact: true })
-    .click();
-  await page.waitForFunction(
-    () =>
-      document.querySelectorAll(".product-sheet-grid tbody tr[data-lot-state]")
-        .length === 0,
-  );
+  await annulledCreate.waitFor({ state: "hidden" });
+  await choose("Estado del lote", "Reabrir lotes");
   current = await waitLine("en_seguimiento");
   check(
-    current.lote_producto
-      .filter((lot) => lot.id_orden_producto === line.id)
-      .every((lot) => lot.estado === "en_seguimiento"),
-    "Reabrir producto abre todos sus lotes conservados",
+    current.lote_producto.filter(
+      (lot) => lot.id_orden_producto === line.id && lot.estado === "anulado",
+    ).length === 2,
+    "Reabrir el lote seleccionado deja anulados sus hermanos",
+  );
+  await page
+    .getByRole("button", { name: "En seguimiento", exact: true })
+    .click();
+  await lotCell("HOJA-ESTADO-1").click();
+  await page.getByRole("button", { name: "Nuevo lote", exact: true }).click();
+  const create = page.getByRole("dialog", {
+    name: /Nuevos lotes|Nuevo lote|Crear lotes/,
+  });
+  await create.waitFor();
+  await create
+    .getByRole("button", { name: "Crear lotes", exact: true })
+    .click();
+  await create.waitFor({ state: "hidden" });
+  current = await state();
+  check(
+    current.lote_producto.filter((lot) => lot.id_orden_producto === line.id)
+      .length === 4,
+    "Nuevo lote desde la hoja crea una posición abierta sin duplicar recepción",
   );
   const withoutState = ({ estado, ...data }) => data;
   check(
@@ -235,39 +240,47 @@ async (page) => {
           withoutState(current.lote_producto.find((lot) => lot.id === id)),
         ),
     ),
-    "Las acciones conservan íntegramente IDs, recepción, fechas, ubicación y demás datos",
+    "Los datos de los lotes originales permanecen intactos",
+  );
+  await page.reload();
+  await page.locator(".product-order-sheet").waitFor();
+  check(
+    JSON.stringify(await state()) === JSON.stringify(current),
+    "Recargar conserva los cambios persistidos",
+  );
+  await page.goto(
+    origin +
+      "/ordenes/productos?filtro=seguimiento_por_cerrar&q=" +
+      order.no_orden,
+  );
+  await page.locator(".product-order-sheet").waitFor();
+  check(
+    (
+      await page
+        .getByRole("button", {
+          name: "Filtro personalizado de la hoja",
+          exact: true,
+        })
+        .innerText()
+    ).includes("Sin filtro personalizado"),
+    "El filtro retirado se interpreta como Sin filtro personalizado",
   );
   await page
-    .getByRole("button", { name: "En seguimiento", exact: true })
+    .getByRole("button", {
+      name: "Filtro personalizado de la hoja",
+      exact: true,
+    })
     .click();
-  await cell(1).click();
-  await choose("Estado del lote", "Anular lotes");
-  await page.waitForFunction(
-    () =>
-      document.querySelectorAll(".product-sheet-grid tbody tr[data-lot-state]")
-        .length === 2,
-  );
-  current = await state();
   check(
-    current.orden_producto.find((row) => row.id === line.id).estado ===
-      "en_seguimiento",
-    "Anular un lote conserva activo el producto mientras queden otros",
+    (await page
+      .getByRole("menuitemradio", {
+        name: "Seguimiento por cerrar",
+        exact: true,
+      })
+      .count()) === 0,
+    "El filtro retirado no aparece en el menú",
   );
-  await page.getByRole("button", { name: "Anuladas", exact: true }).click();
-  await cell(0).click();
-  await choose("Estado del lote", "Reabrir lotes");
-  await page.waitForFunction(
-    () =>
-      document.querySelectorAll(".product-sheet-grid tbody tr[data-lot-state]")
-        .length === 0,
-  );
-  current = await state();
-  check(
-    current.lote_producto
-      .filter((lot) => lot.id_orden_producto === line.id)
-      .every((lot) => lot.estado === "en_seguimiento"),
-    "Reabrir un lote desde la hoja reactiva solo el destino y mantiene sus hermanos",
-  );
+  await page.keyboard.press("Escape");
   check(
     errors.length === 0,
     "Sin errores de JavaScript durante las transiciones de la hoja",

@@ -12,7 +12,10 @@ const base = resolve("tests/.tmp");
 const delivery = "2026-10-28T12:00:00.000Z";
 async function fixture(t: test.TestContext) {
   // These rule scenarios predate creation-date validation and use fixed delivery dates.
-  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-27T12:00:00.000Z") });
+  t.mock.timers.enable({
+    apis: ["Date"],
+    now: new Date("2026-10-27T12:00:00.000Z"),
+  });
   await mkdir(base, { recursive: true });
   const dir = await mkdtemp(join(base, "order-rules-"));
   assert.ok(resolve(dir).startsWith(base + sep));
@@ -237,7 +240,9 @@ test("cerrar, anular y reabrir seguimiento requiere autorización en los tres ti
       id: created.orderId,
       confirm: true,
     });
-    for (const state of ["cerrada", "en_seguimiento", "anulada"]) {
+    for (const state of entity === "orden_producto"
+      ? ["anulada"]
+      : ["cerrada", "en_seguimiento", "anulada"]) {
       await execute(store, "setLineState", {
         entity,
         id: line.id,

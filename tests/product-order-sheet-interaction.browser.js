@@ -139,7 +139,7 @@ async (page) => {
   );
   await paste("5,00\n6,00");
   check(
-    (await page.locator(".product-sheet-errors button").count()) === 2,
+    (await page.locator('[data-column-key="precio_unitario"][data-rejected]').count()) === 2,
     "Dos precios contradictorios del mismo renglón se rechazan",
   );
   check(
@@ -350,26 +350,14 @@ async (page) => {
   await discardedPrice.press("Enter");
   await cell(0, "no_orden").click();
   await cell(2, "no_orden").click({ modifiers: ["Shift"] });
-  await page.getByRole("button", { name: "Nuevo lote", exact: true }).click();
+  await page.getByRole("button", { name: "Estado del lote", exact: true }).click();
+  await page.getByRole("option", { name: "Nuevo lote", exact: true }).click();
   await page
     .getByRole("dialog", { name: "Hay cambios sin guardar", exact: true })
     .getByRole("button", { name: "Descartar y continuar", exact: true })
     .click();
-  const lots = page.getByRole("dialog", {
-    name: "Nuevos lotes · 2 productos",
-    exact: true,
-  });
-  await lots.waitFor();
-  await lots
-    .getByRole("textbox", { name: "Número de lote", exact: true })
-    .nth(0)
-    .fill("BULK-A");
-  await lots
-    .getByRole("textbox", { name: "Número de lote", exact: true })
-    .nth(1)
-    .fill("BULK-B");
-  await lots.getByRole("button", { name: "Crear lotes", exact: true }).click();
-  await lots.waitFor({ state: "hidden" });
+  await page.getByRole("status").filter({ hasText: "Lotes creados" }).waitFor();
+  check((await page.getByRole("dialog", { name: /Nuevos lotes/ }).count()) === 0, "La creación en la hoja no abre un diálogo");
   db = await state();
   check(
     db.lote_producto.filter((lot) =>

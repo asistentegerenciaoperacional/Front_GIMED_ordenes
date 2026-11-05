@@ -1,0 +1,30 @@
+{
+  "checks": [
+    "Supr deja la celda numérica vacía sin mostrar un error",
+    "Permanecer en la misma celda no activa la validación",
+    "El precio válido queda en el borrador",
+    "Supr permite dejar temporalmente vacío el precio obligatorio",
+    "Al salir de un precio vacío se rechaza y se conserva el borrador",
+    "Precio inválido se revierte al valor del borrador",
+    "Precio rechazado conserva marca",
+    "Sin lista de celdas rechazadas",
+    "Cerrar aviso elimina las marcas de error",
+    "Selección inmediata tras error",
+    "Nuevo error protegido muestra aviso",
+    "Fecha inválida se revierte",
+    "Fecha inválida conserva marca",
+    "El selector de factura conserva su ancho amplio",
+    "El botón de agregar factura conserva su texto",
+    "Factura inexistente se rechaza",
+    "Se puede salir inmediatamente del autocompletado",
+    "El selector de corrugado tiene espacio para sus opciones",
+    "Pegado inválido se resume en el banner",
+    "No aparece lista para pegados",
+    "Guardar conserva el borrador válido y excluye valores rechazados",
+    "Cambiar de hoja no queda bloqueado por el valor inválido"
+  ],
+  "errors": [],
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-NYc0lw\\database.json"
+}
