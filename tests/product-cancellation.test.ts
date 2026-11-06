@@ -44,5 +44,9 @@ test("selección múltiple identifica únicamente productos que quedan sin lotes
   const message = cancellationMessage(db, "lot", expected, ids);
   assert.match(message, /Se anularán los lotes seleccionados/);
   assert.match(message, /Productos afectados: OC/);
-  assert.equal((message.match(/renglón/g) ?? []).length, 1);
+  const line = db.orden_producto.find((row) => row.id === expected[0].id)!;
+  const order = db.orden_compra.find((row) => row.id === line.id_orden_compra)!;
+  const product = db.productos.find((row) => row.id === line.id_producto)!;
+  assert.ok(message.includes(`OC ${order.no_orden}, ${product.nombre_producto}`));
+  assert.doesNotMatch(message, /renglón/i);
 });

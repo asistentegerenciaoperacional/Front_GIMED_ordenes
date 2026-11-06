@@ -394,7 +394,7 @@ export function ProductSheetGrid({
     if (
       !editing &&
       event.altKey &&
-      event.shiftKey &&
+      !event.shiftKey &&
       !event.ctrlKey &&
       !event.metaKey &&
       event.key.toLowerCase() === "h"

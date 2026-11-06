@@ -24,7 +24,7 @@
     "Cancelar conserva la edición pendiente para decidir después",
     "Confirmar guarda el último lote y anula el producto atómicamente sin modificar los lotes hermanos",
     "Reabrir un lote desde su formulario reactiva el producto y mantiene anulados los otros lotes",
-    "Sin errores de JavaScript durante el ciclo clásico completo"
+    "Sin errores de JavaScript durante el ciclo clásico completo: []"
   ],
   "screenshots": [
     "tests/evidence/aria/chromium-lifecycle-producto-anulado.png",
@@ -32,15 +32,15 @@
     "tests/evidence/aria/chromium-lifecycle-ultimo-lote-confirmacion.png",
     "tests/evidence/aria/chromium-lifecycle-lote-reabierto.png"
   ],
-  "orderId": "f05ff574b5e0835e4199cdce",
-  "productLineId": "13504211f7ff45df387aaeaf",
+  "orderId": "cde2d9683ac87bab73eeb38b",
+  "productLineId": "a68edad8dc0eb095f0026a56",
   "lotIds": [
-    "d6d1d4a79927c95c5a492d8d",
-    "c6ef995ff4d4abf4f738da52",
-    "53f1bf4446be7e33924a1c82"
+    "e730d4dece66424827c98b1e",
+    "fceafe34e23f2e5a236b05da",
+    "71785ac9a37a3365c010bec5"
   ],
   "pageErrors": [],
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-Mibn3M\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-tUABuB\\database.json"
 }

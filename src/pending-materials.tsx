@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import {
   consolidateMaterialSources,
   groupMaterialSources,
+  materialNeedKey,
   validDemandDay,
   type MaterialDemand,
 } from "../shared/material-demand";
@@ -273,6 +274,17 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
     setStatus(
       "Selección actualizada. Revisa los orígenes disponibles y vuelve a preparar la OCM.",
     );
+  }
+  function removeLinkedSources(demand: MaterialDemand) {
+    setSelected((previous) => {
+      const next = new Map(previous);
+      for (const source of demand.fuentes)
+        next.delete(
+          materialNeedKey(source.id_orden_producto, source.id_material),
+        );
+      return next;
+    });
+    setStatus("");
   }
   return (
     <>
@@ -572,6 +584,7 @@ export function PendingMaterialsPage({ params }: { params: URLSearchParams }) {
           initialType="material"
           abastecimiento={draft}
           onClose={() => setDraft(null)}
+          onCreated={() => removeLinkedSources(draft)}
           onReviewSupply={review}
         />
       )}

@@ -350,7 +350,7 @@ async (page) => {
   await cell(0, "no_orden").click();
   await cell(2, "no_orden").click({ modifiers: ["Shift"] });
   await page.getByRole("button", { name: "Estado del lote", exact: true }).click();
-  await page.getByRole("option", { name: "Nuevo lote", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Nuevo lote", exact: true }).click();
   await page
     .getByRole("dialog", { name: "Hay cambios sin guardar", exact: true })
     .getByRole("button", { name: "Descartar y continuar", exact: true })
@@ -374,7 +374,7 @@ async (page) => {
   await page
     .getByRole("button", { name: "Estado del lote", exact: true })
     .click();
-  await page.getByRole("option", { name: "Cerrar lotes", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Cerrar lotes", exact: true }).click();
   const resolution = page.getByRole("dialog", {
     name: "Hay cambios sin guardar",
     exact: true,

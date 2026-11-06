@@ -270,6 +270,15 @@ fecha al guardar, sin confiar en la elaboración del cliente. Un rechazo
 conserva borrador, datos y consecutivos. La edición histórica conserva sus
 reglas anteriores.
 
+Tras crear cualquier orden, se cierra el diálogo y se muestra «Orden creada»
+en la misma vista, con su contexto y desplazamiento. Desde Materiales
+pendientes, la tabla retira los orígenes vinculados y limpia su selección.
+En el formulario clásico y en la hoja, una nueva OC de productos precarga
+el proveedor de maquila y la entrega solicitada de la última creación de
+productos en ese navegador. Ambos campos son editables. Si la fecha guardada
+ya pasó, Entrega solicitada se abre vacía. Si cambia a Materiales u Otros,
+se retira la fecha que se había precargado automáticamente.
+
 ## Proveedores: NIT
 
 Agregar y editar proveedores usa un único campo **NIT** con formato `NIT-DV`: números sin puntos, guion y exactamente un dígito de verificación, por ejemplo `900123404-5`. Validar el formato cuando se informe; el campo conserva su carácter opcional. El botón **(?)** junto al título explica el formato al pasar el cursor o enfocarlo. Al guardar, NIT y DV se mantienen separados en el modelo.

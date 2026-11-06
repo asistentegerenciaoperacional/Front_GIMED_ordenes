@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "Alt+A abre autorización de la selección",
+    "Alt+O abre nueva orden",
+    "Alt+Mayús+H ya no oculta columnas",
+    "Alt+H oculta y Alt+S muestra columnas",
+    "Alt+D crea un lote",
+    "Alt+C cierra el lote seleccionado",
+    "Alt+N confirma la anulación del lote",
+    "Alt+R reabre el lote",
+    "La lista de lotes comparte tipografía y color con el mensaje",
+    "Alt+Supr muestra lista de lotes, producto y OC",
+    "Cancelar eliminación conserva todos los datos",
+    "Papelera elimina los lotes seleccionados conjuntamente"
+  ],
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-19hcl5\\database.json"
+}

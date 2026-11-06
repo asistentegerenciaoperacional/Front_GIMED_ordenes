@@ -1,3 +1,4 @@
+import { DeleteProductLotsDialog } from "./components/delete-product-lots-dialog";
 import { confirmProductCancellation } from "./product-cancellation";
 import {
   ArrowLeft,
@@ -89,7 +90,6 @@ import {
   Badge,
   Button,
   CancelButton,
-  ConfirmationDialog,
   Dialog,
   Empty,
   LinkButton,
@@ -1035,7 +1035,12 @@ export function OrderDetail({
   const [lot, setLot] = useState<{ line: Row; record?: Row } | null>(null),
     [receipt, setReceipt] = useState<Row | null>(null),
     [mail, setMail] = useState<Row | null>(null);
-  type LotAction = { kind: "delete"; line: Row; record: Row } | null;
+  type LotAction = {
+    kind: "delete";
+    line: Row;
+    record: Row;
+    productName: string;
+  } | null;
   const [pendingAction, setPendingActionValue] = useState<
     | (NonNullable<LotAction> & {
         expected: ReturnType<typeof productLotLifecycleSnapshot>;
@@ -1700,6 +1705,7 @@ export function OrderDetail({
                                                       kind: "delete",
                                                       line: l,
                                                       record: b,
+                                                      productName: name ?? "este producto",
                                                     });
                                                   }}
                                                 />
@@ -1922,42 +1928,19 @@ export function OrderDetail({
       )}{" "}
       {mail && <MailForm context={mail} onClose={() => setMail(null)} />}{" "}
       {pendingAction && (
-        <ConfirmationDialog
-          title="Eliminar lote"
-          confirmLabel="Eliminar lote"
+        <DeleteProductLotsDialog
+          lots={[{
+            id: pendingAction.record.id,
+            number: pendingAction.record.numero_lote ?? "sin número",
+            product: pendingAction.productName,
+            order: o.no_orden,
+          }]}
+          expected={pendingAction.expected}
           onConfirm={confirmLotAction}
           onClose={() => setPendingAction(null)}
           busy={actionBusy}
-          destructive
           error={actionError}
-        >
-          <>
-            <p>
-              Se eliminará el lote{" "}
-              <strong>
-                {pendingAction.record.numero_lote ?? "sin número"}
-              </strong>{" "}
-              del producto {pendingAction.line.posicion}, incluidos sus datos de
-              recepción, Batch record e inspección. Esta acción no se puede
-              deshacer.
-            </p>
-            {db.lote_producto
-              .filter(
-                (record) => record.id_orden_producto === pendingAction.line.id,
-              )
-              .filter(
-                (record) =>
-                  record.id !== pendingAction.record.id &&
-                  record.estado !== "anulado",
-              ).length === 0 && (
-              <p className="notice warning">
-                No quedarán lotes activos de este producto. Al eliminarlo, el
-                producto quedará anulado.
-              </p>
-            )}
-          </>
-          <p>Las facturas y sus documentos se conservarán.</p>
-        </ConfirmationDialog>
+        />
       )}
       {authorize && (
         <OrderAuthorizationDialog

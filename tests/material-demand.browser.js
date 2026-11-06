@@ -144,6 +144,8 @@ async (page) => {
   check(!(await checkFor(first.id, material.id).isChecked()) && !(await checkFor(second.id, material.id).isChecked()), 'Quitar material del resumen retira todos sus orígenes');
   check(await checkFor(second.id, cap.id).isEnabled(), 'Quitar material libera un espacio de la OCM');
   await checkFor(first.id, material.id).check(); await checkFor(second.id, material.id).check();
+  await page.getByRole('button', { name: 'Elaborar OCM', exact: true }).scrollIntoViewIfNeeded();
+  const beforeSaveScroll = await page.evaluate(() => window.scrollY);
   await prepare();
   await percent().fill('5'); await quantity().fill('3201'); await price().fill('2.55');
   await dialog().getByRole('textbox', { name: 'Entrega solicitada', exact: true }).fill('20/01/2027');
@@ -156,6 +158,7 @@ async (page) => {
   check((await dialog().locator('.demand-review').innerText()).includes('3.201') && await dialog().getByRole('button', { name: 'Crear orden', exact: true }).isEnabled(), 'Error temporal conserva la revisión y permite reintentar');
   await page.unroute('**/api/commands');
   let requests = 0;
+  const beforeSaveUrl = page.url();
   await page.route('**/api/commands', async route => { requests++; await new Promise(ok => setTimeout(ok, 350)); await route.continue(); });
   await dialog().getByRole('button', { name: 'Crear orden', exact: true }).click();
   await page.keyboard.press('Escape');
@@ -170,7 +173,15 @@ async (page) => {
   check(!Object.hasOwn(createdLine, 'adicional_pct') && !Object.hasOwn(createdLine, 'cantidad_base'), 'Porcentaje y base no se persisten');
   const links = db.abastecimiento_material.filter(link => link.id_orden_material === createdLine.id);
   check(links.length === 2 && links.some(link => link.id_orden_producto === first.id) && links.some(link => link.id_orden_producto === second.id), 'Material asociado exactamente a ambos renglones seleccionados');
-  check(new URL(page.url()).pathname === '/ordenes/' + created.id, 'Tras guardar abre el detalle de la OCM');
+  check(page.url() === beforeSaveUrl, 'Tras guardar conserva Materiales pendientes y sus parámetros');
+  check(beforeSaveScroll > 0 && await page.evaluate((previous) => {
+    const limit = document.documentElement.scrollHeight - innerHeight;
+    return Math.abs(window.scrollY - Math.min(previous, limit)) <= 2;
+  }, beforeSaveScroll), 'Conserva el desplazamiento de Materiales pendientes al guardar');
+  check(await page.locator('.toast').getByText('Orden creada', { exact: true }).isVisible(), 'Confirma la creación en la vista de origen');
+  check(await row(first.id, material.id).count() === 0 && await row(second.id, material.id).count() === 0 &&
+    await page.locator('.demand-selection-count').getByText('0 materiales', { exact: true }).isVisible(),
+    'Tras guardar desaparecen los orígenes vinculados y se limpia su selección');
 
   const queriedUrl = origin + '/abastecimiento?tab=pendientes&pendientes_desde=2027-02-01&pendientes_hasta=2027-02-28';
   await page.goto(queriedUrl); await panel().waitFor();

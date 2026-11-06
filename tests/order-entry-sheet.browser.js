@@ -68,6 +68,17 @@ async (page) => {
     dialog()
       .getByRole("button", { name: "Revisar orden", exact: true })
       .click();
+  const createInPlace = async (description) => {
+    const originView = page.url();
+    await dialog()
+      .getByRole("button", { name: "Crear orden", exact: true })
+      .click();
+    await dialog().waitFor({ state: "hidden" });
+    check(
+      page.url() === originView,
+      "La creación conserva la vista de " + description,
+    );
+  };
   const cancel = async () => {
     await dialog()
       .getByRole("button", { name: "Cancelar", exact: true })
@@ -214,10 +225,7 @@ async (page) => {
     "Revisar compacta 1 y 3 a 1 y 2",
   );
   await review();
-  await dialog()
-    .getByRole("button", { name: "Crear orden", exact: true })
-    .click();
-  await dialog().waitFor({ state: "hidden" });
+  await createInPlace("productos");
   const created = writes.find((write) => write.name === "createOrder");
   check(
     created.payload.lines.length === 2 &&
@@ -270,10 +278,7 @@ async (page) => {
       "Compactación 2, 4, 5 para " + type,
     );
     await review();
-    await dialog()
-      .getByRole("button", { name: "Crear orden", exact: true })
-      .click();
-    await dialog().waitFor({ state: "hidden" });
+    await createInPlace(type);
   }
   await page.goto(origin + "/ordenes/productos");
   await open();
@@ -441,10 +446,7 @@ async (page) => {
     path: "tests/evidence/aria/order-entry-sheet-supply.png",
   });
   await review();
-  await dialog()
-    .getByRole("button", { name: "Crear orden", exact: true })
-    .click();
-  await dialog().waitFor({ state: "hidden" });
+  await createInPlace("materiales pendientes");
   const supplyWrite = writes
     .filter((write) => write.name === "createOrder")
     .at(-1);

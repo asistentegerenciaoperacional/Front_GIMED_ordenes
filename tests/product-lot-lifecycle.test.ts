@@ -581,3 +581,20 @@ test("la confirmación de anulación queda obsoleta si cambia una cantidad recib
     "LOT_STATE_CHANGED",
   );
 });
+
+test("eliminar varios lotes exige confirmación y snapshot y conserva atomicidad", async (t) => {
+  const store = await fixture(t);
+  const before = store.snapshot();
+  const ids = [sid(160), sid(161)];
+  const expected = productLotLifecycleSnapshot(before, [sid(110)]);
+  await rejected(store, "deleteLots", { ids, expected }, "CONFIRMATION");
+  await rejected(store, "deleteLots", { ids, expected: [], confirm: true }, "LOT_STATE_CHANGED");
+  await rejected(store, "deleteLots", { ids: [ids[0], sid(9999)], expected, confirm: true }, "NOT_FOUND");
+  await execute(store, "deleteLots", { ids, expected, confirm: true });
+  const after = store.snapshot();
+  assert.ok(ids.every((id) => !after.lote_producto.some((lot) => lot.id === id)));
+  assert.equal(after.orden_producto.find((line) => line.id === sid(110))!.estado, "anulada");
+  assert.deepEqual(after.factura, before.factura);
+  assert.deepEqual(after.documento, before.documento);
+  assert.deepEqual(after.abastecimiento_material, before.abastecimiento_material);
+});

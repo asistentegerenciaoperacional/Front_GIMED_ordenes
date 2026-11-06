@@ -59,6 +59,10 @@ Clic selecciona; Shift+clic y Shift+flechas extienden un rectángulo. Doble clic
 
 Las acciones alcanzan todas las filas del rango, deduplicando OC, productos y lotes. Cambiar hoja, búsqueda, filtro u ordenamiento limpia la selección y conserva el borrador. Las filas mantienen posición y pertenencia durante la captura; se recalculan al guardar o aplicar explícitamente una consulta. Los errores ofrecen acceso a su celda, mostrando su columna o retirando filtros si es necesario.
 
+Los atajos de la hoja son **Alt+O** nueva orden, **Alt+A** autorizar, **Alt+H** ocultar columnas seleccionadas, **Alt+S** mostrar todas, **Alt+D** nuevo lote, **Alt+C** cerrar, **Alt+N** anular, **Alt+R** reabrir y **Alt+Supr** eliminar lotes. Las acciones respetan la selección y los permisos de sus botones; no se ejecutan mientras se edita un campo o hay un diálogo abierto.
+
+La papelera elimina los lotes seleccionados de órdenes autorizadas tras una confirmación. Para varios lotes, el diálogo enumera cada lote con su producto y OC; la operación se valida y guarda de forma atómica, comprueba el snapshot y conserva las facturas y sus documentos.
+
 **Nuevo lote** prepara uno por renglón distinto con campos y restricciones existentes, sin copiar recepción, factura ni inspección de otro lote. El diálogo identifica OC, posición y producto. **Imprimir** y **Ver orden escaneada** requieren exactamente una OC distinta; varias filas de la misma OC son válidas.
 
 ## Portapapeles y recuperación
@@ -92,7 +96,7 @@ Se combinan con búsqueda y filtros de columna en la hoja actual. Las fechas cor
 
 ## Servicio y ciclo global de estados
 
-`POST /api/commands` incorpora `saveProductOrderSheet`, `createProductLots`, `setProductLotStates` y `setProductLineStates`. El guardado mixto admite cambios de `orden_compra`, `orden_producto` y `lote_producto`, con `{entity,id,field,expected,value}`. El servidor verifica campos permitidos, tipos, propietarios, originales y relaciones. Aplica juntos los lotes mediante el motor compartido y mantiene la transacción del almacén. Los comandos admiten cuerpos de hasta 16 MB; los demás endpoints mantienen su límite anterior.
+`POST /api/commands` incorpora `saveProductOrderSheet`, `createProductLots`, `setProductLotStates`, `setProductLineStates` y `deleteLots`. El guardado mixto admite cambios de `orden_compra`, `orden_producto` y `lote_producto`, con `{entity,id,field,expected,value}`. El servidor verifica campos permitidos, tipos, propietarios, originales y relaciones. Aplica juntos los lotes mediante el motor compartido y mantiene la transacción del almacén. Los comandos admiten cuerpos de hasta 16 MB; los demás endpoints mantienen su límite anterior.
 
 Conflictos de originales o snapshots responden HTTP 409 con `SHEET_CHANGED` o `LOT_STATE_CHANGED`. El proveedor utiliza su flujo de reemplazo confirmado. Los errores incluyen destinos para localizar las celdas.
 

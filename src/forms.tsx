@@ -76,6 +76,10 @@ import {
 } from "./order-entry-draft";
 import { readOrderEntryPreference } from "./ui-preferences";
 import {
+  readProductOrderDefaults,
+  rememberProductOrder,
+} from "./product-order-defaults";
+import {
   entityValidation,
   validEntityField,
   validPrice,
@@ -1320,6 +1324,7 @@ export function OrderForm({
   order,
   proposedSupplier,
   onClose,
+  onCreated,
   initialType = "producto",
   abastecimiento,
   onReviewSupply,
@@ -1327,6 +1332,7 @@ export function OrderForm({
   order?: Row;
   proposedSupplier?: string;
   onClose: () => void;
+  onCreated?: () => void;
   initialType?: string;
   abastecimiento?: MaterialDemand;
   onReviewSupply?: () => void;
@@ -1340,6 +1346,9 @@ export function OrderForm({
   const [type, setType] = useState(
     order?.tipo_orden ?? (supplyCreation ? "material" : initialType),
   );
+  const [productDefaults] = useState(() =>
+    order || supplyCreation ? {} : readProductOrderDefaults(),
+  );
   const authorized = order?.estado_autorizacion === "autorizada";
   const productsLocked = type === "producto" && authorized;
   const suppliers = (t: string) =>
@@ -1350,10 +1359,18 @@ export function OrderForm({
           ? p.Es_materiales
           : p.Es_maquila === false && p.Es_materiales === false,
     );
+  const defaultSupplier = (orderType: string) => {
+    const eligible = suppliers(orderType);
+    if (orderType === "producto") {
+      const preferred = eligible.find(
+        (provider) => provider.id === productDefaults.supplier,
+      );
+      if (preferred) return preferred.id;
+    }
+    return eligible[0]?.id ?? "";
+  };
   const [supplier, setSupplier] = useState(
-    order?.id_proveedor ??
-      suppliers(supplyCreation ? "material" : initialType)[0]?.id ??
-      "",
+    () => order?.id_proveedor ?? defaultSupplier(type),
   );
   const automaticNumber = nextOrderNumber(db, type);
   const number = order?.no_orden ?? automaticNumber;
@@ -1368,8 +1385,16 @@ export function OrderForm({
   const [date, setDate] = useState(
     order?.fecha_elaboracion?.slice(0, 10) ?? today(),
   );
-  const [delivery, setDelivery] = useState(
-    order?.fecha_solicitada_entrega?.slice(0, 10) ?? "",
+  const defaultProductDelivery = () =>
+    productDefaults.delivery && productDefaults.delivery >= today()
+      ? productDefaults.delivery
+      : "";
+  const [delivery, setDelivery] = useState(() => {
+    if (order) return order.fecha_solicitada_entrega?.slice(0, 10) ?? "";
+    return type === "producto" ? defaultProductDelivery() : "";
+  });
+  const inheritedDelivery = useRef(
+    !order && type === "producto" && Boolean(delivery),
   );
   const fresh = (t: string, provider: string): Row => {
     if (t === "producto") {
@@ -1619,8 +1644,16 @@ export function OrderForm({
   }
   function switchType(t: string) {
     setType(t);
-    const provider = suppliers(t)[0]?.id ?? "";
+    const provider = defaultSupplier(t);
     setSupplier(provider);
+    if (t !== "producto" && inheritedDelivery.current) {
+      inheritedDelivery.current = false;
+      setDelivery("");
+    } else if (t === "producto" && !delivery) {
+      const suggested = defaultProductDelivery();
+      inheritedDelivery.current = Boolean(suggested);
+      setDelivery(suggested);
+    }
     setLines(
       alternativeEntry
         ? padSheetLines([], () => fresh(t, provider))
@@ -1895,6 +1928,7 @@ export function OrderForm({
           message: "Revisa los porcentajes de sticker.",
           fields: orderIssues,
         });
+      const requestedDelivery = isoDate(delivery);
       const result = await run(
         order ? "editOrder" : "createOrder",
         {
@@ -1905,7 +1939,7 @@ export function OrderForm({
           confirm: replacement,
           expected_no_orden: order ? undefined : automaticNumber,
           fecha_elaboracion: order ? isoDate(date) : undefined,
-          fecha_solicitada_entrega: isoDate(delivery),
+          fecha_solicitada_entrega: requestedDelivery,
           lines: supplyCreation
             ? lines.map((line) => ({
                 id_material: line.id_material,
@@ -1919,8 +1953,14 @@ export function OrderForm({
         },
         order ? "Orden actualizada" : "Orden creada",
       );
+      if (!order) {
+        const deliveryDay = costDay(requestedDelivery);
+        if (type === "producto" && deliveryDay)
+          rememberProductOrder(supplier, deliveryDay);
+        onCreated?.();
+      }
       onClose();
-      navigate(`ordenes/${result.orderId}`);
+      if (order) navigate(`ordenes/${result.orderId}`);
     } catch (e) {
       catchError(e);
       if (e instanceof ApiError && e.code === "SUPPLY_CHANGED")
@@ -2053,6 +2093,7 @@ export function OrderForm({
           aria-label="Entrega solicitada"
           value={delivery}
           onChange={(value) => {
+            inheritedDelivery.current = false;
             setDelivery(value);
             setDirty(true);
           }}

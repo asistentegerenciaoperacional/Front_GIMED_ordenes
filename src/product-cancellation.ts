@@ -61,7 +61,7 @@ export function cancellationMessage(
         const product = db.productos.find(
           (row) => row.id === line?.id_producto,
         );
-        return `OC ${order?.no_orden ?? "—"}, ${product?.nombre_producto ?? "Producto"}, renglón ${line?.posicion ?? "—"}`;
+        return `OC ${order?.no_orden ?? "—"}, ${product?.nombre_producto ?? "Producto"}`;
       })
       .join("; ")}.`;
   return `${message} La información de los lotes se conservará. ¿Está seguro?`;

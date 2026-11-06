@@ -287,7 +287,7 @@ async (page) => {
   });
   await measure("abrir y cerrar menú de lotes", async () => {
     await page.getByRole("button", { name: "Estado del lote", exact: true }).click();
-    await page.getByRole("option", { name: "Nuevo lote", exact: true }).waitFor();
+    await page.getByRole("menuitem", { name: "Nuevo lote", exact: true }).waitFor();
     await page.keyboard.press("Escape");
   });
   await measure("abrir y cancelar nueva OC", async () => {

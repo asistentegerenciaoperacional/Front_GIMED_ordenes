@@ -44,6 +44,10 @@ body:has(.product-order-sheet) .content {
   border-top: 1px solid var(--border);
   padding: 8px;
 }
+.product-sheet-tooltip-anchor {
+  display: inline-flex;
+  align-items: center;
+}
 .sheet-order-actions {
   display: inline-flex;
   overflow: hidden;
@@ -93,6 +97,27 @@ body:has(.product-order-sheet) .content {
   outline: 2px solid var(--focus);
   outline-offset: -2px;
 }
+.product-sheet-tools .sheet-lot-trigger {
+  width: 108px;
+  justify-content: space-between;
+}
+.aria-options.sheet-lot-menu {
+  width: max(var(--trigger-width), 140px);
+}
+.sheet-lot-menu .sheet-order-menu-item {
+  justify-content: space-between;
+  gap: 10px;
+}
+.sheet-lot-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #94a3b8;
+  border-radius: 2px;
+  background: white;
+}
+.sheet-lot-swatch.closed { background: #ecfdf3; border-color: #86cda2; }
+.sheet-lot-swatch.cancelled { background: #fff1f2; border-color: #eaa1aa; }
 .product-sheet-tools .btn {
   box-sizing: border-box;
   height: 32px;

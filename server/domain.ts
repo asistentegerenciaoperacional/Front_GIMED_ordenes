@@ -1384,20 +1384,30 @@ export async function command(
       });
       return { row: value };
     }
-    case "deleteLot": {
-      const lot = findRecord(db, "lote_producto", { id: p.id });
-      const line = findRecord(db, "orden_producto", {
-        id: lot.id_orden_producto,
-      });
-      requireAuthorized(db, line);
+    case "deleteLot":
+    case "deleteLots": {
+      const ids = name === "deleteLot" ? [p.id] : p.ids;
+      check(
+        Array.isArray(ids) && ids.length > 0 &&
+          ids.every((id: unknown) => typeof id === "string" && /^[a-f0-9]{24}$/.test(id)) &&
+          new Set(ids).size === ids.length,
+        "Selecciona lotes válidos sin repetir.",
+        "VALIDATION",
+        { ids: "Selecciona al menos un lote, sin repetir identificadores." },
+      );
+      const lots = ids.map((id: string) => findRecord(db, "lote_producto", { id }));
+      const lineIds = [...new Set(lots.map((lot: Row) => String(lot.id_orden_producto)))];
+      for (const id of lineIds)
+        requireAuthorized(db, findRecord(db, "orden_producto", { id }));
       check(
         p.confirm === true,
         "Confirma la eliminación del lote.",
         "CONFIRMATION",
       );
-      validateLotStateExpectation(db, [line.id], p.expected);
-      db.lote_producto = db.lote_producto.filter((row) => row.id !== lot.id);
-      syncProductLineStates(db, [line.id]);
+      validateLotStateExpectation(db, lineIds, p.expected, name === "deleteLots");
+      const removed = new Set(ids);
+      db.lote_producto = db.lote_producto.filter((row) => !removed.has(row.id));
+      syncProductLineStates(db, lineIds);
       return {};
     }
     case "saveReceipt": {

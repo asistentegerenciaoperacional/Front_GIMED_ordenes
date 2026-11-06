@@ -1,3 +1,4 @@
+import { DeleteProductLotsDialog } from "./components/delete-product-lots-dialog";
 import { confirmProductCancellation } from "./product-cancellation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -20,6 +21,7 @@ import {
   Pencil,
   FilterX,
   AlertCircle,
+  Trash2,
   X,
 } from "lucide-react";
 import { blankRow, labels, meta, type Row } from "../shared/schema";
@@ -127,11 +129,17 @@ const problemFrom = (failure: unknown) =>
       });
 function Tool({
   label,
+  tooltip = label,
   ...props
-}: React.ComponentProps<typeof Button> & { label: string }) {
+}: React.ComponentProps<typeof Button> & {
+  label: string;
+  tooltip?: string;
+}) {
   return (
-    <ActionTooltip content={label}>
-      <Button {...props} aria-label={label} />
+    <ActionTooltip content={tooltip}>
+      <span className="product-sheet-tooltip-anchor">
+        <Button {...props} aria-label={label} />
+      </span>
     </ActionTooltip>
   );
 }
@@ -174,6 +182,12 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     [creating, setCreating] = useState(false),
     [editingOrder, setEditingOrder] = useState<string | null>(null);
   const [authorize, setAuthorize] = useState<string[] | null>(null);
+  const [deleting, setDeleting] = useState<{
+    ids: string[];
+    expected: ReturnType<typeof productLotLifecycleSnapshot>;
+    lots: { id: string; number: string; product: string; order: string }[];
+  } | null>(null);
+  const [deleteError, setDeleteError] = useState<string>();
   const [pending, setPending] = useState<(() => void) | null>(null);
   const [replacements, setReplacements] = useState<
     { orderId: string; providerId: string }[]
@@ -673,8 +687,14 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       const current = operationDb.current;
       const rows = ids.map((id) => {
         const line = current.orden_producto.find((item) => item.id === id)!;
-        const order = current.orden_compra.find((item) => item.id === line.id_orden_compra)!;
-        return { ...blankRow("lote_producto"), id_orden_producto: id, fecha_estimada_batch_record: order.fecha_solicitada_entrega };
+        const order = current.orden_compra.find(
+          (item) => item.id === line.id_orden_compra,
+        )!;
+        return {
+          ...blankRow("lote_producto"),
+          id_orden_producto: id,
+          fecha_estimada_batch_record: order.fecha_solicitada_entrega,
+        };
       });
       await run("createProductLots", { rows }, "Lotes creados");
       selection.set(null);
@@ -684,6 +704,135 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       setBusy(false);
     }
   }
+  function beginDelete(ids: string[]) {
+    const current = operationDb.current;
+    const lots = ids.map((id) => {
+      const lot = current.lote_producto.find((item) => item.id === id);
+      const line = current.orden_producto.find(
+        (item) => item.id === lot?.id_orden_producto,
+      );
+      const order = current.orden_compra.find(
+        (item) => item.id === line?.id_orden_compra,
+      );
+      const product = current.productos.find(
+        (item) => item.id === line?.id_producto,
+      );
+      return lot && line && order
+        ? {
+            id,
+            number: lot.numero_lote ?? "sin número",
+            product: product?.nombre_producto ?? "Producto",
+            order: order.no_orden,
+            lineId: line.id,
+          }
+        : null;
+    });
+    if (lots.some((lot) => !lot)) {
+      notify(
+        "La selección cambió. Actualiza la hoja y vuelve a seleccionar los lotes.",
+        true,
+      );
+      return;
+    }
+    const selectedLots = lots.filter(
+      (lot): lot is NonNullable<typeof lot> => lot !== null,
+    );
+    setDeleteError(undefined);
+    setDeleting({
+      ids,
+      lots: selectedLots,
+      expected: productLotLifecycleSnapshot(current, [
+        ...new Set(selectedLots.map((lot) => lot.lineId)),
+      ]),
+    });
+  }
+  async function deleteSelectedLots() {
+    if (!deleting || busy) return;
+    setBusy(true);
+    setDeleteError(undefined);
+    try {
+      await run(
+        "deleteLots",
+        { ids: deleting.ids, expected: deleting.expected, confirm: true },
+        deleting.ids.length === 1 ? "Lote eliminado" : "Lotes eliminados",
+      );
+      setDeleting(null);
+      selection.set(null);
+    } catch (failure) {
+      setDeleteError(problemFrom(failure).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  useEffect(() => {
+    function shortcut(event: globalThis.KeyboardEvent) {
+      if (
+        !event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.shiftKey ||
+        event.repeat ||
+        event.isComposing ||
+        busy ||
+        editing
+      )
+        return;
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest(
+          'input, textarea, select, [contenteditable="true"], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"]',
+        )
+      )
+        return;
+      if (document.querySelector('[role="dialog"], [role="alertdialog"]'))
+        return;
+      const key = event.key.toLowerCase();
+      if (
+        ![
+          "o",
+          "a",
+          "h",
+          "s",
+          "d",
+          "c",
+          "n",
+          "r",
+          "delete",
+          "del",
+          "supr",
+        ].includes(key)
+      )
+        return;
+      event.preventDefault();
+      const targets = selectionTargets();
+      if (key === "o") cleanFirst(() => setCreating(true));
+      else if (
+        key === "a" &&
+        view === "no_autorizadas" &&
+        targets.orderIds.length
+      )
+        cleanFirst(() => setAuthorize(targets.orderIds));
+      else if (key === "h" && targets.range) hideSelectedColumns();
+      else if (key === "s" && hidden.length) updateHidden([]);
+      else if (targets.lotIds.length && key === "d")
+        cleanFirst(() => void createLots(targets.lineIds));
+      else if (targets.lotIds.length && ["c", "n", "r"].includes(key)) {
+        const state =
+          key === "c" ? "cerrado" : key === "n" ? "anulado" : "en_seguimiento";
+        cleanFirst(() => void states(state, targets));
+      } else if (
+        targets.lotIds.length &&
+        targets.selected
+          .filter((row) => row.lot)
+          .every((row) => row.order.estado_autorizacion === "autorizada") &&
+        ["delete", "del", "supr"].includes(key)
+      )
+        cleanFirst(() => beginDelete(targets.lotIds));
+    }
+    window.addEventListener("keydown", shortcut);
+    return () => window.removeEventListener("keydown", shortcut);
+  });
   const editRow = editing && currentByKey.get(editing.rowKey),
     editCol = editing && columns.find((col) => col.key === editing.column);
   let editor: React.ReactNode = null;
@@ -927,43 +1076,133 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             </div>
             <div className="product-sheet-tools">
               <div className="sheet-order-actions" ref={orderActionsRef}>
-              <Button
-                icon={Plus}
-                onClick={() => cleanFirst(() => setCreating(true))}
-              >
-                Nueva OC
-              </Button>
+                <ActionTooltip content="(Alt+O)">
+                  <Button
+                    icon={Plus}
+                    aria-keyshortcuts="Alt+O"
+                    onClick={() => cleanFirst(() => setCreating(true))}
+                  >
+                    Nueva OC
+                  </Button>
+                </ActionTooltip>
+                <MenuTrigger>
+                  <Button
+                    icon={ChevronDown}
+                    aria-label="Más acciones de órdenes"
+                  />
+                  <Popover
+                    triggerRef={orderActionsRef}
+                    className="aria-options custom-filter-options sheet-order-menu"
+                    placement="bottom start"
+                    offset={4}
+                  >
+                    <Menu
+                      className="aria-option-list"
+                      aria-label="Acciones de órdenes"
+                      onAction={() => {
+                        const ids = selectionTargets().orderIds;
+                        if (view === "no_autorizadas" && ids.length && !busy)
+                          cleanFirst(() => setAuthorize(ids));
+                      }}
+                    >
+                      <ActionTooltip content="Autorizar (alt+a)">
+                        <MenuItem
+                          id="autorizar"
+                          aria-keyshortcuts="Alt+A"
+                          className="aria-option sheet-order-menu-item"
+                          isDisabled={
+                            view !== "no_autorizadas" ||
+                            !orderIds.length ||
+                            busy
+                          }
+                        >
+                          Autorizar
+                          {orderIds.length && view === "no_autorizadas"
+                            ? ` ${orderIds.length} OC`
+                            : ""}
+                        </MenuItem>
+                      </ActionTooltip>
+                    </Menu>
+                  </Popover>
+                </MenuTrigger>
+              </div>
               <MenuTrigger>
-                <Button icon={ChevronDown} aria-label="Más acciones de órdenes" />
-                <Popover triggerRef={orderActionsRef} className="aria-options custom-filter-options sheet-order-menu" placement="bottom start" offset={4}>
-                  <Menu className="aria-option-list" aria-label="Acciones de órdenes" onAction={() => {
-                    const ids = selectionTargets().orderIds;
-                    if (view === "no_autorizadas" && ids.length && !busy) cleanFirst(() => setAuthorize(ids));
-                  }}>
-                    <MenuItem id="autorizar" className="aria-option sheet-order-menu-item" isDisabled={view !== "no_autorizadas" || !orderIds.length || busy}>
-                      <span>Autorizar{orderIds.length && view === "no_autorizadas" ? ` ${orderIds.length} OC` : ""}</span>
-                    </MenuItem>
+                <Button
+                  className="sheet-lot-trigger"
+                  aria-label="Estado del lote"
+                  disabled={!lotIds.length || busy}
+                >
+                  Lotes <ChevronDown size={15} aria-hidden="true" />
+                </Button>
+                <Popover
+                  className="aria-options custom-filter-options sheet-order-menu sheet-lot-menu"
+                  placement="bottom start"
+                  offset={4}
+                >
+                  <Menu
+                    className="aria-option-list"
+                    aria-label="Acciones de lote"
+                    onAction={(key) => {
+                      const value = String(key);
+                      const targets = selectionTargets();
+                      if (value === "nuevo")
+                        cleanFirst(() => void createLots(targets.lineIds));
+                      else if (value)
+                        cleanFirst(() => void states(value, targets));
+                    }}
+                  >
+                    <ActionTooltip content="(Alt+d)">
+                      <MenuItem
+                        id="nuevo"
+                        aria-keyshortcuts="Alt+D"
+                        className="aria-option sheet-order-menu-item"
+                      >
+                        Nuevo lote
+                        <Plus size={15} aria-hidden="true" />
+                      </MenuItem>
+                    </ActionTooltip>
+                    <ActionTooltip content="(Alt+c)">
+                      <MenuItem
+                        id="cerrado"
+                        aria-keyshortcuts="Alt+C"
+                        className="aria-option sheet-order-menu-item"
+                      >
+                        Cerrar lotes
+                        <span
+                          className="sheet-lot-swatch closed"
+                          aria-hidden="true"
+                        />
+                      </MenuItem>
+                    </ActionTooltip>
+                    <ActionTooltip content="(Alt+n)">
+                      <MenuItem
+                        id="anulado"
+                        aria-keyshortcuts="Alt+N"
+                        className="aria-option sheet-order-menu-item"
+                      >
+                        Anular lotes
+                        <span
+                          className="sheet-lot-swatch cancelled"
+                          aria-hidden="true"
+                        />
+                      </MenuItem>
+                    </ActionTooltip>
+                    <ActionTooltip content="(Alt+r)">
+                      <MenuItem
+                        id="en_seguimiento"
+                        aria-keyshortcuts="Alt+R"
+                        className="aria-option sheet-order-menu-item"
+                      >
+                        Reabrir lotes
+                        <span
+                          className="sheet-lot-swatch open"
+                          aria-hidden="true"
+                        />
+                      </MenuItem>
+                    </ActionTooltip>
                   </Menu>
                 </Popover>
               </MenuTrigger>
-              </div>
-              <ControlSelect
-                aria-label="Estado del lote"
-                value=""
-                disabled={!lotIds.length || busy}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  const targets = selectionTargets();
-                  if (value === "nuevo") cleanFirst(() => void createLots(targets.lineIds));
-                  else if (value) cleanFirst(() => void states(value, targets));
-                }}
-              >
-                <option value="">Lotes</option>
-                <option value="nuevo">Nuevo lote</option>
-                <option value="cerrado">Cerrar lotes</option>
-                <option value="anulado">Anular lotes</option>
-                <option value="en_seguimiento">Reabrir lotes</option>
-              </ControlSelect>
               <Tool
                 icon={FileText}
                 label="Ver orden escaneada"
@@ -1021,26 +1260,52 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                   if (order) cleanFirst(() => setEditingOrder(order.id));
                 }}
               />
-              <Button
-                icon={Copy}
-                aria-label="Copiar rango"
-                title="Copiar rango (Ctrl+C)"
-                disabled={!range}
-                onClick={() => copy()}
-              />
-              <Button
-                icon={ClipboardPaste}
-                aria-label="Pegar rango"
-                title="Pegar rango (Ctrl+V)"
-                disabled={!range}
-                onClick={() =>
-                  navigator.clipboard
-                    .readText()
-                    .then(paste)
-                    .catch(() =>
-                      notify("Usa Ctrl+V sobre la hoja para pegar.", true),
+              <ActionTooltip content="Copiar (Ctrl+C)">
+                <span className="product-sheet-tooltip-anchor">
+                  <Button
+                    icon={Copy}
+                    aria-label="Copiar rango"
+                    disabled={!range}
+                    onClick={() => copy()}
+                  />
+                </span>
+              </ActionTooltip>
+              <ActionTooltip content="Pegar (Ctrl+V)">
+                <span className="product-sheet-tooltip-anchor">
+                  <Button
+                    icon={ClipboardPaste}
+                    aria-label="Pegar rango"
+                    disabled={!range}
+                    onClick={() =>
+                      navigator.clipboard
+                        .readText()
+                        .then(paste)
+                        .catch(() =>
+                          notify("Usa Ctrl+V sobre la hoja para pegar.", true),
+                        )
+                    }
+                  />
+                </span>
+              </ActionTooltip>
+              <Tool
+                icon={Trash2}
+                label="Eliminar lotes seleccionados"
+                tooltip="Eliminar lotes (Alt+supr)"
+                className="icon-btn delete-action"
+                aria-keyshortcuts="Alt+Delete"
+                disabled={
+                  !lotIds.length ||
+                  busy ||
+                  selected
+                    .filter((row) => row.lot)
+                    .some(
+                      (row) => row.order.estado_autorizacion !== "autorizada",
                     )
                 }
+                onClick={() => {
+                  const ids = selectionTargets().lotIds;
+                  if (ids.length) cleanFirst(() => beginDelete(ids));
+                }}
               />
               <CustomFilterSelect
                 style={{ width: 200, flex: "0 0 200px" }}
@@ -1100,6 +1365,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                       <strong>Columnas visibles</strong>
                       <Button
                         variant="link"
+                        aria-keyshortcuts="Alt+S"
                         disabled={hidden.length === 0}
                         onClick={() => {
                           columnsDialog.current?.focus({ preventScroll: true });
@@ -1112,10 +1378,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                     <Button
                       className="product-sheet-hide-columns"
                       disabled={!range}
-                      aria-keyshortcuts="Alt+Shift+H"
+                      aria-keyshortcuts="Alt+H"
                       onClick={hideSelectedColumns}
                     >
-                      Ocultar columnas seleccionadas <span>Alt+Mayús+H</span>
+                      Ocultar columnas seleccionadas <span>Alt+H</span>
                     </Button>
                     <div className="product-sheet-column-list">
                       {allColumns.map((col) => (
@@ -1244,7 +1510,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           {() => {
             const { orderIds, selected } = selectionTargets();
             return view === "no_autorizadas" && orderIds.length
-              ? ` · ${orderIds.length} OC completas seleccionadas, incluidos sus renglones ocultos`
+              ? ` · ${orderIds.length} OC seleccionadas`
               : selected.length
                 ? ` · ${selected.length} filas seleccionadas`
                 : "";
@@ -1379,6 +1645,16 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             </Button>
           </div>
         </Dialog>
+      )}
+      {deleting && (
+        <DeleteProductLotsDialog
+          lots={deleting.lots}
+          expected={deleting.expected}
+          onConfirm={deleteSelectedLots}
+          onClose={() => setDeleting(null)}
+          busy={busy}
+          error={deleteError}
+        />
       )}
       {creating && <OrderForm onClose={() => setCreating(false)} />}
       {editingOrder && (

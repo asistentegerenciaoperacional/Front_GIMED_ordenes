@@ -24,7 +24,7 @@ Si la anulación alcanza el último lote no anulado de uno o varios productos, e
 
 `setLineState` conserva su contrato y acepta `expected` opcional para los productos. `saveLot` conserva `{ row }` y añade `expected` y `confirm` opcionales para aplicar esta misma protección a las transiciones del formulario clásico. La compatibilidad con llamadas anteriores no elimina las comprobaciones de autorización, pertenencia ni validación de campos.
 
-`setProductLineStates` conserva el contrato `{ ids, estado, expected, confirm? }`, pero únicamente admite `estado: "anulada"`. Valida todos los propietarios, el snapshot completo y la confirmación antes de anular sus lotes y sincronizar estados. `setLineState` aplica la misma regla a `orden_producto`; cerrar/reabrir directamente devuelve `VALIDATION`, incluso con confirmación. Materiales y otros mantienen sus acciones actuales. `deleteLot` acepta también el snapshot `expected` del diálogo y revalida antes de borrar y sincronizar.
+`setProductLineStates` conserva el contrato `{ ids, estado, expected, confirm? }`, pero únicamente admite `estado: "anulada"`. Valida todos los propietarios, el snapshot completo y la confirmación antes de anular sus lotes y sincronizar estados. `setLineState` aplica la misma regla a `orden_producto`; cerrar/reabrir directamente devuelve `VALIDATION`, incluso con confirmación. Materiales y otros mantienen sus acciones actuales. `deleteLot` acepta también el snapshot `expected` del diálogo y revalida antes de borrar y sincronizar. La hoja usa `deleteLots` con IDs únicos, confirmación y snapshot obligatorio para validar y eliminar la selección completa en una transacción.
 
 ## Datos de prueba y verificación
 

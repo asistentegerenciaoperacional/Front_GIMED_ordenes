@@ -33,6 +33,7 @@ async (page) => {
   const requiredDeliveryBlocked = async (type) => {
     const field=dialog().getByRole('textbox',{name:'Entrega solicitada',exact:true});
     check((await field.getAttribute('required')!==null || await field.getAttribute('aria-required')==='true'),'Entrega solicitada marcada obligatoria en '+type);
+    if (await field.inputValue()) await field.fill('');
     await dialog().getByRole('button',{name:'Revisar orden',exact:true}).click();
     await dialog().getByRole('alert').waitFor();
     check(await field.getAttribute('aria-invalid')==='true' &&
@@ -42,6 +43,22 @@ async (page) => {
     await dialog().getByRole('alert').getByRole('link',{name:'Indica la fecha solicitada de entrega.',exact:true}).click();
     check(await field.evaluate((element) => element===document.activeElement),
       'El error de entrega enfoca el campo obligatorio en '+type);
+  };
+  const createAndOpenDetail = async () => {
+    const view = page.url();
+    const saved = page.waitForResponse((response) =>
+      response.url() === origin + '/api/commands' &&
+      response.request().method() === 'POST' &&
+      response.request().postDataJSON()?.name === 'createOrder');
+    await dialog().getByRole('button', { name: 'Crear orden', exact: true }).click();
+    const response = await saved;
+    const data = await response.json();
+    check(response.ok(), 'Creación exitosa en ' + new URL(view).pathname);
+    await dialog().waitFor({ state: 'hidden' });
+    check(page.url() === view, 'La creación conserva la vista de origen');
+    await page.goto(origin + '/ordenes/' + data.result.orderId);
+    await page.getByRole('heading', { name: /^Orden de compra /, level: 1 }).waitFor();
+    return data.result.orderId;
   };
   const optionsFor=async control=>{
     if(await control.evaluate(el=>el.tagName)==='INPUT')await control.locator('xpath=..').getByRole('button',{name:'Mostrar opciones',exact:true}).click();
@@ -729,13 +746,7 @@ async (page) => {
   await dismissHelp();
   await shot("02-revision-orden");
   const beforeProductEmission = await state();
-  await dialog()
-    .getByRole("button", { name: "Crear orden", exact: true })
-    .click();
-  await page
-    .getByRole("heading", { name: /^Orden de compra /, level: 1 })
-    .waitFor();
-  const productId = page.url().split("/").pop();
+  const productId = await createAndOpenDetail();
   let db = await state();
   let line = db.orden_producto.find((r) => r.id_orden_compra === productId);
   check(
@@ -1436,13 +1447,7 @@ async (page) => {
     .click();
   check(await dialog().locator('.dialog-heading p').innerText().then((text) => text.includes('Revisión de OCM ')),
     'La revisión de una orden de otros muestra OCM');
-  await dialog()
-    .getByRole("button", { name: "Crear orden", exact: true })
-    .click();
-  await page
-    .getByRole("heading", { name: /^Orden de compra /, level: 1 })
-    .waitFor();
-  const otherId = page.url().split("/").pop();
+  const otherId = await createAndOpenDetail();
   check((await state()).orden_otro.find((r) => r.id_orden_compra === otherId).fecha_estimada_entrega==='2026-10-23T12:00:00.000Z','Otro creado hereda entrega de la cabecera');
   await unauthorizedActionsBlocked('otros');
   await authorize();
@@ -1561,7 +1566,7 @@ async (page) => {
   // Independent stickers in one order, including returning to the first step.
   await nav("Órdenes de compra");
   await page.locator('.page-heading').getByRole('button',{name:'Nueva orden',exact:true}).click();
-  await dialog().getByRole('textbox',{name:'Entrega solicitada',exact:true}).pressSequentially('24102026');
+  await dialog().getByRole('textbox',{name:'Entrega solicitada',exact:true}).fill('24/10/2026');
   await dialog().locator('.order-form-line').nth(0).getByRole('spinbutton',{name:'Cantidad solicitada',exact:true}).fill('101');
   await dialog().locator('.order-form-line').nth(0).getByRole('textbox',{name:'Precio unitario',exact:true}).fill('2.50');
   await dialog().getByRole('button',{name:'Agregar producto',exact:true}).click();
@@ -1620,9 +1625,7 @@ async (page) => {
   check(await compactTip.evaluate((el) => {const r=el.getBoundingClientRect();return r.left>=0 && r.right<=innerWidth && r.top>=0 && r.bottom<=innerHeight;}),'Tooltip de porcentaje queda dentro de la ventana móvil');
   await helpFor(pct(0)).press('Escape');
   await page.setViewportSize({width:1440,height:900});
-  await dialog().getByRole('button',{name:'Crear orden',exact:true}).click();
-  await page.getByRole('heading',{name:/^Orden de compra /,level:1}).waitFor();
-  const individualId=page.url().split('/').pop();
+  const individualId=await createAndOpenDetail();
   const individualLines=(await state()).orden_producto.filter((r) => r.id_orden_compra===individualId);
   check(individualLines.length===2 && individualLines[0].cantidad_sticker===212 && individualLines[1].cantidad_sticker===223 && individualLines.every((r) => !('sticker_pct' in r)),'Guardado conserva cantidades individuales sin ampliar atributos de la tabla');
 
@@ -1634,9 +1637,7 @@ async (page) => {
   await dialog().getByRole('textbox',{name:'Precio unitario',exact:true}).fill('100.00');
   await shot('20-creacion-material-fecha-cabecera');
   await dialog().getByRole('button',{name:'Revisar orden',exact:true}).click();
-  await dialog().getByRole('button',{name:'Crear orden',exact:true}).click();
-  await page.getByRole('heading',{name:/^Orden de compra /,level:1}).waitFor();
-  const manualMaterialId=page.url().split('/').pop();
+  const manualMaterialId=await createAndOpenDetail();
   check((await state()).orden_material.find((r) => r.id_orden_compra===manualMaterialId).fecha_estimada_entrega==='2026-10-24T12:00:00.000Z','Material creado directamente hereda entrega de cabecera');
   await unauthorizedActionsBlocked('material');
   await authorize();
@@ -1799,9 +1800,7 @@ async (page) => {
   await dialog().getByRole('textbox',{name:'Entrega solicitada',exact:true}).fill('30/10/2026');
   await dialog().getByRole('button',{name:'Agregar producto',exact:true}).click();
   await dialog().getByRole('button',{name:'Revisar orden',exact:true}).click();
-  await dialog().getByRole('button',{name:'Crear orden',exact:true}).click();
-  await page.getByRole('dialog').waitFor({state:'hidden'});
-  const initialLotsOrderId=page.url().split('/').pop();
+  const initialLotsOrderId=await createAndOpenDetail();
   const beforeInitialEdit=await state();
   const initialLines=beforeInitialEdit.orden_producto.filter((row) => row.id_orden_compra===initialLotsOrderId);
   const firstInitialLot=beforeInitialEdit.lote_producto.find((row) => row.id_orden_producto===initialLines[0].id);
