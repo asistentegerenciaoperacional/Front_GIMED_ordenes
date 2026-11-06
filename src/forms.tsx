@@ -1403,7 +1403,7 @@ export function OrderForm({
         cantidad_solicitada: 0,
         precio_unitario: "0.00",
         ...recommendations(db, "", 0),
-        cantidad_corrugado: null,
+        cantidad_corrugado: undefined,
         sticker_pct: 10,
       };
     }
@@ -1725,7 +1725,7 @@ export function OrderForm({
               cantidad_solicitada: p?.unidades_lote ?? 0,
               precio_unitario: String(currentCost(db, id)?.costo ?? 0),
               ...recommendations(db, id, p?.unidades_lote ?? 0),
-              cantidad_corrugado: null,
+              cantidad_corrugado: undefined,
               sticker_pct: 10,
             },
       ),
@@ -1745,7 +1745,15 @@ export function OrderForm({
                 : {}),
               ...(type === "producto"
                 ? {
-                    cantidad_corrugado: null,
+                    cantidad_corrugado:
+                      line.cantidad_corrugado !== null &&
+                      db.producto_corrugado.some(
+                        (box) =>
+                          box.id_producto === line.id_producto &&
+                          box.id_material === line.ref_corrugado,
+                      )
+                        ? undefined
+                        : line.cantidad_corrugado,
                     cantidad_sticker: null,
                     cantidad_cinta: null,
                   }
@@ -1873,28 +1881,37 @@ export function OrderForm({
           message: "Revisa los datos de la orden.",
           fields: issues,
         });
-      const final: Row[] = candidates.map((l) =>
-        type === "producto"
-          ? {
-              ...l,
-              ...Object.fromEntries(
-                Object.entries(
-                  recommendations(
-                    db,
-                    l.id_producto,
-                    l.cantidad_solicitada,
-                    Number.isFinite(l.sticker_pct) &&
-                      l.sticker_pct >= 1 &&
-                      l.sticker_pct <= 10
-                      ? l.sticker_pct
-                      : 10,
-                  ),
-                ).map(([k, v]) => [k, l[k] ?? v]),
-              ),
-              precio_unitario: decimal(l.precio_unitario),
-            }
-          : { ...l, precio_unitario: decimal(l.precio_unitario) },
-      );
+      const final: Row[] = candidates.map((l) => {
+        const precio_unitario = decimal(l.precio_unitario);
+        if (type !== "producto") return { ...l, precio_unitario };
+        const suggested = recommendations(
+          db,
+          l.id_producto,
+          l.cantidad_solicitada,
+          Number.isFinite(l.sticker_pct) &&
+            l.sticker_pct >= 1 &&
+            l.sticker_pct <= 10
+            ? l.sticker_pct
+            : 10,
+        );
+        const boxReference =
+          l.ref_corrugado === undefined
+            ? suggested.ref_corrugado
+            : l.ref_corrugado;
+        return {
+          ...l,
+          ref_corrugado: boxReference,
+          cantidad_corrugado:
+            l.cantidad_corrugado !== undefined
+              ? l.cantidad_corrugado
+              : boxReference === suggested.ref_corrugado
+                ? suggested.cantidad_corrugado
+                : null,
+          cantidad_sticker: l.cantidad_sticker ?? suggested.cantidad_sticker,
+          cantidad_cinta: l.cantidad_cinta ?? suggested.cantidad_cinta,
+          precio_unitario,
+        };
+      });
       setLines(final);
       setStage(2);
     } catch (e) {
@@ -2739,18 +2756,32 @@ export function OrderForm({
                             id={`field-lines.${i}.ref_corrugado`}
                             label="Referencia de corrugado"
                           >
-                            <MaterialPicker
+                            <ReferencePicker
                               id={`field-lines.${i}.ref_corrugado`}
                               value={l.ref_corrugado ?? ""}
                               placeholder="Buscar corrugado…"
-                              onChange={(id) => update(i, "ref_corrugado", id)}
-                              materials={db.materiales.filter((m) =>
-                                /corrugad/.test(
-                                  db.tipos_materiales
-                                    .find((t) => t.id === m.id_tipo_material)
-                                    ?.tipo_material?.toLowerCase() ?? "",
-                                ),
-                              )}
+                              clearOptionId="__sin_corrugado__"
+                              onChange={(id) =>
+                                update(i, "ref_corrugado", id || null)
+                              }
+                              options={[
+                                {
+                                  id: "__sin_corrugado__",
+                                  label: "Sin referencia",
+                                },
+                                ...db.materiales
+                                  .filter((m) =>
+                                    /corrugad/.test(
+                                      db.tipos_materiales
+                                        .find((t) => t.id === m.id_tipo_material)
+                                        ?.tipo_material?.toLowerCase() ?? "",
+                                    ),
+                                  )
+                                  .map((material) => ({
+                                    id: material.id,
+                                    label: recordName(db, "materiales", material),
+                                  })),
+                              ]}
                             />
                           </Field>
                           <Field

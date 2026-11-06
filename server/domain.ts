@@ -567,23 +567,36 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
         );
       }
       // Only new emissions resolve the assigned code. Existing lines retain their historical code.
-      const code =
-        old && old.id_producto === raw.id_producto
-          ? old.id_codigo_barras
-          : selectBarcode(db, raw.id_producto);
+      const sameProduct = old && old.id_producto === raw.id_producto;
+      const code = sameProduct
+        ? old.id_codigo_barras
+        : selectBarcode(db, raw.id_producto);
       const suggested = recommendations(
         db,
         raw.id_producto,
         raw.cantidad_solicitada,
         stickerPct,
       );
+      const boxReference =
+        raw.ref_corrugado !== undefined
+          ? raw.ref_corrugado
+          : sameProduct
+            ? old.ref_corrugado
+            : suggested.ref_corrugado;
+      const boxQuantity =
+        raw.cantidad_corrugado !== undefined
+          ? raw.cantidad_corrugado
+          : sameProduct
+            ? old.cantidad_corrugado
+            : boxReference === suggested.ref_corrugado
+              ? suggested.cantidad_corrugado
+              : null;
       values = {
         ...values,
         id_producto: raw.id_producto,
         id_codigo_barras: code,
-        ref_corrugado: raw.ref_corrugado ?? suggested.ref_corrugado,
-        cantidad_corrugado:
-          raw.cantidad_corrugado ?? suggested.cantidad_corrugado,
+        ref_corrugado: boxReference,
+        cantidad_corrugado: boxQuantity,
         cantidad_sticker:
           raw.cantidad_sticker === undefined
             ? suggested.cantidad_sticker

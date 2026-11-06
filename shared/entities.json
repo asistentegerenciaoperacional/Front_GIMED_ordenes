@@ -487,11 +487,11 @@
         },
         "ref_corrugado": {
           "type": "object_id",
-          "required": true
+          "required": false
         },
         "cantidad_corrugado": {
           "type": "integer",
-          "required": true
+          "required": false
         },
         "estado": {
           "type": "estado_renglon_orden",

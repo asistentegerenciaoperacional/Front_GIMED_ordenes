@@ -1480,7 +1480,9 @@ export function OrderDetail({
                             <div>
                               <dt>Cantidad de corrugado</dt>
                               <dd className="num">
-                                {count(l.cantidad_corrugado)}
+                                {l.cantidad_corrugado == null
+                                  ? "Sin informar"
+                                  : count(l.cantidad_corrugado)}
                               </dd>
                             </div>
                             <div>

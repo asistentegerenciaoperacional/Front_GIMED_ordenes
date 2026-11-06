@@ -861,6 +861,66 @@ test("cantidades finales de producto y empaque con redondeo hacia arriba", async
   assert.equal(line.cantidad_sticker, 330);
 });
 
+test("corrugado de OC: guarda cada campo opcional y conserva sus valores al editar", async (t) => {
+  const store = await fixture(t);
+  const configured = product().lines[0];
+  const selections = [
+    { ref_corrugado: null, cantidad_corrugado: null },
+    { ref_corrugado: sid(53), cantidad_corrugado: null },
+    { ref_corrugado: null, cantidad_corrugado: 0 },
+  ];
+  const payload = product({
+    lines: selections.map((selection) => ({ ...configured, ...selection })),
+  });
+  const { orderId } = await execute(store, "createOrder", payload);
+  const packaging = () =>
+    store.snapshot().orden_producto
+      .filter((row) => row.id_orden_compra === orderId)
+      .map(({ ref_corrugado, cantidad_corrugado }) => ({
+        ref_corrugado,
+        cantidad_corrugado,
+      }));
+  assert.deepEqual(packaging(), selections);
+  await execute(store, "editOrder", {
+    ...payload,
+    id: orderId,
+    lines: store.snapshot().orden_producto
+      .filter((row) => row.id_orden_compra === orderId)
+      .map(({ id }) => ({ ...configured, id, precio_unitario: "20.00" })),
+  });
+  assert.deepEqual(packaging(), selections);
+});
+
+test("corrugado de OC: permite crear sin configuración y valida los valores ingresados", async (t) => {
+  const store = await fixture(t);
+  await store.transaction((db) => {
+    db.producto_corrugado = db.producto_corrugado.filter(
+      (row) => row.id_producto !== sid(70),
+    );
+  });
+  const { orderId } = await execute(store, "createOrder", product());
+  const line = store.snapshot().orden_producto.find(
+    (row) => row.id_orden_compra === orderId,
+  )!;
+  assert.equal(line.ref_corrugado, null);
+  assert.equal(line.cantidad_corrugado, null);
+  const before = store.snapshot();
+  for (const [fields, code] of [
+    [{ cantidad_corrugado: 1.5 }, "TYPE"],
+    [{ ref_corrugado: sid(9999) }, "FOREIGN_KEY"],
+  ] as const) {
+    await assert.rejects(
+      execute(
+        store,
+        "createOrder",
+        product({ lines: [{ ...product().lines[0], ...fields }] }),
+      ),
+      fails(code),
+    );
+  }
+  assert.deepEqual(store.snapshot(), before);
+});
+
 test("emisión de varios productos conserva materiales, vínculos y su consecutivo; guarda un lote inicial por producto", async (t) => {
   const store = await fixture(t);
   const before = store.snapshot();

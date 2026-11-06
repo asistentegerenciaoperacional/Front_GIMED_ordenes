@@ -107,8 +107,8 @@ export interface orden_producto {
   id_producto: string;
   cantidad_solicitada: number;
   precio_unitario: string;
-  ref_corrugado: string;
-  cantidad_corrugado: number;
+  ref_corrugado: string | null;
+  cantidad_corrugado: number | null;
   estado: "en_seguimiento" | "anulada" | "cerrada";
   cantidad_sticker: number | null; // Prototype extension; not in production DBML.
   cantidad_cinta: number | null; // Prototype extension; not in production DBML.
