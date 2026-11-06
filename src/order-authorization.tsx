@@ -33,7 +33,7 @@ export function OrderAuthorizationDialog({
   });
   const unavailable = error?.code === "AUTHORIZATION_CHANGED";
   const title = multiple
-    ? "Autorizar órdenes"
+    ? `Autorizar órdenes (${orders.length})`
     : `Autorizar orden ${orders[0]?.no_orden ?? ""}`;
   const submit = async () => {
     if (submitting.current || !signed || !ids.length || unavailable) return;
@@ -77,6 +77,7 @@ export function OrderAuthorizationDialog({
           : "La autorización corresponde a toda la orden de compra."
       }
       busy={busy}
+      className="authorization-dialog"
       onClose={onClose}
     >
       <div className="dialog-body">
@@ -92,17 +93,10 @@ export function OrderAuthorizationDialog({
             )}
           </ul>
         )}
-        <div className="notice warning">
-          <Info size={17} aria-hidden="true" />
-          {multiple
-            ? "Esta acción es irreversible. Las órdenes no podrán volver a no autorizadas."
-            : "Esta acción es irreversible. La orden no podrá volver a no autorizada."}
-        </div>
         {multiple && (
           <div className="authorization-orders">
-            <h3>Órdenes a autorizar ({orders.length})</h3>
             {orders.length ? (
-              <ul>
+              <ul className="dialog-item-list" aria-label="Órdenes a autorizar">
                 {orders.map((order) => {
                   const supplier = db.proveedor.find(
                     (item) => item.id === order.id_proveedor,
@@ -112,7 +106,7 @@ export function OrderAuthorizationDialog({
                       <strong>
                         {orderReference(order.tipo_orden, order.no_orden)}
                       </strong>
-                      <span>
+                      <span>{" · "}
                         {supplier?.nombre_corto ??
                           supplier?.nombre_largo ??
                           "Sin proveedor"}
@@ -126,6 +120,12 @@ export function OrderAuthorizationDialog({
             )}
           </div>
         )}
+        <div className="notice warning">
+          <Info size={17} aria-hidden="true" />
+          {multiple
+            ? "Esta acción es irreversible. Las órdenes no podrán volver a no autorizadas."
+            : "Esta acción es irreversible. La orden no podrá volver a no autorizada."}
+        </div>
         <FieldEditContext.Provider value={() => {}}>
           <CheckChoice
             className="checkbox-row"

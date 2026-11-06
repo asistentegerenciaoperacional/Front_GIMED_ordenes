@@ -64,7 +64,7 @@ async (page) => {
     });
   const mode = () => page.locator(".authorization-selection");
   const dialog = () =>
-    page.getByRole("dialog", { name: "Autorizar órdenes", exact: true });
+    page.getByRole("dialog", { name: /^Autorizar órdenes \(\d+\)$/ });
   const start = async () =>
     page.getByRole("button", { name: "Autorizar", exact: true }).click();
   const continueButton = () =>
@@ -107,6 +107,21 @@ async (page) => {
     "Teclado desmarca sin doble alternancia",
   );
   await open();
+  check(
+    (await dialog().getAttribute("aria-labelledby")) !== null &&
+      (await dialog().getByRole("heading", { name: "Autorizar órdenes (1)" }).count()) === 1 &&
+      (await dialog().getByRole("heading", { name: /Órdenes a autorizar/ }).count()) === 0,
+    "El título muestra la cantidad sin repetir el encabezado de la lista",
+  );
+  check(
+    await dialog().evaluate((node) => {
+      const list = node.querySelector(".authorization-orders ul");
+      const warning = node.querySelector(".notice.warning");
+      return list && warning && !!(list.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING) &&
+        getComputedStyle(list).listStyleType === "disc";
+    }),
+    "Las órdenes aparecen con viñetas antes del aviso irreversible",
+  );
   check(await confirm().isDisabled(), "Firmas obligatorias en el diálogo");
   check(
     (await dialog().locator(".authorization-orders").innerText()).includes(

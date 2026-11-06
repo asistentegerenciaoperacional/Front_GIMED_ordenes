@@ -1,0 +1,60 @@
+async (page) => {
+  page = page.context().pages()[0];
+  page.setDefaultTimeout(12000);
+  const origin = new URL(page.url()).origin, checks = [];
+  const check = (value, label) => { if (!value) throw new Error(label); checks.push(label); };
+  const state = async () => (await page.request.get(origin + "/api/state")).json();
+  const command = async (name, payload) => {
+    const response = await page.request.post(origin + "/api/commands", { data: { name, payload } });
+    if (!response.ok()) throw new Error(await response.text());
+    return (await response.json()).result;
+  };
+  let db = await state();
+  const product = db.productos.find((p) => p.activo && db.codigos_barras.some((b) => b.id_producto === p.id && b.estado === "asignado"));
+  const orders = [];
+  for (let i = 0; i < 4; i++) {
+    const created = await command("createOrder", { tipo_orden: "producto", id_proveedor: product.id_maquilador, fecha_solicitada_entrega: "2099-03-15T12:00:00.000Z", lines: [{ id_producto: product.id, cantidad_solicitada: 100, precio_unitario: "2.50" }] });
+    orders.push(created.orderId);
+  }
+  db = await state();
+  await page.evaluate(() => localStorage.setItem("gimed:ui:product-order-sheet", "true"));
+  await page.goto(origin + "/ordenes/productos?vista=no_autorizadas");
+  await page.locator(".product-order-sheet").waitFor();
+  const rows = page.locator(".product-sheet-grid tbody tr[data-order-id]");
+  const positions = await Promise.all(orders.map((id) => page.locator(`.product-sheet-grid tbody tr[data-order-id="${id}"]`).getAttribute("data-row-index").then(Number)));
+  positions.sort((a, b) => a - b);
+  check(positions[3] - positions[0] === 3, "Las cuatro órdenes de prueba son contiguas");
+  const cell = (index) => page.locator(`[data-sheet-row="${index}"]`).first();
+  await cell(positions[0]).click();
+  await cell(positions[3]).click({ modifiers: ["Shift"] });
+  await page.keyboard.press("Alt+a");
+  const dialog = page.getByRole("dialog", { name: "Autorizar órdenes (4)", exact: true });
+  await dialog.waitFor();
+  check(await dialog.getByRole("heading", { name: "Autorizar órdenes (4)", exact: true }).count() === 1 && await dialog.getByRole("heading", { name: /Órdenes a autorizar/ }).count() === 0, "El título incluye la cantidad y no se repite el encabezado");
+  const list = dialog.getByRole("list", { name: "Órdenes a autorizar" });
+  check(await list.locator("li").count() === 4 && await list.evaluate((node) => getComputedStyle(node).listStyleType) === "disc", "La lista contiene cuatro órdenes con viñetas");
+  for (const id of orders) check((await list.innerText()).includes(db.orden_compra.find((o) => o.id === id).no_orden), "La selección incluye la OC " + db.orden_compra.find((o) => o.id === id).no_orden);
+  check(await dialog.evaluate((node) => {
+    const list = node.querySelector(".authorization-orders"), warning = node.querySelector(".notice.warning"), checkbox = node.querySelector('input[type="checkbox"]');
+    return !!(list.compareDocumentPosition(warning) & Node.DOCUMENT_POSITION_FOLLOWING) && !!(warning.compareDocumentPosition(checkbox) & Node.DOCUMENT_POSITION_FOLLOWING);
+  }), "El aviso irreversible está entre la lista y la confirmación de firmas");
+  const button = dialog.getByRole("button", { name: "Confirmar autorización", exact: true });
+  check(await button.isDisabled(), "La autorización exige confirmar las firmas");
+  await dialog.getByRole("checkbox").check();
+  check(await button.isEnabled(), "Confirmar firmas habilita la autorización");
+  await button.click();
+  await dialog.waitFor({ state: "hidden" });
+  check(orders.every((id) => true) && orders.every((id) => db.orden_compra.find((o) => o.id === id).estado_autorizacion === "no_autorizada"), "Las órdenes partían sin autorizar");
+  db = await state();
+  check(orders.every((id) => db.orden_compra.find((o) => o.id === id).estado_autorizacion === "autorizada"), "Se autorizaron las cuatro órdenes en la base temporal");
+  const another = await command("createOrder", { tipo_orden: "producto", id_proveedor: product.id_maquilador, fecha_solicitada_entrega: "2099-03-15T12:00:00.000Z", lines: [{ id_producto: product.id, cantidad_solicitada: 100, precio_unitario: "2.50" }] });
+  db = await state();
+  const singleOrder = db.orden_compra.find((o) => o.id === another.orderId);
+  await page.goto(origin + "/ordenes/" + another.orderId);
+  await page.getByRole("button", { name: "Autorizar", exact: true }).click();
+  const single = page.getByRole("dialog", { name: `Autorizar orden ${singleOrder.no_orden}`, exact: true });
+  await single.waitFor();
+  check(await single.locator(".authorization-orders").count() === 0 && await single.getByRole("button", { name: "Confirmar autorización", exact: true }).isDisabled(), "La autorización individual conserva su título y exige firmas");
+  await single.getByRole("button", { name: "Cancelar", exact: true }).click();
+  return { checks };
+};

@@ -3,8 +3,35 @@ import type { Database } from "../shared/models";
 import type { ProductLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
 import { confirmAction } from "./components/overlays";
 
-export function cancellationMessage(
+function annulledProductLines(
+  expected: ProductLotLifecycleSnapshot,
+  lotIds: readonly string[],
+) {
+  const selected = new Set(lotIds);
+  return expected.filter(
+    (line) =>
+      line.estado !== "anulada" &&
+      line.lotes.every(
+        (lot) => lot.estado === "anulado" || selected.has(lot.id),
+      ),
+  );
+}
+
+export function cancellationProducts(
   db: Database,
+  expected: ProductLotLifecycleSnapshot,
+  lotIds: readonly string[],
+) {
+  return annulledProductLines(expected, lotIds).map((item) => {
+    const line = db.orden_producto.find((row) => row.id === item.id);
+    const order = db.orden_compra.find((row) => row.id === line?.id_orden_compra);
+    const product = db.productos.find((row) => row.id === line?.id_producto);
+    return `OC ${order?.no_orden ?? "—"}, ${product?.nombre_producto ?? "Producto"}`;
+  });
+}
+
+export function cancellationMessage(
+  _db: Database,
   kind: "lot" | "product",
   expected: ProductLotLifecycleSnapshot,
   lotIds: readonly string[] = [],
@@ -12,13 +39,7 @@ export function cancellationMessage(
   const selected = new Set(lotIds);
   const affected =
     kind === "lot"
-      ? expected.filter(
-          (line) =>
-            line.estado !== "anulada" &&
-            line.lotes.every(
-              (lot) => lot.estado === "anulado" || selected.has(lot.id),
-            ),
-        )
+      ? annulledProductLines(expected, lotIds)
       : expected;
   const closing =
     kind === "lot"
@@ -51,19 +72,6 @@ export function cancellationMessage(
       closing.length === 1
         ? " El producto quedará cerrado porque no quedarán lotes en seguimiento y conservará lotes cerrados."
         : ` ${closing.length} productos quedarán cerrados porque no tendrán lotes en seguimiento y conservarán lotes cerrados.`;
-  if (kind === "lot" && expected.length > 1 && affected.length)
-    message += ` Productos afectados: ${affected
-      .map((item) => {
-        const line = db.orden_producto.find((row) => row.id === item.id);
-        const order = db.orden_compra.find(
-          (row) => row.id === line?.id_orden_compra,
-        );
-        const product = db.productos.find(
-          (row) => row.id === line?.id_producto,
-        );
-        return `OC ${order?.no_orden ?? "—"}, ${product?.nombre_producto ?? "Producto"}`;
-      })
-      .join("; ")}.`;
   return `${message} La información de los lotes se conservará. ¿Está seguro?`;
 }
 
@@ -82,9 +90,11 @@ export function confirmProductCancellation(
       : multiple
         ? "Anular productos"
         : "Anular producto";
+  const products = kind === "lot" ? cancellationProducts(db, expected, lotIds) : [];
   return confirmAction(
     cancellationMessage(db, kind, expected, lotIds),
     label,
     true,
+    products.length ? { label: "Productos afectados:", items: products } : undefined,
   );
 }

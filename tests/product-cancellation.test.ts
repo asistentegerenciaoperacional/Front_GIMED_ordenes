@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { makeSeed, sid } from "../shared/seed";
 import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
-import { cancellationMessage } from "../src/product-cancellation";
+import { cancellationMessage, cancellationProducts } from "../src/product-cancellation";
 
 test("mensajes de anulación distinguen lote parcial, último y producto", () => {
   const db = makeSeed();
@@ -14,11 +14,13 @@ test("mensajes de anulación distinguen lote parcial, último y producto", () =>
     partial,
     "Se anulará el lote seleccionado. La información de los lotes se conservará. ¿Está seguro?",
   );
+  assert.deepEqual(cancellationProducts(db, expected, [ids[0]]), []);
   const last = cancellationMessage(db, "lot", expected, ids);
   assert.match(
     last,
     /Esta acción anulará el último lote y también el producto/,
   );
+  assert.equal(cancellationProducts(db, expected, ids).length, 1);
   assert.equal(
     cancellationMessage(db, "product", expected),
     "Se anulará el producto y todos sus lotes. La información de los lotes se conservará. ¿Está seguro?",
@@ -43,10 +45,13 @@ test("selección múltiple identifica únicamente productos que quedan sin lotes
   ];
   const message = cancellationMessage(db, "lot", expected, ids);
   assert.match(message, /Se anularán los lotes seleccionados/);
-  assert.match(message, /Productos afectados: OC/);
   const line = db.orden_producto.find((row) => row.id === expected[0].id)!;
   const order = db.orden_compra.find((row) => row.id === line.id_orden_compra)!;
   const product = db.productos.find((row) => row.id === line.id_producto)!;
-  assert.ok(message.includes(`OC ${order.no_orden}, ${product.nombre_producto}`));
+  assert.deepEqual(cancellationProducts(db, expected, ids), [
+    `OC ${order.no_orden}, ${product.nombre_producto}`,
+  ]);
+  const allIds = expected.flatMap((line) => line.lotes.map((lot) => lot.id));
+  assert.equal(cancellationProducts(db, expected, allIds).length, 2);
   assert.doesNotMatch(message, /renglón/i);
 });

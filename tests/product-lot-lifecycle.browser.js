@@ -298,6 +298,11 @@ async (page) => {
     (await confirmation.innerText()).includes("también el producto"),
     "El formulario del último lote explica la anulación del producto",
   );
+  check(
+    (await confirmation.locator(".dialog-item-list li").count()) === 1 &&
+      (await confirmation.locator(".dialog-item-list li").innerText()).includes(product.nombre_producto),
+    "El formulario detalla el producto afectado como elemento de lista",
+  );
   same(
     await state(),
     partial,

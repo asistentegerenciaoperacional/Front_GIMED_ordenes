@@ -1,0 +1,22 @@
+{
+  "checks": [
+    "Seguimiento muestra los lotes abierto y cerrado, excluyendo el anulado",
+    "La hoja no contiene el menú de acciones del producto",
+    "Producto en cerrada",
+    "Cerrar el último abierto no solicita confirmación por tolerancia",
+    "El hermano cerrado conserva su estado",
+    "Producto en en_seguimiento",
+    "Reabrir un lote restaura su estado sin modificar hermanos",
+    "El aviso distingue el cierre del producto al quedar un hermano cerrado",
+    "El aviso sin anulación de producto no muestra una lista de afectados",
+    "Cancelar conserva íntegra la base",
+    "Producto en cerrada",
+    "Anular el último no anulado explica la anulación del producto",
+    "El último lote muestra el producto y su OC como elemento de lista",
+    "La lista comparte el estilo de texto del diálogo",
+    "Producto en anulada"
+  ],
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-FuxLgX\\database.json"
+}

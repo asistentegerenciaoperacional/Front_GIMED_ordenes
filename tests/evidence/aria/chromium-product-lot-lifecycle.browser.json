@@ -18,6 +18,7 @@
     "Anular un lote no último solicita confirmación sin advertir anulación de producto",
     "Anular parte de los lotes conserva activo el producto y todos los demás datos",
     "El formulario del último lote explica la anulación del producto",
+    "El formulario detalla el producto afectado como elemento de lista",
     "La primera solicitud del último lote no guarda ni su estado ni la ubicación pendiente",
     "Cancelar la confirmación del último lote no escribe absolutamente ningún dato",
     "Cancelar conserva abierto el formulario del lote",
@@ -32,15 +33,15 @@
     "tests/evidence/aria/chromium-lifecycle-ultimo-lote-confirmacion.png",
     "tests/evidence/aria/chromium-lifecycle-lote-reabierto.png"
   ],
-  "orderId": "cde2d9683ac87bab73eeb38b",
-  "productLineId": "a68edad8dc0eb095f0026a56",
+  "orderId": "9de5ab0df90d0a608ca058c2",
+  "productLineId": "ab81a0d8395d47b4e9c838de",
   "lotIds": [
-    "e730d4dece66424827c98b1e",
-    "fceafe34e23f2e5a236b05da",
-    "71785ac9a37a3365c010bec5"
+    "3117059ed249a9f1f0402de3",
+    "0fd3080191ac3ae02b41875a",
+    "0b549331d7bd7a76428f5e7d"
   ],
   "pageErrors": [],
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-tUABuB\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-5VcjvE\\database.json"
 }

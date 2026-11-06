@@ -1430,7 +1430,8 @@ textarea.control {
   display: grid;
   gap: 20px;
 }
-.delete-lot-list {
+.delete-lot-list,
+.dialog-item-list {
   margin: 0;
   padding-inline-start: 24px;
   color: var(--muted);
@@ -2997,27 +2998,19 @@ textarea.control {
 .authorization-checkbox-column {
   width: 80px;
 }
+.authorization-dialog .dialog-heading {
+  padding: 16px 20px;
+}
+.authorization-dialog .dialog-body {
+  padding: 16px 20px;
+  gap: 12px;
+}
+.authorization-dialog .dialog-footer {
+  padding: 12px 20px;
+}
 .authorization-orders {
-  margin: 20px 0;
-}
-.authorization-orders h3 {
-  margin: 0 0 8px;
-  font-size: 15px;
-}
-.authorization-orders ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.authorization-orders li {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 18px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
-.authorization-orders li strong {
-  min-width: 95px;
+  max-height: min(40vh, 320px);
+  overflow-y: auto;
 }
 .authorization-conflicts {
   padding-left: 20px;

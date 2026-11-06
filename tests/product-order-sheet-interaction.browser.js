@@ -321,7 +321,7 @@ async (page) => {
   await page.getByRole("button", { name: "Más acciones de órdenes", exact: true }).click();
   await page.getByRole("menuitem", { name: "Autorizar 1 OC", exact: true }).click();
   const authorization = page.getByRole("dialog", {
-    name: "Autorizar órdenes",
+    name: "Autorizar órdenes (1)",
     exact: true,
   });
   await authorization.waitFor();

@@ -1,0 +1,20 @@
+{
+  "checks": [
+    "Las cuatro órdenes de prueba son contiguas",
+    "El título incluye la cantidad y no se repite el encabezado",
+    "La lista contiene cuatro órdenes con viñetas",
+    "La selección incluye la OC 2805",
+    "La selección incluye la OC 2806",
+    "La selección incluye la OC 2807",
+    "La selección incluye la OC 2808",
+    "El aviso irreversible está entre la lista y la confirmación de firmas",
+    "La autorización exige confirmar las firmas",
+    "Confirmar firmas habilita la autorización",
+    "Las órdenes partían sin autorizar",
+    "Se autorizaron las cuatro órdenes en la base temporal",
+    "La autorización individual conserva su título y exige firmas"
+  ],
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-IOYW30\\database.json"
+}

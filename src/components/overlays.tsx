@@ -17,6 +17,7 @@ type Confirmation = {
   message: string;
   confirmLabel: string;
   destructive: boolean;
+  list?: { label: string; items: readonly string[] };
   resolve: (answer: boolean) => void;
 };
 const confirmEvent = "prototipo:confirmation";
@@ -35,11 +36,12 @@ export function confirmAction(
   message: string,
   confirmLabel = "Confirmar",
   destructive = false,
+  list?: { label: string; items: readonly string[] },
 ): Promise<boolean> {
   return new Promise((resolve) =>
     window.dispatchEvent(
       new CustomEvent<Confirmation>(confirmEvent, {
-        detail: { message, confirmLabel, destructive, resolve },
+        detail: { message, confirmLabel, destructive, list, resolve },
       }),
     ),
   );
@@ -84,6 +86,16 @@ export function ConfirmationProvider({ children }: { children: ReactNode }) {
               </div>
               <div className="dialog-body">
                 <p>{current.message}</p>
+                {current.list && current.list.items.length > 0 && (
+                  <div>
+                    <p>{current.list.label}</p>
+                    <ul className="dialog-item-list">
+                      {current.list.items.map((item, index) => (
+                        <li key={index}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
               <div className="dialog-footer">
                 <Action

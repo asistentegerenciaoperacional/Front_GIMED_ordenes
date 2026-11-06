@@ -27,6 +27,13 @@ async (page) => {
         numero_lote: "POSICION-FINAL-" + index,
       },
     });
+  const saveFilterLots = fixture.lote_producto.filter((lot) =>
+    /^VIRTUAL-499[0-2]$/.test(lot.numero_lote ?? ""),
+  );
+  for (const [index, lot] of saveFilterLots.entries())
+    await command("saveLot", {
+      row: { ...lot, numero_lote: "POSICION-GUARDAR-" + index },
+    });
   await page.setViewportSize({ width: 1250, height: 850 });
   await page.evaluate(() =>
     localStorage.setItem("gimed:ui:product-order-sheet", "true"),
@@ -35,9 +42,9 @@ async (page) => {
   const grid = page.locator(".product-sheet-grid");
   const active = grid.locator("[data-active]");
   const column = "cantidad_recibida";
-  const cell = (index) =>
+  const cell = (index, key = column) =>
     grid.locator(
-      '[data-sheet-row="' + index + '"][data-column-key="' + column + '"]',
+      '[data-sheet-row="' + index + '"][data-column-key="' + key + '"]',
     );
   const ready = () =>
     page.locator('.product-order-sheet[aria-busy="false"]').waitFor();
@@ -46,13 +53,16 @@ async (page) => {
       top: table.parentElement.scrollTop,
       left: table.parentElement.scrollLeft,
     }));
-  const select = async (index) => {
-    await grid.evaluate((table, index) => {
-      table.parentElement.scrollTop = (index - 3) * 32;
-      table.parentElement.scrollLeft = 600;
-    }, index);
-    await cell(index).click();
-    await cell(index).and(active).waitFor();
+  const select = async (index, key = column, left = 600) => {
+    await grid.evaluate(
+      (table, { index, left }) => {
+        table.parentElement.scrollTop = (index - 3) * 32;
+        table.parentElement.scrollLeft = left;
+      },
+      { index, left },
+    );
+    await cell(index, key).click();
+    await cell(index, key).and(active).waitFor();
     const scroll = await position();
     if (scroll.top <= 0 || scroll.left <= 0)
       throw new Error("La hoja de prueba debe estar desplazada en ambos ejes.");
@@ -91,6 +101,30 @@ async (page) => {
       .getByRole("alertdialog")
       .getByRole("button", { name: label, exact: true })
       .click();
+  const paste = (value) =>
+    grid.evaluate((table, value) => {
+      const clipboard = new DataTransfer();
+      clipboard.setData("text/plain", value);
+      table.dispatchEvent(
+        new ClipboardEvent("paste", {
+          bubbles: true,
+          clipboardData: clipboard,
+        }),
+      );
+    }, value);
+  const saveButton = (name = "Guardar 1 cambios") =>
+    page.getByRole("button", { name, exact: true });
+  const removeButton = () =>
+    page.getByRole("button", {
+      name: "Eliminar lotes seleccionados",
+      exact: true,
+    });
+  const deleteDialog = () =>
+    page.getByRole("dialog", { name: "Eliminar lote", exact: true });
+  const deleteConfirm = (name = "Eliminar lote") =>
+    deleteDialog().getByRole("button", { name, exact: true }).click();
+  const persistedLot = async (key) =>
+    (await state()).lote_producto.find((lot) => "lot:" + lot.id === key);
   const rowCount = () => grid.getAttribute("aria-rowcount").then(Number);
   const countChangesTo = (count) =>
     page.waitForFunction(
@@ -98,7 +132,7 @@ async (page) => {
         Number(
           document
             .querySelector(".product-sheet-grid")
-            .getAttribute("aria-rowcount"),
+            ?.getAttribute("aria-rowcount"),
         ) === count,
       count,
     );
@@ -207,13 +241,7 @@ async (page) => {
     .getByRole("button", { name: "En seguimiento", exact: true })
     .click();
   chosen = await select(45);
-  await grid.evaluate((table) => {
-    const clipboard = new DataTransfer();
-    clipboard.setData("text/plain", "12");
-    table.dispatchEvent(
-      new ClipboardEvent("paste", { bubbles: true, clipboardData: clipboard }),
-    );
-  });
+  await paste("12");
   await page
     .getByRole("button", { name: "Guardar 1 cambios", exact: true })
     .waitFor();
@@ -297,6 +325,205 @@ async (page) => {
     null,
     { ...emptyScroll, top: 0 },
     "Al desaparecer el último lote filtrado, la cuadrícula conserva el foco",
+  );
+
+  await page.goto(origin + "/ordenes/productos?vista=seguimiento");
+  await grid.waitFor();
+  chosen = await select(48);
+  count = await rowCount();
+  next = await successor();
+  await removeButton().click();
+  await deleteConfirm("Cancelar");
+  await verify(
+    chosen.key,
+    chosen.scroll,
+    "Cancelar la eliminación devuelve el foco a la misma celda",
+  );
+  await removeButton().click();
+  await deleteConfirm();
+  await countChangesTo(count - 1);
+  await verify(
+    next,
+    chosen.scroll,
+    "La papelera elimina el lote y activa al siguiente en la misma columna",
+  );
+  if (await persistedLot(chosen.key))
+    throw new Error("El lote individual sigue en la base.");
+
+  await page.keyboard.press("Shift+ArrowDown");
+  await cell(49).and(active).waitFor();
+  const second = await active.getAttribute("data-sheet-key");
+  const afterRange = await successor();
+  await page.keyboard.press("Alt+Delete");
+  await deleteDialog().waitFor();
+  if ((await deleteDialog().locator("li").count()) !== 2)
+    throw new Error("La confirmación debe incluir ambos lotes.");
+  await deleteConfirm();
+  await countChangesTo(count - 3);
+  await verify(
+    afterRange,
+    chosen.scroll,
+    "Alt+Supr elimina ambos lotes y reduce el rango a la nueva celda activa",
+  );
+  if (
+    (await grid.locator("[data-range]").count()) !== 1 ||
+    (await persistedLot(next)) ||
+    (await persistedLot(second))
+  )
+    throw new Error(
+      "La eliminación múltiple no dejó la selección o los datos esperados.",
+    );
+
+  chosen = await select(50);
+  await removeButton().click();
+  await deleteDialog().waitFor();
+  const changedSibling = (await state()).lote_producto.find(
+    (lot) => lot.numero_lote === "VIRTUAL-4001",
+  );
+  await command("setProductLotStates", {
+    ids: [changedSibling.id],
+    estado: "cerrado",
+  });
+  await deleteConfirm();
+  await deleteDialog()
+    .getByText(/Los lotes o el estado del producto cambiaron/)
+    .waitFor();
+  await deleteConfirm("Cancelar");
+  await verify(
+    chosen.key,
+    chosen.scroll,
+    "El conflicto se muestra en el diálogo de eliminación y la hoja conserva su posición",
+  );
+
+  await paste("23");
+  await saveButton().click();
+  await verify(
+    chosen.key,
+    chosen.scroll,
+    "Guardar desde la barra completa devuelve el foco a la celda",
+  );
+  if ((await persistedLot(chosen.key)).cantidad_recibida !== 23)
+    throw new Error("Guardar no persistió la cantidad.");
+  await paste("24");
+  await page
+    .getByRole("button", { name: "Ocultar barra de herramientas" })
+    .click();
+  const collapsedScroll = await position();
+  await saveButton("Guardar 1").click();
+  await verify(
+    chosen.key,
+    collapsedScroll,
+    "Guardar desde la barra plegada conserva la posición y el foco",
+  );
+  if ((await persistedLot(chosen.key)).cantidad_recibida !== 24)
+    throw new Error("El guardado desde la barra plegada no persistió.");
+  await page.getByRole("button", { name: "Mostrar herramientas" }).click();
+
+  chosen = await select(51);
+  await paste("25");
+  await command("saveLot", {
+    row: { ...(await persistedLot(chosen.key)), cantidad_recibida: 26 },
+  });
+  await saveButton().click();
+  await verify(
+    chosen.key,
+    chosen.scroll,
+    "Un conflicto de guardado conserva la celda, el scroll y el borrador",
+  );
+  await saveButton().waitFor();
+  if (
+    (await persistedLot(chosen.key)).cantidad_recibida !== 26 ||
+    (await active.innerText()).trim() !== "25"
+  )
+    throw new Error(
+      "El conflicto debe dejar el borrador visible y el dato concurrente persistido.",
+    );
+  await page.getByRole("button", { name: "Descartar", exact: true }).click();
+  await confirm("Descartar");
+
+  await page.goto(
+    origin +
+      "/ordenes/productos?vista=seguimiento&ordenar=numero_lote&direccion=asc",
+  );
+  await grid.waitFor();
+  chosen = await select(60, "numero_lote", 180);
+  const followingNumber = (await cell(61, "numero_lote").innerText()).trim();
+  await paste(followingNumber + "-A");
+  await saveButton().click();
+  await verify(
+    chosen.key,
+    chosen.scroll,
+    "Guardar con ordenamiento conserva la identidad de la celda aunque se mueva",
+    "numero_lote",
+  );
+  if (Number(await active.getAttribute("data-sheet-row")) <= 60)
+    throw new Error("La fila guardada no se reordenó.");
+
+  chosen = await select(62);
+  await paste("27");
+  let finishSave;
+  const delayedSave = new Promise((resolve) => {
+    finishSave = resolve;
+  });
+  await page.route(
+    "**/api/commands",
+    async (route) => {
+      const response = await route.fetch();
+      await delayedSave;
+      await route.fulfill({ response });
+    },
+    { times: 1 },
+  );
+  await saveButton().click();
+  await page.getByRole("button", { name: "Anuladas", exact: true }).click();
+  const newView = await select(30);
+  finishSave();
+  await verify(
+    newView.key,
+    newView.scroll,
+    "Una respuesta tardía de Guardar respeta la nueva pestaña y su celda",
+  );
+  if ((await persistedLot(chosen.key)).cantidad_recibida !== 27)
+    throw new Error("El guardado tardío no persistió.");
+
+  await page.goto(
+    origin + "/ordenes/productos?vista=seguimiento&q=POSICION-GUARDAR",
+  );
+  await countChangesTo(4);
+  await grid.evaluate((table) => {
+    table.parentElement.scrollLeft = 180;
+  });
+  await cell(1, "numero_lote").click();
+  await cell(1, "numero_lote").and(active).waitFor();
+  const filterScroll = await position();
+  const filterNeighbor = await cell(2, "numero_lote").getAttribute(
+    "data-sheet-key",
+  );
+  await paste("FUERA-DEL-FILTRO");
+  await saveButton().click();
+  await countChangesTo(3);
+  await verify(
+    filterNeighbor,
+    filterScroll,
+    "Guardar una fila que sale del filtro activa al vecino",
+    "numero_lote",
+  );
+
+  await search.fill("POSICION-GUARDAR-2");
+  await countChangesTo(2);
+  await grid.evaluate((table) => {
+    table.parentElement.scrollLeft = 600;
+  });
+  await cell(0).click();
+  await cell(0).and(active).waitFor();
+  const lastScroll = await position();
+  await removeButton().click();
+  await deleteConfirm();
+  await countChangesTo(1);
+  await verify(
+    null,
+    lastScroll,
+    "Eliminar el último lote de la vista deja el foco en la cuadrícula vacía",
   );
   return { checks };
 };

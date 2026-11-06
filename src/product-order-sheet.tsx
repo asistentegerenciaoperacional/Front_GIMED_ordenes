@@ -113,7 +113,7 @@ import {
 import "./product-order-sheet.css";
 
 type SavedDraft = { version: 1; timestamp: string; changes: SheetChange[] };
-type LotRefresh = {
+type SheetRefresh = {
   snapshot: Database;
   scope: object;
   position: SheetViewportPosition;
@@ -197,13 +197,15 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [authorize, setAuthorize] = useState<string[] | null>(null);
   const [deleting, setDeleting] = useState<{
     ids: string[];
+    origin: object;
     expected: ReturnType<typeof productLotLifecycleSnapshot>;
     lots: { id: string; number: string; product: string; order: string }[];
   } | null>(null);
   const [deleteError, setDeleteError] = useState<string>();
+  const deleteFocusOrigin = useRef<object | null>(null);
   const [pending, setPending] = useState<{
     action: () => void;
-    lotScope?: object;
+    focusScope?: object;
   } | null>(null);
   const [replacements, setReplacements] = useState<
     { orderId: string; providerId: string }[]
@@ -259,11 +261,13 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const liveScope = useRef(scope);
   liveScope.current = scope;
   const sheetRef = useRef<HTMLElement>(null);
-  const lotSnapshot = useRef<LotRefresh | undefined>(undefined);
-  const [restoration, setRestoration] = useState<LotRefresh>();
-  const getViewport = () =>
-    sheetRef.current?.querySelector<HTMLElement>(".product-sheet-viewport");
-  const captureLotSnapshot = (snapshot: Database, origin: object) => {
+  const sheetSnapshot = useRef<SheetRefresh | undefined>(undefined);
+  const [restoration, setRestoration] = useState<SheetRefresh>();
+  const getViewport = useCallback(
+    () => sheetRef.current?.querySelector<HTMLElement>(".product-sheet-viewport"),
+    [],
+  );
+  const captureSheetSnapshot = (snapshot: Database, origin: object) => {
     const viewport = getViewport();
     if (!viewport) return;
     const refresh = {
@@ -278,11 +282,11 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           viewport.contains(document.activeElement),
       },
     };
-    lotSnapshot.current = refresh;
+    sheetSnapshot.current = refresh;
     return refresh;
   };
-  const returnLotFocus = (origin: object) => {
-    requestAnimationFrame(() => {
+  const returnSheetFocus = useCallback((origin: object) => {
+    const focusGrid = () => {
       const viewport = getViewport();
       const active = document.activeElement;
       if (
@@ -292,14 +296,27 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         (active === document.body ||
           viewport.contains(active) ||
           (sheetRef.current?.contains(active) &&
-            active?.closest(".sheet-lot-trigger")))
+            active?.closest("[data-sheet-return-focus]")))
       )
         viewport.querySelector("table")?.focus({ preventScroll: true });
-    });
+    };
+    // React Aria restores focus to the dialog trigger in the next frame.
+    requestAnimationFrame(() => requestAnimationFrame(focusGrid));
+  }, [getViewport]);
+  const closeDeleteDialog = () => {
+    if (!deleting) return;
+    deleteFocusOrigin.current = deleting.origin;
+    setDeleting(null);
   };
+  useEffect(() => {
+    const origin = deleteFocusOrigin.current;
+    if (deleting || !origin) return;
+    deleteFocusOrigin.current = null;
+    returnSheetFocus(origin);
+  }, [deleting, returnSheetFocus]);
   const cancelPendingAction = () => {
     setPending(null);
-    if (pending?.lotScope) returnLotFocus(pending.lotScope);
+    if (pending?.focusScope) returnSheetFocus(pending.focusScope);
   };
   const tableState = useMemo(
     () => readColumnState(params, allColumns),
@@ -345,8 +362,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       : [];
   }, [openedColumn, candidates, allColumns, tableState.filters]);
   useLayoutEffect(() => {
-    const refresh = lotSnapshot.current;
-    if (refresh?.snapshot === db) lotSnapshot.current = undefined;
+    const refresh = sheetSnapshot.current;
+    if (refresh?.snapshot === db) sheetSnapshot.current = undefined;
     if (draftRef.current.length || editing) return;
     setProjection(db);
     if (refresh?.snapshot === db && refresh.scope === liveScope.current) {
@@ -444,32 +461,30 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     next.delete("pagina");
     replaceRoute("/ordenes/productos" + (next.size ? "?" + next : ""));
   };
-  const cleanFirst = (action: () => void, lotScope?: object) => {
+  const cleanFirst = (action: () => void, focusScope?: object) => {
     if (editing && !commit(undefined, true)) return;
-    if (draftRef.current.length) setPending({ action, lotScope });
+    if (draftRef.current.length) setPending({ action, focusScope });
     else action();
   };
-  async function save(lotScope?: object): Promise<boolean> {
+  async function save(origin = scope): Promise<boolean> {
     if (submitting.current) return false;
+    const submitted = draftRef.current;
+    if (!submitted.length) return true;
     submitting.current = true;
     setBusy(true);
     setError(null);
     try {
-      const submitted = draftRef.current;
       let savedSnapshot: Database | undefined;
-      let refresh: LotRefresh | undefined;
-      if (submitted.length)
-        await run(
-          "saveProductOrderSheet",
-          { changes: submitted },
-          "Cambios de la hoja guardados",
-          lotScope
-            ? (snapshot) => {
-                savedSnapshot = snapshot;
-                refresh = captureLotSnapshot(snapshot, lotScope);
-              }
-            : undefined,
-        );
+      let refresh: SheetRefresh | undefined;
+      await run(
+        "saveProductOrderSheet",
+        { changes: submitted },
+        "Cambios de la hoja guardados",
+        (snapshot) => {
+          savedSnapshot = snapshot;
+          refresh = captureSheetSnapshot(snapshot, origin);
+        },
+      );
       operationDb.current =
         savedSnapshot ??
         (operationDb.current === db
@@ -480,7 +495,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       setProjectionDay(day);
       draft([]);
       setIssues([]);
-      if (!refresh) selection.set(null);
       setEditing(null);
       setProjectionRevision((value) => value + 1);
       return true;
@@ -512,6 +526,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     } finally {
       submitting.current = false;
       setBusy(false);
+      returnSheetFocus(origin);
     }
   }
   const discard = () => {
@@ -752,13 +767,13 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         "setProductLotStates",
         { ids: lotIds, estado: state, expected, confirm: state === "anulado" },
         "Estados de lote actualizados",
-        (snapshot) => captureLotSnapshot(snapshot, lotScope),
+        (snapshot) => captureSheetSnapshot(snapshot, lotScope),
       );
     } catch (failure) {
       setError(problemFrom(failure));
     } finally {
       setBusy(false);
-      returnLotFocus(lotScope);
+      returnSheetFocus(lotScope);
     }
   }
   async function createLots(ids: string[], lotScope: object) {
@@ -778,16 +793,16 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         };
       });
       await run("createProductLots", { rows }, "Lotes creados", (snapshot) =>
-        captureLotSnapshot(snapshot, lotScope),
+        captureSheetSnapshot(snapshot, lotScope),
       );
     } catch (failure) {
       setError(problemFrom(failure));
     } finally {
       setBusy(false);
-      returnLotFocus(lotScope);
+      returnSheetFocus(lotScope);
     }
   }
-  function beginDelete(ids: string[]) {
+  function beginDelete(ids: string[], origin: object) {
     const current = operationDb.current;
     const lots = ids.map((id) => {
       const lot = current.lote_producto.find((item) => item.id === id);
@@ -823,6 +838,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     setDeleteError(undefined);
     setDeleting({
       ids,
+      origin,
       lots: selectedLots,
       expected: productLotLifecycleSnapshot(current, [
         ...new Set(selectedLots.map((lot) => lot.lineId)),
@@ -838,9 +854,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         "deleteLots",
         { ids: deleting.ids, expected: deleting.expected, confirm: true },
         deleting.ids.length === 1 ? "Lote eliminado" : "Lotes eliminados",
+        (snapshot) => captureSheetSnapshot(snapshot, deleting.origin),
       );
-      setDeleting(null);
-      selection.set(null);
+      closeDeleteDialog();
     } catch (failure) {
       setDeleteError(problemFrom(failure).message);
     } finally {
@@ -911,7 +927,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           .every((row) => row.order.estado_autorizacion === "autorizada") &&
         ["delete", "del", "supr"].includes(key)
       )
-        cleanFirst(() => beginDelete(targets.lotIds));
+        cleanFirst(() => beginDelete(targets.lotIds, scope), scope);
     }
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
@@ -1119,6 +1135,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               <div className="inline">
                 <Button
                   icon={Save}
+                  data-sheet-return-focus
                   variant="primary"
                   disabled={(!changes.length && !editing) || busy}
                   onClick={() => {
@@ -1212,6 +1229,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               <MenuTrigger>
                 <Button
                   className="sheet-lot-trigger"
+                  data-sheet-return-focus
                   aria-label="Estado del lote"
                   disabled={!lotIds.length || busy}
                 >
@@ -1375,6 +1393,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 label="Eliminar lotes seleccionados"
                 tooltip="Eliminar lotes (Alt+supr)"
                 className="icon-btn delete-action"
+                data-sheet-return-focus
                 aria-keyshortcuts="Alt+Delete"
                 disabled={
                   !lotIds.length ||
@@ -1387,7 +1406,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 }
                 onClick={() => {
                   const ids = selectionTargets().lotIds;
-                  if (ids.length) cleanFirst(() => beginDelete(ids));
+                  if (ids.length) cleanFirst(() => beginDelete(ids, scope), scope);
                 }}
               />
               <CustomFilterSelect
@@ -1543,6 +1562,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             </Button>
             <Button
               icon={Save}
+              data-sheet-return-focus
               disabled={(!changes.length && !editing) || busy}
               onClick={() => {
                 if (commit()) void save();
@@ -1720,7 +1740,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               variant="primary"
               disabled={busy}
               onClick={async () => {
-                if (await save(pending.lotScope)) {
+                if (await save(pending.focusScope)) {
                   setPending(null);
                   pending.action();
                 }
@@ -1736,7 +1756,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           lots={deleting.lots}
           expected={deleting.expected}
           onConfirm={deleteSelectedLots}
-          onClose={() => setDeleting(null)}
+          onClose={closeDeleteDialog}
           busy={busy}
           error={deleteError}
         />
