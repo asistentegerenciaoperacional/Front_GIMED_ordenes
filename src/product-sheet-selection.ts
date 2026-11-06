@@ -8,6 +8,10 @@ export const rangeBounds = (range: SheetRange) => ({
 });
 
 type Address = { rowKey: string; columnKey: string };
+export type SheetSelectionPosition = {
+  rows: readonly string[];
+  addresses: { anchor: Address; focus: Address } | null;
+};
 type Scheduler = {
   request: (callback: () => void) => number;
   cancel: (id: number) => void;
@@ -41,6 +45,10 @@ export class SheetSelection {
       : "";
   };
   getAddress = () => this.addresses;
+  capture = (): SheetSelectionPosition => ({
+    rows: this.rowKeys,
+    addresses: this.addresses,
+  });
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
     return () => {
@@ -51,17 +59,57 @@ export class SheetSelection {
     rows: readonly string[],
     columns: readonly string[],
     view: unknown,
+    position?: SheetSelectionPosition,
   ) {
     if (
       this.rowKeys === rows &&
       this.columnKeys === columns &&
-      this.view === view
+      this.view === view &&
+      !position
     )
       return;
     this.rowKeys = rows;
     this.columnKeys = columns;
     this.view = view;
-    this.reset();
+    this.cancelPending();
+    this.current = null;
+    this.addresses = null;
+    const addresses = position?.addresses;
+    if (addresses && rows.length) {
+      const indexes = new Map(rows.map((key, index) => [key, index]));
+      const column = columns.indexOf(addresses.focus.columnKey);
+      if (column >= 0) {
+        const focusRow = indexes.get(addresses.focus.rowKey);
+        const anchorRow = indexes.get(addresses.anchor.rowKey);
+        const anchorColumn = columns.indexOf(addresses.anchor.columnKey);
+        const previous = position.rows.indexOf(addresses.focus.rowKey);
+        let row = focusRow;
+        if (row === undefined) {
+          for (
+            let index = previous + 1;
+            index < position.rows.length && row === undefined;
+            index++
+          )
+            row = indexes.get(position.rows[index]);
+          for (
+            let index = previous - 1;
+            index >= 0 && row === undefined;
+            index--
+          )
+            row = indexes.get(position.rows[index]);
+        }
+        const focus = {
+          row: row ?? Math.max(0, Math.min(previous, rows.length - 1)),
+          column,
+        };
+        const anchor =
+          focusRow !== undefined && anchorRow !== undefined && anchorColumn >= 0
+            ? { row: anchorRow, column: anchorColumn }
+            : focus;
+        this.set({ anchor, focus });
+      }
+    }
+    this.flush();
   }
   set = (range: SheetRange | null) => {
     if (!range) {

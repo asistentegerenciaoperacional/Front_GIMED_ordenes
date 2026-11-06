@@ -88,6 +88,60 @@ test("view replacement cancels old frames and invalidates stable addresses", () 
   assert.equal(selection.getSnapshot(), null);
   assert.equal(selection.getAddress(), null);
 });
+
+test("lot updates preserve both range endpoints by key after insertion and reordering", () => {
+  const { selection, columns, frames } = fixture();
+  selection.set({
+    anchor: { row: 0, column: 0 },
+    focus: { row: 1, column: 1 },
+  });
+  selection.configure(
+    ["new", "lot-b", "lot-c", "lot-a"],
+    columns,
+    "follow-up",
+    selection.capture(),
+  );
+  assert.deepEqual(selection.read(), {
+    anchor: { row: 3, column: 0 },
+    focus: { row: 1, column: 1 },
+  });
+  assert.equal(selection.getSnapshot(), selection.read());
+  assert.equal(frames.size, 0);
+});
+
+test("removed active lots use the next surviving lot, then the previous lot", () => {
+  const { selection, columns } = fixture();
+  selection.set({
+    anchor: { row: 0, column: 0 },
+    focus: { row: 1, column: 1 },
+  });
+  selection.configure(
+    ["lot-a", "new", "lot-c"],
+    columns,
+    "follow-up",
+    selection.capture(),
+  );
+  assert.deepEqual(selection.getAddress(), {
+    anchor: { rowKey: "lot-c", columnKey: "location" },
+    focus: { rowKey: "lot-c", columnKey: "location" },
+  });
+  selection.configure(
+    ["lot-a", "new"],
+    columns,
+    "follow-up",
+    selection.capture(),
+  );
+  assert.equal(selection.getAddress()?.focus.rowKey, "new");
+  selection.configure(
+    ["replacement"],
+    columns,
+    "follow-up",
+    selection.capture(),
+  );
+  assert.equal(selection.getAddress()?.focus.rowKey, "replacement");
+  selection.configure([], columns, "follow-up", selection.capture());
+  assert.equal(selection.read(), null);
+});
 test("flush, reset and disposal leave no delayed resurrection of selection", () => {
   const { selection, frames, tick } = fixture();
   let publications = 0;

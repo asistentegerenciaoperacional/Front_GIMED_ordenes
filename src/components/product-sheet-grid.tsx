@@ -14,6 +14,7 @@ import {
   SheetSelection,
   rangeBounds,
   type SheetPoint,
+  type SheetSelectionPosition,
 } from "../product-sheet-selection";
 export {
   rangeBounds,
@@ -72,11 +73,19 @@ export function SheetCellHint({
 
 const rowHeight = 32,
   headerHeight = 44;
+export type SheetViewportPosition = {
+  top: number;
+  left: number;
+  selection: SheetSelectionPosition;
+  reveal: boolean;
+};
+
 export function ProductSheetGrid({
   rows,
   columns,
   selection,
   view,
+  restorePosition,
   pinnedColumn,
   renderCell,
   renderHeader,
@@ -95,6 +104,7 @@ export function ProductSheetGrid({
   columns: SheetColumn[];
   selection: SheetSelection;
   view: string;
+  restorePosition?: SheetViewportPosition;
   pinnedColumn?: string | null;
   renderCell: (row: ProductSheetRow, col: SheetColumn) => ReactNode;
   renderHeader: (col: SheetColumn) => ReactNode;
@@ -205,6 +215,8 @@ export function ProductSheetGrid({
   const [columnRange, setColumnRange] = useState({ start: 0, end: 12 });
   const windowFrame = useRef<number | null>(null);
   const previousRows = useRef<readonly string[] | null>(null);
+  const lastRestore = useRef<SheetViewportPosition | undefined>(undefined);
+  const restoring = useRef(false);
   const updateWindow = useCallback((force = false) => {
     const el = viewport.current;
     if (!el) return;
@@ -326,14 +338,6 @@ export function ProductSheetGrid({
       if (frame) cancelAnimationFrame(frame);
     };
   }, [selection, rowKeys, columnKeys, view]);
-  useLayoutEffect(() => {
-    drag.current = null;
-    selection.configure(rowKeys, columnKeys, view);
-    if (viewport.current && previousRows.current !== rowKeys)
-      viewport.current.scrollTop = 0;
-    previousRows.current = rowKeys;
-    updateWindow(true);
-  }, [rowKeys, columnKeys, view, selection, updateWindow]);
   useEffect(() => {
     const observer = new ResizeObserver(() => updateWindow(true));
     if (viewport.current) observer.observe(viewport.current);
@@ -365,9 +369,39 @@ export function ProductSheetGrid({
     },
     [offsets, updateWindow],
   );
+  useLayoutEffect(() => {
+    drag.current = null;
+    const position =
+      restorePosition !== lastRestore.current ? restorePosition : undefined;
+    lastRestore.current = restorePosition;
+    const el = viewport.current;
+    if (position && el) {
+      restoring.current = true;
+      selection.configure(rowKeys, columnKeys, view, position.selection);
+      restoring.current = false;
+      el.scrollTop = position.top;
+      el.scrollLeft = position.left;
+      const focus = selection.read()?.focus;
+      if (position.reveal && focus) reveal(focus, false);
+    } else {
+      selection.configure(rowKeys, columnKeys, view);
+      if (el && previousRows.current !== rowKeys) el.scrollTop = 0;
+    }
+    previousRows.current = rowKeys;
+    updateWindow(true);
+  }, [
+    rowKeys,
+    columnKeys,
+    view,
+    selection,
+    updateWindow,
+    restorePosition,
+    reveal,
+  ]);
   useLayoutEffect(
     () =>
       selection.subscribe(() => {
+        if (restoring.current) return;
         const range = selection.read();
         if (range && !live.current.editing) reveal(range.focus);
         paint();

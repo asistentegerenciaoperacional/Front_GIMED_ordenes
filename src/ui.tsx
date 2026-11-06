@@ -98,7 +98,12 @@ export async function request(path: string, body?: Row): Promise<any> {
 }
 type AppContextValue = {
   db: Database;
-  run: (name: string, payload: Row, message?: string) => Promise<Row>;
+  run: (
+    name: string,
+    payload: Row,
+    message?: string,
+    beforeSnapshot?: (snapshot: Database) => void,
+  ) => Promise<Row>;
   navigate: (path: string) => void;
   notify: (message: string, error?: boolean) => void;
 };

@@ -1,6 +1,13 @@
 import { DeleteProductLotsDialog } from "./components/delete-product-lots-dialog";
 import { confirmProductCancellation } from "./product-cancellation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Dialog as AriaDialog,
   DialogTrigger,
@@ -45,6 +52,7 @@ import {
 import {
   ProductSheetGrid,
   SheetCellHint,
+  type SheetViewportPosition,
 } from "./components/product-sheet-grid";
 import { SheetSelection, rangeBounds } from "./product-sheet-selection";
 import { SheetSelectionView } from "./components/sheet-selection-view";
@@ -105,6 +113,11 @@ import {
 import "./product-order-sheet.css";
 
 type SavedDraft = { version: 1; timestamp: string; changes: SheetChange[] };
+type LotRefresh = {
+  snapshot: Database;
+  scope: object;
+  position: SheetViewportPosition;
+};
 type Editing = {
   rowKey: string;
   column: string;
@@ -188,7 +201,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     lots: { id: string; number: string; product: string; order: string }[];
   } | null>(null);
   const [deleteError, setDeleteError] = useState<string>();
-  const [pending, setPending] = useState<(() => void) | null>(null);
+  const [pending, setPending] = useState<{
+    action: () => void;
+    lotScope?: object;
+  } | null>(null);
   const [replacements, setReplacements] = useState<
     { orderId: string; providerId: string }[]
   >([]);
@@ -239,6 +255,52 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     [issues],
   );
   const key = params.toString();
+  const scope = useMemo(() => ({}), [key, columns]);
+  const liveScope = useRef(scope);
+  liveScope.current = scope;
+  const sheetRef = useRef<HTMLElement>(null);
+  const lotSnapshot = useRef<LotRefresh | undefined>(undefined);
+  const [restoration, setRestoration] = useState<LotRefresh>();
+  const getViewport = () =>
+    sheetRef.current?.querySelector<HTMLElement>(".product-sheet-viewport");
+  const captureLotSnapshot = (snapshot: Database, origin: object) => {
+    const viewport = getViewport();
+    if (!viewport) return;
+    const refresh = {
+      snapshot,
+      scope: liveScope.current,
+      position: {
+        top: viewport.scrollTop,
+        left: viewport.scrollLeft,
+        selection: selection.capture(),
+        reveal:
+          liveScope.current === origin ||
+          viewport.contains(document.activeElement),
+      },
+    };
+    lotSnapshot.current = refresh;
+    return refresh;
+  };
+  const returnLotFocus = (origin: object) => {
+    requestAnimationFrame(() => {
+      const viewport = getViewport();
+      const active = document.activeElement;
+      if (
+        viewport &&
+        liveScope.current === origin &&
+        !document.querySelector('[role="dialog"], [role="alertdialog"]') &&
+        (active === document.body ||
+          viewport.contains(active) ||
+          (sheetRef.current?.contains(active) &&
+            active?.closest(".sheet-lot-trigger")))
+      )
+        viewport.querySelector("table")?.focus({ preventScroll: true });
+    });
+  };
+  const cancelPendingAction = () => {
+    setPending(null);
+    if (pending?.lotScope) returnLotFocus(pending.lotScope);
+  };
   const tableState = useMemo(
     () => readColumnState(params, allColumns),
     [key, view],
@@ -282,10 +344,17 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         )
       : [];
   }, [openedColumn, candidates, allColumns, tableState.filters]);
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const refresh = lotSnapshot.current;
+    if (refresh?.snapshot === db) lotSnapshot.current = undefined;
     if (draftRef.current.length || editing) return;
     setProjection(db);
-    selection.set(null);
+    if (refresh?.snapshot === db && refresh.scope === liveScope.current) {
+      setRestoration(refresh);
+    } else {
+      setRestoration(undefined);
+      selection.set(null);
+    }
   }, [db]);
   useEffect(() => {
     setHidden(loadHidden(view));
@@ -375,33 +444,43 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     next.delete("pagina");
     replaceRoute("/ordenes/productos" + (next.size ? "?" + next : ""));
   };
-  const cleanFirst = (action: () => void) => {
+  const cleanFirst = (action: () => void, lotScope?: object) => {
     if (editing && !commit(undefined, true)) return;
-    if (draftRef.current.length) setPending(() => action);
+    if (draftRef.current.length) setPending({ action, lotScope });
     else action();
   };
-  async function save(): Promise<boolean> {
+  async function save(lotScope?: object): Promise<boolean> {
     if (submitting.current) return false;
     submitting.current = true;
     setBusy(true);
     setError(null);
     try {
       const submitted = draftRef.current;
+      let savedSnapshot: Database | undefined;
+      let refresh: LotRefresh | undefined;
       if (submitted.length)
         await run(
           "saveProductOrderSheet",
           { changes: submitted },
           "Cambios de la hoja guardados",
+          lotScope
+            ? (snapshot) => {
+                savedSnapshot = snapshot;
+                refresh = captureLotSnapshot(snapshot, lotScope);
+              }
+            : undefined,
         );
       operationDb.current =
-        operationDb.current === db
+        savedSnapshot ??
+        (operationDb.current === db
           ? overlaySheetChanges(db, submitted)
-          : operationDb.current;
+          : operationDb.current);
       setProjection(operationDb.current);
+      setRestoration(refresh);
       setProjectionDay(day);
       draft([]);
       setIssues([]);
-      selection.set(null);
+      if (!refresh) selection.set(null);
       setEditing(null);
       setProjectionRevision((value) => value + 1);
       return true;
@@ -502,7 +581,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           setReplacements([
             { orderId: row.order.id, providerId: String(provider.value) },
           ]);
-        if (draftRef.current.length) setPending(() => action);
+        if (draftRef.current.length) setPending({ action });
         else action();
       }
       return !provider;
@@ -580,7 +659,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             providerId: String(change.value),
           })),
         );
-      if (draftRef.current.length) setPending(() => action);
+      if (draftRef.current.length) setPending({ action });
       else action();
     }
     if (overflow)
@@ -651,6 +730,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   async function states(
     state: string,
     targets: ReturnType<typeof selectionTargets>,
+    lotScope: object,
   ) {
     const { lotIds, lineIds } = targets;
     if (!lotIds.length) return;
@@ -672,15 +752,16 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         "setProductLotStates",
         { ids: lotIds, estado: state, expected, confirm: state === "anulado" },
         "Estados de lote actualizados",
+        (snapshot) => captureLotSnapshot(snapshot, lotScope),
       );
-      selection.set(null);
     } catch (failure) {
       setError(problemFrom(failure));
     } finally {
       setBusy(false);
+      returnLotFocus(lotScope);
     }
   }
-  async function createLots(ids: string[]) {
+  async function createLots(ids: string[], lotScope: object) {
     setBusy(true);
     setError(null);
     try {
@@ -696,12 +777,14 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           fecha_estimada_batch_record: order.fecha_solicitada_entrega,
         };
       });
-      await run("createProductLots", { rows }, "Lotes creados");
-      selection.set(null);
+      await run("createProductLots", { rows }, "Lotes creados", (snapshot) =>
+        captureLotSnapshot(snapshot, lotScope),
+      );
     } catch (failure) {
       setError(problemFrom(failure));
     } finally {
       setBusy(false);
+      returnLotFocus(lotScope);
     }
   }
   function beginDelete(ids: string[]) {
@@ -816,11 +899,11 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       else if (key === "h" && targets.range) hideSelectedColumns();
       else if (key === "s" && hidden.length) updateHidden([]);
       else if (targets.lotIds.length && key === "d")
-        cleanFirst(() => void createLots(targets.lineIds));
+        cleanFirst(() => void createLots(targets.lineIds, scope), scope);
       else if (targets.lotIds.length && ["c", "n", "r"].includes(key)) {
         const state =
           key === "c" ? "cerrado" : key === "n" ? "anulado" : "en_seguimiento";
-        cleanFirst(() => void states(state, targets));
+        cleanFirst(() => void states(state, targets, scope), scope);
       } else if (
         targets.lotIds.length &&
         targets.selected
@@ -1146,9 +1229,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                       const value = String(key);
                       const targets = selectionTargets();
                       if (value === "nuevo")
-                        cleanFirst(() => void createLots(targets.lineIds));
+                        cleanFirst(() => void createLots(targets.lineIds, scope), scope);
                       else if (value)
-                        cleanFirst(() => void states(value, targets));
+                        cleanFirst(() => void states(value, targets, scope), scope);
                     }}
                   >
                     <ActionTooltip content="(Alt+d)">
@@ -1422,6 +1505,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   );
   return (
     <section
+      ref={sheetRef}
       className="product-order-sheet"
       aria-label="Vista alternativa de OC de productos"
       aria-busy={busy}
@@ -1523,6 +1607,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         columns={columns}
         selection={selection}
         view={view}
+        restorePosition={
+          restoration?.scope === scope ? restoration.position : undefined
+        }
         pinnedColumn={openedColumn}
         onEdit={edit}
         editing={editing}
@@ -1611,21 +1698,20 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       {pending && (
         <Dialog
           title="Hay cambios sin guardar"
-          onClose={() => setPending(null)}
+          onClose={cancelPendingAction}
         >
           <div className="dialog-body">
             <p>Resuelve el borrador antes de continuar con la acción.</p>
           </div>
           <div className="dialog-footer">
-            <CancelButton onClick={() => setPending(null)}>
+            <CancelButton onClick={cancelPendingAction}>
               Cancelar
             </CancelButton>
             <Button
               onClick={() => {
-                const action = pending;
                 discard();
                 setPending(null);
-                action();
+                pending.action();
               }}
             >
               Descartar y continuar
@@ -1634,10 +1720,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               variant="primary"
               disabled={busy}
               onClick={async () => {
-                if (await save()) {
-                  const action = pending;
+                if (await save(pending.lotScope)) {
                   setPending(null);
-                  action();
+                  pending.action();
                 }
               }}
             >

@@ -160,14 +160,19 @@ export function App() {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 7000);
   }, []);
-  const load = useCallback(async () => {
-    try {
-      setDb(shareSnapshotStrings(await request("state")));
-      setLoadError("");
-    } catch (e) {
-      setLoadError((e as Error).message);
-    }
-  }, []);
+  const load = useCallback(
+    async (beforeSnapshot?: (snapshot: Database) => void) => {
+      try {
+        const snapshot = shareSnapshotStrings(await request("state"));
+        beforeSnapshot?.(snapshot);
+        setDb(snapshot);
+        setLoadError("");
+      } catch (e) {
+        setLoadError((e as Error).message);
+      }
+    },
+    [],
+  );
   useEffect(() => {
     void load();
     window.history.replaceState(null, "", `/${previousRoute.current}`);
@@ -289,11 +294,18 @@ export function App() {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
   const run = useCallback(
-    async (name: string, payload: Row, message?: string) => {
+    async (
+      name: string,
+      payload: Row,
+      message?: string,
+      beforeSnapshot?: (snapshot: Database) => void,
+    ) => {
       setSaving((n) => n + 1);
       try {
         const { result } = await request("commands", { name, payload });
-        setDb(shareSnapshotStrings(await request("state")));
+        const snapshot = shareSnapshotStrings(await request("state"));
+        beforeSnapshot?.(snapshot);
+        setDb(snapshot);
         if (message) notify(message);
         return result;
       } catch (error) {
@@ -315,7 +327,7 @@ export function App() {
                 /^lines\.\d+\.id_producto$/.test(field),
               )))
         )
-          await load();
+          await load(beforeSnapshot);
         throw error;
       } finally {
         setSaving((n) => n - 1);
