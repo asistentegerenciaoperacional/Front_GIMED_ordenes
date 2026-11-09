@@ -2,6 +2,7 @@ import { FileText, Info, Paperclip, Plus } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { schemas, type Row } from "../shared/schema";
 import {
+  Action,
   ControlForm,
   ControlInput,
   ControlLink,
@@ -165,6 +166,7 @@ export function Documents({
                   </small>
                   <div className="doc-actions">
                     <ControlLink
+                      className="doc-action"
                       href={`/api/documents/${d.id}/content`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -172,22 +174,21 @@ export function Documents({
                       Ver
                     </ControlLink>
                     <ControlLink
+                      className="doc-action"
                       href={`/api/documents/${d.id}/content?download=1`}
                     >
                       Descargar
                     </ControlLink>
-                    <ControlLink
-                      href={`/api/documents/${d.id}/content`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Action
+                      type="button"
+                      className="doc-action"
+                      onClick={() => edit(d)}
                     >
-                      Imprimir
-                    </ControlLink>
-                    <Button variant="link" onClick={() => edit(d)}>
                       Reemplazar
-                    </Button>
-                    <Button
-                      variant="link"
+                    </Action>
+                    <Action
+                      type="button"
+                      className="doc-action"
                       aria-label={`Eliminar ${d.nombre_archivo}`}
                       onClick={async () => {
                         if (await confirmAction("¿Eliminar este placeholder?"))
@@ -199,7 +200,7 @@ export function Documents({
                       }}
                     >
                       Eliminar
-                    </Button>
+                    </Action>
                   </div>
                 </div>
               </div>

@@ -2043,12 +2043,26 @@ textarea.control {
 .doc-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 7px;
 }
-.doc-actions a,
-.doc-actions button {
+.doc-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-family: inherit;
   font-size: 10px;
+  font-weight: 400;
   min-height: 24px;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.doc-action:hover {
+  text-decoration: underline;
 }
 .related-link {
   display: flex;
@@ -2697,7 +2711,7 @@ textarea.control {
   .recipient .aria-select-control {
     width: 65px !important;
   }
-  .doc-actions .btn {
+  .doc-action {
     min-height: 30px;
   }
   .toast {
