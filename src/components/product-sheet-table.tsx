@@ -10,6 +10,7 @@ import type {
   ProductSheetRow,
   SheetColumn,
 } from "../product-order-sheet-model";
+import type { SheetPoint } from "../product-sheet-selection";
 
 type Props = {
   rows: ProductSheetRow[];
@@ -20,6 +21,7 @@ type Props = {
   columnEnd: number;
   width: number;
   pinnedColumn?: string | null;
+  rangeAnchor: SheetPoint | null;
   renderCell: (row: ProductSheetRow, column: SheetColumn) => ReactNode;
   renderHeader: (column: SheetColumn) => ReactNode;
   editing: { rowKey: string; column: string } | null;
@@ -146,6 +148,7 @@ export const ProductSheetTable = memo(function ProductSheetTable({
   columnStart,
   columnEnd,
   pinnedColumn,
+  rangeAnchor,
   width,
   renderCell,
   renderHeader,
@@ -158,6 +161,8 @@ export const ProductSheetTable = memo(function ProductSheetTable({
   const slots = useMemo(() => {
     const wanted = new Set<number>();
     for (let i = columnStart; i < columnEnd; i++) wanted.add(i);
+    if (rangeAnchor && rangeAnchor.column < columns.length)
+      wanted.add(rangeAnchor.column);
     for (const key of [pinnedColumn, editing?.column]) {
       const index = columns.findIndex((col) => col.key === key);
       if (index >= 0) wanted.add(index);
@@ -177,18 +182,36 @@ export const ProductSheetTable = memo(function ProductSheetTable({
     });
     if (gap) result.push({ key: "gap-end", index: -1, width: gap });
     return result;
-  }, [columns, columnStart, columnEnd, pinnedColumn, editing?.column]);
+  }, [
+    columns,
+    columnStart,
+    columnEnd,
+    pinnedColumn,
+    rangeAnchor?.column,
+    editing?.column,
+  ]);
   const indices = useMemo(() => {
     const result = Array.from(
       { length: Math.max(0, end - start) },
       (_, index) => start + index,
     );
+    if (
+      rangeAnchor &&
+      rangeAnchor.row < rows.length &&
+      (rangeAnchor.row < start || rangeAnchor.row >= end)
+    )
+      result.push(rangeAnchor.row);
     if (editing) {
       const index = rows.findIndex((row) => row.key === editing.rowKey);
-      if (index >= 0 && (index < start || index >= end)) result.push(index);
+      if (
+        index >= 0 &&
+        index !== rangeAnchor?.row &&
+        (index < start || index >= end)
+      )
+        result.push(index);
     }
     return result.sort((a, b) => a - b);
-  }, [rows, start, end, editing?.rowKey]);
+  }, [rows, start, end, rangeAnchor?.row, editing?.rowKey]);
   const headers = useMemo(
     () =>
       slots.map((slot) => {

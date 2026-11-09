@@ -141,6 +141,8 @@ export function ProductSheetGrid({
     () => columns.reduce((sum, col) => sum + col.width, 0),
     [columns],
   );
+  const [rangeAnchor, setRangeAnchor] = useState<SheetPoint | null>(null);
+  const mountedAnchor = useRef<SheetPoint | null>(null);
   const setFlag = (node: Element, name: string, value: boolean) => {
     if (node.hasAttribute(name) !== value) {
       if (value) node.setAttribute(name, "true");
@@ -150,6 +152,20 @@ export function ProductSheetGrid({
   const paint = useCallback(() => {
     const range = selection.read(),
       bounds = range && rangeBounds(range);
+    // Keep the active cell addressable even when following the far end of the range.
+    const anchor =
+      range &&
+      bounds &&
+      (bounds.top !== bounds.bottom || bounds.left !== bounds.right)
+        ? range.anchor
+        : null;
+    if (
+      anchor?.row !== mountedAnchor.current?.row ||
+      anchor?.column !== mountedAnchor.current?.column
+    ) {
+      mountedAnchor.current = anchor;
+      setRangeAnchor(anchor);
+    }
     const selectedOrders = new Set<string>();
     if (bounds && live.current.view === "no_autorizadas")
       for (let index = bounds.top; index <= bounds.bottom; index++) {
@@ -165,7 +181,7 @@ export function ProductSheetGrid({
         point.column >= bounds.left &&
         point.column <= bounds.right;
       const focused =
-        range?.focus.row === point.row && range.focus.column === point.column;
+        range?.anchor.row === point.row && range.anchor.column === point.column;
       setFlag(node, "data-range", selected);
       setFlag(node, "data-active", focused);
       if (node.getAttribute("aria-selected") !== String(selected))
@@ -308,7 +324,7 @@ export function ProductSheetGrid({
         ) {
           dragged.current = true;
           state.last = point;
-          selection.set({ anchor: state.anchor, focus: point });
+          selection.set({ anchor: state.anchor, extent: point });
         }
       }
       if (dx || dy) frame = requestAnimationFrame(tick);
@@ -381,8 +397,8 @@ export function ProductSheetGrid({
       restoring.current = false;
       el.scrollTop = position.top;
       el.scrollLeft = position.left;
-      const focus = selection.read()?.focus;
-      if (position.reveal && focus) reveal(focus, false);
+      const extent = selection.read()?.extent;
+      if (position.reveal && extent) reveal(extent, false);
     } else {
       selection.configure(rowKeys, columnKeys, view);
       if (el && previousRows.current !== rowKeys) el.scrollTop = 0;
@@ -403,7 +419,7 @@ export function ProductSheetGrid({
       selection.subscribe(() => {
         if (restoring.current) return;
         const range = selection.read();
-        if (range && !live.current.editing) reveal(range.focus);
+        if (range && !live.current.editing) reveal(range.extent);
         paint();
       }),
     [selection, reveal, paint],
@@ -475,7 +491,7 @@ export function ProductSheetGrid({
       if (range) onClear();
       return;
     }
-    const current = range?.focus ?? { row: 0, column: 0 };
+    const current = range?.anchor ?? { row: 0, column: 0 };
     if (!rows.length || !columns.length) return;
     if (event.key === "F2") {
       event.preventDefault();
@@ -495,8 +511,9 @@ export function ProductSheetGrid({
     ) {
       event.preventDefault();
       event.stopPropagation();
-      let row = current.row,
-        column = current.column;
+      const extend = event.shiftKey && event.key !== "Tab";
+      const origin = extend && !editing ? (range?.extent ?? current) : current;
+      let { row, column } = origin;
       if (event.key === "ArrowUp") row--;
       if (["ArrowDown", "Enter"].includes(event.key)) row++;
       if (event.key === "ArrowLeft") column--;
@@ -518,11 +535,8 @@ export function ProductSheetGrid({
       if (editing?.deferredClear && point.row === current.row && point.column === current.column) return;
       if (editing && !onCommit()) return;
       selection.set({
-        anchor:
-          event.shiftKey && event.key !== "Tab"
-            ? (range?.anchor ?? current)
-            : point,
-        focus: point,
+        anchor: extend ? current : point,
+        extent: point,
       });
       return;
     }
@@ -562,7 +576,7 @@ export function ProductSheetGrid({
           y: event.clientY,
         };
         dragged.current = false;
-        selection.set({ anchor, focus: point });
+        selection.set({ anchor, extent: point });
         viewport.current
           ?.querySelector<HTMLTableElement>("table")
           ?.focus({ preventScroll: true });
@@ -595,7 +609,7 @@ export function ProductSheetGrid({
         };
         selection.set({
           anchor: event.shiftKey ? (selection.read()?.anchor ?? point) : point,
-          focus: point,
+          extent: point,
         });
         viewport.current
           ?.querySelector<HTMLTableElement>("table")
@@ -622,6 +636,7 @@ export function ProductSheetGrid({
         columnStart={columnRange.start}
         columnEnd={columnRange.end}
         pinnedColumn={pinnedColumn}
+        rangeAnchor={rangeAnchor}
         width={width}
         renderCell={renderCell}
         renderHeader={renderHeader}

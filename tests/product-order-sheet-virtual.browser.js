@@ -94,9 +94,18 @@ async (page) => {
   await page.mouse.up();
   await page.waitForTimeout(100);
   check(
-    Number(await page.locator("[data-active]").getAttribute("data-sheet-row")) >
-      25,
-    `Arrastrar cerca del borde desplaza y selecciona filas virtualizadas (fila ${await page.locator("[data-active]").getAttribute("data-sheet-row")}, scroll ${await viewport.evaluate((element) => element.scrollTop)})`,
+    await viewport.evaluate((element) => {
+      const table = element.querySelector("table");
+      const active = document.getElementById(table.getAttribute("aria-activedescendant"));
+      return (
+        table.contains(active) &&
+        active.dataset.sheetRow === "0" &&
+        [...table.querySelectorAll("[data-range]")].some(
+          (cell) => Number(cell.dataset.sheetRow) > 25,
+        )
+      );
+    }),
+    "Arrastrar alcanza filas virtualizadas y conserva accesible la primera celda",
   );
   await viewport.evaluate((element) => (element.scrollTop = 0));
   await firstCell.waitFor();

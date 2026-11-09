@@ -94,8 +94,9 @@ async (page) => {
     () => document.querySelectorAll("[data-range]").length === 4,
   );
   check(
-    (await page.locator("[data-range]").count()) === 4,
-    "Arrastrar selecciona un rectángulo de dos filas y dos columnas",
+    (await page.locator("[data-range]").count()) === 4 &&
+      (await cell(0, "fecha_confirmacion").getAttribute("data-active")) === "true",
+    "Arrastrar selecciona un rectángulo y conserva activa la primera celda",
   );
   await cell(0, "ubicacion").scrollIntoViewIfNeeded();
   const a = await cell(0, "ubicacion").boundingBox(),

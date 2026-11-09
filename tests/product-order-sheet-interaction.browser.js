@@ -144,22 +144,20 @@ async (page) => {
       (await text(2, "precio_unitario")).includes("6,00"),
     "Una matriz se pega hacia abajo y derecha desde una celda",
   );
-  for (const [anchor, start] of [
-    [0, 31],
-    [2, 41],
-  ]) {
-    await cell(anchor, "cantidad_solicitada").click();
-    await cell(1, "cantidad_recibida").click({ modifiers: ["Shift"] });
-    await paste(start + "\t7,00\n" + (start + 1) + "\t8,00");
-    check(
-      (await text(0, "cantidad_recibida")) === "400" &&
-        (await text(1, "cantidad_recibida")) === String(start) &&
-        (await text(2, "cantidad_recibida")) === String(start + 1),
-      "La matriz comienza en el foco del rango y sale de la selección (ancla " +
-        anchor +
-        ")",
-    );
-  }
+  await cell(1, "cantidad_recibida").click();
+  await cell(0, "cantidad_solicitada").click({ modifiers: ["Shift"] });
+  check(
+    (await cell(1, "cantidad_recibida").getAttribute("data-active")) === "true" &&
+      (await cell(0, "cantidad_solicitada").getAttribute("data-range")) === "true",
+    "Shift+clic hacia arriba e izquierda conserva la celda inicial activa",
+  );
+  await paste("31\t7,00\n32\t8,00");
+  check(
+    (await text(0, "cantidad_recibida")) === "400" &&
+      (await text(1, "cantidad_recibida")) === "31" &&
+      (await text(2, "cantidad_recibida")) === "32",
+    "La matriz parte de la primera celda activa y se extiende fuera del rango",
+  );
 
   await cell(1, "ubicacion").click();
   await paste("Primera\nSegunda\nFuera 1\nFuera 2");
@@ -230,6 +228,30 @@ async (page) => {
 
   await cell(0, "precio_unitario").click();
   await page.keyboard.press("Shift+ArrowDown");
+  await page.keyboard.press("Shift+ArrowDown");
+  await page.waitForFunction(
+    () => document.querySelectorAll("[data-range]").length === 3,
+  );
+  check(
+    (await cell(0, "precio_unitario").getAttribute("data-active")) === "true",
+    "Dos flechas con Shift amplían el rango sin mover la celda activa",
+  );
+  await page.keyboard.press("ArrowDown");
+  await page.waitForFunction(
+    () => !!document.querySelector('[data-active][data-sheet-row="1"][data-column-key="precio_unitario"]'),
+  );
+  check(
+    (await page.locator("[data-range]").count()) === 1,
+    "Una flecha sin Shift navega desde la primera celda y contrae el rango",
+  );
+  await page.keyboard.press("Shift+ArrowUp");
+  await page.keyboard.press("F2");
+  const rangeEditor = cell(1, "precio_unitario").getByRole("textbox");
+  await rangeEditor.waitFor();
+  await rangeEditor.press("Escape");
+
+  await cell(0, "precio_unitario").click();
+  await page.keyboard.press("Shift+ArrowDown");
   await page.waitForFunction(
     () => document.querySelectorAll("[data-range]").length === 2,
   );
@@ -253,7 +275,6 @@ async (page) => {
       2,
     "Ctrl+C copia una matriz compatible con Excel",
   );
-  await cell(0, "precio_unitario").click();
   await paste("5,00\n6,00");
   check(
     (await page.locator('[data-column-key="precio_unitario"][data-rejected]').count()) === 2,

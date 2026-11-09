@@ -1,16 +1,17 @@
 export type SheetPoint = { row: number; column: number };
-export type SheetRange = { anchor: SheetPoint; focus: SheetPoint };
+/** The anchor is the active cell. The extent moves as the range is extended. */
+export type SheetRange = { anchor: SheetPoint; extent: SheetPoint };
 export const rangeBounds = (range: SheetRange) => ({
-  top: Math.min(range.anchor.row, range.focus.row),
-  bottom: Math.max(range.anchor.row, range.focus.row),
-  left: Math.min(range.anchor.column, range.focus.column),
-  right: Math.max(range.anchor.column, range.focus.column),
+  top: Math.min(range.anchor.row, range.extent.row),
+  bottom: Math.max(range.anchor.row, range.extent.row),
+  left: Math.min(range.anchor.column, range.extent.column),
+  right: Math.max(range.anchor.column, range.extent.column),
 });
 
 type Address = { rowKey: string; columnKey: string };
 export type SheetSelectionPosition = {
   rows: readonly string[];
-  addresses: { anchor: Address; focus: Address } | null;
+  addresses: { anchor: Address; extent: Address } | null;
 };
 type Scheduler = {
   request: (callback: () => void) => number;
@@ -29,7 +30,7 @@ export class SheetSelection {
   private rowKeys: readonly string[] = [];
   private columnKeys: readonly string[] = [];
   private view: unknown;
-  private addresses: { anchor: Address; focus: Address } | null = null;
+  private addresses: SheetSelectionPosition["addresses"] = null;
   constructor(
     private scheduler: Scheduler = {
       request: (callback) => requestAnimationFrame(callback),
@@ -41,7 +42,7 @@ export class SheetSelection {
   getRowSnapshot = () => {
     const r = this.published;
     return r
-      ? `${Math.min(r.anchor.row, r.focus.row)}:${Math.max(r.anchor.row, r.focus.row)}`
+      ? `${Math.min(r.anchor.row, r.extent.row)}:${Math.max(r.anchor.row, r.extent.row)}`
       : "";
   };
   getAddress = () => this.addresses;
@@ -77,13 +78,13 @@ export class SheetSelection {
     const addresses = position?.addresses;
     if (addresses && rows.length) {
       const indexes = new Map(rows.map((key, index) => [key, index]));
-      const column = columns.indexOf(addresses.focus.columnKey);
+      const column = columns.indexOf(addresses.anchor.columnKey);
       if (column >= 0) {
-        const focusRow = indexes.get(addresses.focus.rowKey);
         const anchorRow = indexes.get(addresses.anchor.rowKey);
-        const anchorColumn = columns.indexOf(addresses.anchor.columnKey);
-        const previous = position.rows.indexOf(addresses.focus.rowKey);
-        let row = focusRow;
+        const extentRow = indexes.get(addresses.extent.rowKey);
+        const extentColumn = columns.indexOf(addresses.extent.columnKey);
+        const previous = position.rows.indexOf(addresses.anchor.rowKey);
+        let row = anchorRow;
         if (row === undefined) {
           for (
             let index = previous + 1;
@@ -98,15 +99,15 @@ export class SheetSelection {
           )
             row = indexes.get(position.rows[index]);
         }
-        const focus = {
+        const anchor = {
           row: row ?? Math.max(0, Math.min(previous, rows.length - 1)),
           column,
         };
-        const anchor =
-          focusRow !== undefined && anchorRow !== undefined && anchorColumn >= 0
-            ? { row: anchorRow, column: anchorColumn }
-            : focus;
-        this.set({ anchor, focus });
+        const extent =
+          anchorRow !== undefined && extentRow !== undefined && extentColumn >= 0
+            ? { row: extentRow, column: extentColumn }
+            : anchor;
+        this.set({ anchor, extent });
       }
     }
     this.flush();
@@ -121,11 +122,11 @@ export class SheetSelection {
       row: Math.max(0, Math.min(this.rowKeys.length - 1, p.row)),
       column: Math.max(0, Math.min(this.columnKeys.length - 1, p.column)),
     });
-    const next = { anchor: clamp(range.anchor), focus: clamp(range.focus) };
+    const next = { anchor: clamp(range.anchor), extent: clamp(range.extent) };
     if (
       this.current &&
       samePoint(this.current.anchor, next.anchor) &&
-      samePoint(this.current.focus, next.focus)
+      samePoint(this.current.extent, next.extent)
     )
       return;
     this.current = next;
@@ -135,7 +136,7 @@ export class SheetSelection {
     });
     this.addresses = {
       anchor: address(next.anchor),
-      focus: address(next.focus),
+      extent: address(next.extent),
     };
     if (this.frame !== null) return;
     const revision = this.revision;

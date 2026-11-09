@@ -54,7 +54,7 @@ async (page) => {
   check(
     reads.length === 4 &&
       reads.every(
-        ([, range]) => range.focus.row === 1 && range.focus.column === 2,
+        ([, range]) => range.anchor.row === 1 && range.anchor.column === 2,
       ),
     "Copiar, pegar, borrar y editar leen todas las teclas antes del frame visual",
   );
@@ -82,9 +82,8 @@ async (page) => {
     );
     grid.dispatchEvent(
       new KeyboardEvent("keydown", {
-        key: "H",
+        key: "h",
         altKey: true,
-        shiftKey: true,
         bubbles: true,
         cancelable: true,
       }),

@@ -660,7 +660,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           inputs.push({ row, column: columns[c], text });
       }
     } else {
-      const { row: firstRow, column: firstColumn } = range.focus;
+      const { row: firstRow, column: firstColumn } = range.anchor;
       const rowCount = Math.min(matrix.length, rows.length - firstRow);
       const availableColumns = columns.length - firstColumn;
       for (let r = 0; r < rowCount; r++) {
@@ -1684,8 +1684,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       <div className="visually-hidden" aria-live="polite" aria-atomic="true">
         <SheetSelectionView selection={selection}>
           {(range) =>
-            range && rows[range.focus.row] && columns[range.focus.column]
-              ? `Fila ${range.focus.row + 1} de ${rows.length}, ${columns[range.focus.column].label}: ${sheetValue(viewDb, display(rows[range.focus.row]), columns[range.focus.column])}`
+            range && rows[range.anchor.row] && columns[range.anchor.column]
+              ? `Fila ${range.anchor.row + 1} de ${rows.length}, ${columns[range.anchor.column].label}: ${sheetValue(viewDb, display(rows[range.anchor.row]), columns[range.anchor.column])}`
               : ""
           }
         </SheetSelectionView>

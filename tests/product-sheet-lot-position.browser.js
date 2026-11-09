@@ -351,9 +351,10 @@ async (page) => {
     throw new Error("El lote individual sigue en la base.");
 
   await page.keyboard.press("Shift+ArrowDown");
-  await cell(49).and(active).waitFor();
-  const second = await active.getAttribute("data-sheet-key");
-  const afterRange = await successor();
+  await cell(48).and(active).waitFor();
+  await cell(49).and(grid.locator("[data-range]")).waitFor();
+  const second = await cell(49).getAttribute("data-sheet-key");
+  const afterRange = await cell(50).getAttribute("data-sheet-key");
   await page.keyboard.press("Alt+Delete");
   await deleteDialog().waitFor();
   if ((await deleteDialog().locator("li").count()) !== 2)

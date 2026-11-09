@@ -29,30 +29,30 @@ test("all input is immediately available before a single presentation frame", ()
   let publications = 0;
   selection.subscribe(() => publications++);
   for (let row = 0; row < 3; row++)
-    selection.set({ anchor: { row, column: 0 }, focus: { row, column: 0 } });
-  assert.equal(selection.read()?.focus.row, 2);
+    selection.set({ anchor: { row, column: 0 }, extent: { row, column: 0 } });
+  assert.equal(selection.read()?.anchor.row, 2);
   assert.equal(selection.getSnapshot(), null);
-  assert.deepEqual(selection.getAddress()?.focus, {
+  assert.deepEqual(selection.getAddress()?.anchor, {
     rowKey: "lot-c",
     columnKey: "price",
   });
   assert.equal(frames.size, 1);
   tick();
   assert.equal(publications, 1);
-  assert.equal(selection.getSnapshot()?.focus.row, 2);
+  assert.equal(selection.getSnapshot()?.anchor.row, 2);
 });
 test("unchanged clamped positions and identical ranges publish nothing", () => {
   const { selection, tick, frames } = fixture();
   selection.set({
     anchor: { row: 0, column: 0 },
-    focus: { row: 0, column: 0 },
+    extent: { row: 0, column: 0 },
   });
   tick();
   const original = selection.read();
   for (let i = 0; i < 120; i++)
     selection.set({
       anchor: { row: -1, column: -1 },
-      focus: { row: -1, column: -1 },
+      extent: { row: -1, column: -1 },
     });
   assert.equal(selection.read(), original);
   assert.equal(frames.size, 0);
@@ -61,14 +61,14 @@ test("row subscribers stay stable for horizontal motion while full snapshots cha
   const { selection, tick } = fixture();
   selection.set({
     anchor: { row: 1, column: 0 },
-    focus: { row: 1, column: 0 },
+    extent: { row: 1, column: 0 },
   });
   tick();
   const rowSummary = selection.getRowSnapshot(),
     first = selection.getSnapshot();
   selection.set({
     anchor: { row: 1, column: 1 },
-    focus: { row: 1, column: 1 },
+    extent: { row: 1, column: 1 },
   });
   tick();
   assert.equal(selection.getRowSnapshot(), rowSummary);
@@ -78,7 +78,7 @@ test("view replacement cancels old frames and invalidates stable addresses", () 
   const { selection, frames, tick } = fixture();
   selection.set({
     anchor: { row: 1, column: 1 },
-    focus: { row: 2, column: 1 },
+    extent: { row: 2, column: 1 },
   });
   const stale = [...frames.values()][0];
   selection.configure(["other"], ["quantity"], "annulled");
@@ -93,7 +93,7 @@ test("lot updates preserve both range endpoints by key after insertion and reord
   const { selection, columns, frames } = fixture();
   selection.set({
     anchor: { row: 0, column: 0 },
-    focus: { row: 1, column: 1 },
+    extent: { row: 1, column: 1 },
   });
   selection.configure(
     ["new", "lot-b", "lot-c", "lot-a"],
@@ -103,7 +103,7 @@ test("lot updates preserve both range endpoints by key after insertion and reord
   );
   assert.deepEqual(selection.read(), {
     anchor: { row: 3, column: 0 },
-    focus: { row: 1, column: 1 },
+    extent: { row: 1, column: 1 },
   });
   assert.equal(selection.getSnapshot(), selection.read());
   assert.equal(frames.size, 0);
@@ -112,8 +112,8 @@ test("lot updates preserve both range endpoints by key after insertion and reord
 test("removed active lots use the next surviving lot, then the previous lot", () => {
   const { selection, columns } = fixture();
   selection.set({
-    anchor: { row: 0, column: 0 },
-    focus: { row: 1, column: 1 },
+    anchor: { row: 1, column: 1 },
+    extent: { row: 0, column: 0 },
   });
   selection.configure(
     ["lot-a", "new", "lot-c"],
@@ -123,7 +123,7 @@ test("removed active lots use the next surviving lot, then the previous lot", ()
   );
   assert.deepEqual(selection.getAddress(), {
     anchor: { rowKey: "lot-c", columnKey: "location" },
-    focus: { rowKey: "lot-c", columnKey: "location" },
+    extent: { rowKey: "lot-c", columnKey: "location" },
   });
   selection.configure(
     ["lot-a", "new"],
@@ -131,16 +131,34 @@ test("removed active lots use the next surviving lot, then the previous lot", ()
     "follow-up",
     selection.capture(),
   );
-  assert.equal(selection.getAddress()?.focus.rowKey, "new");
+  assert.equal(selection.getAddress()?.anchor.rowKey, "new");
   selection.configure(
     ["replacement"],
     columns,
     "follow-up",
     selection.capture(),
   );
-  assert.equal(selection.getAddress()?.focus.rowKey, "replacement");
+  assert.equal(selection.getAddress()?.anchor.rowKey, "replacement");
   selection.configure([], columns, "follow-up", selection.capture());
   assert.equal(selection.read(), null);
+});
+
+test("removing only the extent collapses the range at its active cell", () => {
+  const { selection, columns } = fixture();
+  selection.set({
+    anchor: { row: 2, column: 1 },
+    extent: { row: 0, column: 0 },
+  });
+  selection.configure(
+    ["lot-c", "lot-b"],
+    columns,
+    "follow-up",
+    selection.capture(),
+  );
+  assert.deepEqual(selection.read(), {
+    anchor: { row: 0, column: 1 },
+    extent: { row: 0, column: 1 },
+  });
 });
 test("flush, reset and disposal leave no delayed resurrection of selection", () => {
   const { selection, frames, tick } = fixture();
@@ -148,7 +166,7 @@ test("flush, reset and disposal leave no delayed resurrection of selection", () 
   const unsubscribe = selection.subscribe(() => publications++);
   selection.set({
     anchor: { row: 0, column: 0 },
-    focus: { row: 1, column: 1 },
+    extent: { row: 1, column: 1 },
   });
   selection.flush();
   assert.equal(frames.size, 0);
@@ -160,7 +178,7 @@ test("flush, reset and disposal leave no delayed resurrection of selection", () 
   unsubscribe();
   selection.set({
     anchor: { row: 2, column: 1 },
-    focus: { row: 2, column: 1 },
+    extent: { row: 2, column: 1 },
   });
   selection.cancelPending();
   tick();
