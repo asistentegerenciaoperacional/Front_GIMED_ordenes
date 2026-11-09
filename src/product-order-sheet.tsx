@@ -626,12 +626,18 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           .map((col) => sheetValue(viewDb, display(row), col)),
       );
     const value = formatSheetClipboard(matrix);
+    const message =
+      bounds.top === bounds.bottom && bounds.left === bounds.right
+        ? "Celda copiada."
+        : "Rango copiado.";
     if (event) {
       event.preventDefault();
       event.clipboardData.setData("text/plain", value);
+      notify(message);
     } else
       navigator.clipboard
         .writeText(value)
+        .then(() => notify(message))
         .catch(() =>
           notify("Usa Ctrl+C para copiar el rango seleccionado.", true),
         );
@@ -693,8 +699,13 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       if (draftRef.current.length) setPending({ action });
       else action();
     }
+    const message = inputs.length === 1 ? "Celda pegada." : "Rango pegado.";
     if (overflow)
-      notify(`${overflow} celdas fuera de la hoja no se pegaron.`, true);
+      notify(
+        `${inputs.length ? `${message} ` : ""}${overflow} celdas fuera de la hoja no se pegaron.`,
+        true,
+      );
+    else if (inputs.length) notify(message);
   }
   function clearSelection() {
     const range = selection.read();
@@ -1479,32 +1490,35 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                       };
                     }}
                   >
-                    <div className="product-sheet-column-menu-header">
-                      <strong>Columnas visibles</strong>
+                    <div className="product-sheet-column-menu-header column-filter-title">
+                      <h3>Columnas visibles</h3>
+                    </div>
+                    <div className="product-sheet-column-list">
                       <Button
-                        variant="link"
+                        className="product-sheet-hide-columns"
+                        disabled={!range}
+                        aria-keyshortcuts="Alt+H"
+                        onClick={hideSelectedColumns}
+                      >
+                        Ocultar columnas seleccionadas <span>Alt+H</span>
+                      </Button>
+                      <CheckChoice
+                        className="column-value-option column-select-all"
                         aria-keyshortcuts="Alt+S"
+                        checked={hidden.length === 0}
+                        indeterminate={hidden.length > 0}
                         disabled={hidden.length === 0}
-                        onClick={() => {
+                        onChange={() => {
                           columnsDialog.current?.focus({ preventScroll: true });
                           updateHidden([]);
                         }}
                       >
-                        Seleccionar todas
-                      </Button>
-                    </div>
-                    <Button
-                      className="product-sheet-hide-columns"
-                      disabled={!range}
-                      aria-keyshortcuts="Alt+H"
-                      onClick={hideSelectedColumns}
-                    >
-                      Ocultar columnas seleccionadas <span>Alt+H</span>
-                    </Button>
-                    <div className="product-sheet-column-list">
+                        Seleccionar todas (Alt+S)
+                      </CheckChoice>
                       {allColumns.map((col) => (
                         <CheckChoice
                           key={col.key}
+                          className="column-value-option"
                           checked={!hidden.includes(col.key)}
                           disabled={
                             !hidden.includes(col.key) && columns.length === 1

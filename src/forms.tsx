@@ -1441,17 +1441,27 @@ export function OrderForm({
   const submittingOrder = useRef(false);
   const [supplyConflict, setSupplyConflict] = useState(false);
   const supplyOrigins = useMemo(() => {
-    const groups = new Map<string, Row[]>();
+    const groups = new Map<
+      string,
+      { order: Row; productLineId: string; productName: string }[]
+    >();
     if (!abastecimiento) return groups;
-    const products = new Map(
-      db.orden_producto.map((line) => [line.id, line.id_orden_compra]),
-    );
+    const productLines = new Map(db.orden_producto.map((line) => [line.id, line]));
     const orders = new Map(db.orden_compra.map((order) => [order.id, order]));
     for (const source of abastecimiento.fuentes) {
-      const order = orders.get(products.get(source.id_orden_producto) ?? "");
-      if (!order) continue;
+      const productLine = productLines.get(source.id_orden_producto);
+      const order = orders.get(productLine?.id_orden_compra ?? "");
+      if (!order || !productLine) continue;
       const group = groups.get(source.id_material) ?? [];
-      if (!group.some((origin) => origin.id === order.id)) group.push(order);
+      if (!group.some((origin) => origin.productLineId === productLine.id)) {
+        group.push({
+          order,
+          productLineId: productLine.id,
+          productName:
+            db.productos.find((product) => product.id === productLine.id_producto)
+              ?.nombre_producto ?? "Producto",
+        });
+      }
       groups.set(source.id_material, group);
     }
     return groups;
@@ -1460,7 +1470,7 @@ export function OrderForm({
     () =>
       earliestMaterialDelivery(
         [...supplyOrigins.values()].flatMap((origins) =>
-          origins.map((origin) => origin.fecha_solicitada_entrega ?? null),
+          origins.map((origin) => origin.order.fecha_solicitada_entrega ?? null),
         ),
       ),
     [supplyOrigins],
@@ -2494,10 +2504,9 @@ export function OrderForm({
                             {supplyOrigins
                               .get(line.id_material)
                               ?.map((origin) =>
-                                orderReference("producto", origin.no_orden),
+                                `${orderReference("producto", origin.order.no_orden)} - ${origin.productName}`,
                               )
                               .join(", ")}{" "}
-                            · {line.fuentes.length} renglones de producto
                           </p>
                           {renderEntryAdditional(line, index)}
                         </div>
@@ -2576,9 +2585,12 @@ export function OrderForm({
                           <span>
                             Orígenes:{" "}
                             <strong>
-                              {supplyOrigins.get(l.id_material)?.length ?? 0} OC
-                              · {l.fuentes.length}{" "}
-                              {l.fuentes.length === 1 ? "renglón" : "renglones"}
+                              {(supplyOrigins.get(l.id_material) ?? [])
+                                .map(
+                                  (origin) =>
+                                    `${orderReference("producto", origin.order.no_orden)} - ${origin.productName}`,
+                                )
+                                .join(", ")}
                             </strong>
                           </span>
                         </p>
@@ -2665,7 +2677,6 @@ export function OrderForm({
                   aria-label="Revisión de materiales y orígenes"
                 >
                   {lines.map((line, index) => {
-                    const sources = line.fuentes as MaterialDemand["fuentes"];
                     const origins = supplyOrigins.get(line.id_material) ?? [];
                     return (
                       <div className="order-form-line" key={line.id_material}>
@@ -2701,15 +2712,12 @@ export function OrderForm({
                           {origins
                             .slice(0, 10)
                             .map((origin) =>
-                              orderReference("producto", origin.no_orden),
+                              `${orderReference("producto", origin.order.no_orden)} - ${origin.productName}`,
                             )
                             .join(", ")}
                           {origins.length > 10
-                            ? ` y ${origins.length - 10} OC más`
-                            : ""}{" "}
-                          · {sources.length}{" "}
-                          {sources.length === 1 ? "renglón" : "renglones"} de
-                          producto
+                            ? ` y ${origins.length - 10} orígenes más`
+                            : ""}
                         </p>
                       </div>
                     );

@@ -200,7 +200,7 @@ function MaterialSupplyDialog({
           id: line.id,
           line,
           order,
-          label: `${orderReference(order.tipo_orden, order.no_orden)} · Renglón ${line.posicion} · ${snapshot.proveedor.find((row) => row.id === order.id_proveedor)?.nombre_corto ?? "Proveedor"}`,
+          label: `${orderReference(order.tipo_orden, order.no_orden)} · ${count(line.cantidad_solicitada)} unidades · ${snapshot.proveedor.find((row) => row.id === order.id_proveedor)?.nombre_corto ?? "Proveedor"}`,
         }))
         .sort((a, b) => supplyOrder.compare(a.label, b.label)),
     [candidates, snapshot.proveedor],
@@ -215,10 +215,10 @@ function MaterialSupplyDialog({
     // Keep the committed ID available while searching for another option.
     if (selected && !visible.some((choice) => choice.id === targetId))
       visible.push(selected);
-    return visible.map(({ id, label, line, order }) => ({
+    return visible.map(({ id, label, order }) => ({
       id,
       label,
-      description: `${count(line.cantidad_solicitada)} unidades · ${shortDate(order.fecha_solicitada_entrega)} · ${order.estado_autorizacion === "autorizada" ? "Autorizada" : "Sin autorizar"} · ${line.id.slice(-6)}`,
+      description: `${shortDate(order.fecha_solicitada_entrega)} · ${order.estado_autorizacion === "autorizada" ? "Autorizada" : "Sin autorizar"}`,
     }));
   }, [choices, targetQuery, targetId]);
   async function submit(event: FormEvent<HTMLFormElement>) {

@@ -77,7 +77,7 @@ async (page) => {
   });
   await dialog().getByRole('button', { name: 'Vincular OCM', exact: true }).click();
   await dialog().getByRole('alert').waitFor();
-  check((await targetInput().inputValue()).includes('Renglón 1'), 'Error del servicio conserva selección');
+  check((await targetInput().inputValue()).includes('2.200 unidades'), 'Error del servicio conserva selección');
   await page.unroute('**/api/commands');
   // Another request covers the same pair while the user's dialog remains open.
   const header = db.orden_compra.find(o => o.id === ocId), materialHeader = db.orden_compra.find(o => o.id === ocm.orderId);
@@ -88,7 +88,7 @@ async (page) => {
   } });
   await dialog().getByRole('button', { name: 'Vincular OCM', exact: true }).click();
   await dialog().getByRole('button', { name: 'Revisar opciones actualizadas', exact: true }).waitFor();
-  check((await targetInput().inputValue()).includes('Renglón 1'), 'Conflicto conserva borrador');
+  check((await targetInput().inputValue()).includes('2.200 unidades'), 'Conflicto conserva borrador');
   await dialog().getByRole('button', { name: 'Revisar opciones actualizadas', exact: true }).click();
   await materialInput().fill(''); await materialInput().press('ArrowDown');
   check(await page.locator(`[role="option"][data-key="${cap.id}"]`).count() === 0, 'Necesidad cubierta retirada después de revisar');
