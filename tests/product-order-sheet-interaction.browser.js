@@ -112,6 +112,122 @@ async (page) => {
     (await text(1, "cantidad_solicitada")) === "600",
     "El segundo lote muestra solicitada menos las 400 recibidas antes",
   );
+  await cell(2, "precio_unitario").click();
+  await cell(1, "cantidad_recibida").click({ modifiers: ["Shift"] });
+  await paste("18");
+  check(
+    (await text(1, "cantidad_recibida")) === "18" &&
+      (await text(2, "cantidad_recibida")) === "18" &&
+      (await text(1, "precio_unitario")).includes("18,00") &&
+      (await text(2, "precio_unitario")).includes("18,00"),
+    "Un valor rellena un rango rectangular seleccionado hacia arriba e izquierda",
+  );
+  await cell(2, "ubicacion").click();
+  await cell(1, "ubicacion").click({ modifiers: ["Shift"] });
+  await paste('"Norte\nSur"');
+  check(
+    (await cell(1, "ubicacion").textContent()).includes("Norte\nSur") &&
+      (await cell(2, "ubicacion").textContent()).includes("Norte\nSur"),
+    "Un texto entrecomillado con salto de línea rellena ambas celdas",
+  );
+  await paste("");
+  check(
+    (await text(1, "ubicacion")) === "" && (await text(2, "ubicacion")) === "",
+    "Una celda vacía se aplica a todo el rango",
+  );
+  await cell(1, "cantidad_recibida").click();
+  await paste("21\t5,00\n22\t6,00");
+  check(
+    (await text(1, "cantidad_recibida")) === "21" &&
+      (await text(2, "cantidad_recibida")) === "22" &&
+      (await text(1, "precio_unitario")).includes("5,00") &&
+      (await text(2, "precio_unitario")).includes("6,00"),
+    "Una matriz se pega hacia abajo y derecha desde una celda",
+  );
+  for (const [anchor, start] of [
+    [0, 31],
+    [2, 41],
+  ]) {
+    await cell(anchor, "cantidad_solicitada").click();
+    await cell(1, "cantidad_recibida").click({ modifiers: ["Shift"] });
+    await paste(start + "\t7,00\n" + (start + 1) + "\t8,00");
+    check(
+      (await text(0, "cantidad_recibida")) === "400" &&
+        (await text(1, "cantidad_recibida")) === String(start) &&
+        (await text(2, "cantidad_recibida")) === String(start + 1),
+      "La matriz comienza en el foco del rango y sale de la selección (ancla " +
+        anchor +
+        ")",
+    );
+  }
+
+  await cell(1, "ubicacion").click();
+  await paste("Primera\nSegunda\nFuera 1\nFuera 2");
+  await page
+    .getByText("2 celdas fuera de la hoja no se pegaron.", { exact: true })
+    .waitFor();
+  check(
+    (await text(1, "ubicacion")) === "Primera" &&
+      (await text(2, "ubicacion")) === "Segunda",
+    "El borde inferior de la vista filtrada recorta los dos últimos valores",
+  );
+  await cell(0, "fecha_confirmacion").click();
+  await paste("2099-02-15\tDerecha\tFuera");
+  await page
+    .getByText("1 celdas fuera de la hoja no se pegaron.", { exact: true })
+    .waitFor();
+  check(
+    (await text(0, "fecha_confirmacion")) === "15/02/2099" &&
+      (await text(0, "ubicacion")) === "Derecha",
+    "El borde derecho conserva las dos primeras columnas de la matriz",
+  );
+  await cell(1, "fecha_confirmacion").click();
+  await paste(
+    "2099-02-16\tInterior A\tFuera\n2099-02-17\tInterior B\tFuera\nFuera\tFuera\tFuera",
+  );
+  await page
+    .getByText("5 celdas fuera de la hoja no se pegaron.", { exact: true })
+    .waitFor();
+  check(
+    (await text(1, "fecha_confirmacion")) === "16/02/2099" &&
+      (await text(2, "fecha_confirmacion")) === "17/02/2099" &&
+      (await text(1, "ubicacion")) === "Interior A" &&
+      (await text(2, "ubicacion")) === "Interior B",
+    "El recorte simultáneo conserva el bloque que cabe",
+  );
+  await cell(0, "precio_unitario").click();
+  await page.keyboard.press("Alt+h");
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector(".product-sheet-grid")
+        .getAttribute("aria-colcount") === "23",
+  );
+  await cell(0, "cantidad_recibida").click();
+  await paste("50\tProtegido");
+  check(
+    (await text(0, "cantidad_recibida")) === "50" &&
+      (await cell(0, "id_proveedor").getAttribute("data-rejected")) !== null,
+    "La matriz salta la columna oculta y el validador protege al proveedor",
+  );
+  await page.keyboard.press("Alt+s");
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector(".product-sheet-grid")
+        .getAttribute("aria-colcount") === "24",
+  );
+  check(
+    (await text(0, "precio_unitario")).includes("7,00"),
+    "El pegado respeta el precio de la columna oculta",
+  );
+  await page.getByRole("button", { name: "Descartar", exact: true }).click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Descartar", exact: true })
+    .click();
+  await page.getByText("Sin cambios pendientes", { exact: false }).waitFor();
+
   await cell(0, "precio_unitario").click();
   await page.keyboard.press("Shift+ArrowDown");
   await page.waitForFunction(
@@ -137,6 +253,7 @@ async (page) => {
       2,
     "Ctrl+C copia una matriz compatible con Excel",
   );
+  await cell(0, "precio_unitario").click();
   await paste("5,00\n6,00");
   check(
     (await page.locator('[data-column-key="precio_unitario"][data-rejected]').count()) === 2,
@@ -309,7 +426,7 @@ async (page) => {
     await page
       .locator(".product-sheet-status")
       .textContent()
-      .then((text) => text.includes("OC completas seleccionadas")),
+      .then((text) => text.includes("1 OC seleccionadas")),
     "Autorizar selecciona la OC completa aunque el filtro oculte un renglón",
   );
   check(

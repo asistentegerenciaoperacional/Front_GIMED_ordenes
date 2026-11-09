@@ -308,6 +308,28 @@ async (page) => {
       .getByRole("button", { name: "Mostrar herramientas", exact: true })
       .click();
   });
+  await search().fill("VIRTUAL-");
+  const rowCount = 5000;
+  await page
+    .locator(`.product-sheet-grid[aria-rowcount="${rowCount + 1}"]`)
+    .waitFor();
+  await cell(rowCount - 2, "ubicacion").click();
+  const oversized = [
+    "Penúltima bodega",
+    "Última bodega",
+    ...Array(rowCount - 2).fill("Fuera"),
+  ].join("\n");
+  await measure("recortar pegado de 5000 valores a 2 destinos", async () => {
+    await paste(oversized);
+    await page
+      .getByRole("button", { name: "Guardar 2 cambios", exact: true })
+      .waitFor();
+  });
+  check(
+    (await cell(rowCount - 2, "ubicacion").innerText()) === "Penúltima bodega" &&
+      (await cell(rowCount - 1, "ubicacion").innerText()) === "Última bodega",
+    "En el borde inferior solo se aplican los dos primeros valores de 5000",
+  );
   check(
     writes.length === 1 && writes[0] === "saveProductOrderSheet",
     "Únicamente Guardar envía un comando durante la prueba",

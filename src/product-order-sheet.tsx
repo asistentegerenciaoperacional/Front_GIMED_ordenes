@@ -642,22 +642,38 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       notify("Selecciona primero la celda de destino.", true);
       return;
     }
-    const bounds = rangeBounds(range),
-      matrix = parseSheetClipboard(value);
+    const matrix = parseSheetClipboard(value);
     const inputs: {
       row: ProductSheetRow;
       column: SheetColumn;
       text: string;
     }[] = [];
     let overflow = 0;
-    matrix.forEach((values, r) =>
-      values.forEach((text, c) => {
-        const row = rows[bounds.top + r],
-          column = columns[bounds.left + c];
-        if (row && column) inputs.push({ row: display(row), column, text });
-        else overflow++;
-      }),
-    );
+    if (matrix.length === 1 && matrix[0].length === 1) {
+      const { top, bottom, left, right } = rangeBounds(range);
+      const text = matrix[0][0];
+      const rowEnd = Math.min(bottom + 1, rows.length);
+      const columnEnd = Math.min(right + 1, columns.length);
+      for (let r = top; r < rowEnd; r++) {
+        const row = display(rows[r]);
+        for (let c = left; c < columnEnd; c++)
+          inputs.push({ row, column: columns[c], text });
+      }
+    } else {
+      const { row: firstRow, column: firstColumn } = range.focus;
+      const rowCount = Math.min(matrix.length, rows.length - firstRow);
+      const availableColumns = columns.length - firstColumn;
+      for (let r = 0; r < rowCount; r++) {
+        const values = matrix[r];
+        const columnCount = Math.min(values.length, availableColumns);
+        overflow += values.length - columnCount;
+        const row = display(rows[firstRow + r]);
+        for (let c = 0; c < columnCount; c++)
+          inputs.push({ row, column: columns[firstColumn + c], text: values[c] });
+      }
+      for (let r = rowCount; r < matrix.length; r++)
+        overflow += matrix[r].length;
+    }
     const result = proposeSheetInput(db, changes, inputs);
     setError(null);
     const replacement = result.changes.filter(
