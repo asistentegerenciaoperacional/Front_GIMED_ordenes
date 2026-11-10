@@ -162,7 +162,7 @@ async (page) => {
   await cell(1, "ubicacion").click();
   await paste("Primera\nSegunda\nFuera 1\nFuera 2");
   await page
-    .getByText("2 celdas fuera de la hoja no se pegaron.", { exact: true })
+    .getByText("Rango pegado. 2 celdas fuera de la hoja no se pegaron.", { exact: true })
     .waitFor();
   check(
     (await text(1, "ubicacion")) === "Primera" &&
@@ -172,7 +172,7 @@ async (page) => {
   await cell(0, "fecha_confirmacion").click();
   await paste("2099-02-15\tDerecha\tFuera");
   await page
-    .getByText("1 celdas fuera de la hoja no se pegaron.", { exact: true })
+    .getByText("Rango pegado. 1 celdas fuera de la hoja no se pegaron.", { exact: true })
     .waitFor();
   check(
     (await text(0, "fecha_confirmacion")) === "15/02/2099" &&
@@ -184,7 +184,7 @@ async (page) => {
     "2099-02-16\tInterior A\tFuera\n2099-02-17\tInterior B\tFuera\nFuera\tFuera\tFuera",
   );
   await page
-    .getByText("5 celdas fuera de la hoja no se pegaron.", { exact: true })
+    .getByText("Rango pegado. 5 celdas fuera de la hoja no se pegaron.", { exact: true })
     .waitFor();
   check(
     (await text(1, "fecha_confirmacion")) === "16/02/2099" &&
@@ -194,6 +194,7 @@ async (page) => {
     "El recorte simultáneo conserva el bloque que cabe",
   );
   await cell(0, "precio_unitario").click();
+  await page.keyboard.press("Shift+ArrowRight");
   await page.keyboard.press("Alt+h");
   await page.waitForFunction(
     () =>
@@ -206,14 +207,14 @@ async (page) => {
   check(
     (await text(0, "cantidad_recibida")) === "50" &&
       (await cell(0, "id_proveedor").getAttribute("data-rejected")) !== null,
-    "La matriz salta la columna oculta y el validador protege al proveedor",
+    "La matriz salta las columnas ocultas y el validador protege al proveedor",
   );
   await page.keyboard.press("Alt+s");
   await page.waitForFunction(
     () =>
       document
         .querySelector(".product-sheet-grid")
-        .getAttribute("aria-colcount") === "24",
+        .getAttribute("aria-colcount") === "25",
   );
   check(
     (await text(0, "precio_unitario")).includes("7,00"),
@@ -427,7 +428,7 @@ async (page) => {
   check(
     Number(
       await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
-    ) === 23,
+    ) === 24,
     "El menú oculta una columna de esta hoja",
   );
   await page.reload();
@@ -435,7 +436,7 @@ async (page) => {
   check(
     Number(
       await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
-    ) === 23,
+    ) === 24,
     "Las columnas visibles persisten al recargar",
   );
   await page
@@ -453,7 +454,7 @@ async (page) => {
   check(
     Number(
       await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
-    ) === 9,
+    ) === 10,
     "La visibilidad de columnas es independiente para No autorizadas",
   );
   await page.getByRole("button", { name: "Más acciones de órdenes", exact: true }).click();

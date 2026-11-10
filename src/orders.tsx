@@ -29,6 +29,7 @@ import {
   lazy,
   Suspense,
   type MouseEvent,
+  type ReactNode,
 } from "react";
 import {
   deviation,
@@ -68,7 +69,11 @@ import {
   paginateOrders,
   readCustomFilter,
 } from "./order-filters";
-import { LineDisclosure, OrderLineCard } from "./order-line-card";
+import {
+  LineDisclosure,
+  OrderLineCard,
+  ProductCostSummary,
+} from "./order-line-card";
 import { cachedOrderRead } from "./order-read-cache";
 import { buildOrderReadModel, filterCustomOrders } from "./order-read-model";
 import {
@@ -117,6 +122,7 @@ import {
 import { useBogotaDay } from "./use-bogota-day";
 import { useProductSheetPreference } from "./product-sheet-preferences";
 import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
+import { indexLinkedMaterialLines } from "../shared/product-unit-cost";
 const ProductOrderSheet = lazy(() =>
   import("./product-order-sheet").then((module) => ({
     default: module.ProductOrderSheet,
@@ -1068,6 +1074,10 @@ export function OrderDetail({
       }
     return byLine;
   }, [db, id, o?.tipo_orden]);
+  const linkedMaterials = useMemo(
+    () => (o?.tipo_orden === "producto" ? indexLinkedMaterialLines(db) : null),
+    [db, o?.tipo_orden],
+  );
   if (!o)
     return (
       <Empty
@@ -1081,13 +1091,10 @@ export function OrderDetail({
     state = orderState(db, o);
   const related =
     o.tipo_orden === "producto"
-      ? db.abastecimiento_material
-          .filter((a) => lines.some((l) => l.id === a.id_orden_producto))
-          .map(
-            (a) =>
-              db.orden_material.find((l) => l.id === a.id_orden_material)!
-                .id_orden_compra,
-          )
+      ? lines.flatMap(
+          (line) =>
+            linkedMaterials?.get(line.id)?.map(({ order }) => order.id) ?? [],
+        )
       : o.tipo_orden === "material"
         ? db.abastecimiento_material
             .filter((a) => lines.some((l) => l.id === a.id_orden_material))
@@ -1300,7 +1307,7 @@ export function OrderDetail({
                     : [];
                 const delta =
                   o.tipo_orden === "producto" ? deviation(db, l) : null;
-                const summaryMetrics = (
+                const summaryMetrics = (costMetric?: ReactNode) => (
                   <>
                     <div>
                       <dt>Cantidad solicitada</dt>
@@ -1310,6 +1317,7 @@ export function OrderDetail({
                       <dt>Precio unitario</dt>
                       <dd className="num">{money(l.precio_unitario)}</dd>
                     </div>
+                    {costMetric}
                     <div>
                       <dt>
                         {o.tipo_orden === "producto"
@@ -1427,17 +1435,25 @@ export function OrderDetail({
                             )}
                           </div>
                           {o.tipo_orden === "producto" ? (
-                            <dl className="line-metadata product">
-                              <div>
-                                <dt>Código de barras</dt>
-                                <dd className="line-code">
-                                  {db.codigos_barras.find(
-                                    (code) => code.id === l.id_codigo_barras,
-                                  )?.codigo ?? "Sin informar"}
-                                </dd>
-                              </div>
-                              {summaryMetrics}
-                            </dl>
+                            <ProductCostSummary
+                              price={l.precio_unitario}
+                              orderNumber={o.no_orden}
+                              linked={linkedMaterials?.get(l.id)}
+                            >
+                              {(costMetric) => (
+                                <dl className="line-metadata product">
+                                  <div>
+                                    <dt>Código de barras</dt>
+                                    <dd className="line-code">
+                                      {db.codigos_barras.find(
+                                        (code) => code.id === l.id_codigo_barras,
+                                      )?.codigo ?? "Sin informar"}
+                                    </dd>
+                                  </div>
+                                  {summaryMetrics(costMetric)}
+                                </dl>
+                              )}
+                            </ProductCostSummary>
                           ) : o.tipo_orden === "material" ? (
                             <dl className="line-metadata single">
                               <div>
@@ -1503,7 +1519,7 @@ export function OrderDetail({
                             </div>
                           </dl>
                         ) : (
-                          <dl className="line-metrics">{summaryMetrics}</dl>
+                          <dl className="line-metrics">{summaryMetrics()}</dl>
                         )}
                         <div className="line-content">
                           {o.tipo_orden === "producto" ? (

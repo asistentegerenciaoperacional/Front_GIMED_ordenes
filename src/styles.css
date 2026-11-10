@@ -1720,7 +1720,7 @@ textarea.control {
   grid-template-columns: minmax(0, 1fr);
 }
 .line-metadata.product {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 .line-metadata > div {
   min-width: 0;
@@ -1743,6 +1743,59 @@ textarea.control {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 16px;
   font-weight: 600;
+}
+.product-cost-summary {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.product-cost-toggle.btn.link {
+  font-size: 11px;
+  gap: 4px;
+}
+.product-cost-toggle svg {
+  flex: none;
+  width: 12px;
+}
+.product-cost-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.product-cost-summary[data-expanded] > .product-cost-panel {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.product-cost-breakdown {
+  margin: 0;
+  font-size: 12px;
+}
+.product-cost-breakdown > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 8px 12px;
+}
+.product-cost-breakdown > div + div {
+  border-top: 1px solid var(--border);
+}
+.product-cost-breakdown dd {
+  margin: 0;
+  text-align: right;
+}
+.product-cost-breakdown dt {
+  overflow-wrap: anywhere;
+}
+.product-cost-breakdown a {
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.product-cost-total {
+  font-weight: 700;
+}
+.product-cost-empty {
+  margin: 0;
+  padding: 0 12px 8px;
 }
 .invoice-document-link {
   text-decoration: underline;
@@ -1880,6 +1933,15 @@ textarea.control {
 }
 .lot-list .data-table th {
   padding: 10px 12px;
+}
+@container order-line (650px < width <= 800px) {
+  .line-metadata.product {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .line-metadata.product > div:nth-child(5) {
+    padding-left: 0;
+    border-left: 0;
+  }
 }
 @container order-line (max-width: 650px) {
   .line-card-head {

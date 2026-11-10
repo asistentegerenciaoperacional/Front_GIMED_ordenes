@@ -165,7 +165,7 @@ async (page) => {
     check(
       Number(
         await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
-      ) === 24,
+      ) === 25,
       `Cabeceras disponibles en ${id}`,
     );
   }

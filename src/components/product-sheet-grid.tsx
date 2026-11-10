@@ -29,11 +29,13 @@ import { Tooltip, TooltipTrigger } from "react-aria-components/Tooltip";
 import { Action } from "./controls";
 
 export function SheetCellHint({
-  label,
+  ariaLabel,
+  content,
   children,
   indicator = false,
 }: {
-  label: string;
+  ariaLabel: string;
+  content: ReactNode;
   children: ReactNode;
   indicator?: boolean;
 }) {
@@ -47,7 +49,7 @@ export function SheetCellHint({
     >
       <Action
         className={indicator ? "sheet-excess-indicator" : "sheet-ocm-number"}
-        aria-label={label}
+        aria-label={ariaLabel}
         onClick={() => setPinned(!pinned)}
         onBlur={() => setPinned(false)}
         onKeyDown={(event) => {
@@ -65,7 +67,7 @@ export function SheetCellHint({
         offset={6}
         data-react-aria-top-layer=""
       >
-        {label}
+        {content}
       </Tooltip>
     </TooltipTrigger>
   );

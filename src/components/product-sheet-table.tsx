@@ -67,6 +67,7 @@ const SheetCell = memo(function SheetCell({
       data-column-key={column.key}
       data-rejected={invalid || undefined}
       aria-invalid={invalid || undefined}
+      aria-readonly={!column.entity || undefined}
     >
       {editing ? editor : renderCell(row, column)}
     </td>

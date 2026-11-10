@@ -12,9 +12,9 @@ El cuerpo utiliza filas de 32 px, texto de 12 px, bordes finos y cifras alineada
 
 ## Hojas y propiedad de los datos
 
-**No autorizadas** muestra una fila por renglón y nueve columnas: No. de orden, Código de barras, Producto, Cantidad solicitada, Precio unitario, Proveedor, Fecha de elaboración, Fecha solicitada de entrega y Fecha estimada de batch record. Seleccionar parte de una OC incluye todos sus renglones en la autorización, aunque estén filtrados. El rango y la inclusión de la OC se distinguen visualmente.
+**No autorizadas** muestra una fila por renglón y diez columnas: No. de orden, Código de barras, Producto, Cantidad solicitada, Precio unitario, Costo total unitario, Proveedor, Fecha de elaboración, Fecha solicitada de entrega y Fecha estimada de batch record. Seleccionar parte de una OC incluye todos sus renglones en la autorización, aunque estén filtrados. El rango y la inclusión de la OC se distinguen visualmente.
 
-**En seguimiento** muestra lotes abiertos y cerrados de OC autorizadas. **Anuladas** muestra sus lotes anulados. La clasificación depende del lote. Ambas hojas tienen estas 24 columnas, en orden:
+**En seguimiento** muestra lotes abiertos y cerrados de OC autorizadas. **Anuladas** muestra sus lotes anulados. La clasificación depende del lote. Ambas hojas tienen estas 25 columnas, en orden:
 
 1. No. de orden
 2. Factura
@@ -24,28 +24,31 @@ El cuerpo utiliza filas de 32 px, texto de 12 px, bordes finos y cifras alineada
 6. Cantidad solicitada
 7. Cantidad recibida
 8. Precio unitario
-9. Proveedor
-10. Sticker
-11. Cinta
-12. OCM vinculadas
-13. Referencia de corrugado
-14. Cantidad de corrugado
-15. Fecha de elaboración
-16. Fecha solicitada de entrega
-17. Fecha estimada de batch record
-18. Fecha de entrega de batch record
-19. Estado batch record
-20. Fecha de inspección
-21. Inspección
-22. Fecha de recepción
-23. Fecha de confirmación
-24. Ubicación
+9. Costo total unitario
+10. Proveedor
+11. Sticker
+12. Cinta
+13. OCM vinculadas
+14. Referencia de corrugado
+15. Cantidad de corrugado
+16. Fecha de elaboración
+17. Fecha solicitada de entrega
+18. Fecha estimada de batch record
+19. Fecha de entrega de batch record
+20. Estado batch record
+21. Fecha de inspección
+22. Inspección
+23. Fecha de recepción
+24. Fecha de confirmación
+25. Ubicación
 
 Cada fila conserva los identificadores de cabecera, renglón y lote. Los cambios de cabecera se repiten en la OC; los de renglón, en sus lotes; los de lote afectan únicamente a ese registro. La selección y el borrador utilizan esas identidades, no posiciones visibles.
 
 No. de orden, código de barras, OCM vinculadas y saldos calculados son de lectura. Proveedor y producto quedan bloqueados después de autorizar. Cambiar proveedor antes de autorizar utiliza el reemplazo completo y confirmado existente. La estimada de batch de No autorizadas sigue la entrega de cabecera; después de autorizar mantiene su seguimiento independiente.
 
 Las OCM vinculadas se resuelven por renglón y se repiten en sus lotes. Se muestran sus números y un tooltip con los materiales específicos, accesible con cursor, foco y toque.
+
+**Costo total unitario** es de solo lectura. Suma al precio de la OC el de cada renglón de OCM vinculado y vigente, incluso si su orden está pendiente de autorización. Se actualiza con el borrador del precio y se repite en todos los lotes del producto. El detalle de la OC permite desplegar los importes y las OCM de origen.
 
 ## Saldo, selección e interacción
 

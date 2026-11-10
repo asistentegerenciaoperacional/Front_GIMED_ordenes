@@ -27,8 +27,8 @@ async (page) => {
   check(
     Number(
       await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
-    ) === 24,
-    "Seguimiento presenta las 24 columnas",
+    ) === 25,
+    "Seguimiento presenta las 25 columnas",
   );
   check(
     !(await page.locator(".stats-grid").count()),
@@ -69,8 +69,8 @@ async (page) => {
   check(
     Number(
       await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
-    ) === 9,
-    "No autorizadas presenta nueve columnas",
+    ) === 10,
+    "No autorizadas presenta diez columnas",
   );
   await page.getByRole("button", { name: "Anuladas", exact: true }).click();
   check(

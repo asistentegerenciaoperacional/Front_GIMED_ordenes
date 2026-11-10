@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, readFile, rm } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
 import { makeSeed } from "../shared/seed";
+import {
+  indexLinkedMaterialLines,
+  productUnitCost,
+} from "../shared/product-unit-cost";
 import { blankRow } from "../shared/schema";
 import {
   overlaySheetChanges,
@@ -18,6 +22,7 @@ import {
   formatSheetClipboard,
   proposeSheetInput,
   productSheetColumns,
+  sheetRaw,
   sheetValue,
 } from "../src/product-order-sheet-model";
 import { command } from "../server/domain";
@@ -139,7 +144,8 @@ function fixture() {
 }
 test("columnas exactas, identidad por lote/renglón y clasificación independiente del padre", () => {
   const { db, row } = fixture();
-  assert.equal(columnsForSheet("seguimiento").length, 24);
+  assert.equal(columnsForSheet("seguimiento").length, 25);
+  assert.equal(columnsForSheet("anuladas").length, 25);
   assert.deepEqual(
     columnsForSheet("no_autorizadas").map((col) => col.key),
     [
@@ -148,6 +154,7 @@ test("columnas exactas, identidad por lote/renglón y clasificación independien
       "id_producto",
       "cantidad_solicitada",
       "precio_unitario",
+      "costo_total_unitario",
       "id_proveedor",
       "fecha_elaboracion",
       "fecha_solicitada_entrega",
@@ -171,6 +178,83 @@ test("columnas exactas, identidad por lote/renglón y clasificación independien
       (item) => item.key === `line:${item.line.id}`,
     ),
   );
+});
+test("el costo unitario suma renglones de material vigentes con precisión y se replica en los lotes", () => {
+  const { db, row } = fixture();
+  const price = "3200.01";
+  row.line.precio_unitario = price;
+  const [container, cap, replacement, cancelled] = db.orden_material;
+  container.precio_unitario = "450.02";
+  container.estado = "cerrada";
+  cap.precio_unitario = "120.03";
+  cancelled.precio_unitario = "999.00";
+  cancelled.estado = "anulada";
+  replacement.precio_unitario = "10.11";
+  const link = (productId: string, materialLineId: string) => ({
+    id_orden_producto: productId,
+    id_orden_material: materialLineId,
+  });
+  const other = db.orden_producto.find((line) => line.id !== row.line.id)!;
+  const unlinked = db.orden_producto.find(
+    (line) => line.id !== row.line.id && line.id !== other.id,
+  )!;
+  db.abastecimiento_material = [
+    ...[container, cap, container, cancelled, replacement].map((line) =>
+      link(row.line.id, line.id),
+    ),
+    link(other.id, container.id),
+  ];
+  const linked = indexLinkedMaterialLines(db);
+  const breakdown = productUnitCost(price, linked.get(row.line.id)!);
+  assert.equal(breakdown.total, "3780.17");
+  assert.deepEqual(
+    breakdown.materials.map(({ line }) => line.id),
+    [container.id, cap.id, replacement.id],
+  );
+  assert.equal(productUnitCost("0.01", linked.get(other.id)!).total, "450.03");
+  assert.equal(
+    productUnitCost(unlinked.precio_unitario, []).total,
+    unlinked.precio_unitario,
+  );
+
+  const cost = column("costo_total_unitario");
+  const lot = row.lot!;
+  db.lote_producto.push({ ...lot, id: "second-active-cost-lot" });
+  db.lote_producto.push({
+    ...lot,
+    id: "cancelled-cost-lot",
+    estado: "anulado",
+  });
+  const costs = (database: typeof db, view: "seguimiento" | "anuladas") =>
+    buildProductSheet(database, view)
+      .filter((item) => item.line.id === row.line.id)
+      .map((item) => sheetRaw(item, cost));
+  assert.ok(costs(db, "seguimiento").length >= 2);
+  assert.deepEqual([...new Set(costs(db, "seguimiento"))], ["3780.17"]);
+  assert.deepEqual([...new Set(costs(db, "anuladas"))], ["3780.17"]);
+  const current = buildProductSheet(db, "seguimiento").find(
+    (item) => item.key === row.key,
+  )!;
+  assert.equal(sheetValue(db, current, cost), "$ 3.780,17");
+  assert.equal(current.cells.costo_total_unitario.sortValue, "3780.17");
+  assert.match(cellPermission(db, current, cost)!, /Celda protegida/);
+
+  const draft = overlaySheetChanges(db, [
+    {
+      entity: "orden_producto",
+      id: row.line.id,
+      field: "precio_unitario",
+      expected: price,
+      value: "3300.00",
+    },
+  ]);
+  assert.deepEqual([...new Set(costs(draft, "seguimiento"))], ["3880.16"]);
+  assert.deepEqual([...new Set(costs(db, "seguimiento"))], ["3780.17"]);
+
+  replacement.precio_unitario = "10.21";
+  assert.deepEqual([...new Set(costs(db, "seguimiento"))], ["3780.27"]);
+  replacement.estado = "anulada";
+  assert.deepEqual([...new Set(costs(db, "seguimiento"))], ["3770.06"]);
 });
 test("saldos usan creación estable, incluyen abiertos/cerrados y excluyen anulados y filtros", () => {
   const { db, row } = fixture();

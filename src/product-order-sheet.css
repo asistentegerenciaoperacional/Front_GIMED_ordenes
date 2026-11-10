@@ -360,6 +360,13 @@ body:has(.product-order-sheet) .content {
   align-items: center;
   gap: 2px;
 }
+.sheet-ocm-tooltip ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+.sheet-ocm-tooltip li + li {
+  margin-top: 2px;
+}
 .sheet-ocm-number {
   color: var(--primary);
   padding: 0;

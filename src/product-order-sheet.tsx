@@ -1098,7 +1098,19 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               return (
                 <SheetCellHint
                   key={id}
-                  label={`OCM ${items[0].order.no_orden}: ${items.map((item) => `${item.material} · ${count(item.quantity)} unidades`).join("; ")}`}
+                  ariaLabel={`OCM ${items[0].order.no_orden}: ${items.map((item) => `${item.material} · ${count(item.quantity)} unidades`).join("; ")}`}
+                  content={
+                    <div className="sheet-ocm-tooltip">
+                      <strong>OCM {items[0].order.no_orden}:</strong>
+                      <ul>
+                        {items.map((item, index) => (
+                          <li key={`${item.material}-${index}`}>
+                            {item.material} · {count(item.quantity)} unidades
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  }
                 >
                   {items[0].order.no_orden}
                 </SheetCellHint>
@@ -1118,7 +1130,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           {col.key === "cantidad_solicitada" && row.excess > 0 && (
             <SheetCellHint
               indicator
-              label={`${count(row.excess)} unidades recibidas de más en lotes anteriores`}
+              ariaLabel={`${count(row.excess)} unidades recibidas de más en lotes anteriores`}
+              content={`${count(row.excess)} unidades recibidas de más en lotes anteriores`}
             >
               Sobreentrega
             </SheetCellHint>

@@ -17,6 +17,11 @@ import { addCalendarDays, type CustomFilterId } from "./order-filters";
 import { parseDateInput } from "./dates";
 import { materialRole } from "../shared/product-materials";
 import {
+  indexLinkedMaterialLines,
+  productUnitCost,
+} from "../shared/product-unit-cost";
+import { money as exactMoney } from "./ui";
+import {
   EMPTY_VALUE,
   calendarDay,
   type Column,
@@ -39,10 +44,10 @@ const column = (
 ): SheetColumn => ({ key, label, kind, width, entity, field });
 export const productSheetColumns: SheetColumn[] = [
   column("no_orden", "No. de orden", "integer", 112),
-  column("id_factura", "Factura", "text", 145, "lote_producto"),
-  column("numero_lote", "Lote", "text", 140, "lote_producto"),
-  column("codigo", "Código de barras", "text", 162),
-  column("id_producto", "Producto", "text", 280, "orden_producto"),
+  column("id_factura", "Factura", "text", 124, "lote_producto"),
+  column("numero_lote", "Lote", "text", 123, "lote_producto"),
+  column("codigo", "Código de barras", "text", 140),
+  column("id_producto", "Producto", "text", 240, "orden_producto"),
   column(
     "cantidad_solicitada",
     "Cantidad solicitada",
@@ -64,6 +69,7 @@ export const productSheetColumns: SheetColumn[] = [
     149,
     "orden_producto",
   ),
+  column("costo_total_unitario", "Costo total unitario", "decimal", 170),
   column("id_proveedor", "Proveedor", "text", 190, "orden_compra"),
   column("cantidad_sticker", "Sticker", "integer", 110, "orden_producto"),
   column("cantidad_cinta", "Cinta", "integer", 110, "orden_producto"),
@@ -141,6 +147,7 @@ const unauthorizedKeys = [
   "id_producto",
   "cantidad_solicitada",
   "precio_unitario",
+  "costo_total_unitario",
   "id_proveedor",
   "fecha_elaboracion",
   "fecha_solicitada_entrega",
@@ -167,6 +174,7 @@ export type ProductSheetRow = {
   remaining: number;
   excess: number;
   globalRemaining: number;
+  unitCost: string;
   supply: SupplyItem[];
   documentId?: string;
   cells: Record<string, ColumnCell>;
@@ -214,6 +222,7 @@ function lookup(db: Database) {
 }
 export function sheetRaw(row: ProductSheetRow, col: SheetColumn): unknown {
   if (col.key === "no_orden") return row.order.no_orden;
+  if (col.key === "costo_total_unitario") return row.unitCost;
   if (!row.lot && col.key === "fecha_estimada_batch_record")
     return row.initialLot?.fecha_estimada_batch_record;
   if (col.key === "cantidad_solicitada")
@@ -229,6 +238,7 @@ export function sheetValue(
   row: ProductSheetRow,
   col: SheetColumn,
 ): string {
+  if (col.key === "costo_total_unitario") return exactMoney(row.unitCost);
   const references = lookup(db);
   if (col.key === "codigo")
     return references.codes.get(row.line.id_codigo_barras)?.codigo ?? "";
@@ -315,27 +325,8 @@ export function buildProductSheet(
     children.push(lot);
     lots.set(lot.id_orden_producto, children);
   }
-  const materialLines = new Map(
-    db.orden_material.map((line) => [line.id, line]),
-  );
-  const materials = new Map(
-    db.materiales.map((material) => [material.id, material]),
-  );
-  const supply = new Map<string, SupplyItem[]>();
-  for (const link of db.abastecimiento_material) {
-    const line = materialLines.get(link.id_orden_material),
-      order = line && orders.get(line.id_orden_compra);
-    if (line && order) {
-      const items = supply.get(link.id_orden_producto) ?? [];
-      items.push({
-        order,
-        material: materials.get(line.id_material)?.nombre_material ?? "",
-        quantity: line.cantidad_solicitada,
-        state: line.estado,
-      });
-      supply.set(link.id_orden_producto, items);
-    }
-  }
+  const linkedMaterials = indexLinkedMaterialLines(db, orders);
+  const { materials } = lookup(db);
   const documents = new Map(
     db.documento
       .filter(
@@ -360,6 +351,14 @@ export function buildProductSheet(
     const globalRemaining =
       line.cantidad_solicitada -
       active.reduce((sum, lot) => sum + (lot.cantidad_recibida ?? 0), 0);
+    const linked = linkedMaterials.get(line.id) ?? [];
+    const { total: unitCost } = productUnitCost(line.precio_unitario, linked);
+    const supply = linked.map(({ line: materialLine, order }) => ({
+      order,
+      material: materials.get(materialLine.id_material)?.nombre_material ?? "",
+      quantity: materialLine.cantidad_solicitada,
+      state: materialLine.estado,
+    }));
     let received = 0;
     const append = (lot: lote_producto | undefined, first: boolean) => {
       const row: ProductSheetRow = {
@@ -372,7 +371,8 @@ export function buildProductSheet(
         remaining: Math.max(0, line.cantidad_solicitada - received),
         excess: Math.max(0, received - line.cantidad_solicitada),
         globalRemaining,
-        supply: supply.get(line.id) ?? [],
+        unitCost,
+        supply,
         documentId: documents.get(order.id),
         cells: {},
       };
