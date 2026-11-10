@@ -80,9 +80,11 @@ export function SheetCellHint({
 
 const rowHeight = 32,
   headerHeight = 44;
-export type SheetViewportPosition = {
+export type SheetScrollPosition = {
   top: number;
   left: number;
+};
+export type SheetViewportPosition = SheetScrollPosition & {
   selection: SheetSelectionPosition;
   reveal: boolean;
 };
@@ -92,6 +94,7 @@ export function ProductSheetGrid({
   columns,
   selection,
   view,
+  initialScroll,
   restorePosition,
   pinnedColumn,
   renderCell,
@@ -111,6 +114,7 @@ export function ProductSheetGrid({
   columns: SheetColumn[];
   selection: SheetSelection;
   view: string;
+  initialScroll?: SheetScrollPosition;
   restorePosition?: SheetViewportPosition;
   pinnedColumn?: string | null;
   renderCell: (row: ProductSheetRow, col: SheetColumn) => ReactNode;
@@ -408,7 +412,12 @@ export function ProductSheetGrid({
       if (position.reveal && extent) reveal(extent, false);
     } else {
       selection.configure(rowKeys, columnKeys, view);
-      if (el && previousRows.current !== rowKeys) el.scrollTop = 0;
+      if (el && previousRows.current === null && initialScroll) {
+        el.scrollTop = initialScroll.top;
+        el.scrollLeft = initialScroll.left;
+      } else if (el && previousRows.current !== rowKeys) {
+        el.scrollTop = 0;
+      }
     }
     previousRows.current = rowKeys;
     updateWindow(true);
@@ -418,6 +427,7 @@ export function ProductSheetGrid({
     view,
     selection,
     updateWindow,
+    initialScroll,
     restorePosition,
     reveal,
   ]);

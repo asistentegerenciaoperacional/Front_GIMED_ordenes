@@ -55,6 +55,7 @@ import {
 import {
   ProductSheetGrid,
   SheetCellHint,
+  type SheetScrollPosition,
   type SheetViewportPosition,
 } from "./components/product-sheet-grid";
 import { SheetSelection, rangeBounds } from "./product-sheet-selection";
@@ -132,6 +133,9 @@ type SupplyOrigin = { scope: object; menuRowKey?: string };
 const canLinkSupply = ({ line, order }: ProductSheetRow) =>
   line.estado === "en_seguimiento" && order.estado_autorizacion === "autorizada";
 const localVisibility = "gimed:ui:product-sheet-columns:";
+// Keep recent positions for this app session, keyed by the sheet's query.
+const scrollByQuery = new Map<string, SheetScrollPosition>();
+const scrollHistoryLimit = 20;
 function loadHidden(view: SheetView): string[] {
   const saved = readSheetLocal<unknown>(localVisibility + view, []);
   return Array.isArray(saved)
@@ -269,6 +273,17 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     [issues],
   );
   const key = params.toString();
+  const scrollKey = useMemo(() => {
+    const query = new URLSearchParams(key);
+    if (view === "seguimiento") query.delete("vista");
+    query.sort();
+    return query.toString();
+  }, [key, view]);
+  const [initialScroll] = useState(() => scrollByQuery.get(scrollKey));
+  const latestScrollKey = useRef(scrollKey);
+  useLayoutEffect(() => {
+    latestScrollKey.current = scrollKey;
+  }, [scrollKey]);
   const scope = useMemo(() => ({}), [key, columns]);
   const liveScope = useRef(scope);
   liveScope.current = scope;
@@ -279,6 +294,22 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     () => sheetRef.current?.querySelector<HTMLElement>(".product-sheet-viewport"),
     [],
   );
+  useLayoutEffect(() => {
+    const viewport = getViewport();
+    if (!viewport) return;
+    return () => {
+      const query = latestScrollKey.current;
+      scrollByQuery.delete(query);
+      scrollByQuery.set(query, {
+        top: viewport.scrollTop,
+        left: viewport.scrollLeft,
+      });
+      if (scrollByQuery.size > scrollHistoryLimit) {
+        const oldest = scrollByQuery.keys().next().value;
+        if (oldest !== undefined) scrollByQuery.delete(oldest);
+      }
+    };
+  }, [getViewport]);
   const captureSheetSnapshot = (
     snapshot: Database,
     origin: object,
@@ -1777,6 +1808,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         columns={columns}
         selection={selection}
         view={view}
+        initialScroll={initialScroll}
         restorePosition={
           restoration?.scope === scope ? restoration.position : undefined
         }

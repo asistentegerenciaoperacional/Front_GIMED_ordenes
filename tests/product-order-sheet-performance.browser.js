@@ -180,18 +180,16 @@ async (page) => {
     page.getByRole("button", { name: "Limpiar filtros", exact: true }).click(),
   );
   await measure("ocultar y mostrar columna", async () => {
+    const grid = page.locator(".product-sheet-grid");
+    const columns = Number(await grid.getAttribute("aria-colcount"));
     await page.getByRole("button", { name: "Columnas", exact: true }).click();
     const invoice = page
       .getByRole("dialog", { name: "Columnas visibles", exact: true })
       .getByRole("checkbox", { name: "Factura", exact: true });
     await invoice.uncheck();
-    check(
-      Number(
-        await page.locator(".product-sheet-grid").getAttribute("aria-colcount"),
-      ) === 23,
-      "La columna se oculta sin recargar",
-    );
+    await grid.and(page.locator(`[aria-colcount="${columns - 1}"]`)).waitFor();
     await invoice.check();
+    await grid.and(page.locator(`[aria-colcount="${columns}"]`)).waitFor();
     await page.keyboard.press("Escape");
   });
   await measure("selección y teclado", async () => {

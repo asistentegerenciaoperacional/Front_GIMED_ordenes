@@ -150,6 +150,55 @@ async (page) => {
     );
 
   await grid.waitFor();
+  const search = page.getByRole("searchbox", {
+    name: "Buscar en la hoja de OC",
+  });
+  await search.fill("VIRTUAL-");
+  await page.waitForURL((url) => url.searchParams.get("q") === "VIRTUAL-");
+  const checkReturn = async (scroll, label) => {
+    await page.waitForURL(
+      (url) =>
+        url.pathname === "/ordenes/productos" &&
+        url.searchParams.get("q") === "VIRTUAL-",
+    );
+    await grid.waitFor();
+    await page.waitForFunction(({ top, left }) => {
+      const viewport = document.querySelector(".product-sheet-viewport");
+      return (
+        viewport &&
+        Math.abs(viewport.scrollTop - top) <= 1 &&
+        Math.abs(viewport.scrollLeft - left) <= 1
+      );
+    }, scroll);
+    checks.push(label);
+  };
+  let exitPosition = (await select(42)).scroll;
+  await page.getByRole("button", { name: "Ver detalle", exact: true }).click();
+  await page.getByRole("link", { name: "Volver a órdenes" }).click();
+  await checkReturn(
+    exitPosition,
+    "Volver del detalle recupera ambos ejes de la hoja filtrada",
+  );
+
+  exitPosition = (await select(65, column, 720)).scroll;
+  await page.getByRole("button", { name: "Imprimir", exact: true }).click();
+  await page.waitForURL(/\/imprimir\?/);
+  await page.goBack();
+  await checkReturn(
+    exitPosition,
+    "Atrás desde impresión recupera el desplazamiento más reciente",
+  );
+
+  await page.getByRole("button", { name: "Materiales", exact: true }).click();
+  await page.waitForURL(/\/ordenes\/materiales/);
+  await page.goBack();
+  await checkReturn(
+    exitPosition,
+    "Volver desde Materiales conserva el desplazamiento de la hoja",
+  );
+  await search.fill("");
+  await page.waitForURL((url) => !url.searchParams.has("q"));
+
   let chosen = await select(42);
   let count = await rowCount();
   await menu("Nuevo lote");
@@ -300,9 +349,6 @@ async (page) => {
     "La respuesta tardía respeta la pestaña y la celda seleccionada durante la espera",
   );
 
-  const search = page.getByRole("searchbox", {
-    name: "Buscar en la hoja de OC",
-  });
   await search.fill("POSICION-FINAL");
   await countChangesTo(3);
   await grid.evaluate((table) => {
