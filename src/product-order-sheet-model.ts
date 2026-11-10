@@ -4,7 +4,7 @@ import type {
   orden_producto,
   lote_producto,
 } from "../shared/models";
-import { canonical, decimal, meta, type Row } from "../shared/schema";
+import { canonical, decimal, meta, orderState, type Row } from "../shared/schema";
 import {
   changeKey,
   overlaySheetChanges,
@@ -163,6 +163,7 @@ export type SupplyItem = {
   material: string;
   quantity: number;
   state: string;
+  orderCancelled: boolean;
 };
 export type ProductSheetRow = {
   key: string;
@@ -358,6 +359,7 @@ export function buildProductSheet(
       material: materials.get(materialLine.id_material)?.nombre_material ?? "",
       quantity: materialLine.cantidad_solicitada,
       state: materialLine.estado,
+      orderCancelled: orderState(db, order) === "anulada",
     }));
     let received = 0;
     const append = (lot: lote_producto | undefined, first: boolean) => {

@@ -520,6 +520,7 @@ test("las 17 variantes de filtros usan condiciones por lote y vínculos por reng
       material: "Envase",
       quantity: 10,
       state: "en_seguimiento",
+      orderCancelled: false,
     },
   ];
   row.line.estado = "en_seguimiento";

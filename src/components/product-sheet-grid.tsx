@@ -33,11 +33,13 @@ export function SheetCellHint({
   content,
   children,
   indicator = false,
+  onActivate,
 }: {
   ariaLabel: string;
   content: ReactNode;
   children: ReactNode;
   indicator?: boolean;
+  onActivate?: () => void;
 }) {
   const [hovered, setHovered] = useState(false),
     [pinned, setPinned] = useState(false);
@@ -50,7 +52,10 @@ export function SheetCellHint({
       <Action
         className={indicator ? "sheet-excess-indicator" : "sheet-ocm-number"}
         aria-label={ariaLabel}
-        onClick={() => setPinned(!pinned)}
+        onClick={() => {
+          if (onActivate) onActivate();
+          else setPinned(!pinned);
+        }}
         onBlur={() => setPinned(false)}
         onKeyDown={(event) => {
           if (event.key === "Escape") {

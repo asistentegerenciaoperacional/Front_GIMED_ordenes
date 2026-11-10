@@ -375,6 +375,10 @@ body:has(.product-order-sheet) .content {
   font: inherit;
   cursor: pointer;
 }
+.sheet-ocm-number-cancelled {
+  color: #dc2626;
+  text-decoration: line-through;
+}
 .product-sheet-grid .field-help {
   width: 13px;
   height: 13px;

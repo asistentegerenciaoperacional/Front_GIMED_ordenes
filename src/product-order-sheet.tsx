@@ -1095,13 +1095,20 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           <div className="sheet-ocm-links">
             {[...new Set(row.supply.map((item) => item.order.id))].map((id) => {
               const items = row.supply.filter((item) => item.order.id === id);
+              const cancelled = items[0].orderCancelled;
+              const stateLabel = cancelled ? " (anulada)" : "";
               return (
                 <SheetCellHint
                   key={id}
-                  ariaLabel={`OCM ${items[0].order.no_orden}: ${items.map((item) => `${item.material} · ${count(item.quantity)} unidades`).join("; ")}`}
+                  ariaLabel={`OCM ${items[0].order.no_orden}${stateLabel}: ${items.map((item) => `${item.material} · ${count(item.quantity)} unidades`).join("; ")}`}
+                  onActivate={() =>
+                    cleanFirst(() => navigate(`ordenes/${items[0].order.id}`))
+                  }
                   content={
                     <div className="sheet-ocm-tooltip">
-                      <strong>OCM {items[0].order.no_orden}:</strong>
+                      <strong>
+                        OCM {items[0].order.no_orden}{stateLabel}:
+                      </strong>
                       <ul>
                         {items.map((item, index) => (
                           <li key={`${item.material}-${index}`}>
@@ -1112,7 +1119,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                     </div>
                   }
                 >
-                  {items[0].order.no_orden}
+                  <span className={cancelled ? "sheet-ocm-number-cancelled" : undefined}>
+                    {items[0].order.no_orden}
+                  </span>
                 </SheetCellHint>
               );
             })}
