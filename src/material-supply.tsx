@@ -16,6 +16,7 @@ import {
   materialDemandDay,
   type MaterialNeed,
 } from "../shared/material-demand";
+import type { Database } from "../shared/models";
 import { canonical, orderReference } from "../shared/schema";
 import { ControlForm, ControlInput } from "./components/controls";
 import {
@@ -147,12 +148,14 @@ export function ProductSupply({
   );
 }
 
-function MaterialSupplyDialog({
+export function MaterialSupplyDialog({
   productLineId,
   onClose,
+  beforeSnapshot,
 }: {
   productLineId: string;
   onClose: () => void;
+  beforeSnapshot?: (snapshot: Database) => void;
 }) {
   const { db, run } = useApp();
   const [snapshot, setSnapshot] = useState(db);
@@ -247,6 +250,7 @@ function MaterialSupplyDialog({
           expected: materialSupplySelection(snapshot, productLineId, targetId),
         },
         "OCM vinculada al producto",
+        beforeSnapshot,
       );
       onClose();
     } catch (failure) {

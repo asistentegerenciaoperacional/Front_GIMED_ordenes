@@ -117,9 +117,10 @@ async (page) => {
   const thirdId = await createOC();
   const thirdState = await state();
   const third = thirdState.orden_producto.find(l => l.id_orden_compra === thirdId);
+  const thirdLot = thirdState.lote_producto.find(l => l.id_orden_producto === third.id);
   await page.goto(origin + '/ordenes/' + thirdId);
   await trigger().click(); await selectCap();
-  await command('setLineState', { entity: 'orden_producto', id: third.id, estado: 'cerrada', confirm: true });
+  await command('saveLot', { row: { ...thirdLot, numero_lote: 'PRUEBA-OCM-CERRADO', estado: 'cerrado' } });
   await dialog().getByRole('button', { name: 'Vincular OCM', exact: true }).click();
   await dialog().getByRole('button', { name: 'Revisar opciones actualizadas', exact: true }).waitFor();
   check(await dialog().isVisible(), 'Cerrar la OC concurrentemente conserva el diálogo y el borrador');

@@ -48,6 +48,8 @@ No. de orden, código de barras, OCM vinculadas y saldos calculados son de lectu
 
 Las OCM vinculadas se resuelven por renglón y se repiten en sus lotes. Se muestran sus números y un tooltip con los materiales específicos, accesible con cursor, foco y toque.
 
+La flecha de **Nueva OC** ofrece **Vincular OCM** para un único renglón de producto en seguimiento de una OC autorizada. Seleccionar varios lotes del mismo renglón es válido. **F2** o doble clic en el área libre de **OCM vinculadas** abre el mismo diálogo que el detalle de la OC. Antes de vincular se resuelve el borrador de la hoja. Al confirmar se actualizan los vínculos y el costo unitario en todos los lotes del renglón.
+
 **Costo total unitario** es de solo lectura. Suma al precio de la OC el de cada renglón de OCM vinculado y vigente, incluso si su orden está pendiente de autorización. Se actualiza con el borrador del precio y se repite en todos los lotes del producto. El detalle de la OC permite desplegar los importes y las OCM de origen.
 
 ## Saldo, selección e interacción

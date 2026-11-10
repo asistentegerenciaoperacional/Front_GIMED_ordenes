@@ -66,7 +66,7 @@ body:has(.product-order-sheet) .content {
   padding-inline: 7px;
 }
 .aria-options.sheet-order-menu {
-  width: var(--trigger-width);
+  width: max(var(--trigger-width), 146px);
   padding: 0;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -79,6 +79,8 @@ body:has(.product-order-sheet) .content {
 .sheet-order-menu .sheet-order-menu-item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   min-height: 30px;
   box-sizing: border-box;
   padding: 6px 7px;

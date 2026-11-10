@@ -20,7 +20,9 @@ import {
   ClipboardPaste,
   Copy,
   Eye,
+  FileCheck2,
   FileText,
+  Link2,
   Plus,
   Printer,
   Save,
@@ -33,6 +35,7 @@ import {
 } from "lucide-react";
 import { blankRow, labels, meta, type Row } from "../shared/schema";
 import type { Database } from "../shared/models";
+import { buildMaterialNeeds } from "../shared/material-demand";
 import { materialRole } from "../shared/product-materials";
 import {
   changeKey,
@@ -58,6 +61,7 @@ import { SheetSelection, rangeBounds } from "./product-sheet-selection";
 import { SheetSelectionView } from "./components/sheet-selection-view";
 import { InvoicePicker, OrderForm, productLotFieldOrder } from "./forms";
 import { ActionTooltip } from "./components/overlays";
+import { MaterialSupplyDialog } from "./material-supply";
 import { customFilters, readCustomFilter } from "./order-filters";
 import {
   columnOptions,
@@ -124,6 +128,9 @@ type Editing = {
   value: string;
   deferredClear?: boolean;
 };
+type SupplyOrigin = { scope: object; menuRowKey?: string };
+const canLinkSupply = ({ line, order }: ProductSheetRow) =>
+  line.estado === "en_seguimiento" && order.estado_autorizacion === "autorizada";
 const localVisibility = "gimed:ui:product-sheet-columns:";
 function loadHidden(view: SheetView): string[] {
   const saved = readSheetLocal<unknown>(localVisibility + view, []);
@@ -195,6 +202,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     [creating, setCreating] = useState(false),
     [editingOrder, setEditingOrder] = useState<string | null>(null);
   const [authorize, setAuthorize] = useState<string[] | null>(null);
+  const [linking, setLinking] = useState<
+    (SupplyOrigin & { lineId: string }) | null
+  >(null);
   const [deleting, setDeleting] = useState<{
     ids: string[];
     origin: object;
@@ -206,6 +216,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [pending, setPending] = useState<{
     action: () => void;
     focusScope?: object;
+    menuRowKey?: string;
   } | null>(null);
   const [replacements, setReplacements] = useState<
     { orderId: string; providerId: string }[]
@@ -214,6 +225,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     [openedColumn, setOpenedColumn] = useState<string | null>(null);
   const columnsDialog = useRef<HTMLElement | null>(null);
   const orderActionsRef = useRef<HTMLDivElement>(null);
+  const orderMenuTrigger = useRef<HTMLButtonElement>(null);
   const [collapsed, setCollapsed] = useState(() =>
     readSheetLocal(
       "gimed:ui:product-sheet-collapsed",
@@ -267,7 +279,11 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     () => sheetRef.current?.querySelector<HTMLElement>(".product-sheet-viewport"),
     [],
   );
-  const captureSheetSnapshot = (snapshot: Database, origin: object) => {
+  const captureSheetSnapshot = (
+    snapshot: Database,
+    origin: object,
+    reveal?: boolean,
+  ) => {
     const viewport = getViewport();
     if (!viewport) return;
     const refresh = {
@@ -278,31 +294,39 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         left: viewport.scrollLeft,
         selection: selection.capture(),
         reveal:
-          liveScope.current === origin ||
-          viewport.contains(document.activeElement),
+          reveal ??
+          (liveScope.current === origin ||
+            viewport.contains(document.activeElement)),
       },
     };
     sheetSnapshot.current = refresh;
     return refresh;
   };
-  const returnSheetFocus = useCallback((origin: object) => {
-    const focusGrid = () => {
+  const returnSheetFocus = useCallback((origin: object, menuRowKey?: string) => {
+    const restoreFocus = () => {
       const viewport = getViewport();
       const active = document.activeElement;
+      const trigger = orderMenuTrigger.current;
       if (
         viewport &&
         liveScope.current === origin &&
         !document.querySelector('[role="dialog"], [role="alertdialog"]') &&
         (active === document.body ||
           viewport.contains(active) ||
+          (!!menuRowKey && active === trigger) ||
           (sheetRef.current?.contains(active) &&
             active?.closest("[data-sheet-return-focus]")))
-      )
-        viewport.querySelector("table")?.focus({ preventScroll: true });
+      ) {
+        const target =
+          menuRowKey && selection.getAddress()?.anchor.rowKey === menuRowKey
+            ? trigger
+            : null;
+        (target ?? viewport.querySelector("table"))?.focus({ preventScroll: true });
+      }
     };
     // React Aria restores focus to the dialog trigger in the next frame.
-    requestAnimationFrame(() => requestAnimationFrame(focusGrid));
-  }, [getViewport]);
+    requestAnimationFrame(() => requestAnimationFrame(restoreFocus));
+  }, [getViewport, selection]);
   const closeDeleteDialog = () => {
     if (!deleting) return;
     deleteFocusOrigin.current = deleting.origin;
@@ -316,7 +340,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   }, [deleting, returnSheetFocus]);
   const cancelPendingAction = () => {
     setPending(null);
-    if (pending?.focusScope) returnSheetFocus(pending.focusScope);
+    if (pending?.focusScope)
+      returnSheetFocus(pending.focusScope, pending.menuRowKey);
   };
   const tableState = useMemo(
     () => readColumnState(params, allColumns),
@@ -426,14 +451,17 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     if (!range) return "";
     const bounds = rangeBounds(range),
       orders = new Set<string>();
+    const firstLine = rows[bounds.top]?.line.id;
     let hasLot = false;
+    let sameLine = true;
     for (let index = bounds.top; index <= bounds.bottom; index++) {
       const row = rows[index];
       if (!row) continue;
       orders.add(row.order.id);
+      sameLine &&= row.line.id === firstLine;
       hasLot ||= !!row.lot;
     }
-    return `${bounds.bottom - bounds.top + 1}/${[...orders].join(",")}/${hasLot}`;
+    return `${bounds.bottom - bounds.top + 1}/${[...orders].join(",")}/${hasLot}/${sameLine ? firstLine ?? "" : ""}`;
   }, [selection, rows]);
   const printSelected = (orderId: string) => {
     const viewport = document.querySelector<HTMLElement>(
@@ -461,11 +489,51 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     next.delete("pagina");
     replaceRoute("/ordenes/productos" + (next.size ? "?" + next : ""));
   };
-  const cleanFirst = (action: () => void, focusScope?: object) => {
+  const cleanFirst = (
+    action: () => void,
+    focusScope?: object,
+    menuRowKey?: string,
+  ) => {
     if (editing && !commit(undefined, true)) return;
-    if (draftRef.current.length) setPending({ action, focusScope });
+    if (draftRef.current.length) setPending({ action, focusScope, menuRowKey });
     else action();
   };
+  function beginSupply(row: ProductSheetRow, menuRowKey?: string) {
+    if (busy || linking) return;
+    const unavailable =
+      "Solo puedes vincular OCM a un producto en seguimiento de una OC autorizada.";
+    if (!canLinkSupply(display(row))) {
+      notify(unavailable, true);
+      return;
+    }
+    const lineId = row.line.id;
+    cleanFirst(
+      () => {
+        if (liveScope.current !== scope) return;
+        const snapshot = operationDb.current;
+        const line = snapshot.orden_producto.find((item) => item.id === lineId);
+        const order = snapshot.orden_compra.find(
+          (item) => item.id === line?.id_orden_compra,
+        );
+        if (
+          line?.estado !== "en_seguimiento" ||
+          order?.estado_autorizacion !== "autorizada"
+        ) {
+          notify(unavailable, true);
+        } else if (
+          !buildMaterialNeeds(snapshot, order.id).some((need) => need.line.id === lineId)
+        ) {
+          notify("Este producto no tiene materiales pendientes de abastecer.");
+        } else {
+          setLinking({ lineId, scope, menuRowKey });
+          return;
+        }
+        returnSheetFocus(scope, menuRowKey);
+      },
+      scope,
+      menuRowKey,
+    );
+  }
   async function save(origin = scope): Promise<boolean> {
     if (submitting.current) return false;
     const submitted = draftRef.current;
@@ -536,6 +604,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     setError(null);
   };
   function edit(row: ProductSheetRow, col: SheetColumn, initial?: string) {
+    if (col.key === "ocm" && initial === undefined) {
+      beginSupply(row);
+      return;
+    }
     setProjectionDay(day);
     const current = display(row),
       denied = cellPermission(db, current, col);
@@ -1160,6 +1232,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       {() => {
         const { range, selected, lineIds, lotIds, orderIds, singleOrder } =
           selectionTargets();
+        const authorizeLabel =
+          orderIds.length && view === "no_autorizadas"
+            ? `Autorizar ${orderIds.length} OC`
+            : "Autorizar";
         return (
           <>
             <div className="product-sheet-toolbar-top">
@@ -1236,6 +1312,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 </ActionTooltip>
                 <MenuTrigger>
                   <Button
+                    ref={orderMenuTrigger}
                     icon={ChevronDown}
                     aria-label="Más acciones de órdenes"
                   />
@@ -1248,15 +1325,25 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                     <Menu
                       className="aria-option-list"
                       aria-label="Acciones de órdenes"
-                      onAction={() => {
-                        const ids = selectionTargets().orderIds;
-                        if (view === "no_autorizadas" && ids.length && !busy)
-                          cleanFirst(() => setAuthorize(ids));
+                      onAction={(key) => {
+                        const targets = selectionTargets();
+                        if (key === "vincular-ocm" && targets.lineIds.length === 1) {
+                          const anchor = targets.range && rows[targets.range.anchor.row];
+                          if (anchor) beginSupply(anchor, anchor.key);
+                        } else if (
+                          key === "autorizar" &&
+                          view === "no_autorizadas" &&
+                          targets.orderIds.length &&
+                          !busy
+                        ) {
+                          cleanFirst(() => setAuthorize(targets.orderIds));
+                        }
                       }}
                     >
                       <ActionTooltip content="Autorizar (alt+a)">
                         <MenuItem
                           id="autorizar"
+                          textValue={authorizeLabel}
                           aria-keyshortcuts="Alt+A"
                           className="aria-option sheet-order-menu-item"
                           isDisabled={
@@ -1265,12 +1352,23 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                             busy
                           }
                         >
-                          Autorizar
-                          {orderIds.length && view === "no_autorizadas"
-                            ? ` ${orderIds.length} OC`
-                            : ""}
+                          {authorizeLabel}
+                          <FileCheck2 size={15} aria-hidden="true" />
                         </MenuItem>
                       </ActionTooltip>
+                      <MenuItem
+                        id="vincular-ocm"
+                        textValue="Vincular OCM"
+                        className="aria-option sheet-order-menu-item"
+                        isDisabled={
+                          busy ||
+                          lineIds.length !== 1 ||
+                          !canLinkSupply(display(selected[0]))
+                        }
+                      >
+                        Vincular OCM
+                        <Link2 size={15} aria-hidden="true" />
+                      </MenuItem>
                     </Menu>
                   </Popover>
                 </MenuTrigger>
@@ -1814,6 +1912,18 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         />
       )}
       {creating && <OrderForm onClose={() => setCreating(false)} />}
+      {linking && (
+        <MaterialSupplyDialog
+          productLineId={linking.lineId}
+          beforeSnapshot={(snapshot) =>
+            captureSheetSnapshot(snapshot, linking.scope, !linking.menuRowKey)
+          }
+          onClose={() => {
+            setLinking(null);
+            returnSheetFocus(linking.scope, linking.menuRowKey);
+          }}
+        />
+      )}
       {editingOrder && (
         <OrderForm
           order={db.orden_compra.find((order) => order.id === editingOrder)}
