@@ -159,6 +159,7 @@ export function makeOrderPerformanceFixture(lotCount: number): Database {
         estado_inspeccion: serial % 3 === 0 ? "aprobada" : "pendiente",
         fecha_recepcion: reception,
         fecha_confirmacion: confirmation,
+        id_direccion: null,
         ubicacion: reception ? "Bodega de demostración" : null,
         estado:
           serial % 19 === 0
@@ -194,6 +195,7 @@ export function makeOrderPerformanceFixture(lotCount: number): Database {
         fecha_entrega: reception,
         id_lote_material: reception ? sid(900) : null,
         id_factura: serial % 4 === 0 ? null : sid(902),
+        id_direccion: null,
         ubicacion: reception ? "Bodega de demostración" : null,
         estado:
           serial % 11 === 0
@@ -226,6 +228,7 @@ export function makeOrderPerformanceFixture(lotCount: number): Database {
         fecha_estimada_entrega: order.fecha_solicitada_entrega,
         fecha_entrega: serial % 3 === 0 ? iso(-1 - (serial % 8)) : null,
         id_factura: serial % 4 === 0 ? null : sid(903),
+        id_direccion: null,
         ubicacion: null,
         estado:
           serial % 11 === 0

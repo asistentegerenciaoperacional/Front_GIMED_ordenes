@@ -16,6 +16,7 @@ import {
 import { addCalendarDays, type CustomFilterId } from "./order-filters";
 import { parseDateInput } from "./dates";
 import { materialRole } from "../shared/product-materials";
+import { selectableAddresses } from "../shared/reception-location";
 import {
   indexLinkedMaterialLines,
   productUnitCost,
@@ -139,7 +140,7 @@ export const productSheetColumns: SheetColumn[] = [
     175,
     "lote_producto",
   ),
-  column("ubicacion", "Ubicación", "text", 180, "lote_producto"),
+  column("ubicacion", "Ubicación", "text", 180, "lote_producto", "id_direccion"),
 ];
 const unauthorizedKeys = [
   "no_orden",
@@ -240,6 +241,7 @@ export function sheetValue(
   col: SheetColumn,
 ): string {
   if (col.key === "costo_total_unitario") return exactMoney(row.unitCost);
+  if (col.key === "ubicacion") return row.lot?.ubicacion ?? "";
   const references = lookup(db);
   if (col.key === "codigo")
     return references.codes.get(row.line.id_codigo_barras)?.codigo ?? "";
@@ -496,6 +498,15 @@ export function parseSheetInput(
   const nullable =
     col.entity && !meta.tables[col.entity].fields[field]?.required;
   if (!raw && nullable) return null;
+  if (field === "id_direccion") {
+    if (raw === row.lot?.id_direccion) return raw;
+    const addresses = selectableAddresses(db);
+    const exact = addresses.find((address) => address.id === raw);
+    if (exact) return exact.id;
+    const matching = addresses.filter((address) => canonical(address.nombre_dir ?? "") === canonical(raw));
+    if (matching.length === 1) return matching[0].id;
+    throw new Error(matching.length ? "Hay varias bodegas con ese nombre. Usa el selector." : "Selecciona una ubicación activa.");
+  }
   const reference =
     field === "id_producto"
       ? db.productos.map((p) => ({ id: p.id, labels: [p.nombre_producto] }))

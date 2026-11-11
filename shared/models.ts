@@ -28,13 +28,29 @@ export interface proveedor {
   activo: boolean | null;
 }
 
-export interface direccion_proveedor {
+export interface direccion {
   id: string;
-  id_proveedor: string;
+  tipo: "propia" | "proveedor";
+  id_proveedor: string | null;
+  activa: boolean;
   nombre_dir: string | null;
   ciudad: string | null;
   linea_1: string | null;
   linea_2: string | null;
+}
+
+export interface usuario {
+  id: string;
+  nombre: string;
+}
+
+export interface comentario {
+  id: string;
+  id_usuario: string;
+  id_orden_producto: string | null;
+  id_orden_material: string | null;
+  texto: string;
+  fecha_creacion: string;
 }
 
 export interface contacto {
@@ -127,6 +143,7 @@ export interface lote_producto {
   estado_inspeccion: "pendiente" | "aprobada" | "rechazada";
   fecha_recepcion: string | null;
   fecha_confirmacion: string | null;
+  id_direccion: string | null;
   ubicacion: string | null;
   estado: "en_seguimiento" | "cerrado" | "anulado";
 }
@@ -143,6 +160,7 @@ export interface orden_material {
   fecha_entrega: string | null;
   id_lote_material: string | null;
   id_factura: string | null;
+  id_direccion: string | null;
   ubicacion: string | null;
   estado: "en_seguimiento" | "anulada" | "cerrada";
 }
@@ -163,6 +181,7 @@ export interface orden_otro {
   fecha_estimada_entrega: string | null;
   fecha_entrega: string | null;
   id_factura: string | null;
+  id_direccion: string | null;
   ubicacion: string | null;
   estado: "en_seguimiento" | "anulada" | "cerrada";
 }
@@ -246,7 +265,9 @@ export interface EntityMap {
   productos: productos;
   codigos_barras: codigos_barras;
   proveedor: proveedor;
-  direccion_proveedor: direccion_proveedor;
+  direccion: direccion;
+  usuario: usuario;
+  comentario: comentario;
   contacto: contacto;
   categorias: categorias;
   costos_maquila: costos_maquila;

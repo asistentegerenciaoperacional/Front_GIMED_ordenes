@@ -73,6 +73,7 @@ export class ApiError extends Error {
     this.details = data.details ?? {};
   }
 }
+export const sessionExpiredEvent = "prototipo:session-expired";
 export async function request(path: string, body?: Row): Promise<any> {
   let response: Response;
   try {
@@ -93,11 +94,16 @@ export async function request(path: string, body?: Row): Promise<any> {
     });
   }
   const data = await response.json();
-  if (!response.ok) throw new ApiError(data);
+  if (!response.ok) {
+    if (data.code === "AUTH_REQUIRED" && path !== "auth/session")
+      window.dispatchEvent(new Event(sessionExpiredEvent));
+    throw new ApiError(data);
+  }
   return data;
 }
 type AppContextValue = {
   db: Database;
+  userId: string;
   run: (
     name: string,
     payload: Row,
@@ -606,9 +612,11 @@ export function useErrors(validation?: LiveValidation) {
 export function ErrorNotice({
   error,
   id,
+  onBeforeFieldFocus,
 }: {
   error: ApiError | null;
   id?: string;
+  onBeforeFieldFocus?: (field: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const scope = useContext(FieldScope);
@@ -635,6 +643,7 @@ export function ErrorNotice({
                   href={`#field-${field}`}
                   onClick={(e) => {
                     e.preventDefault();
+                    onBeforeFieldFocus?.(field);
                     const form =
                       ref.current?.closest("form") ??
                       ref.current?.parentElement;

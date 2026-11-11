@@ -92,6 +92,18 @@ export function validateDatabase(
           "FOREIGN_KEY",
           { [ref.field]: "Selecciona un registro existente." },
         );
+  for (const address of db.direccion)
+    check(
+      (address.tipo === "proveedor") === (address.id_proveedor !== null),
+      "Indica un proveedor únicamente para una dirección de proveedor.",
+      "VALIDATION",
+      { id_proveedor: "Revisa el tipo de ubicación y su proveedor." },
+    );
+  for (const comment of db.comentario)
+    check(
+      (comment.id_orden_producto === null) !== (comment.id_orden_material === null),
+      "El comentario debe pertenecer a un solo renglón.",
+    );
     }
   for (const template of db.plantilla_correo) {
     check(template.tipo_evento === quotationEvent, "La plantilla global corresponde a cotización de materiales.");

@@ -1,5 +1,9 @@
 {
   "enums": {
+    "tipo_direccion": [
+      "propia",
+      "proveedor"
+    ],
     "tipo_orden": [
       "producto",
       "material",
@@ -200,15 +204,24 @@
       ],
       "unique": []
     },
-    "direccion_proveedor": {
+    "direccion": {
       "fields": {
         "id": {
           "type": "object_id",
           "required": true
         },
+        "tipo": {
+          "type": "tipo_direccion",
+          "required": true
+        },
         "id_proveedor": {
           "type": "object_id",
-          "required": true
+          "required": false
+        },
+        "activa": {
+          "type": "boolean",
+          "required": true,
+          "default": true
         },
         "nombre_dir": {
           "type": "varchar",
@@ -225,6 +238,54 @@
         "linea_2": {
           "type": "varchar",
           "required": false
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "usuario": {
+      "fields": {
+        "id": {
+          "type": "uuid",
+          "required": true
+        },
+        "nombre": {
+          "type": "varchar",
+          "required": true
+        }
+      },
+      "pk": [
+        "id"
+      ],
+      "unique": []
+    },
+    "comentario": {
+      "fields": {
+        "id": {
+          "type": "object_id",
+          "required": true
+        },
+        "id_usuario": {
+          "type": "uuid",
+          "required": true
+        },
+        "id_orden_producto": {
+          "type": "object_id",
+          "required": false
+        },
+        "id_orden_material": {
+          "type": "object_id",
+          "required": false
+        },
+        "texto": {
+          "type": "varchar",
+          "required": true
+        },
+        "fecha_creacion": {
+          "type": "datetime",
+          "required": true
         }
       },
       "pk": [
@@ -571,6 +632,10 @@
           "type": "datetime",
           "required": false
         },
+        "id_direccion": {
+          "type": "object_id",
+          "required": false
+        },
         "ubicacion": {
           "type": "varchar",
           "required": false
@@ -629,6 +694,10 @@
           "required": false
         },
         "id_factura": {
+          "type": "object_id",
+          "required": false
+        },
+        "id_direccion": {
           "type": "object_id",
           "required": false
         },
@@ -711,6 +780,10 @@
           "required": false
         },
         "id_factura": {
+          "type": "object_id",
+          "required": false
+        },
+        "id_direccion": {
           "type": "object_id",
           "required": false
         },
@@ -1093,9 +1166,45 @@
       "targetField": "id"
     },
     {
-      "table": "direccion_proveedor",
+      "table": "direccion",
       "field": "id_proveedor",
       "target": "proveedor",
+      "targetField": "id"
+    },
+    {
+      "table": "lote_producto",
+      "field": "id_direccion",
+      "target": "direccion",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_material",
+      "field": "id_direccion",
+      "target": "direccion",
+      "targetField": "id"
+    },
+    {
+      "table": "orden_otro",
+      "field": "id_direccion",
+      "target": "direccion",
+      "targetField": "id"
+    },
+    {
+      "table": "comentario",
+      "field": "id_usuario",
+      "target": "usuario",
+      "targetField": "id"
+    },
+    {
+      "table": "comentario",
+      "field": "id_orden_producto",
+      "target": "orden_producto",
+      "targetField": "id"
+    },
+    {
+      "table": "comentario",
+      "field": "id_orden_material",
+      "target": "orden_material",
       "targetField": "id"
     },
     {

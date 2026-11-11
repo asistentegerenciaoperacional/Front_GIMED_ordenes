@@ -80,13 +80,14 @@ const materialFilterColumns: Column<string>[] = [
 
 const providerEntities: Entity[] = [
   "proveedor",
-  "direccion_proveedor",
+  "direccion",
   "contacto",
 ];
 const providerBooleanFields = new Set([
   "Es_maquila",
   "Es_materiales",
   "activo",
+  "activa",
 ]);
 
 const catalogCell = (
@@ -214,12 +215,14 @@ const columns: Partial<Record<Entity, string[]>> = {
   ],
   materiales: ["codigo_material", "nombre_material", "id_tipo_material"],
   contacto: ["id_proveedor", "nombre", "cargo_area", "correo", "celular"],
-  direccion_proveedor: [
+  direccion: [
+    "tipo",
     "id_proveedor",
     "nombre_dir",
     "ciudad",
     "linea_1",
     "linea_2",
+    "activa",
   ],
   costos_maquila: ["id_producto", "costo", "fecha_inicio", "fecha_fin"],
   contacto_interno: ["nombre", "correo", "cargo_area", "activo"],
@@ -473,7 +476,7 @@ export function CatalogTable({
                               onClick={() => setDetails(row)}
                             />
                           )}
-                          <Button
+                          {entity !== "direccion" && <Button
                             className="icon-btn table-action delete-action"
                             icon={Trash2}
                             aria-label={`Eliminar ${recordName(db, entity, row)}`}
@@ -491,7 +494,7 @@ export function CatalogTable({
                                   "Registro eliminado",
                                 ).catch((e) => notify(e.message, true));
                             }}
-                          />
+                          />}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -682,13 +685,15 @@ export function CatalogPage({
   };
   const providerList: Entity[] = [
     "proveedor",
-    "direccion_proveedor",
+    "direccion",
     "contacto",
   ];
   const initial = (
     params.get("tab") === "producto_corrugado"
       ? "materiales_asociados"
-      : params.get("tab")
+      : params.get("tab") === "direccion_proveedor"
+        ? "direccion"
+        : params.get("tab")
   ) as Entity;
   const catalogEntityList: Entity[] = Object.values(catalogGroups).flat();
   const [entity, setEntity] = useState<Entity>(() =>

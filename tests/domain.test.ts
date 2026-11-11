@@ -138,11 +138,11 @@ test("el lote inicial toma batch estimado de la cabecera y conserva su fecha des
   );
 });
 
-test("el estado inicial tiene las 28 colecciones base y la plantilla provisional, conservando tipos, históricos y decimales exactos", () => {
+test("el estado inicial tiene las 30 colecciones base y la plantilla provisional, conservando tipos, históricos y decimales exactos", () => {
   const db = validateDatabase(makeSeed());
-  assert.equal(entities.length, 29);
+  assert.equal(entities.length, 31);
   assert.deepEqual(makeSeed().plantilla_correo, []);
-  assert.equal(Object.keys(db).length, 29);
+  assert.equal(Object.keys(db).length, 31);
   assert.equal(
     db.orden_producto.find((l) => l.id === sid(116))!.id_codigo_barras,
     sid(94),

@@ -66,6 +66,8 @@ import {
 import { Documents } from "./document-controls";
 import { TooltipHelp, confirmAction } from "./components/overlays";
 import { OrderEntrySheet } from "./order-entry-sheet";
+import { withCommentRemovalConfirmation } from "./line-comments";
+import { ReceptionLocationPicker } from "./reception-location";
 import {
   blankSheetLine,
   compactSheetLines,
@@ -153,7 +155,11 @@ export function CatalogForm({
   );
   const [dirty, setDirty] = useState(false);
   const update = (field: string, value: any) => {
-    setValues({ ...values, [field]: value });
+    setValues({
+      ...values,
+      [field]: value,
+      ...(entity === "direccion" && field === "tipo" && value === "propia" ? { id_proveedor: null } : {}),
+    });
     setDirty(true);
   };
   const updateProviderNit = (value: string) => {
@@ -308,7 +314,8 @@ export function CatalogForm({
               .filter(
                 ([name]) =>
                   name !== "id" &&
-                  !(entity === "proveedor" && name === "digito_verf"),
+                  !(entity === "proveedor" && name === "digito_verf") &&
+                  !(entity === "direccion" && name === "id_proveedor" && values.tipo !== "proveedor"),
               )
               .map(([field, spec]) => {
                 const id = `field-${field}`,
@@ -499,7 +506,11 @@ export function CatalogForm({
                     id={id}
                     label={labels[field] ?? text(field)}
                     required={
-                      entity === "materiales" && field === "codigo_material"
+                      entity === "direccion" && field === "id_proveedor"
+                        ? values.tipo === "proveedor"
+                        : entity === "direccion" && field === "nombre_dir"
+                        ? true
+                        : entity === "materiales" && field === "codigo_material"
                         ? materialCodeRequired(db, values.id_tipo_material)
                         : spec.required
                     }
@@ -993,7 +1004,7 @@ export const productLotFieldOrder = [
   "estado_inspeccion",
   "fecha_recepcion",
   "fecha_confirmacion",
-  "ubicacion",
+  "id_direccion",
 ];
 
 export function LotForm({
@@ -1077,7 +1088,17 @@ export function LotForm({
               .map(([field, spec]) => {
                 const id = `field-${field}`;
                 const isDate = spec.type === "datetime";
-                const control = meta.enums[spec.type] ? (
+              const control = field === "id_direccion" ? (
+                <ReceptionLocationPicker
+                  id={id}
+                  value={row.id_direccion}
+                  historical={row.ubicacion}
+                  onChange={(value) => {
+                    setRow({ ...row, id_direccion: value, ubicacion: null });
+                    setDirty(true);
+                  }}
+                />
+              ) : meta.enums[spec.type] ? (
                   <ControlSelect
                     id={id}
                     value={row[field] ?? ""}
@@ -1219,14 +1240,15 @@ export function ReceiptForm({
               />
             </Field>
             <Field
-              id="field-ubicacion"
+              id="field-id_direccion"
               label="Ubicación de recepción"
-              error={error?.fields.ubicacion}
+              error={error?.fields.id_direccion}
             >
-              <ControlInput
-                id="field-ubicacion"
-                value={row.ubicacion ?? ""}
-                onChange={(e) => update("ubicacion", e.target.value || null)}
+              <ReceptionLocationPicker
+                id="field-id_direccion"
+                value={row.id_direccion}
+                historical={row.ubicacion}
+                onChange={(value) => setRow({ ...row, id_direccion: value, ubicacion: null })}
               />
             </Field>
             {["fecha_estimada_entrega", "fecha_entrega"].map((f) => (
@@ -1956,7 +1978,7 @@ export function OrderForm({
           fields: orderIssues,
         });
       const requestedDelivery = isoDate(delivery);
-      const result = await run(
+      const result = await withCommentRemovalConfirmation((confirmar_comentarios) => run(
         order ? "editOrder" : "createOrder",
         {
           id: order?.id,
@@ -1964,6 +1986,7 @@ export function OrderForm({
           id_proveedor: supplier,
           no_orden: order ? number : undefined,
           confirm: replacement,
+          confirmar_comentarios,
           expected_no_orden: order ? undefined : automaticNumber,
           fecha_elaboracion: order ? isoDate(date) : undefined,
           fecha_solicitada_entrega: requestedDelivery,
@@ -1979,7 +2002,8 @@ export function OrderForm({
           ...(supplyCreation ? { abastecimiento } : {}),
         },
         order ? "Orden actualizada" : "Orden creada",
-      );
+      ));
+      if (!result) return;
       if (!order) {
         const deliveryDay = costDay(requestedDelivery);
         if (type === "producto" && deliveryDay)

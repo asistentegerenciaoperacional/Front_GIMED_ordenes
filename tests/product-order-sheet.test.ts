@@ -83,15 +83,15 @@ test("copias versionadas rechazan destinos corruptos sin alterar la base", () =>
 });
 test("la edición posterior conserva un original null y no borra la detección de conflicto", () => {
   const { db, row } = fixture();
-  row.lot!.ubicacion = null;
+  row.lot!.id_direccion = null;
   const first = proposeSheetInput(
     db,
     [],
-    [{ row, column: column("ubicacion"), text: "Cali" }],
+    [{ row, column: column("ubicacion"), text: db.direccion[0].id }],
   );
-  row.lot!.ubicacion = "Cambio de otra sesión";
+  row.lot!.id_direccion = db.direccion[1].id;
   const second = proposeSheetInput(db, first.changes, [
-    { row, column: column("ubicacion"), text: "Bogotá" },
+    { row, column: column("ubicacion"), text: db.direccion[2].id },
   ]);
   assert.equal(second.changes[0].expected, null);
 });
@@ -384,7 +384,7 @@ test("pegado contradictorio de un dato compartido se rechaza sin perder otras ce
     [
       { row: rows[0], column: column("precio_unitario"), text: "7500" },
       { row: rows.at(-1)!, column: column("precio_unitario"), text: "8000" },
-      { row: rows[0], column: column("ubicacion"), text: "Cali" },
+      { row: rows[0], column: column("ubicacion"), text: db.direccion[0].id },
     ],
   );
   assert.equal(
@@ -394,7 +394,7 @@ test("pegado contradictorio de un dato compartido se rechaza sin perder otras ce
   );
   assert.deepEqual(
     result.changes.map((change) => change.field),
-    ["ubicacion"],
+    ["id_direccion"],
   );
 });
 test("fechas, enteros, referencias ambiguas y factura de otro proveedor no se aceptan", () => {

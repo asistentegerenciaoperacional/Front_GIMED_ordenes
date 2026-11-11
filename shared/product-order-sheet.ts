@@ -77,6 +77,7 @@ export const sheetFields = {
     "fecha_recepcion",
     "fecha_confirmacion",
     "ubicacion",
+    "id_direccion",
   ],
 } satisfies Record<SheetEntity, string[]>;
 
@@ -126,6 +127,7 @@ export function overlaySheetChanges(
 ): Database {
   if (!changes.length) return db;
   const next = { ...db };
+  const addressNames = new Map(db.direccion.map((address) => [address.id, address.nombre_dir]));
   for (const entity of Object.keys(sheetFields) as SheetEntity[]) {
     const byId = new Map<string, SheetChange[]>();
     for (const change of changes)
@@ -135,16 +137,14 @@ export function overlaySheetChanges(
       )
         byId.set(change.id, [...(byId.get(change.id) ?? []), change]);
     if (byId.size)
-      (next[entity] as Row[]) = db[entity].map((row) =>
-        byId.has(row.id)
-          ? {
-              ...row,
-              ...Object.fromEntries(
-                byId.get(row.id)!.map((change) => [change.field, change.value]),
-              ),
-            }
-          : row,
-      );
+      (next[entity] as Row[]) = db[entity].map((row) => {
+        const edits = byId.get(row.id);
+        if (!edits) return row;
+        const updated = { ...row, ...Object.fromEntries(edits.map((change) => [change.field, change.value])) } as Row;
+        if (entity === "lote_producto" && updated.id_direccion !== (row as Row).id_direccion)
+          updated.ubicacion = addressNames.get(updated.id_direccion) ?? null;
+        return updated;
+      });
   }
   const changedProducts = new Set(
     changes

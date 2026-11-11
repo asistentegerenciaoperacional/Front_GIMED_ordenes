@@ -1,4 +1,5 @@
 import type { Database } from "../shared/models";
+import { selectableAddresses } from "../shared/reception-location";
 import { costIssue } from "../shared/maquila-costs";
 import { materialCatalogIssue } from "../shared/product-materials";
 import {
@@ -73,6 +74,10 @@ export function validEntityField(
   const value = normalizedField(entity, field, raw);
   if (spec.required && typeof value === "string" && !value.trim()) return false;
   if (!schemas[entity].shape[field].safeParse(value).success) return false;
+  if (entity === "direccion" && field === "id_proveedor" && (values.tipo === "proveedor") !== (value !== null))
+    return false;
+  if (entity === "direccion" && field === "nombre_dir" && (typeof value !== "string" || !value.trim()))
+    return false;
   if (entity === "costos_maquila" && db) {
     const normalized = Object.fromEntries(
       Object.entries(values).map(([name, raw]) => [
@@ -105,6 +110,8 @@ export function validEntityField(
   )
     return false;
   if (!db) return true;
+  if (field === "id_direccion" && value !== null && value !== record?.id_direccion)
+    return selectableAddresses(db).some((address) => address.id === value);
   if (entity === "materiales" || entity === "tipos_materiales") {
     const issue = materialCatalogIssue(db, entity, {
       ...values,

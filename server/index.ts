@@ -5,13 +5,27 @@ import { JsonStore } from "./store";
 import { command, mailPreview } from "./domain";
 import { materialQuotationPreview } from "./material-quotation";
 import { BusinessError } from "./integrity";
+import { createAuth } from "./auth";
+import { addLineComment, lineComments } from "./comments";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const store = await JsonStore.open(
   process.env.PROTOTIPO_DATA_FILE || resolve(root, "data/database.json"),
 );
 const app = express();
+const auth = createAuth(store);
+app.use("/api", auth.verifyOrigin);
 app.use("/api/commands", express.json({ limit: "16mb" }));
 app.use(express.json({ limit: "1mb" }));
+app.get("/api/health", (_req, res) => res.json({ ok: true }));
+app.post("/api/auth/login", auth.login);
+app.post("/api/auth/logout", auth.logout);
+app.use("/api", auth.requireSession);
+app.get("/api/auth/session", (_req, res) => res.json({ usuario: res.locals.usuario }));
+app.get("/api/comentarios/:tipo/:id", (req, res) => res.json(lineComments(store.snapshot(), req.params)));
+app.post("/api/comentarios", async (req, res) => {
+  const comment = await store.transaction((db) => addLineComment(db, req.body, res.locals.usuario));
+  res.status(201).json(comment);
+});
 app.get("/api/state", (_req, res) => res.json(store.snapshot()));
 app.post("/api/commands", async (req, res) => {
   const result = await store.transaction((db) =>
@@ -57,7 +71,7 @@ app.use(
     _next: express.NextFunction,
   ) => {
     if (err instanceof BusinessError)
-      res.status(err.code === "NOT_FOUND" ? 404 : ["SHEET_CHANGED", "LOT_STATE_CHANGED"].includes(err.code) ? 409 : 422).json({
+      res.status(err.code === "NOT_FOUND" ? 404 : ["SHEET_CHANGED", "LOT_STATE_CHANGED", "COMMENT_REMOVAL"].includes(err.code) ? 409 : 422).json({
         message: err.message,
         code: err.code,
         fields: err.fields,

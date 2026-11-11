@@ -92,7 +92,7 @@ async (page) => {
   await corrected(field('cantidad_recibida'),'Cantidad recibida del lote');
   await page.getByRole('alert').waitFor({state:'hidden'});
   await field('fecha_recepcion').fill('31/02/2026');
-  await field('ubicacion').focus();
+  await field('id_direccion').focus();
   check(await field('fecha_recepcion').getAttribute('aria-invalid')==='true','Fecha inexistente muestra el error del calendario');
   await field('fecha_recepcion').fill('24/10/2026');
   await corrected(field('fecha_recepcion'),'Fecha de recepción válida');

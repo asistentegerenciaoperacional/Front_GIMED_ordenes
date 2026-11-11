@@ -8,6 +8,7 @@ import {
   FolderOpen,
   Mail,
   Menu,
+  LogOut,
   Package,
   ReceiptText,
   RefreshCw,
@@ -24,7 +25,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { Database } from "../shared/models";
+import type { Database, usuario } from "../shared/models";
 import type { Row } from "../shared/schema";
 import { shareSnapshotStrings } from "./snapshot-memory";
 import { ControlLink } from "./components/controls";
@@ -71,7 +72,7 @@ const navigation = [
   { id: "documentos", label: "Documentos", icon: FolderOpen },
   { id: "correos", label: "Correos", icon: Mail },
 ];
-export function App() {
+export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise<void> }) {
   const [db, setDb] = useState<Database | null>(null),
     [loadError, setLoadError] = useState(""),
     [route, setRoute] = useState(currentRoute),
@@ -403,7 +404,7 @@ export function App() {
       />
     );
   return (
-    <AppContext.Provider value={{ db, run, navigate, notify }}>
+    <AppContext.Provider value={{ db, run, navigate, notify, userId: user.id }}>
       {print ? (
         content
       ) : (
@@ -473,9 +474,16 @@ export function App() {
                 </div>
               </div>
               <div className="topbar-right">
-                <span className="avatar" aria-label="Espacio GIMED">
-                  GI
+                <span className="avatar" aria-label={user.nombre}>
+                  {user.nombre.slice(0, 2).toUpperCase()}
                 </span>
+                <Button
+                  variant="ghost"
+                  icon={LogOut}
+                  aria-label="Cerrar sesión"
+                  title={`${user.nombre} · Cerrar sesión`}
+                  onClick={() => void onLogout().catch((error: Error) => notify(error.message, true))}
+                />
               </div>
             </header>
             <main id="main-content" className="content" tabIndex={-1}>

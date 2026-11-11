@@ -2,18 +2,21 @@ import { spawn } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
+import { authTestAccounts, authTestPassword, startAuthFixture } from "../tests/fixtures/supabase-auth.mjs";
 
 const report = JSON.parse(
   await readFile("tests/evidence/browser-report.json", "utf8"),
 );
 const saved = JSON.parse(await readFile(report.dataFile, "utf8"));
 const port = process.env.PROTOTIPO_RESTART_PORT || "3003";
+const auth = await startAuthFixture();
 const server = spawn(
   process.execPath,
-  ["node_modules/tsx/dist/cli.mjs", "server/index.ts"],
+  ["--import", "tsx", "server/index.ts"],
   {
     env: {
       ...process.env,
+      ...auth.env,
       PROTOTIPO_API_PORT: port,
       PROTOTIPO_DATA_FILE: report.dataFile,
     },
@@ -42,7 +45,16 @@ try {
       fail(new Error(`Servicio terminó con ${code}`));
     });
   });
-  const response = await fetch(`http://127.0.0.1:${port}/api/state`);
+  const api = `http://127.0.0.1:${port}/api/`;
+  const login = await fetch(api + "auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: authTestAccounts[0].email, password: authTestPassword }),
+  });
+  assert.equal(login.status, 200);
+  const response = await fetch(api + "state", {
+    headers: { cookie: login.headers.get("set-cookie").split(";")[0] },
+  });
   assert.equal(response.status, 200);
   const restored = await response.json();
   assert.deepEqual(restored, saved);
@@ -62,4 +74,5 @@ try {
   );
 } finally {
   server.kill();
+  await auth.close();
 }

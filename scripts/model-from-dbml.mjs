@@ -26,6 +26,7 @@ for (const match of source.matchAll(/Table\s+(\w+)\s*\{([\s\S]*?)\n\}/g)) {
       enums[type] ||
       [
         "object_id",
+        "uuid",
         "varchar",
         "integer",
         "boolean",

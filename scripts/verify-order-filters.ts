@@ -28,6 +28,9 @@ let database = makeOrderPerformanceFixture(6000);
 let stateReads = 0;
 const app = express();
 app.use(express.json());
+app.get("/api/auth/session", (_req, res) => {
+  res.json({ usuario: { id: "00000000-0000-4000-8000-000000000001", nombre: "Pruebas" } });
+});
 app.get("/api/state", (_req, res) => {
   stateReads++;
   res.json(structuredClone(database));

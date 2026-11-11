@@ -1,5 +1,6 @@
 import { DeleteProductLotsDialog } from "./components/delete-product-lots-dialog";
 import { confirmProductCancellation } from "./product-cancellation";
+import { LineComments } from "./line-comments";
 import {
   ArrowLeft,
   Ban,
@@ -13,6 +14,7 @@ import {
   FileCheck2,
   FilePlus2,
   Info,
+  MessageSquare,
   Package,
   Pencil,
   Plus,
@@ -1041,6 +1043,7 @@ export function OrderDetail({
   const [lot, setLot] = useState<{ line: Row; record?: Row } | null>(null),
     [receipt, setReceipt] = useState<Row | null>(null),
     [mail, setMail] = useState<Row | null>(null);
+  const [comments, setComments] = useState<{ tipo: "producto" | "material"; id: string; name: string } | null>(null);
   type LotAction = {
     kind: "delete";
     line: Row;
@@ -1364,6 +1367,14 @@ export function OrderDetail({
                           </div>
                           <div className="inline line-card-actions">
                             <Badge value={l.estado} />
+                            {o.tipo_orden !== "otro" && (
+                              <Button className="small" icon={MessageSquare} onClick={() => {
+                                if (o.tipo_orden === "producto" || o.tipo_orden === "material")
+                                  setComments({ tipo: o.tipo_orden, id: l.id, name });
+                              }}>
+                                Comentarios
+                              </Button>
+                            )}
                             {o.tipo_orden !== "producto" &&
                               l.estado === "en_seguimiento" && (
                                 <>
@@ -1937,6 +1948,7 @@ export function OrderDetail({
           onClose={() => setLot(null)}
         />
       )}{" "}
+      {comments && <LineComments {...comments} onClose={() => setComments(null)} />}
       {receipt && o.tipo_orden !== "producto" && (
         <ReceiptForm
           entity={lineTable(o.tipo_orden) as "orden_material" | "orden_otro"}

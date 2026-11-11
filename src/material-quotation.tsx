@@ -1,4 +1,4 @@
-import { Send, Trash2 } from "lucide-react";
+import { ChevronDown, Send, Trash2 } from "lucide-react";
 import {
   startTransition,
   useActionState,
@@ -6,8 +6,15 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
-import { Disclosure, DisclosurePanel } from "react-aria-components/Disclosure";
+import { flushSync } from "react-dom";
+import type { Key } from "react-aria-components";
+import {
+  Disclosure,
+  DisclosureGroup,
+  DisclosurePanel,
+} from "react-aria-components/DisclosureGroup";
 import type { Database } from "../shared/models";
 import {
   isMaterialSupplier,
@@ -23,11 +30,13 @@ import {
   createMaterialQuotation,
   quotationContacts,
   quotationRecipientAddress,
+  quotationTemplate,
   refreshMaterialQuotation,
   suggestedQuotationRecipient,
   type MaterialQuotationDraft,
   type MaterialQuotationPreview,
 } from "../shared/material-quotation";
+import { validEmail } from "../shared/schema";
 import {
   ControlForm,
   ControlInput,
@@ -37,6 +46,7 @@ import { formatDateInput } from "./dates";
 import { QuotationTemplateFields } from "./quotation-template";
 import {
   ApiError,
+  Badge,
   Button,
   CancelButton,
   Dialog,
@@ -47,6 +57,56 @@ import {
   request,
   useApp,
 } from "./ui";
+
+const sectionIds = ["materiales", "destinatarios", "plantilla"] as const;
+type SectionId = (typeof sectionIds)[number];
+const sectionForField = (field: string) =>
+  sectionIds.find((id) => field.startsWith(`${id}.`));
+const messagesLabel = (total: number) =>
+  `${count(total)} ${total === 1 ? "mensaje" : "mensajes"}`;
+
+function QuotationSection({
+  id,
+  title,
+  summary,
+  children,
+}: {
+  id: SectionId;
+  title: string;
+  summary: ReactNode;
+  children: ReactNode;
+}) {
+  const summaryId = `quotation-summary-${id}`;
+  return (
+    <Disclosure id={id} className="quotation-section">
+      {({ isExpanded }) => (
+        <>
+          <h3>
+            <Button
+              slot="trigger"
+              variant="ghost"
+              className="quotation-section-trigger line-disclosure-toggle"
+              aria-label={title}
+              aria-describedby={summaryId}
+            >
+              <span>{title}</span>
+              <span
+                id={summaryId}
+                className="compact-note quotation-section-summary"
+              >
+                {summary}
+              </span>
+              <ChevronDown size={16} aria-hidden="true" />
+            </Button>
+          </h3>
+          <DisclosurePanel inert={!isExpanded}>
+            <div className="quotation-section-content stack">{children}</div>
+          </DisclosurePanel>
+        </>
+      )}
+    </Disclosure>
+  );
+}
 
 export default function MaterialQuotationDialog({
   demanda,
@@ -61,6 +121,9 @@ export default function MaterialQuotationDialog({
     createMaterialQuotation(db, demanda),
   );
   const [initial] = useState(() => JSON.stringify(draft));
+  const [expanded, setExpanded] = useState<Set<Key>>(
+    () => new Set(["materiales"]),
+  );
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const [preview, setPreview] = useState<MaterialQuotationPreview | null>(null);
@@ -82,10 +145,20 @@ export default function MaterialQuotationDialog({
     () => snapshot.proveedor.filter(isMaterialSupplier),
     [snapshot.proveedor],
   );
-  const providerIds = useMemo(
-    () => [...new Set(draft.materiales.flatMap((line) => line.proveedor_ids))],
-    [draft.materiales],
-  );
+  const providerMessages = useMemo(() => {
+    const messages = new Map<string, number>();
+    for (const line of draft.materiales)
+      for (const id of line.proveedor_ids)
+        messages.set(id, (messages.get(id) ?? 0) + 1);
+    return messages;
+  }, [draft.materiales]);
+  const pendingRecipients = draft.destinatarios.filter(
+    (recipient) => !validEmail(quotationRecipientAddress(snapshot, recipient)),
+  ).length;
+  const globalTemplate = quotationTemplate(snapshot);
+  const templateEdited =
+    draft.plantilla.asunto !== globalTemplate.asunto ||
+    draft.plantilla.cuerpo !== globalTemplate.cuerpo;
   const messageCount = draft.materiales.reduce(
     (total, line) => total + line.proveedor_ids.length,
     0,
@@ -114,6 +187,11 @@ export default function MaterialQuotationDialog({
       ),
     });
   };
+  const reportError = (problem: ApiError) => {
+    setError(problem);
+    const section = sectionForField(Object.keys(problem.fields)[0] ?? "");
+    if (!preview && section) setExpanded(new Set([section]));
+  };
   const [, submit, sending] = useActionState(async () => {
     try {
       if (!preview) {
@@ -122,9 +200,9 @@ export default function MaterialQuotationDialog({
           draft,
         );
         if (Object.keys(result.issues).length)
-          setError(
+          reportError(
             new ApiError({
-              message: "Completa los destinatarios de todos los materiales.",
+              message: "Revisa los campos indicados antes de continuar.",
               fields: result.issues,
             }),
           );
@@ -141,7 +219,7 @@ export default function MaterialQuotationDialog({
         onClose();
       }
     } catch (cause) {
-      setError(
+      reportError(
         cause instanceof ApiError
           ? cause
           : new ApiError({ message: (cause as Error).message }),
@@ -154,9 +232,18 @@ export default function MaterialQuotationDialog({
   const busy = sending || refreshing;
   useEffect(() => {
     if (busy) return;
-    if (error)
-      form.current?.querySelector<HTMLElement>(".error-notice")?.focus();
-    else if (preview) reviewHeading.current?.focus();
+    if (error) {
+      const field = Object.keys(error.fields)[0];
+      const target =
+        !preview && field && sectionForField(field)
+          ? form.current?.querySelector<HTMLElement>(
+              `[data-field-path="${CSS.escape(field)}"]`,
+            )
+          : null;
+      (
+        target ?? form.current?.querySelector<HTMLElement>(".error-notice")
+      )?.focus();
+    } else if (preview) reviewHeading.current?.focus();
   }, [preview, busy, error]);
   const refresh = async () => {
     setRefreshing(true);
@@ -209,7 +296,14 @@ export default function MaterialQuotationDialog({
         }}
       >
         <div className="dialog-body stack" inert={busy}>
-          <ErrorNotice error={error} />
+          <ErrorNotice
+            error={error}
+            onBeforeFieldFocus={(field) => {
+              const section = sectionForField(field);
+              if (!preview && section && !expanded.has(section))
+                flushSync(() => setExpanded(new Set([section])));
+            }}
+          />
           {error?.code === "QUOTATION_CHANGED" && (
             <Button onClick={() => void refresh()}>Actualizar datos</Button>
           )}
@@ -218,14 +312,12 @@ export default function MaterialQuotationDialog({
               {status}
             </p>
           )}
-          <p className="compact-note">
-            {draft.materiales.length} materiales · {providerIds.length}{" "}
-            proveedores · {preview?.messages.length ?? messageCount} mensajes.
-            Un mensaje por material y proveedor, con un único destinatario
-            principal.
-          </p>
           {preview ? (
             <>
+              <p className="compact-note">
+                {messagesLabel(preview.messages.length)} · Un destinatario
+                principal por mensaje.
+              </p>
               <h3 ref={reviewHeading} tabIndex={-1}>
                 Revisar cotizaciones
               </h3>
@@ -257,280 +349,295 @@ export default function MaterialQuotationDialog({
               ))}
             </>
           ) : (
-            <>
-              <div className="notice subtle">
-                Cada material necesita al menos un proveedor con destinatario
-                válido. Puedes quitar favoritos y agregar otros proveedores de
-                materiales.
-              </div>
-              {draft.materiales.map((line, index) => {
-                const material = snapshot.materiales.find(
-                  (m) => m.id === line.id_material,
-                )!;
-                const group = groups.get(line.id_material)!;
-                const date = earliestMaterialDelivery(
-                  group.fuentes.map(
-                    (source) => source.fecha_solicitada_entrega,
-                  ),
-                )!;
-                return (
-                  <section
-                    className="quotation-card"
-                    key={line.id_material}
-                    data-quotation-material={line.id_material}
-                  >
-                    <h3>{material?.nombre_material ?? "Material"}</h3>
-                    <p className="compact-note">
-                      MAIA{" "}
-                      {material?.codigo_material == null
-                        ? "Sin código"
-                        : String(material.codigo_material).padStart(
-                            3,
-                            "0",
-                          )}{" "}
-                      · Base {count(group.cantidad_base)} · Entrega solicitada{" "}
-                      {formatDateInput(date)}
-                    </p>
-                    <div className="form-grid">
+            <DisclosureGroup
+              className="quotation-sections"
+              expandedKeys={expanded}
+              onExpandedChange={setExpanded}
+            >
+              <QuotationSection
+                id="materiales"
+                title="Materiales y proveedores"
+                summary={`${count(draft.materiales.length)} ${draft.materiales.length === 1 ? "material" : "materiales"} · ${count(providerMessages.size)} ${providerMessages.size === 1 ? "proveedor" : "proveedores"}`}
+              >
+                {draft.materiales.map((line, index) => {
+                  const material = snapshot.materiales.find(
+                    (m) => m.id === line.id_material,
+                  )!;
+                  const group = groups.get(line.id_material)!;
+                  const date = earliestMaterialDelivery(
+                    group.fuentes.map(
+                      (source) => source.fecha_solicitada_entrega,
+                    ),
+                  )!;
+                  return (
+                    <section
+                      className="quotation-material"
+                      key={line.id_material}
+                      data-quotation-material={line.id_material}
+                    >
+                      <h4>{material?.nombre_material ?? "Material"}</h4>
+                      <p className="compact-note">
+                        MAIA{" "}
+                        {material?.codigo_material == null
+                          ? "Sin código"
+                          : String(material.codigo_material).padStart(
+                              3,
+                              "0",
+                            )}{" "}
+                        · Base {count(group.cantidad_base)} · Entrega solicitada{" "}
+                        {formatDateInput(date)}
+                      </p>
+                      <div className="form-grid">
+                        <Field
+                          id={`field-materiales.${index}.adicional_pct`}
+                          label="Adicional (%)"
+                          error={
+                            error?.fields[`materiales.${index}.adicional_pct`]
+                          }
+                        >
+                          <ControlInput
+                            id={`field-materiales.${index}.adicional_pct`}
+                            type="number"
+                            min={5}
+                            max={10}
+                            step="any"
+                            value={
+                              Number.isFinite(line.adicional_pct)
+                                ? line.adicional_pct
+                                : ""
+                            }
+                            onChange={(event) => {
+                              const percent =
+                                event.target.value === ""
+                                  ? NaN
+                                  : Number(event.target.value);
+                              let quantity = line.cantidad;
+                              try {
+                                quantity = demandQuantity(
+                                  group.cantidad_base,
+                                  percent,
+                                );
+                              } catch {
+                                /* Field validation explains invalid percentages. */
+                              }
+                              updateMaterial(index, {
+                                adicional_pct: percent,
+                                cantidad: quantity,
+                              });
+                            }}
+                          />
+                        </Field>
+                        <Field
+                          id={`field-materiales.${index}.cantidad`}
+                          label="Cantidad a cotizar"
+                          error={error?.fields[`materiales.${index}.cantidad`]}
+                        >
+                          <ControlInput
+                            id={`field-materiales.${index}.cantidad`}
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={
+                              Number.isFinite(line.cantidad)
+                                ? line.cantidad
+                                : ""
+                            }
+                            onChange={(event) =>
+                              updateMaterial(index, {
+                                cantidad:
+                                  event.target.value === ""
+                                    ? NaN
+                                    : Number(event.target.value),
+                              })
+                            }
+                          />
+                        </Field>
+                      </div>
+                      <p className="strong quotation-suppliers-heading">
+                        Proveedores a cotizar
+                      </p>
+                      <ul
+                        className="quotation-providers"
+                        aria-label="Proveedores a cotizar"
+                      >
+                        {line.proveedor_ids.map((id) => {
+                          const provider = snapshot.proveedor.find(
+                            (p) => p.id === id,
+                          );
+                          return (
+                            <li key={id}>
+                              <span>
+                                {provider
+                                  ? supplierOptionLabel(
+                                      provider,
+                                      snapshot.proveedor,
+                                    )
+                                  : "Proveedor no disponible"}
+                              </span>
+                              <Button
+                                icon={Trash2}
+                                className="icon-btn"
+                                aria-label={`Quitar ${provider?.nombre_largo ?? id} de ${material?.nombre_material}`}
+                                onClick={() =>
+                                  updateMaterial(index, {
+                                    proveedor_ids: line.proveedor_ids.filter(
+                                      (value) => value !== id,
+                                    ),
+                                  })
+                                }
+                              />
+                            </li>
+                          );
+                        })}
+                      </ul>
                       <Field
-                        id={`field-materiales.${index}.adicional_pct`}
-                        label="Adicional (%)"
+                        id={`field-materiales.${index}.proveedor_ids`}
+                        label="Agregar proveedor"
                         error={
-                          error?.fields[`materiales.${index}.adicional_pct`]
+                          error?.fields[`materiales.${index}.proveedor_ids`]
                         }
                       >
-                        <ControlInput
-                          id={`field-materiales.${index}.adicional_pct`}
-                          type="number"
-                          min={5}
-                          max={10}
-                          step="any"
-                          value={
-                            Number.isFinite(line.adicional_pct)
-                              ? line.adicional_pct
-                              : ""
-                          }
-                          onChange={(event) => {
-                            const percent =
-                              event.target.value === ""
-                                ? NaN
-                                : Number(event.target.value);
-                            let quantity = line.cantidad;
-                            try {
-                              quantity = demandQuantity(
-                                group.cantidad_base,
-                                percent,
-                              );
-                            } catch {
-                              /* Field validation explains invalid percentages. */
-                            }
-                            updateMaterial(index, {
-                              adicional_pct: percent,
-                              cantidad: quantity,
-                            });
+                        <ProviderPicker
+                          key={line.proveedor_ids.join("/")}
+                          id={`field-materiales.${index}.proveedor_ids`}
+                          value=""
+                          commitOnSelection
+                          providers={providers.filter(
+                            (p) => !line.proveedor_ids.includes(p.id),
+                          )}
+                          onChange={(id) => {
+                            if (id && !line.proveedor_ids.includes(id))
+                              updateMaterial(index, {
+                                proveedor_ids: [...line.proveedor_ids, id],
+                              });
                           }}
                         />
                       </Field>
-                      <Field
-                        id={`field-materiales.${index}.cantidad`}
-                        label="Cantidad a cotizar"
-                        error={error?.fields[`materiales.${index}.cantidad`]}
-                      >
-                        <ControlInput
-                          id={`field-materiales.${index}.cantidad`}
-                          type="number"
-                          min={1}
-                          step={1}
-                          value={
-                            Number.isFinite(line.cantidad) ? line.cantidad : ""
-                          }
-                          onChange={(event) =>
-                            updateMaterial(index, {
-                              cantidad:
-                                event.target.value === ""
-                                  ? NaN
-                                  : Number(event.target.value),
-                            })
-                          }
-                        />
-                      </Field>
-                    </div>
-                    <ul className="quotation-providers">
-                      {line.proveedor_ids.map((id) => {
-                        const provider = snapshot.proveedor.find(
-                          (p) => p.id === id,
-                        );
-                        const address = quotationRecipientAddress(
-                          snapshot,
-                          draft.destinatarios.find(
-                            (r) => r.id_proveedor === id,
-                          ),
-                        );
-                        return (
-                          <li key={id}>
-                            <span>
-                              {provider
-                                ? supplierOptionLabel(
-                                    provider,
-                                    snapshot.proveedor,
-                                  )
-                                : "Proveedor no disponible"}
-                              <small>
-                                {address ||
-                                  "Completa su destinatario en la sección siguiente"}
-                              </small>
-                            </span>
-                            <Button
-                              icon={Trash2}
-                              className="icon-btn"
-                              aria-label={`Quitar ${provider?.nombre_largo ?? id} de ${material?.nombre_material}`}
-                              onClick={() =>
-                                updateMaterial(index, {
-                                  proveedor_ids: line.proveedor_ids.filter(
-                                    (value) => value !== id,
-                                  ),
-                                })
-                              }
-                            />
-                          </li>
-                        );
-                      })}
-                    </ul>
-                    <Field
-                      id={`field-materiales.${index}.proveedor_ids`}
-                      label="Agregar proveedor"
-                      error={error?.fields[`materiales.${index}.proveedor_ids`]}
+                      {!line.proveedor_ids.length && (
+                        <p className="compact-note">
+                          Sin proveedores. Agrega al menos uno para cotizar este
+                          material.
+                        </p>
+                      )}
+                    </section>
+                  );
+                })}
+              </QuotationSection>
+              <QuotationSection
+                id="destinatarios"
+                title="Destinatarios por proveedor"
+                summary={
+                  pendingRecipients ? (
+                    <Badge value="pendiente">
+                      {count(pendingRecipients)}{" "}
+                      {pendingRecipients === 1 ? "pendiente" : "pendientes"}
+                    </Badge>
+                  ) : providerMessages.size ? (
+                    "Completos"
+                  ) : (
+                    "Sin proveedores"
+                  )
+                }
+              >
+                <p className="compact-note">
+                  {providerMessages.size
+                    ? "Un destinatario principal por proveedor, compartido entre sus mensajes."
+                    : "Agrega proveedores en la sección Materiales y proveedores."}
+                </p>
+                {[...providerMessages].map(([id, messages]) => {
+                  const provider = snapshot.proveedor.find((p) => p.id === id);
+                  const recipient = draft.destinatarios.find(
+                    (r) => r.id_proveedor === id,
+                  )!;
+                  const contacts = quotationContacts(snapshot, id);
+                  const change = (value: Partial<typeof recipient>) =>
+                    update({
+                      ...draft,
+                      destinatarios: draft.destinatarios.map((r) =>
+                        r.id_proveedor === id ? { ...r, ...value } : r,
+                      ),
+                    });
+                  return (
+                    <div
+                      className="quotation-recipient"
+                      key={id}
+                      data-quotation-provider={id}
                     >
-                      <ProviderPicker
-                        key={line.proveedor_ids.join("/")}
-                        id={`field-materiales.${index}.proveedor_ids`}
-                        value=""
-                        commitOnSelection
-                        providers={providers.filter(
-                          (p) => !line.proveedor_ids.includes(p.id),
-                        )}
-                        onChange={(id) => {
-                          if (id && !line.proveedor_ids.includes(id))
-                            updateMaterial(index, {
-                              proveedor_ids: [...line.proveedor_ids, id],
-                            });
-                        }}
-                      />
-                    </Field>
-                    {!line.proveedor_ids.length && (
-                      <p className="compact-note">
-                        Sin proveedores. Agrega al menos uno para cotizar este
-                        material.
-                      </p>
-                    )}
-                  </section>
-                );
-              })}
-              {providerIds.length > 0 && (
-                <section className="quotation-card">
-                  <h3>Destinatario único por proveedor</h3>
-                  <p className="compact-note">
-                    Cada cambio se aplica a todos sus materiales. Escribir un
-                    correo manual no modifica el directorio.
-                  </p>
-                  {providerIds.map((id) => {
-                    const provider = snapshot.proveedor.find(
-                      (p) => p.id === id,
-                    );
-                    const recipient = draft.destinatarios.find(
-                      (r) => r.id_proveedor === id,
-                    )!;
-                    const contacts = quotationContacts(snapshot, id);
-                    const change = (value: Partial<typeof recipient>) =>
-                      update({
-                        ...draft,
-                        destinatarios: draft.destinatarios.map((r) =>
-                          r.id_proveedor === id ? { ...r, ...value } : r,
-                        ),
-                      });
-                    return (
-                      <div
-                        className="quotation-recipient"
-                        key={id}
-                        data-quotation-provider={id}
-                      >
+                      <div>
                         <h4>
                           {provider
                             ? supplierOptionLabel(provider, snapshot.proveedor)
                             : "Proveedor no disponible"}
                         </h4>
-                        {contacts.suggested.length > 1 &&
-                          !recipient.id_contacto &&
-                          !recipient.correo && (
-                            <p className="compact-note">
-                              Hay varios contactos sugeridos; elige uno o
-                              escribe un correo.
-                            </p>
-                          )}
-                        <div className="form-grid">
-                          <Field
-                            id={`field-contacto-${id}`}
-                            label="Contacto del proveedor"
-                          >
-                            <ControlSelect
-                              id={`field-contacto-${id}`}
-                              value={recipient.id_contacto ?? ""}
-                              onChange={(event) => {
-                                const contact = contacts.contacts.find(
-                                  (c) => c.id === event.target.value,
-                                );
-                                change({
-                                  id_contacto: contact?.id ?? null,
-                                  correo: contact?.correo ?? "",
-                                });
-                              }}
-                            >
-                              <option value="">Escribir correo manual</option>
-                              {contacts.contacts.map((contact) => (
-                                <option key={contact.id} value={contact.id}>
-                                  {contact.nombre} · {contact.correo}
-                                  {contacts.suggested.some(
-                                    (c) => c.id === contact.id,
-                                  )
-                                    ? " · Sugerido"
-                                    : ""}
-                                </option>
-                              ))}
-                            </ControlSelect>
-                          </Field>
-                          <Field
-                            id={`field-destinatarios.${id}`}
-                            label="Correo del destinatario"
-                            required
-                            error={error?.fields[`destinatarios.${id}`]}
-                          >
-                            <ControlInput
-                              id={`field-destinatarios.${id}`}
-                              type="email"
-                              autoComplete="email"
-                              value={quotationRecipientAddress(
-                                snapshot,
-                                recipient,
-                              )}
-                              onChange={(event) =>
-                                change({
-                                  id_contacto: null,
-                                  correo: event.target.value,
-                                })
-                              }
-                            />
-                          </Field>
-                        </div>
+                        <p className="compact-note">
+                          {messagesLabel(messages)}
+                        </p>
                       </div>
-                    );
-                  })}
-                </section>
-              )}
-              <section className="quotation-card">
-                <h3>Plantilla común para este envío</h3>
+                      <div className="form-grid">
+                        <Field
+                          id={`field-contacto-${id}`}
+                          label="Contacto del proveedor"
+                        >
+                          <ControlSelect
+                            id={`field-contacto-${id}`}
+                            value={recipient.id_contacto ?? ""}
+                            onChange={(event) => {
+                              const contact = contacts.contacts.find(
+                                (c) => c.id === event.target.value,
+                              );
+                              change({
+                                id_contacto: contact?.id ?? null,
+                                correo: contact?.correo ?? "",
+                              });
+                            }}
+                          >
+                            <option value="">Escribir correo manual</option>
+                            {contacts.contacts.map((contact) => (
+                              <option key={contact.id} value={contact.id}>
+                                {contact.nombre} · {contact.correo}
+                                {contacts.suggested.some(
+                                  (c) => c.id === contact.id,
+                                )
+                                  ? " · Sugerido"
+                                  : ""}
+                              </option>
+                            ))}
+                          </ControlSelect>
+                        </Field>
+                        <Field
+                          id={`field-destinatarios.${id}`}
+                          label="Correo del destinatario"
+                          required
+                          error={error?.fields[`destinatarios.${id}`]}
+                        >
+                          <ControlInput
+                            id={`field-destinatarios.${id}`}
+                            type="email"
+                            autoComplete="email"
+                            value={quotationRecipientAddress(
+                              snapshot,
+                              recipient,
+                            )}
+                            onChange={(event) =>
+                              change({
+                                id_contacto: null,
+                                correo: event.target.value,
+                              })
+                            }
+                          />
+                        </Field>
+                      </div>
+                    </div>
+                  );
+                })}
+              </QuotationSection>
+              <QuotationSection
+                id="plantilla"
+                title="Plantilla de envío"
+                summary={templateEdited ? "Editada" : "Sin cambios"}
+              >
                 <p className="compact-note">
-                  Una plantilla para todos los mensajes. Estos ajustes no
-                  cambian la plantilla global de Configuración.
+                  Los cambios se aplican solo a este envío.
                 </p>
                 <QuotationTemplateFields
                   prefix="plantilla."
@@ -538,13 +645,18 @@ export default function MaterialQuotationDialog({
                   fields={error?.fields}
                   onChange={(plantilla) => update({ ...draft, plantilla })}
                 />
-              </section>
-            </>
+              </QuotationSection>
+            </DisclosureGroup>
           )}
         </div>
         <div
           className={`dialog-footer${preview ? " quotation-review-footer" : ""}`}
         >
+          {!preview && (
+            <p className="compact-note quotation-count">
+              {messagesLabel(messageCount)}
+            </p>
+          )}
           <CancelButton disabled={busy} onClick={onClose}>
             Cancelar
           </CancelButton>

@@ -182,17 +182,59 @@ async (page) => {
     dialog().locator(`[data-quotation-material="${id}"]`);
   const recipient = (id) =>
     dialog().locator(`[data-quotation-provider="${id}"]`);
+  const section = (name) => dialog().getByRole("button", { name, exact: true });
+  const openSection = async (name) => {
+    const trigger = section(name);
+    if ((await trigger.getAttribute("aria-expanded")) !== "true")
+      await trigger.press("Enter");
+  };
+  const materialsSection = "Materiales y proveedores";
+  const recipientsSection = "Destinatarios por proveedor";
+  const templateSection = "Plantilla de envío";
   await dialog().waitFor();
+  check(
+    (await section(materialsSection).getAttribute("aria-expanded")) ===
+      "true" &&
+      (await section(recipientsSection).getAttribute("aria-expanded")) ===
+        "false" &&
+      (await section(templateSection).getAttribute("aria-expanded")) ===
+        "false",
+    "La captura abre únicamente Materiales y proveedores",
+  );
   check(
     (await dialog().locator("[data-quotation-material]").count()) === 8,
     "Diálogo muestra una sección por material",
   );
+  for (const title of [materialsSection, recipientsSection, templateSection])
+    check(
+      (await section(title).innerText()).startsWith(title),
+      `Encabezado sin numeración: ${title}`,
+    );
+  check(
+    (await material(chosen[0])
+      .getByRole("list", { name: "Proveedores a cotizar" })
+      .count()) === 1,
+    "La tarjeta del material identifica su lista de proveedores",
+  );
+  await openSection(templateSection);
   check(
     (await dialog()
       .getByRole("textbox", { name: "Asunto", exact: true })
       .inputValue()) === globalSubject,
     "Diálogo utiliza la plantilla global",
   );
+  check(
+    (await section(materialsSection).getAttribute("aria-expanded")) ===
+      "false" &&
+      (await material(chosen[0]).getByRole("spinbutton").count()) === 0,
+    "Al abrir Plantilla con el teclado, los campos plegados salen del árbol accesible",
+  );
+  await section(templateSection).press("Space");
+  check(
+    (await section(templateSection).getAttribute("aria-expanded")) === "false",
+    "La sección activa puede plegarse con el teclado",
+  );
+  await openSection(materialsSection);
   check(
     (await material(chosen[0]).innerText()).includes("3.000"),
     "Consolidación suma solo los orígenes seleccionados",
@@ -203,22 +245,48 @@ async (page) => {
       .inputValue()) === "3300",
     "Adicional inicial de 10 % con aritmética exacta",
   );
+  await openSection(recipientsSection);
   check(
     (await recipient(mainProvider.id)
       .getByRole("textbox", { name: "Correo del destinatario", exact: true })
       .inputValue()) === "",
     "Varios contactos sugeridos exigen elegir uno",
   );
+  await openSection(materialsSection);
   await dialog()
     .getByRole("button", { name: "Revisar cotización", exact: true })
     .click();
   await dialog().locator(".error-notice").waitFor();
+  await page.waitForFunction(() =>
+    document.activeElement
+      ?.getAttribute("data-field-path")
+      ?.startsWith("destinatarios."),
+  );
+  check(
+    (await section(recipientsSection).getAttribute("aria-expanded")) === "true",
+    "Revisar abre Destinatarios y enfoca el primer correo pendiente",
+  );
   check(
     (await dialog()
       .getByRole("button", { name: /^Confirmar .* envíos simulados/ })
       .count()) === 0,
     "Faltantes impiden confirmar el envío",
   );
+  await openSection(materialsSection);
+  await dialog()
+    .locator('.error-notice a[href^="#field-destinatarios."]')
+    .first()
+    .click();
+  await page.waitForFunction(() =>
+    document.activeElement
+      ?.getAttribute("data-field-path")
+      ?.startsWith("destinatarios."),
+  );
+  check(
+    (await section(recipientsSection).getAttribute("aria-expanded")) === "true",
+    "El enlace del aviso abre una sección plegada y enfoca el campo",
+  );
+  await openSection(materialsSection);
   // Keep a single common supplier per material, exercising configurable favorites.
   for (const id of chosen) {
     const card = material(id);
@@ -241,15 +309,20 @@ async (page) => {
         .click();
     }
   }
+  await openSection(recipientsSection);
   await recipient(mainProvider.id)
     .getByRole("textbox", { name: "Correo del destinatario", exact: true })
     .fill("manual-compartido@ejemplo.com");
+  await openSection(materialsSection);
+  await openSection(recipientsSection);
   check(
-    (await dialog()
-      .locator(".quotation-providers small")
-      .filter({ hasText: "manual-compartido@ejemplo.com" })
-      .count()) === 8,
-    "Un destinatario manual se refleja en todos los materiales del proveedor",
+    (await recipient(mainProvider.id)
+      .getByRole("textbox", { name: "Correo del destinatario", exact: true })
+      .inputValue()) === "manual-compartido@ejemplo.com" &&
+      (await recipient(mainProvider.id)
+        .getByText("8 mensajes", { exact: true })
+        .count()) === 1,
+    "El correo manual se conserva al plegar y es común a los ocho mensajes del proveedor",
   );
   check(
     (await state()).contacto.every(
@@ -260,6 +333,7 @@ async (page) => {
   await recipient(mainProvider.id)
     .getByRole("combobox", { name: "Contacto del proveedor", exact: true })
     .selectOption(mainContact.id);
+  await openSection(materialsSection);
   const firstCard = material(chosen[0]);
   await firstCard
     .getByRole("spinbutton", { name: "Adicional (%)", exact: true })
@@ -291,16 +365,23 @@ async (page) => {
     .filter({ hasText: mainProvider.nombre_largo })
     .getByRole("button")
     .click();
+  await openSection(recipientsSection);
   await recipient(supplier.id)
     .getByRole("textbox", { name: "Correo del destinatario", exact: true })
     .fill("nuevo@cotizador.example");
+  await openSection(templateSection);
   await dialog()
     .getByRole("textbox", { name: "Asunto", exact: true })
     .fill("{{desconocida}}");
+  await openSection(materialsSection);
   await dialog()
     .getByRole("button", { name: "Revisar cotización", exact: true })
     .click();
   await dialog().locator(".error-notice").waitFor();
+  check(
+    (await section(templateSection).getAttribute("aria-expanded")) === "true",
+    "Un error de plantilla abre su sección plegada",
+  );
   check(
     (await dialog().locator(".error-notice").innerText()).includes(
       "Variable desconocida",
@@ -313,6 +394,7 @@ async (page) => {
   await dialog()
     .getByRole("textbox", { name: "Asunto", exact: true })
     .fill("Solo este envío · {{material}}");
+  await openSection(recipientsSection);
   const engine = await page.evaluate(() =>
     navigator.userAgent.includes("Firefox")
       ? "firefox"
@@ -321,7 +403,7 @@ async (page) => {
         ? "webkit"
         : "chromium",
   );
-  for (const width of [1440, 375]) {
+  for (const width of [1440, 375, 320]) {
     await page.setViewportSize({ width, height: 1000 });
     check(
       await dialog().evaluate(
@@ -331,6 +413,45 @@ async (page) => {
       ),
       "Captura responsive a " + width,
     );
+    check(
+      await dialog()
+        .locator(".quotation-section")
+        .evaluateAll((sections) =>
+          sections.every((panel) => {
+            const heading = panel.querySelector(".quotation-section-trigger");
+            const typography = getComputedStyle(heading);
+            return (
+              panel.scrollWidth <= panel.clientWidth + 1 &&
+              [
+                ...panel.querySelectorAll("h4, p, label, input, textarea"),
+              ].every((item) => {
+                const style = getComputedStyle(item);
+                return (
+                  parseFloat(style.fontSize) <=
+                    parseFloat(typography.fontSize) &&
+                  style.fontFamily === typography.fontFamily
+                );
+              })
+            );
+          }),
+        ),
+      "Jerarquía tipográfica y secciones sin desborde a " + width,
+    );
+    await openSection(materialsSection);
+    check(
+      await dialog()
+        .locator(".quotation-material")
+        .evaluateAll((cards) =>
+          cards.every(
+            (card, index) =>
+              card.scrollWidth <= card.clientWidth + 1 &&
+              (index === 0 ||
+                card.getBoundingClientRect().top >
+                  cards[index - 1].getBoundingClientRect().bottom),
+          ),
+        ),
+      "Tarjetas de materiales separadas y sin desborde a " + width,
+    );
     await dialog().evaluate((el) => {
       let node = el;
       while (node) {
@@ -338,9 +459,12 @@ async (page) => {
         node = node.parentElement;
       }
     });
-    await page.screenshot({
-      path: `tests/evidence/quotations/${engine}-capture-${width}.png`,
-    });
+    if (width !== 320)
+      await page.screenshot({
+        path: `tests/evidence/quotations/${engine}-capture-${width}.png`,
+        animations: "disabled",
+      });
+    await openSection(recipientsSection);
   }
   await dialog()
     .getByRole("button", { name: "Revisar cotización", exact: true })
@@ -444,18 +568,21 @@ async (page) => {
   await dialog()
     .getByRole("button", { name: "Revisar cotización", exact: true })
     .waitFor();
+  await openSection(materialsSection);
   check(
     (await material(chosen[0])
       .getByRole("spinbutton", { name: "Cantidad a cotizar", exact: true })
       .inputValue()) === "3210",
     "Actualizar conserva cantidad manual",
   );
+  await openSection(templateSection);
   check(
     (await dialog()
       .getByRole("textbox", { name: "Asunto", exact: true })
       .inputValue()) === "Solo este envío · {{material}}",
     "Actualizar conserva plantilla del lote",
   );
+  await openSection(recipientsSection);
   check(
     (await recipient(mainProvider.id)
       .getByRole("textbox", { name: "Correo del destinatario", exact: true })
@@ -529,6 +656,7 @@ async (page) => {
   await page
     .getByRole("button", { name: "Cotizar materiales", exact: true })
     .click();
+  await openSection(templateSection);
   check(
     (await dialog()
       .getByRole("textbox", { name: "Asunto", exact: true })

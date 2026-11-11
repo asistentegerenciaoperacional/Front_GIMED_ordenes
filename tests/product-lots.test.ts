@@ -324,7 +324,7 @@ test("el número es obligatorio para datos de seguimiento y cierre, pero una ent
   for (const tracking of [
     { cantidad_recibida: 0 },
     { id_factura: sid(150) },
-    { ubicacion: "Bodega" },
+    { id_direccion: sid(11) },
     ...[
       "fecha_entrega_batch_record",
       "fecha_inspeccion",

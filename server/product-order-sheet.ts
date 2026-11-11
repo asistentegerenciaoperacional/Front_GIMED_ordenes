@@ -8,6 +8,7 @@ import {
   type SheetChange,
 } from "../shared/product-order-sheet";
 import { check, BusinessError } from "./integrity";
+import { saveReceptionLocation } from "./reception-location";
 
 type Dispatch = (db: Database, name: string, payload: Row) => Promise<Row>;
 export async function saveProductOrderSheet(
@@ -124,7 +125,7 @@ export async function saveProductOrderSheet(
       ),
     }));
     try {
-      await dispatch(db, "editOrder", { ...header, lines });
+      await dispatch(db, "editOrder", { ...header, lines, confirmar_comentarios: payload.confirmar_comentarios });
     } catch (failure) {
       if (!(failure instanceof BusinessError)) throw failure;
       const targets = changes.filter(
@@ -157,6 +158,8 @@ export async function saveProductOrderSheet(
           byLot.get(lot.id)!.map((change) => [change.field, change.value]),
         ),
       };
+      const input = Object.fromEntries(byLot.get(lot.id)!.map((change) => [change.field, change.value]));
+      saveReceptionLocation(db, lot, row, input);
       row.numero_lote =
         typeof row.numero_lote === "string"
           ? row.numero_lote.trim() || null

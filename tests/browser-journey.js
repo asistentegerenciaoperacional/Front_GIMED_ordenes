@@ -1332,9 +1332,11 @@ async (page) => {
       exact: true,
     })
     .fill(String(materialLine.cantidad_solicitada));
+  const materialAddress = initial.direccion.find((address) => address.id_proveedor ===
+    initial.orden_compra.find((order) => order.id === materialId).id_proveedor);
   await dialog()
-    .getByRole("textbox", { name: "Ubicación de recepción", exact: true })
-    .fill("Bodega de materiales");
+    .getByRole("button", { name: "Ubicación de recepción", exact: true })
+    .selectOption(materialAddress.id);
   await dialog()
     .getByRole("textbox", { name: "Entrega recibida", exact: true })
     .fill("2026-10-25");
@@ -1365,7 +1367,7 @@ async (page) => {
     row: {
       cantidad_recibida: otherMaterialLine.cantidad_solicitada,
       fecha_entrega: "2026-10-25T12:00:00.000Z",
-      ubicacion: "Bodega de materiales",
+      id_direccion: materialAddress.id,
       id_lote_material: initial.lote_material.find((lot) => lot.numero_lote === "MAT-26-041").id,
       id_factura: initial.factura.find((invoice) => invoice.numero_factura === "ENV-00412").id,
     },
@@ -1460,9 +1462,11 @@ async (page) => {
       exact: true,
     })
     .fill("2");
+  const otherAddress = initial.direccion.find((address) => address.id_proveedor ===
+    (initial.proveedor.find((provider) => provider.nombre_corto === "Punto")?.id));
   await dialog()
-    .getByRole("textbox", { name: "Ubicación de recepción", exact: true })
-    .fill("Oficina");
+    .getByRole("button", { name: "Ubicación de recepción", exact: true })
+    .selectOption(otherAddress.id);
   await dialog()
     .getByRole("button", { name: "Guardar recepción", exact: true })
     .click();

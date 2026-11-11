@@ -12,6 +12,7 @@ import { createServer } from "node:net";
 import { chromium, firefox, webkit } from "playwright-core";
 import { ariaPage } from "../tests/aria-playwright.mjs";
 import { createFixtureVite } from "./fixture-vite.mjs";
+import { authTestLogin, startAuthFixture } from "../tests/fixtures/supabase-auth.mjs";
 
 const file = process.argv[2] ?? "tests/browser-journey.js";
 const engine = process.argv[3] ?? "chromium";
@@ -27,20 +28,20 @@ const socket = createServer();
 await new Promise((ok) => socket.listen(0, "127.0.0.1", ok));
 const port = socket.address().port;
 await new Promise((ok) => socket.close(ok));
+const auth = await startAuthFixture();
 const server = spawn(
   process.execPath,
   [
     ...(historicalJourney
       ? ["--import", "./tests/fixtures/browser-clock.mjs"]
       : []),
-    ...(historicalJourney
-      ? ["--import", "tsx"]
-      : ["node_modules/tsx/dist/cli.mjs"]),
+    "--import", "tsx",
     "server/index.ts",
   ],
   {
     env: {
       ...process.env,
+      ...auth.env,
       PROTOTIPO_API_PORT: String(port),
       PROTOTIPO_DATA_FILE: join(temporary, "database.json"),
     },
@@ -74,6 +75,13 @@ try {
   });
   const context = await browser.newContext();
   const page = await context.newPage();
+  const accountJourney = file.includes("account-receptions");
+  if (!accountJourney && !file.includes("live-errors") && !file.includes("aria-controls")) {
+    const login = await authTestLogin({
+      post: (path, options) => context.request.post(`http://127.0.0.1:${port}${path}`, options),
+    });
+    assert.equal(login.status(), 200);
+  }
   if (historicalJourney)
     await page.clock.setFixedTime(new Date("2026-10-14T12:00:00.000Z"));
   const consoleMessages = [];
@@ -122,7 +130,7 @@ try {
     [],
     "Sin errores ni advertencias de React o React Aria",
   );
-  const evidence = file.includes("material-quotation")
+  const evidence = process.env.PROTOTIPO_BROWSER_EVIDENCE ?? (file.includes("material-quotation")
     ? "tests/evidence/quotations"
     : file.includes("order-authorization")
       ? "tests/evidence/authorization"
@@ -136,7 +144,7 @@ try {
               ? "tests/evidence/barcodes"
               : file.includes("favorites")
                 ? "tests/evidence/favorites"
-                : "tests/evidence/aria";
+                : "tests/evidence/aria");
   await mkdir(evidence, { recursive: true });
   const report =
     evidence +
@@ -164,7 +172,7 @@ try {
   console.error(error.stack);
   if (browser) {
     const page = browser.contexts()[0]?.pages()[0];
-    if (page) {
+    if (page && page.url() !== "about:blank") {
       console.error("URL: " + page.url());
       console.error(
         await page.evaluate(() =>
@@ -199,7 +207,7 @@ try {
         ),
       );
       await page
-        .screenshot({ path: "tests/evidence/aria/failure.png" })
+        .screenshot({ path: `${process.env.PROTOTIPO_BROWSER_EVIDENCE ?? "tests/evidence/aria"}/failure.png` })
         .catch(() => {});
     }
   }
@@ -208,4 +216,5 @@ try {
   await browser?.close();
   await vite?.close();
   server.kill();
+  await auth.close();
 }

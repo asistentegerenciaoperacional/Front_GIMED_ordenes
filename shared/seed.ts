@@ -60,7 +60,8 @@ export function makeSeed(): Database {
     activo: true,
   });
   for (let i = 1; i <= 5; i++) {
-    add("direccion_proveedor", 10 + i, {
+    add("direccion", 10 + i, {
+      tipo: "proveedor",
       id_proveedor: sid(i),
       nombre_dir: "Bodega principal",
       ciudad: i === 2 ? "Medellín" : "Bogotá",

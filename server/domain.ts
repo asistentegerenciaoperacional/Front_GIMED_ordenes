@@ -1,4 +1,6 @@
 import { randomBytes } from "node:crypto";
+import { removeCommentsForOrderEdit } from "./comments";
+import { saveReceptionLocation } from "./reception-location";
 import { deliverMail, simulatedTransport, type MailTransport } from "./mail";
 export type { MailTransport } from "./mail";
 import { materialQuotationPreview } from "./material-quotation";
@@ -159,7 +161,7 @@ const push = (db: Database, table: Entity, values: Row) => {
 export const editableEntities: Entity[] = [
   "productos",
   "proveedor",
-  "direccion_proveedor",
+  "direccion",
   "contacto",
   "categorias",
   "costos_maquila",
@@ -466,6 +468,8 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
         "AUTHORIZATION",
         { lines: "Los productos de una orden autorizada están bloqueados." },
       );
+    if (p.tipo_orden === "producto" || p.tipo_orden === "material")
+      removeCommentsForOrderEdit(db, o.id, p.tipo_orden, existing, p.lines, replacing, p.confirmar_comentarios?.[o.id]);
     if (replacing) {
       check(
         p.confirm === true,
@@ -1017,8 +1021,8 @@ export function mailPreview(db: Database, p: Row): Row {
           )!;
           const o = db.orden_compra.find((o) => o.id === line.id_orden_compra)!;
           const prov = db.proveedor.find((p) => p.id === o.id_proveedor)!;
-          const dirs = db.direccion_proveedor
-            .filter((d) => d.id_proveedor === prov.id)
+          const dirs = db.direccion
+            .filter((d) => d.tipo === "proveedor" && d.activa && d.id_proveedor === prov.id)
             .map((d) =>
               [d.nombre_dir, d.linea_1, d.linea_2, d.ciudad]
                 .filter(Boolean)
@@ -1227,6 +1231,10 @@ export async function command(
         "Esta entidad se modifica desde su proceso correspondiente.",
       );
       const value = { ...blankRow(table), ...p.row };
+      if (table === "direccion") {
+        value.nombre_dir = typeof value.nombre_dir === "string" ? value.nombre_dir.trim() : null;
+        check(value.nombre_dir, "Indica el nombre de la bodega.", "VALIDATION", { nombre_dir: "Campo obligatorio." });
+      }
       if (Object.hasOwn(value, "id") && !value.id) value.id = newId();
       const old = p.key
         ? (db[table] as Row[]).find(
@@ -1283,6 +1291,7 @@ export async function command(
         "Esta entidad se modifica desde su proceso correspondiente.",
       );
       const record = findRecord(db, table, p.key);
+      check(table !== "direccion", "Desactiva la ubicación desde el catálogo para conservar su historial.");
       (db[table] as Row[]) = (db[table] as Row[]).filter((r) => r !== record);
       return {};
     }
@@ -1391,6 +1400,7 @@ export async function command(
           ? value.numero_lote.trim() || null
           : value.numero_lote;
       if (!p.row.id) value.id = newId();
+      saveReceptionLocation(db, old, value, p.row);
       saveProductLotChanges(db, [value], {
         expected: p.expected,
         confirm: p.confirm,
@@ -1436,10 +1446,14 @@ export async function command(
         "fecha_estimada_entrega",
         "fecha_entrega",
         "id_factura",
+        "id_direccion",
         "ubicacion",
         ...(table === "orden_material" ? ["id_lote_material"] : []),
       ];
-      for (const field of allowed) if (field in p.row) l[field] = p.row[field];
+      const updated = { ...l };
+      for (const field of allowed) if (field in p.row) updated[field] = p.row[field];
+      saveReceptionLocation(db, l, updated, p.row);
+      Object.assign(l, updated);
       return {};
     }
     case "createInvoice": {

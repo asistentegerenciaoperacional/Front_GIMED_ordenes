@@ -26,7 +26,6 @@ import {
   Plus,
   Printer,
   Save,
-  Undo2,
   Pencil,
   FilterX,
   AlertCircle,
@@ -60,6 +59,18 @@ import {
 } from "./components/product-sheet-grid";
 import { SheetSelection, rangeBounds } from "./product-sheet-selection";
 import { SheetSelectionView } from "./components/sheet-selection-view";
+import { ReceptionLocationPicker } from "./reception-location";
+import { withCommentRemovalConfirmation } from "./line-comments";
+import {
+  SheetHistoryControls,
+  sheetHistoryShortcut,
+} from "./components/sheet-history-controls";
+import type { SheetHistoryDirection } from "./sheet-history";
+import { useSheetHistory } from "./use-sheet-history";
+import {
+  checkProductSheetReplay,
+  sameProductSheetDraft,
+} from "./product-sheet-draft-history";
 import { InvoicePicker, OrderForm, productLotFieldOrder } from "./forms";
 import { ActionTooltip } from "./components/overlays";
 import { MaterialSupplyDialog } from "./material-supply";
@@ -93,7 +104,7 @@ import {
   type SheetView,
 } from "./product-order-sheet-model";
 import {
-  PRODUCT_SHEET_DRAFT,
+  productSheetDraftKey,
   readSheetLocal,
 } from "./product-sheet-preferences";
 import { replaceRoute } from "./routing";
@@ -169,7 +180,8 @@ function Tool({
 }
 
 export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
-  const { db, run, navigate, notify } = useApp();
+  const { db, run, navigate, notify, userId } = useApp();
+  const draftKey = productSheetDraftKey(userId);
   const view = (
     ["no_autorizadas", "seguimiento", "anuladas"].includes(
       params.get("vista") ?? "",
@@ -177,10 +189,11 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       ? params.get("vista")
       : "seguimiento"
   ) as SheetView;
-  const [changes, setChanges] = useState<SheetChange[]>([]),
-    [touched, setTouched] = useState(false);
+  const { history, value: changes, canUndo, canRedo } =
+    useSheetHistory<SheetChange[]>([], sameProductSheetDraft);
+  const [touched, setTouched] = useState(false);
   const [recovery, setRecovery] = useState<SavedDraft | null>(() => {
-    const saved = readSheetLocal<SavedDraft | null>(PRODUCT_SHEET_DRAFT, null);
+    const saved = readSheetLocal<SavedDraft | null>(draftKey, null);
     return isSheetDraft(saved) && saved.changes.length ? saved : null;
   });
   const [recoveryOpen, setRecoveryOpen] = useState(() => !!recovery);
@@ -241,7 +254,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const submitting = useRef(false);
   const operationDb = useRef(db);
   operationDb.current = db;
-  const draftRef = useRef<SheetChange[]>([]);
   const day = useBogotaDay();
   const [projectionDay, setProjectionDay] = useState(day);
   const filterDay = changes.length || editing ? projectionDay : day;
@@ -420,7 +432,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   useLayoutEffect(() => {
     const refresh = sheetSnapshot.current;
     if (refresh?.snapshot === db) sheetSnapshot.current = undefined;
-    if (draftRef.current.length || editing) return;
+    if (history.getSnapshot().value.length || editing) return;
     setProjection(db);
     if (refresh?.snapshot === db && refresh.scope === liveScope.current) {
       setRestoration(refresh);
@@ -440,23 +452,42 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     try {
       if (changes.length)
         localStorage.setItem(
-          PRODUCT_SHEET_DRAFT,
+          draftKey,
           JSON.stringify({
             version: 1,
             timestamp: new Date().toISOString(),
             changes,
           }),
         );
-      else localStorage.removeItem(PRODUCT_SHEET_DRAFT);
+      else localStorage.removeItem(draftKey);
       setStorageError(false);
     } catch {
       setStorageError(true);
     }
-  }, [changes, touched]);
-  const draft = (next: SheetChange[]) => {
-    draftRef.current = next;
-    setChanges(next);
+  }, [changes, draftKey, touched]);
+  const recordDraft = (next: SheetChange[]) => {
+    if (history.record(next)) setTouched(true);
+  };
+  const resetDraft = () => {
+    history.reset([]);
     setTouched(true);
+  };
+  const moveDraft = (direction: SheetHistoryDirection) => {
+    if (busy || submitting.current || editing) return;
+    try {
+      if (
+        !history.move(direction, (next, current) =>
+          checkProductSheetReplay(operationDb.current, next, current),
+        )
+      )
+        return;
+      setProjectionDay(day);
+      setIssues([]);
+      setError(null);
+      returnSheetFocus(scope);
+    } catch (failure) {
+      setError(problemFrom(failure));
+    }
   };
   const display = (row: ProductSheetRow) => currentByKey.get(row.key) ?? row;
   const selectionTargets = () => {
@@ -504,10 +535,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   };
   const changeQuery = (values: Record<string, string>) => {
     if (editing && !commit(undefined, true)) return;
+    const current = history.getSnapshot().value;
     setProjection(
-      draftRef.current === changes
-        ? viewDb
-        : overlaySheetChanges(db, draftRef.current),
+      current === changes ? viewDb : overlaySheetChanges(db, current),
     );
     setProjectionDay(day);
     setProjectionRevision((value) => value + 1);
@@ -526,7 +556,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     menuRowKey?: string,
   ) => {
     if (editing && !commit(undefined, true)) return;
-    if (draftRef.current.length) setPending({ action, focusScope, menuRowKey });
+    if (history.getSnapshot().value.length)
+      setPending({ action, focusScope, menuRowKey });
     else action();
   };
   function beginSupply(row: ProductSheetRow, menuRowKey?: string) {
@@ -567,23 +598,27 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   }
   async function save(origin = scope): Promise<boolean> {
     if (submitting.current) return false;
-    const submitted = draftRef.current;
-    if (!submitted.length) return true;
+    const submitted = history.getSnapshot().value;
+    if (!submitted.length) {
+      resetDraft();
+      return true;
+    }
     submitting.current = true;
     setBusy(true);
     setError(null);
     try {
       let savedSnapshot: Database | undefined;
       let refresh: SheetRefresh | undefined;
-      await run(
+      const saved = await withCommentRemovalConfirmation((confirmar_comentarios) => run(
         "saveProductOrderSheet",
-        { changes: submitted },
+        { changes: submitted, confirmar_comentarios },
         "Cambios de la hoja guardados",
         (snapshot) => {
           savedSnapshot = snapshot;
           refresh = captureSheetSnapshot(snapshot, origin);
         },
-      );
+      ));
+      if (!saved) return false;
       operationDb.current =
         savedSnapshot ??
         (operationDb.current === db
@@ -592,7 +627,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       setProjection(operationDb.current);
       setRestoration(refresh);
       setProjectionDay(day);
-      draft([]);
+      resetDraft();
       setIssues([]);
       setEditing(null);
       setProjectionRevision((value) => value + 1);
@@ -629,12 +664,13 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     }
   }
   const discard = () => {
-    draft([]);
+    resetDraft();
     setEditing(null);
     setIssues([]);
     setError(null);
   };
   function edit(row: ProductSheetRow, col: SheetColumn, initial?: string) {
+    if (busy || submitting.current) return;
     if (col.key === "ocm" && initial === undefined) {
       beginSupply(row);
       return;
@@ -664,13 +700,14 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   }
   function commit(value?: string, allowRejected = false): boolean {
     if (!editing) return true;
+    if (busy || submitting.current) return false;
     const row = currentByKey.get(editing.rowKey),
       col = allColumns.find((col) => col.key === editing.column);
     if (!row || !col) {
       setEditing(null);
       return true;
     }
-    const result = proposeSheetInput(db, changes, [
+    const result = proposeSheetInput(db, history.getSnapshot().value, [
       { row, column: col, text: value ?? editing.value },
     ]);
     setError(null);
@@ -699,12 +736,12 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           setReplacements([
             { orderId: row.order.id, providerId: String(provider.value) },
           ]);
-        if (draftRef.current.length) setPending({ action });
+        if (history.getSnapshot().value.length) setPending({ action });
         else action();
       }
       return !provider;
     }
-    draft(result.changes);
+    recordDraft(result.changes);
     setEditing(null);
     return true;
   }
@@ -746,6 +783,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         );
   }
   function paste(value: string) {
+    if (busy || submitting.current) return;
     const range = selection.read();
     if (!range) {
       notify("Selecciona primero la celda de destino.", true);
@@ -783,12 +821,14 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       for (let r = rowCount; r < matrix.length; r++)
         overflow += matrix[r].length;
     }
-    const result = proposeSheetInput(db, changes, inputs);
+    const result = proposeSheetInput(db, history.getSnapshot().value, inputs);
     setError(null);
     const replacement = result.changes.filter(
       (change) => change.field === "id_proveedor",
     );
-    draft(result.changes.filter((change) => change.field !== "id_proveedor"));
+    recordDraft(
+      result.changes.filter((change) => change.field !== "id_proveedor"),
+    );
     setIssues(result.issues);
     setEditing(null);
     if (replacement.length) {
@@ -799,7 +839,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             providerId: String(change.value),
           })),
         );
-      if (draftRef.current.length) setPending({ action });
+      if (history.getSnapshot().value.length) setPending({ action });
       else action();
     }
     const message = inputs.length === 1 ? "Celda pegada." : "Rango pegado.";
@@ -811,6 +851,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     else if (inputs.length) notify(message);
   }
   function clearSelection() {
+    if (busy || submitting.current) return;
     const range = selection.read();
     if (!range) return;
     const bounds = rangeBounds(range);
@@ -844,8 +885,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           .slice(bounds.left, bounds.right + 1)
           .map((column) => ({ row: display(row), column, text: "" })),
       );
-    const result = proposeSheetInput(db, changes, inputs);
-    draft(result.changes);
+    const result = proposeSheetInput(db, history.getSnapshot().value, inputs);
+    recordDraft(result.changes);
     setIssues(result.issues);
     setError(null);
   }
@@ -1147,6 +1188,18 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           />
         </div>
       );
+    else if (editCol.key === "ubicacion")
+      editor = (
+        <div className="sheet-reference-editor">
+          <ReceptionLocationPicker
+            aria-label={editCol.label}
+            value={editRow.lot?.id_direccion ?? null}
+            historical={editRow.lot?.ubicacion ?? null}
+            preserveHistorical
+            onChange={(id) => commit(id ?? "")}
+          />
+        </div>
+      );
     else if (editCol.kind === "enum")
       editor = (
         <ControlSelect
@@ -1258,6 +1311,14 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       invalidKeys.has(`${row.key}/${col.key}`),
     [invalidKeys],
   );
+  const historyControls = (
+    <SheetHistoryControls
+      canUndo={canUndo}
+      canRedo={canRedo}
+      disabled={busy || !!editing}
+      onMove={moveDraft}
+    />
+  );
   const toolbar = (
     <SheetSelectionView selection={selection} snapshot={selectionSummary}>
       {() => {
@@ -1289,6 +1350,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 ))}
               </div>
               <div className="inline">
+                {historyControls}
                 <Button
                   icon={Save}
                   data-sheet-return-focus
@@ -1301,8 +1363,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                   Guardar{changes.length ? ` ${changes.length} cambios` : ""}
                 </Button>
                 <Button
-                  icon={Undo2}
-                  disabled={(!changes.length && !editing) || busy}
+                  icon={X}
+                  disabled={
+                    (!canUndo && !canRedo && !changes.length && !editing) || busy
+                  }
                   onClick={async () => {
                     if (
                       await confirmAction(
@@ -1709,6 +1773,13 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       className="product-order-sheet"
       aria-label="Vista alternativa de OC de productos"
       aria-busy={busy}
+      onKeyDown={(event) => {
+        if (editing || busy) return;
+        const direction = sheetHistoryShortcut(event);
+        if (!direction) return;
+        event.preventDefault();
+        moveDraft(direction);
+      }}
     >
       <div className="product-sheet-title">
         <h1>Órdenes de compra</h1>
@@ -1741,16 +1812,19 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             >
               Mostrar herramientas
             </Button>
-            <Button
-              icon={Save}
-              data-sheet-return-focus
-              disabled={(!changes.length && !editing) || busy}
-              onClick={() => {
-                if (commit()) void save();
-              }}
-            >
-              Guardar {changes.length || ""}
-            </Button>
+            <div className="inline">
+              {historyControls}
+              <Button
+                icon={Save}
+                data-sheet-return-focus
+                disabled={(!changes.length && !editing) || busy}
+                onClick={() => {
+                  if (commit()) void save();
+                }}
+              >
+                Guardar {changes.length || ""}
+              </Button>
+            </div>
           </div>
         ) : (
           toolbar
@@ -1887,7 +1961,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
             <Button
               variant="primary"
               onClick={() => {
-                draft(recovery.changes);
+                recordDraft(recovery.changes);
                 setRecovery(null);
                 setError(null);
               }}

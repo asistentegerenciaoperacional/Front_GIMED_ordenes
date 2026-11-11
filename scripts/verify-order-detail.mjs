@@ -3,6 +3,7 @@ import { mkdir, mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { resolve, join, sep } from "node:path";
 import { createServer } from "node:net";
 import {ariaBrowserFile} from "./aria-browser-source.mjs";
+import { authTestAccounts, authTestPassword, startAuthFixture } from "../tests/fixtures/supabase-auth.mjs";
 
 const browser = process.argv[2] || "chrome";
 const journey = process.argv.includes("--journey");
@@ -18,8 +19,10 @@ await new Promise((ok, fail) => {
 });
 const port = socket.address().port;
 await new Promise((ok) => socket.close(ok));
+const auth = await startAuthFixture();
 const env = {
   ...process.env,
+  ...auth.env,
   PROTOTIPO_API_PORT: String(port),
   PROTOTIPO_DATA_FILE: join(temporary, "database.json"),
   NO_UPDATE_NOTIFIER: "1",
@@ -77,6 +80,16 @@ try {
     `--profile=${join(temporary, "profile")}`,
     "--idle-timeout=0",
   ]);
+  const signIn = join(temporary, "sign-in.js");
+  const credentials = { email: authTestAccounts[0].email, password: authTestPassword };
+  await writeFile(signIn, `async (page) => {
+    const login = await page.request.post(new URL("/api/auth/login", page.url()).href, {
+      data: ${JSON.stringify(credentials)}
+    });
+    if (!login.ok()) throw new Error(await login.text());
+    await page.reload();
+  }`);
+  await cli(["run-code", `--filename=${signIn}`]);
   let testFile = "tests/order-detail.browser.js";
   if (journey) {
     await mkdir(join(evidence, "journey"), { recursive: true });
@@ -106,6 +119,7 @@ try {
 } finally {
   await cli(["close"]).catch(() => {});
   api.kill();
+  await auth.close();
   if (!resolve(temporary).startsWith(base + sep))
     throw new Error("Directorio temporal fuera del espacio de pruebas");
   await rm(temporary, {

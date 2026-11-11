@@ -1,10 +1,26 @@
 # Prototipo local de órdenes de compra · GIMED
 
-Aplicación interactiva en español basada en `Planeacion/requisitos.md`, las 28 tablas de `Planeacion/db.md` y las restricciones R01–R13. Incluye una colección provisional adicional para la plantilla de cotización. Permite recorrer los procesos con datos ficticios y conservar los cambios en este equipo. Los archivos son placeholders y los correos se simulan.
+Aplicación interactiva en español basada en `Planeacion/requisitos.md`, el esquema de `Planeacion/db.md` y las restricciones R01–R13. Incluye una colección provisional adicional para la plantilla de cotización. Permite recorrer los procesos con datos ficticios y conservar los cambios en este equipo. Los archivos son placeholders y los correos se simulan.
 
 Documentación actualizada el **14 de octubre de 2026**. Los cambios acordados están incorporados en los [requisitos vigentes](../Planeacion/requisitos.md) y en los apartados de esta guía. La [cobertura](COBERTURA.md) los relaciona con las pantallas actuales.
 
 ## Arranque
+
+### Configurar el acceso
+
+En un proyecto de Supabase Auth, habilita el acceso por correo y contraseña y deshabilita el registro público y el inicio de sesión anónimo. Crea las cuentas internas desde **Authentication → Users**. Configura el proceso local desde PowerShell, con el URL del proyecto, su clave publicable y los UUID de las cuentas autorizadas separados por coma.
+
+```powershell
+$env:SUPABASE_URL = 'https://tu-proyecto.supabase.co'
+$env:SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_...'
+$env:PROTOTIPO_AUTH_USER_IDS = 'UUID-CUENTA-1,UUID-CUENTA-2'
+```
+
+Arranca desde la misma sesión de PowerShell. Para retirar el acceso de una cuenta, elimina su UUID de la configuración y reinicia el servicio. El reinicio requiere volver a iniciar sesión. El identificador de Supabase permanece asociado a la autoría local aunque la cuenta deje de tener acceso. Cuando se incorpore OAuth, vincula el proveedor a la identidad existente para conservar ese identificador. Las órdenes, direcciones y comentarios se guardan en `data/database.json`.
+
+La API de negocio y los documentos exigen la cookie de sesión. `GET /api/health` devuelve el estado del servicio local. Para probar la integración HTTP con el servicio de autenticación simulado, ejecuta `node --test tests/auth.integration.mjs`.
+
+Para abrir una demostración con autenticación simulada, ejecuta `npm run build` y luego `npm run demo`. Entra en [la instancia de prueba](http://127.0.0.1:3002) con `ana@example.com` y la contraseña `local-test-password`. La demostración usa datos ficticios y guarda sus cambios en `tests/.tmp/demo-auth/database.json`.
 
 Probado con Node.js 24 y npm. Desde la carpeta `prototipo`, instala las dependencias una vez:
 
@@ -30,6 +46,10 @@ npm start
 En este caso la interfaz y la API se sirven juntas en [el puerto 3001](http://127.0.0.1:3001).
 
 ## Uso del prototipo
+
+Cada renglón de producto o material tiene un botón **Comentarios** para consultar y publicar mensajes con autor y fecha. Anular el renglón conserva sus comentarios. Quitar o sustituir el renglón, incluido un reemplazo de orden por cambio de proveedor, pide confirmar la cantidad de comentarios que se eliminará.
+
+En **Proveedores → Direcciones y bodegas** se administran las bodegas propias y las direcciones de proveedor. La recepción de un lote de producto o de un renglón de material u otros permite elegir una ubicación por su nombre. Las bodegas desactivadas y las ubicaciones de texto anteriores se conservan en el historial. La primera apertura de un JSON anterior genera una copia `*.recepciones-*.bak` antes de migrarlo.
 
 La navegación se abre como un **drawer** mediante el botón de menú de la esquina superior izquierda, tanto en escritorio como en móvil. Desde **1024 px** de ancho, su icono **Fijar navegación** lo mantiene visible y reserva su espacio en el diseño, ajustando el ancho del contenido. Por debajo, la opción desaparece; reducir una ventana con el panel fijado lo convierte en flotante y libera su columna. Volver a ampliar permite fijarlo otra vez, conservándolo desfijado hasta hacerlo. El estado fijado se conserva al cambiar de sección en los anchos permitidos; el panel tiene desplazamiento interno cuando los destinos no caben.
 
@@ -58,7 +78,7 @@ Cada tabla de datos indicada aquí debe ofrecer un botón de filtro en las cabec
 | Catálogos → Productos → Lista de productos   | Producto, maquilador, categoría, maquila/IVA y código asignado (texto); unidades por lote (entero); activo (enumeración Sí/No).                                             |
 | Catálogos → Materiales → Lista de materiales | Código MAIA, material y tipo de material (texto). El código conserva sus ceros iniciales.                                                                                 |
 | Proveedores → Proveedores                    | Nombre completo, nombre resumido y NIT (texto); proveedor de maquila, proveedor de materiales y activo (enumeraciones Sí/No).                                             |
-| Proveedores → Direcciones de proveedor       | Proveedor, nombre de bodega, ciudad, dirección y complemento (texto).                                                                                                     |
+| Proveedores → Direcciones y bodegas          | Tipo, proveedor, nombre de bodega, ciudad, dirección y complemento (texto) y activa (enumeración Sí/No).                                                                    |
 | Proveedores → Contactos de proveedor         | Proveedor, nombre, cargo o área, correo y celular (texto).                                                                                                                |
 | Códigos de barras                            | Código y producto (texto), estado GS1/sistema (enumeración), creación (fecha). La explicación de los cinco estados se abre desde el botón **(?)** junto a la búsqueda.   |
 

@@ -60,6 +60,7 @@ export function productLotNeedsNumber(row: Row): boolean {
       "fecha_recepcion",
       "fecha_confirmacion",
       "ubicacion",
+      "id_direccion",
     ].some(
       (field) =>
         row[field] !== null && row[field] !== undefined && row[field] !== "",
@@ -85,6 +86,8 @@ export const schemas = Object.fromEntries(
       let type: z.ZodType =
         spec.type === "object_id"
           ? idSchema
+          : spec.type === "uuid"
+            ? z.uuid()
           : spec.type === "integer"
             ? z
                 .number()
@@ -111,6 +114,8 @@ export const schemas = Object.fromEntries(
                       : z.string();
       if (spec.required && spec.type === "varchar")
         type = z.string().min(1, "Campo obligatorio.");
+      if (name === "comentario" && field === "texto")
+        type = z.string().trim().min(1).max(10000);
       if (name === "lote_producto" && field === "numero_lote")
         type = z
           .string()
@@ -339,7 +344,9 @@ export const titles: Record<Entity, string> = {
   productos: "Productos",
   codigos_barras: "Códigos de barras",
   proveedor: "Proveedores",
-  direccion_proveedor: "Direcciones de proveedor",
+  direccion: "Direcciones y bodegas",
+  usuario: "Usuarios",
+  comentario: "Comentarios",
   contacto: "Contactos de proveedor",
   categorias: "Categorías",
   costos_maquila: "Costos de maquila",
@@ -416,6 +423,9 @@ export const labels: Record<string, string> = {
   fecha_recepcion: "Recepción",
   fecha_confirmacion: "Confirmación",
   ubicacion: "Ubicación de recepción",
+  id_direccion: "Ubicación de recepción",
+  tipo: "Tipo de ubicación",
+  activa: "Activa",
   estado: "Estado",
   fecha_estimada_entrega: "Entrega estimada",
   fecha_entrega: "Entrega recibida",
@@ -453,6 +463,7 @@ export const words: Record<string, string> = {
   activo: "Activo",
   asignado: "Asignado",
   inactivo: "Inactivo",
+  propia: "Propia",
   producto: "Producto",
   productos: "Productos",
   material: "Material",

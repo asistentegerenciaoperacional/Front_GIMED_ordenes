@@ -8,6 +8,7 @@ import { validateDatabase } from "./integrity";
 import { migrateFavoriteSuppliers } from "./favorite-migration";
 import { migrateBarcodes } from "./barcode-migration";
 import { migrateQuotationTemplate } from "./quotation-migration";
+import { migrateReceptionData } from "./reception-migration";
 export class JsonStore {
   private state!: Database;
   private queue: Promise<unknown> = Promise.resolve();
@@ -15,6 +16,7 @@ export class JsonStore {
   migration?: { before: number; after: number; backup: string };
   barcodeMigration?: { demoted: string[]; backup: string };
   quotationMigration?: { backup: string };
+  receptionMigration?: { backup: string };
   static async open(file: string, seed: () => Database = makeSeed) {
     const store = new JsonStore(file);
     await mkdir(dirname(file), { recursive: true });
@@ -30,9 +32,11 @@ export class JsonStore {
     const migration = migrateFavoriteSuppliers(JSON.parse(original));
     const barcodes = migrateBarcodes(migration.database);
     const quotation = migrateQuotationTemplate(barcodes.database);
-    store.state = validateDatabase(quotation.database as Database);
-    if (migration.changed || barcodes.changed || quotation.changed) {
-      const backup = `${file}.${quotation.changed ? "quotations" : barcodes.changed ? "barcodes" : "favorites"}-${Date.now()}-${randomUUID()}.bak`;
+    const reception = migrateReceptionData(quotation.database);
+    store.state = validateDatabase(reception.database as unknown as Database);
+    if (migration.changed || barcodes.changed || quotation.changed || reception.changed) {
+      const kind = reception.changed ? "recepciones" : quotation.changed ? "quotations" : barcodes.changed ? "barcodes" : "favorites";
+      const backup = `${file}.${kind}-${Date.now()}-${randomUUID()}.bak`;
       await writeFile(backup, original, { encoding: "utf8", flag: "wx" });
       // Validation and exact backup must succeed before the atomic replacement.
       await store.persist(store.state);
@@ -45,6 +49,7 @@ export class JsonStore {
       if (barcodes.changed)
         store.barcodeMigration = { demoted: barcodes.demoted, backup };
       if (quotation.changed) store.quotationMigration = { backup };
+      if (reception.changed) store.receptionMigration = { backup };
     }
     return store;
   }

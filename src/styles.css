@@ -3126,35 +3126,131 @@ textarea.control {
   flex-wrap: wrap;
   gap: 8px;
 }
-.quotation-card {
+.quotation-card,
+.quotation-material {
   padding: 16px;
   border: 1px solid var(--border);
-  border-radius: 10px;
   min-width: 0;
 }
+.quotation-card {
+  border-radius: 10px;
+  font-size: 13px;
+}
 .quotation-card h3 { margin: 0 0 10px; font-size: 15px; }
-.quotation-card h4 { margin: 0 0 10px; }
-.quotation-card > .compact-note { margin: 0 0 14px; }
-.quotation-providers { list-style: none; padding: 0; margin: 12px 0; }
+.quotation-card p { font-size: inherit; }
+.quotation-sections {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.quotation-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.btn.quotation-section-trigger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: inherit;
+  color: var(--ink);
+  font-size: inherit;
+  font-weight: inherit;
+  text-align: start;
+  white-space: normal;
+}
+.quotation-section h3 {
+  border-radius: inherit;
+}
+.quotation-section-trigger[aria-expanded="true"] {
+  background: var(--soft);
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+.quotation-section-summary {
+  font-weight: 400;
+  text-align: end;
+}
+.quotation-section-content {
+  padding: 12px;
+  gap: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+.quotation-section-content h4 {
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.quotation-material {
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--soft) 55%, var(--surface));
+}
+.quotation-material > h4 {
+  font-size: 14px;
+}
+.quotation-material .compact-note,
+.quotation-material .field label,
+.quotation-material .field input:not(:disabled) {
+  color: var(--ink);
+}
+.quotation-material .field input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.quotation-material > h4 + .compact-note {
+  margin: 4px 0 12px;
+}
+.quotation-suppliers-heading {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  color: var(--ink);
+  font-size: 14px;
+}
+.quotation-providers { list-style: none; padding: 0; margin: 0 0 8px; }
 .quotation-providers li {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid var(--border);
 }
+.quotation-providers li + li { border-top: 1px solid var(--border); }
 .quotation-providers li span { min-width: 0; overflow-wrap: anywhere; }
-.quotation-providers small { display: block; color: var(--muted); margin-top: 4px; }
-.quotation-recipient { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
+.quotation-recipient {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  align-items: start;
+  gap: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+.quotation-recipient .field {
+  grid-template-columns: minmax(0, 1fr);
+}
 .quotation-preview-trigger { margin: 10px 0; }
 .material-quotation-dialog .dialog-footer { flex-wrap: wrap; }
+.quotation-count { margin-inline-end: auto; }
 .quotation-message { white-space: pre-wrap; overflow-wrap: anywhere; }
 .quotation-template-fields .compact-note { overflow-wrap: anywhere; }
+@media (max-width: 720px) {
+  .quotation-recipient { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+}
 @media (max-width: 600px) {
   .demand-selection-actions { width: 100%; }
   .demand-selection-actions > .btn { flex: 1 1 140px; }
-  .quotation-card { padding: 12px; }
+  .quotation-card, .quotation-material { padding: 12px; }
+  .btn.quotation-section-trigger {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 2px;
+  }
+  .quotation-section-summary { grid-area: 2 / 1; text-align: start; }
+  .quotation-section-trigger > svg { grid-area: 1 / 2 / span 2; }
+  .quotation-count { flex-basis: 100%; }
   .material-quotation-dialog { scroll-padding-bottom: 160px; }
   .material-quotation-dialog .quotation-review-footer > .btn { flex: 1 1 auto; }
   .material-quotation-dialog .quotation-review-footer > .btn:last-child { flex-basis: 100%; }

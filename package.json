@@ -7,6 +7,7 @@
     "dev": "node scripts/dev.mjs",
     "build": "tsc --noEmit && vite build",
     "start": "tsx server/index.ts",
+    "demo": "node --import tsx scripts/demo-auth.mjs",
     "test": "tsx --test tests/*.test.ts",
     "test:browser": "npm run build && node scripts/verify-aria-browser.mjs && node scripts/verify-persistence.mjs",
     "test:ocm": "npm run build && node scripts/verify-material-demand.mjs",

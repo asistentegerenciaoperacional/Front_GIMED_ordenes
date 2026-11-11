@@ -87,7 +87,7 @@ async (page) => {
     page.locator(".product-sheet-grid tbody tr[data-lot-state]");
   const choose = async (menu, option) => {
     await page.getByRole("button", { name: menu, exact: true }).click();
-    await page.getByRole("option", { name: option, exact: true }).click();
+    await page.getByRole("menuitem", { name: option, exact: true }).click();
   };
   const confirm = () => page.getByRole("alertdialog");
   const waitLine = async (expected) => {
@@ -191,16 +191,13 @@ async (page) => {
     "Anuladas conserva los tres lotes con sus mismos datos",
   );
   await lotCell("HOJA-ESTADO-1").click();
-  await page.getByRole("button", { name: "Nuevo lote", exact: true }).click();
-  const annulledCreate = page.getByRole("dialog", { name: /Nuevos lotes/ });
-  await annulledCreate.waitFor();
+  await page.getByRole("button", { name: "Estado del lote", exact: true }).click();
+  const annulledCreate = page.getByRole("menuitem", { name: "Nuevo lote", exact: true });
   check(
-    await annulledCreate.isVisible(),
+    await annulledCreate.isEnabled(),
     "Nuevo lote está habilitado sobre un producto anulado",
   );
-  await annulledCreate
-    .getByRole("button", { name: "Cancelar", exact: true })
-    .click();
+  await page.keyboard.press("Escape");
   await annulledCreate.waitFor({ state: "hidden" });
   await choose("Estado del lote", "Reabrir lotes");
   current = await waitLine("en_seguimiento");
@@ -214,15 +211,11 @@ async (page) => {
     .getByRole("button", { name: "En seguimiento", exact: true })
     .click();
   await lotCell("HOJA-ESTADO-1").click();
-  await page.getByRole("button", { name: "Nuevo lote", exact: true }).click();
-  const create = page.getByRole("dialog", {
-    name: /Nuevos lotes|Nuevo lote|Crear lotes/,
-  });
-  await create.waitFor();
-  await create
-    .getByRole("button", { name: "Crear lotes", exact: true })
-    .click();
-  await create.waitFor({ state: "hidden" });
+  await choose("Estado del lote", "Nuevo lote");
+  await page.waitForFunction(async (lineId) => {
+    const snapshot = await (await fetch("/api/state")).json();
+    return snapshot.lote_producto.filter((lot) => lot.id_orden_producto === lineId).length === 4;
+  }, line.id);
   current = await state();
   check(
     current.lote_producto.filter((lot) => lot.id_orden_producto === line.id)
