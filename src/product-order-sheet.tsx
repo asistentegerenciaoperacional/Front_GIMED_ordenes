@@ -23,6 +23,7 @@ import {
   FileCheck2,
   FileText,
   Link2,
+  MessageSquare,
   Plus,
   Printer,
   Save,
@@ -60,7 +61,7 @@ import {
 import { SheetSelection, rangeBounds } from "./product-sheet-selection";
 import { SheetSelectionView } from "./components/sheet-selection-view";
 import { ReceptionLocationPicker } from "./reception-location";
-import { withCommentRemovalConfirmation } from "./line-comments";
+import { LineComments, withCommentRemovalConfirmation } from "./line-comments";
 import {
   SheetHistoryControls,
   sheetHistoryShortcut,
@@ -219,6 +220,11 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     [creating, setCreating] = useState(false),
     [editingOrder, setEditingOrder] = useState<string | null>(null);
   const [authorize, setAuthorize] = useState<string[] | null>(null);
+  const [comments, setComments] = useState<{
+    tipo: "producto";
+    id: string;
+    name: string;
+  } | null>(null);
   const [linking, setLinking] = useState<
     (SupplyOrigin & { lineId: string }) | null
   >(null);
@@ -1586,6 +1592,26 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 }}
               />
               <Tool
+                icon={MessageSquare}
+                label="Comentarios"
+                disabled={lineIds.length !== 1 || !lotIds.length || busy}
+                onClick={() => {
+                  const row = selected.find((item) => item.lot);
+                  if (!row?.lot) return;
+                  const product = db.productos.find(
+                    (item) => item.id === row.line.id_producto,
+                  );
+                  const lotNumber = row.lot.numero_lote || "Sin número de lote";
+                  cleanFirst(() =>
+                    setComments({
+                      tipo: "producto",
+                      id: row.line.id,
+                      name: `OC ${row.order.no_orden} · ${product?.nombre_producto ?? "Producto"} · Lote ${lotNumber}`,
+                    }),
+                  );
+                }}
+              />
+              <Tool
                 icon={Eye}
                 label="Ver detalle"
                 disabled={!singleOrder}
@@ -2016,6 +2042,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           busy={busy}
           error={deleteError}
         />
+      )}
+      {comments && (
+        <LineComments {...comments} onClose={() => setComments(null)} />
       )}
       {creating && <OrderForm onClose={() => setCreating(false)} />}
       {linking && (
