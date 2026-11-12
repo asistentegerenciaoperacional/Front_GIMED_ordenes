@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Las órdenes y los documentos requieren sesión",
+    "Inicio de sesión, cuenta ajena rechazada y documentos habilitados",
+    "El editor compacto crece con el texto y se adapta a móvil",
+    "Publicación y lectura de varios comentarios de producto",
+    "El material admite comentarios y recepción en una bodega propia",
+    "La hoja de productos guarda la referencia de bodega por lote",
+    "Cerrar sesión retira la interfaz y el acceso a los datos"
+  ],
+  "mode": "production",
+  "consoleMessages": [],
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-RTFg34\\database.json"
+}

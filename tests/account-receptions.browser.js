@@ -37,6 +37,37 @@ async (page) => {
   await dialog
     .getByText("Este renglón todavía no tiene comentarios.")
     .waitFor();
+  const editor = dialog.getByLabel("Nuevo comentario");
+  const assertEditorWidth = async () => {
+    const sizes = await editor.evaluate((element) => {
+      const footer = element.closest(".comment-composer");
+      const style = getComputedStyle(footer);
+      return {
+        editor: element.getBoundingClientRect().width,
+        available: footer.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      };
+    });
+    if (Math.abs(sizes.editor - sizes.available) > 1)
+      throw new Error(`El editor no ocupa el ancho disponible: ${sizes.editor} / ${sizes.available}`);
+  };
+  await assertEditorWidth();
+  const emptyHeight = await editor.evaluate((element) => element.getBoundingClientRect().height);
+  await editor.fill("Primera línea\nSegunda línea\nTercera línea\nCuarta línea");
+  const expandedHeight = await editor.evaluate((element) => element.getBoundingClientRect().height);
+  if (emptyHeight > 45 || expandedHeight <= emptyHeight)
+    throw new Error(`El editor no se adapta al contenido: ${emptyHeight} / ${expandedHeight}`);
+  await editor.fill("");
+  const clearedHeight = await editor.evaluate((element) => element.getBoundingClientRect().height);
+  if (clearedHeight !== emptyHeight)
+    throw new Error(`El editor no recuperó su altura inicial: ${clearedHeight} / ${emptyHeight}`);
+  if (await dialog.getByRole("button", { name: "Publicar comentario" }).isEnabled())
+    throw new Error("Se permite publicar un comentario vacío.");
+  await page.setViewportSize({ width: 375, height: 700 });
+  await assertEditorWidth();
+  const mobileOverflow = await dialog.evaluate((element) => element.scrollWidth > element.clientWidth);
+  if (mobileOverflow) throw new Error("El diálogo de comentarios se desborda en móvil.");
+  await page.setViewportSize({ width: 1280, height: 720 });
+  checks.push("El editor compacto crece con el texto y se adapta a móvil");
   for (const text of [
     "Primer seguimiento de producto",
     "Segundo seguimiento de producto",
@@ -56,6 +87,10 @@ async (page) => {
     throw new Error(
       `Fechas y autores obtenidos: ${commentDates}, ${commentAuthors.join(", ")}`,
     );
+  const avatarRadius = await dialog.locator(".comment-avatar").first().evaluate((element) => getComputedStyle(element).borderRadius);
+  const headerAvatarRadius = await page.locator(".topbar .avatar").evaluate((element) => getComputedStyle(element).borderRadius);
+  if (avatarRadius !== headerAvatarRadius)
+    throw new Error(`El radio del avatar no coincide: ${avatarRadius} / ${headerAvatarRadius}`);
   checks.push("Publicación y lectura de varios comentarios de producto");
 
   await page.goto(`${base}/proveedores?tab=direccion`);

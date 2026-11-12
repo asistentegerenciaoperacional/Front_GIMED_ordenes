@@ -62,6 +62,10 @@ Se puede empezar a escribir en cualquiera de las siete filas. Vaciar fila limpia
 
 Dentro de la cuadrícula, las flechas recorren las celdas y Enter confirma la edición y baja una fila, sin enviar el formulario. En los límites no se avanza fuera de la hoja. Los menús de autocompletado abiertos conservan prioridad para seleccionar con flechas/Enter; una selección no produce además un salto de fila. Calendarios, Tab y Escape mantienen su comportamiento compartido. La navegación específica de la hoja se acota a esta tabla y no altera las otras tablas de React Aria.
 
+### Comentarios de renglón
+
+El diálogo de comentarios de productos y materiales conserva la cabecera compartida y presenta cada comentario con inicial decorativa, autor, fecha en color secundario y texto. Las entradas se separan con una línea fina y los textos largos se ajustan al ancho disponible. El pie contiene el campo etiquetado **Nuevo comentario** y la acción **Publicar comentario**; el editor comienza con una línea, crece con su contenido hasta 160 px y después permite desplazamiento interno. Al vaciarlo recupera su altura inicial y la publicación permanece deshabilitada. El diálogo compartido conserva foco, cierre, confirmación de descarte y bloqueo durante el guardado.
+
 ### Historial de producto
 
 El historial de Catálogos → Productos reutiliza el diálogo React Aria con la clase `product-history-dialog` y el componente `ProductHistory`. La cabecera conserva el nombre del producto, el subtítulo y el cierre. El cuerpo agrupa primero seis datos en una única superficie suave con borde: tipo de maquila, costo vigente, unidades por lote, categoría, maquila/IVA y código asignado. El código procede de `assignedBarcode` y el costo de `currentCost`.
