@@ -60,7 +60,6 @@ import {
 } from "./components/product-sheet-grid";
 import { SheetSelection, rangeBounds } from "./product-sheet-selection";
 import { SheetSelectionView } from "./components/sheet-selection-view";
-import { ReceptionLocationPicker } from "./reception-location";
 import { LineComments, withCommentRemovalConfirmation } from "./line-comments";
 import {
   SheetHistoryControls,
@@ -72,7 +71,7 @@ import {
   checkProductSheetReplay,
   sameProductSheetDraft,
 } from "./product-sheet-draft-history";
-import { InvoicePicker, OrderForm, productLotFieldOrder } from "./forms";
+import { CatalogForm, InvoicePicker, OrderForm, SheetLocationPicker, productLotFieldOrder } from "./forms";
 import { ActionTooltip } from "./components/overlays";
 import { MaterialSupplyDialog } from "./material-supply";
 import { customFilters, readCustomFilter } from "./order-filters";
@@ -215,6 +214,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const [editing, setEditing] = useState<Editing | null>(null);
   useEffect(() => () => selection.cancelPending(), [selection]);
   const [pendingInvoice, setPendingInvoice] = useState<string | null>(null);
+  const [pendingAddress, setPendingAddress] = useState<{ id: string; rowKey: string } | null>(null);
+  const [creatingAddress, setCreatingAddress] = useState<{ rowKey: string; query: string } | null>(null);
   const [projection, setProjection] = useState<Database>(db);
   const [busy, setBusy] = useState(false),
     [creating, setCreating] = useState(false),
@@ -760,6 +761,19 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       setPendingInvoice(null);
     }
   }, [db, pendingInvoice]);
+  useEffect(() => {
+    if (pendingAddress && db.direccion.some((address) => address.id === pendingAddress.id)) {
+      const row = currentByKey.get(pendingAddress.rowKey);
+      const column = allColumns.find((item) => item.key === "ubicacion");
+      if (row && column) {
+        const result = proposeSheetInput(db, history.getSnapshot().value, [{ row, column, text: pendingAddress.id }]);
+        setIssues((previous) => [...previous.filter((issue) => issue.rowKey !== row.key || issue.column !== column.key), ...result.issues]);
+        if (!result.issues.length) recordDraft(result.changes);
+      }
+      setEditing(null);
+      setPendingAddress(null);
+    }
+  }, [db, pendingAddress]);
   function copy(event?: React.ClipboardEvent) {
     const range = selection.read();
     if (!range) return;
@@ -1196,12 +1210,12 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       );
     else if (editCol.key === "ubicacion")
       editor = (
-        <div className="sheet-reference-editor">
-          <ReceptionLocationPicker
-            aria-label={editCol.label}
+        <div className="sheet-reference-editor sheet-reference-editor-right">
+          <SheetLocationPicker
             value={editRow.lot?.id_direccion ?? null}
             historical={editRow.lot?.ubicacion ?? null}
-            preserveHistorical
+            onSearchChange={(value) => setEditing((old) => old ? { ...old, value } : old)}
+            onCreate={(query) => setCreatingAddress({ rowKey: editRow.key, query })}
             onChange={(id) => commit(id ?? "")}
           />
         </div>
@@ -2047,6 +2061,9 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         <LineComments {...comments} onClose={() => setComments(null)} />
       )}
       {creating && <OrderForm onClose={() => setCreating(false)} />}
+      {creatingAddress && <CatalogForm entity="direccion" initialValues={{ nombre_dir: creatingAddress.query }}
+        onClose={() => setCreatingAddress(null)}
+        onSaved={(address) => setPendingAddress({ id: address.id, rowKey: creatingAddress.rowKey })} />}
       {linking && (
         <MaterialSupplyDialog
           productLineId={linking.lineId}

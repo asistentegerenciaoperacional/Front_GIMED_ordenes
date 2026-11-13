@@ -68,6 +68,7 @@ import { TooltipHelp, confirmAction } from "./components/overlays";
 import { OrderEntrySheet } from "./order-entry-sheet";
 import { withCommentRemovalConfirmation } from "./line-comments";
 import { ReceptionLocationPicker } from "./reception-location";
+import { selectableAddresses } from "../shared/reception-location";
 import {
   blankSheetLine,
   compactSheetLines,
@@ -991,6 +992,44 @@ export function InvoicePicker({
       )}
     </>
   );
+}
+
+export function SheetLocationPicker({ value, historical, onChange, onCreate, onSearchChange }: {
+  value: string | null;
+  historical: string | null;
+  onChange: (id: string | null) => void;
+  onCreate: (query: string) => void;
+  onSearchChange: (query: string) => void;
+}) {
+  const { db } = useApp();
+  const [search, setSearch] = useState("");
+  const addresses = selectableAddresses(db);
+  const historicalKey = "__ubicacion_historica__";
+  const selected = value ?? (historical ? historicalKey : "");
+  const options = [
+    { id: "__sin_ubicacion__", label: "Sin ubicación", disabled: !!historical && !value },
+    ...(historical && !value ? [{ id: historicalKey, label: historical, disabled: true }] : []),
+    ...(value && !addresses.some((address) => address.id === value)
+      ? [{ id: value, label: `${historical ?? "Ubicación anterior"} (inactiva)`, disabled: true }]
+      : []),
+    ...addresses.map((address) => ({
+      id: address.id,
+      label: address.tipo === "proveedor"
+        ? `${address.nombre_dir} · ${db.proveedor.find((provider) => provider.id === address.id_proveedor)?.nombre_corto ?? "Proveedor"}`
+        : (address.nombre_dir ?? ""),
+      section: address.tipo === "propia" ? "Bodegas propias" : "Proveedores",
+    })),
+  ];
+  return <>
+    <div className="invoice-picker">
+      <ReferencePicker options={options} value={selected} autoFocus
+        aria-label="Buscar ubicación" placeholder="Buscar ubicación..."
+        clearOptionId="__sin_ubicacion__" commitOnSelection
+        onQueryChange={(query) => { setSearch(query); onSearchChange(query); }}
+        onChange={(id) => onChange(id || null)} />
+      <Button className="small" icon={Plus} onClick={() => onCreate(search)}>Agregar dirección</Button>
+    </div>
+  </>;
 }
 
 export const productLotFieldOrder = [

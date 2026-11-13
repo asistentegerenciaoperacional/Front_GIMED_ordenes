@@ -357,6 +357,10 @@ body:has(.product-order-sheet) .content {
   border: 2px solid var(--primary);
   padding: 2px;
 }
+.sheet-reference-editor-right {
+  left: auto;
+  right: 0;
+}
 .sheet-ocm-links > span {
   display: inline-flex;
   align-items: center;

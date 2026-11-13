@@ -18,6 +18,9 @@
     "Factura inexistente se rechaza",
     "Se puede salir inmediatamente del autocompletado",
     "El selector de corrugado tiene espacio para sus opciones",
+    "Ubicación ofrece búsqueda de referencias",
+    "El editor de ubicación se despliega hacia la izquierda",
+    "Agregar abre el formulario de dirección",
     "Pegado inválido se resume en el banner",
     "No aparece lista para pegados",
     "Guardar conserva el borrador válido y excluye valores rechazados",
@@ -26,5 +29,5 @@
   "errors": [],
   "mode": "production",
   "consoleMessages": [],
-  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-NYc0lw\\database.json"
+  "dataFile": "C:\\Users\\USER\\OneDrive - gimed.com.co\\Documentos\\Proyectos GIMED\\Seguimiento ordenes de compra\\prototipo\\tests\\.tmp\\aria-browser-P68nPx\\database.json"
 }
