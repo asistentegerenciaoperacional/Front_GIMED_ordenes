@@ -379,9 +379,9 @@ Confirmaciones usan el diálogo compartido React Aria, bloqueo durante guardado 
 
 Especificación de datos, recuperación y pruebas: [CODIGOS-BARRAS.md](../CODIGOS-BARRAS.md).
 
-## Hoja alternativa de OC de productos
+## Hojas alternativas de órdenes de compra
 
-**Configuración → Apariencia → Vista alternativa de la tabla de OC de productos**, independiente de la preferencia de creación y desactivada por defecto. Exclusiva del listado de Productos; Materiales/OCM conserva su tabla actual.
+**Configuración → Apariencia → Vista alternativa de las tablas de órdenes de compra** activa las hojas de Productos y Materiales en este navegador. La opción está desactivada por defecto y es independiente de la preferencia de creación. Ambas hojas usan la misma cuadrícula y los mismos controles de selección, columnas, búsqueda, portapapeles e historial. La posición se recuerda durante la sesión por hoja, usuario y consulta. Los borradores se recuperan por separado.
 
 Usa el ancho disponible, una cinta compacta de dos filas en escritorio y ninguna tarjeta de resumen. Las acciones agrupan creación, lotes, seguimiento del producto, autorización, documentos, impresión, edición, portapapeles, filtros y columnas. Los iconos tienen nombre accesible y tooltip. La cinta se oculta y recupera desde un control siempre disponible. Los filtros conservan el estándar global y los encabezados reutilizan `ColumnHeader`.
 
@@ -399,7 +399,15 @@ Solo Guardar persiste. Recuperar sustituye el borrador actual, mantiene edición
 
 El ciclo global conserva IDs y datos al anular o reabrir lotes. El producto se cierra automáticamente al quedar sin lotes abiertos y conservar al menos uno cerrado; todos anulados o ningún lote lo anulan. La hoja elimina el menú Productos y conserva las acciones de Lotes. No hay cierre/reapertura directa de producto ni confirmación por tolerancia. Nuevo lote funciona sobre productos cerrados/anulados autorizados. Eliminar físicamente sigue separado de anular. Contrato y pruebas: [CICLO-LOTES.md](../CICLO-LOTES.md) y [VERIFICACION.md](../VERIFICACION.md).
 
-### Respuesta de la hoja y colecciones extensas
+### Hoja de OCM
+
+Materiales y Otros se muestran juntos y se distinguen con el selector de tipo. Cada fila representa un renglón de OCM. No autorizadas se clasifica por cabecera. En seguimiento muestra los renglones autorizados abiertos o cerrados, y Anuladas los autorizados anulados. Los colores de estado y el foco siguen las mismas reglas que en Productos.
+
+El lote de material puede repetirse en varios renglones. Cada renglón conserva sus cantidades, fechas, factura y ubicación. Los certificados vigentes se abren desde las acciones del renglón y pertenecen al lote. En OC vinculadas se muestran los números de orden y los productos en la ayuda accesible por foco y cursor. El detalle concentra los envíos de certificados, comentarios y gestión de vínculos.
+
+Tras autorizar, se bloquean el proveedor, la identidad y el conjunto de renglones de Materiales y Otros. La recepción sigue editable en los tres estados. Cerrar y anular aplican a renglones abiertos, y reabrir a cerrados o anulados. La acción informa cuántos renglones incluye y omite, y confirma la anulación en conjunto.
+
+### Respuesta de las hojas y colecciones extensas
 
 Los cambios de consulta, hoja, columnas, borrador y datos guardados deben mantener la interfaz operable sin recarga. Validar la aplicación tanto en producción como en desarrollo con StrictMode. Los modelos de celdas deben soportar inspección de propiedades ajenas a las columnas sin efectos ni excepciones; los cálculos se hacen bajo demanda y los filtros solo leen columnas activas. Conservar modelos y referencias cuando no cambian sus datos, e indexar los marcadores de edición/error.
 

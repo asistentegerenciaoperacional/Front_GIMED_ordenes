@@ -304,7 +304,7 @@ async (page) => {
     };
   });
   const label = page.getByText(
-    "Vista alternativa de la tabla de OC de productos",
+    "Vista alternativa de las tablas de órdenes de compra",
     { exact: true },
   );
   await label.click();

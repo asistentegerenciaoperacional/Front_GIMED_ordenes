@@ -1,4 +1,5 @@
 import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
+import type { Database } from "../shared/models";
 import { confirmProductCancellation } from "./product-cancellation";
 import {
   ArrowLeft,
@@ -1219,10 +1220,12 @@ export function ReceiptForm({
   entity,
   line,
   onClose,
+  beforeSnapshot,
 }: {
   entity: "orden_material" | "orden_otro";
   line: Row;
   onClose: () => void;
+  beforeSnapshot?: (snapshot: Database) => void;
 }) {
   const { db, run } = useApp();
   const [row, setRow] = useState<Row>({ ...line });
@@ -1241,6 +1244,7 @@ export function ReceiptForm({
         "saveReceipt",
         { entity, id: line.id, row },
         "Recepción guardada",
+        beforeSnapshot,
       );
       onClose();
     } catch (e) {
@@ -1386,6 +1390,8 @@ export function OrderForm({
   proposedSupplier,
   onClose,
   onCreated,
+  beforeSnapshot,
+  returnToDetail = true,
   initialType = "producto",
   abastecimiento,
   onReviewSupply,
@@ -1394,6 +1400,8 @@ export function OrderForm({
   proposedSupplier?: string;
   onClose: () => void;
   onCreated?: () => void;
+  beforeSnapshot?: (snapshot: Database) => void;
+  returnToDetail?: boolean;
   initialType?: string;
   abastecimiento?: MaterialDemand;
   onReviewSupply?: () => void;
@@ -1412,6 +1420,7 @@ export function OrderForm({
   );
   const authorized = order?.estado_autorizacion === "autorizada";
   const productsLocked = type === "producto" && authorized;
+  const linesLocked = Boolean(authorized);
   const suppliers = (t: string) =>
     db.proveedor.filter((p) =>
       t === "producto"
@@ -2041,6 +2050,7 @@ export function OrderForm({
           ...(supplyCreation ? { abastecimiento } : {}),
         },
         order ? "Orden actualizada" : "Orden creada",
+        beforeSnapshot,
       ));
       if (!result) return;
       if (!order) {
@@ -2050,7 +2060,7 @@ export function OrderForm({
         onCreated?.();
       }
       onClose();
-      if (order) navigate(`ordenes/${result.orderId}`);
+      if (order && returnToDetail) navigate(`ordenes/${result.orderId}`);
     } catch (e) {
       catchError(e);
       if (e instanceof ApiError && e.code === "SUPPLY_CHANGED")
@@ -2272,7 +2282,7 @@ export function OrderForm({
                 ? (query) => changeSheetQuery(i, query)
                 : undefined
             }
-            disabled={supplyCreation}
+            disabled={supplyCreation || linesLocked}
             aria-describedby={
               supplyCreation ? "order-supply-locked" : undefined
             }
@@ -2282,8 +2292,9 @@ export function OrderForm({
           <>
             <ControlInput
               id={key("producto")}
+              disabled={linesLocked}
               value={l.producto}
-              list={`conceptos-anteriores-${i}`}
+              list={linesLocked ? undefined : `conceptos-anteriores-${i}`}
               placeholder={
                 alternativeEntry ? "" : "Escribe o selecciona un concepto…"
               }
@@ -2311,7 +2322,7 @@ export function OrderForm({
         <ControlInput
           disabled={
             alternativeEntry &&
-            ((supplyCreation && !l.id_material) || (productsLocked && !l.id))
+            ((supplyCreation && !l.id_material) || (linesLocked && !l.id))
           }
           id={key("cantidad_solicitada")}
           type="number"
@@ -2339,7 +2350,7 @@ export function OrderForm({
         <ControlInput
           disabled={
             alternativeEntry &&
-            ((supplyCreation && !l.id_material) || (productsLocked && !l.id))
+            ((supplyCreation && !l.id_material) || (linesLocked && !l.id))
           }
           id={key("precio_unitario")}
           inputMode="decimal"
@@ -2448,10 +2459,11 @@ export function OrderForm({
           {stage === 1 && alternativeEntry ? (
             <>
               <div className="order-sheet-type">{entryFields.type}</div>
-              {productsLocked && (
+              {linesLocked && (
                 <p className="notice subtle" id="order-products-locked">
-                  Los productos están bloqueados porque la orden está autorizada.
-                  Puedes ajustar cantidades, precios y materiales de empaque.
+                  {productsLocked
+                    ? "Los productos están bloqueados porque la orden está autorizada. Puedes ajustar cantidades, precios y materiales de empaque."
+                    : "Los renglones están bloqueados porque la OCM está autorizada. Puedes ajustar cantidades, precios y fechas."}
                 </p>
               )}
               <OrderEntrySheet
@@ -2502,7 +2514,7 @@ export function OrderForm({
                 activeRow={activeSheetRow}
                 onActiveRow={setActiveSheetRow}
                 clearDisabled={
-                  productsLocked ||
+                  linesLocked ||
                   supplyCreation ||
                   isEmptySheetLine(lines[activeSheetRow])
                 }
@@ -2588,11 +2600,11 @@ export function OrderForm({
                 {entryFields.delivery}
               </div>
               <div>
-                {productsLocked && (
+                {linesLocked && (
                   <p className="notice subtle" id="order-products-locked">
-                    Los productos están bloqueados porque la orden está
-                    autorizada. Puedes ajustar cantidades, precios y materiales
-                    de empaque.
+                    {productsLocked
+                      ? "Los productos están bloqueados porque la orden está autorizada. Puedes ajustar cantidades, precios y materiales de empaque."
+                      : "Los renglones están bloqueados porque la OCM está autorizada. Puedes ajustar cantidades, precios y fechas."}
                   </p>
                 )}
                 <div className="spread" style={{ marginBottom: 16 }}>
@@ -2623,7 +2635,7 @@ export function OrderForm({
                           className="icon-btn"
                           icon={Trash2}
                           disabled={
-                            productsLocked ||
+                            linesLocked ||
                             supplyCreation ||
                             lines.length === 1
                           }
@@ -2718,7 +2730,7 @@ export function OrderForm({
                 <Button
                   icon={Plus}
                   disabled={
-                    productsLocked || supplyCreation || lines.length === 7
+                    linesLocked || supplyCreation || lines.length === 7
                   }
                   aria-describedby={
                     productsLocked ? "order-products-locked" : undefined

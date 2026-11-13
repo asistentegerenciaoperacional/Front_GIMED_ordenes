@@ -4,9 +4,8 @@ import type {
   orden_producto,
   lote_producto,
 } from "../shared/models";
-import { canonical, decimal, meta, orderState, type Row } from "../shared/schema";
+import { canonical, meta, orderState, type Row } from "../shared/schema";
 import {
-  changeKey,
   overlaySheetChanges,
   sheetPermission,
   sheetRecordIssue,
@@ -14,7 +13,8 @@ import {
   type SheetEntity,
 } from "../shared/product-order-sheet";
 import { addCalendarDays, type CustomFilterId } from "./order-filters";
-import { parseDateInput } from "./dates";
+import { proposeOrderSheetInput, sheetScalarInput, type SheetCellIssue } from "./order-sheet-editing";
+export type { SheetCellIssue } from "./order-sheet-editing";
 import { materialRole } from "../shared/product-materials";
 import { selectableAddresses } from "../shared/reception-location";
 import {
@@ -29,7 +29,8 @@ import {
   type ColumnCell,
 } from "./order-table";
 
-export type SheetView = "no_autorizadas" | "seguimiento" | "anuladas";
+import type { SheetView } from "./order-sheet-editing";
+export { formatSheetClipboard, parseSheetClipboard, type SheetView } from "./order-sheet-editing";
 export type SheetColumn = Column<string> & {
   width: number;
   entity?: SheetEntity;
@@ -547,27 +548,6 @@ export function parseSheetInput(
       );
     return found[0].id;
   }
-  if (col.kind === "date") {
-    const date = /^\d{4}-\d{2}-\d{2}$/.test(raw)
-      ? parseDateInput(raw.split("-").reverse().join("/"))
-      : parseDateInput(raw);
-    if (!date) throw new Error("Introduce una fecha válida (dd/mm/aaaa).");
-    return `${date}T12:00:00.000Z`;
-  }
-  if (col.kind === "integer" || col.kind === "decimal") {
-    let value = raw.replace(/[$\s]/g, "");
-    if (value.includes(","))
-      value = value.replaceAll(".", "").replace(",", ".");
-    else if (/^-?\d{1,3}(\.\d{3})+$/.test(value))
-      value = value.replaceAll(".", "");
-    if (!/^-?\d+(\.\d+)?$/.test(value))
-      throw new Error("Introduce un número válido.");
-    if (col.kind === "decimal") return decimal(value);
-    const number = Number(value);
-    if (!Number.isSafeInteger(number))
-      throw new Error("Introduce una cantidad entera.");
-    return number;
-  }
   if (col.kind === "enum") {
     const spec = meta.tables.lote_producto.fields[field];
     const values = meta.enums[spec.type];
@@ -579,178 +559,28 @@ export function parseSheetInput(
     if (!match) throw new Error("Selecciona un estado válido.");
     return match;
   }
-  return raw;
+  return sheetScalarInput(col.kind, raw);
 }
-export type SheetCellIssue = {
-  rowKey: string;
-  column: string;
-  message: string;
-  protected?: boolean;
-};
 export function proposeSheetInput(
   db: Database,
   current: SheetChange[],
   inputs: { row: ProductSheetRow; column: SheetColumn; text: string }[],
 ): { changes: SheetChange[]; issues: SheetCellIssue[] } {
-  const issues: SheetCellIssue[] = [],
-    candidates: {
-      change: SheetChange;
-      row: ProductSheetRow;
-      col: SheetColumn;
-    }[] = [];
-  for (const input of inputs) {
-    const denied = cellPermission(db, input.row, input.column);
-    if (denied) {
-      issues.push({
-        rowKey: input.row.key,
-        column: input.column.key,
-        message: denied,
-        protected: true,
-      });
-      continue;
-    }
-    try {
-      const target = sheetTarget(input.row, input.column)!;
-      const prior = current.find(
-        (change) => changeKey(change) === changeKey(target),
-      );
-      const expected = prior
-        ? prior.expected
-        : (db[target.entity].find((record) => record.id === target.id) as Row)[
-            target.field
-          ];
-      candidates.push({
-        change: {
-          ...target,
-          expected,
-          value: parseSheetInput(db, input.row, input.column, input.text),
-        },
-        row: input.row,
-        col: input.column,
-      });
-    } catch (error) {
-      issues.push({
-        rowKey: input.row.key,
-        column: input.column.key,
-        message: (error as Error).message,
-      });
-    }
-  }
-  const values = new Map<string, Set<string>>();
-  candidates.forEach(({ change }) =>
-    values.set(
-      changeKey(change),
-      new Set([
-        ...(values.get(changeKey(change)) ?? []),
-        JSON.stringify(change.value),
-      ]),
-    ),
-  );
-  const accepted = candidates.filter(({ change, row, col }) => {
-    if (values.get(changeKey(change))!.size > 1) {
-      issues.push({
-        rowKey: row.key,
-        column: col.key,
-        message:
-          "Valores contradictorios: estas filas comparten el mismo dato.",
-      });
-      return false;
-    }
-    return true;
-  });
-  const map = new Map(current.map((change) => [changeKey(change), change]));
-  accepted.forEach(({ change }) => map.set(changeKey(change), change));
-  const rejected = new Set<string>();
-  for (let pass = 0; pass <= accepted.length; pass++) {
-    const prospective = overlaySheetChanges(db, [...map.values()]);
-    const invalid = new Map<string, Record<string, string>>();
-    const eligible = accepted.filter(
-      ({ change }) => !rejected.has(changeKey(change)),
-    );
-    for (const { change } of eligible) {
-      const key = `${change.entity}/${change.id}`;
-      if (!invalid.has(key))
-        invalid.set(
-          key,
-          sheetRecordIssue(prospective, change.entity, change.id, db),
-        );
-    }
-    let failures = eligible.filter(
-      ({ change }) =>
-        invalid.get(`${change.entity}/${change.id}`)![change.field],
-    );
-    const ownFields = failures.length > 0;
-    if (!ownFields)
-      failures = eligible.filter(
-        ({ change }) =>
-          change.entity === "lote_producto" &&
-          invalid.get(`${change.entity}/${change.id}`)!.numero_lote,
-      );
-    if (!failures.length) break;
-    for (const { change, row, col } of failures) {
-      const problems = invalid.get(`${change.entity}/${change.id}`)!;
-      issues.push({
-        rowKey: row.key,
-        column: col.key,
-        message: ownFields ? problems[change.field] : problems.numero_lote,
-      });
-      rejected.add(changeKey(change));
-      const old = current.find((item) => changeKey(item) === changeKey(change));
-      if (old) map.set(changeKey(old), old);
-      else map.delete(changeKey(change));
-    }
-  }
-  return {
-    changes: [...map.values()].filter(
-      (change) =>
-        JSON.stringify(change.value) !== JSON.stringify(change.expected),
-    ),
-    issues,
-  };
-}
-
-export function formatSheetClipboard(rows: string[][]): string {
-  return rows
-    .map((row) =>
-      row
-        .map((value) =>
-          value === "" || /[\t\r\n"]/.test(value)
-            ? `"${value.replaceAll('"', '""')}"`
-            : value,
-        )
-        .join("\t"),
-    )
-    .join("\n");
-}
-export function parseSheetClipboard(text: string): string[][] {
-  const rows: string[][] = [[]];
-  let value = "",
-    quoted = false;
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    if (char === '"') {
-      if (quoted && text[i + 1] === '"') {
-        value += '"';
-        i++;
-      } else if (quoted || !value) quoted = !quoted;
-      else value += char;
-    } else if (!quoted && (char === "\t" || char === "\n" || char === "\r")) {
-      rows.at(-1)!.push(value);
-      value = "";
-      if (char !== "\t") {
-        if (char === "\r" && text[i + 1] === "\n") i++;
-        rows.push([]);
+  const records = new Map<SheetEntity, Map<string, Row>>();
+  return proposeOrderSheetInput(db, current, inputs, {
+    permission: cellPermission,
+    target: (row, col) => sheetTarget(row, col)!,
+    expected: (db, target) => {
+      let table = records.get(target.entity);
+      if (!table) {
+        table = new Map(db[target.entity].map((row) => [row.id, row]));
+        records.set(target.entity, table);
       }
-    } else value += char;
-  }
-  rows.at(-1)!.push(value);
-  if (
-    !quoted &&
-    /[\r\n]$/.test(text) &&
-    rows.length > 1 &&
-    rows.at(-1)!.length === 1 &&
-    !rows.at(-1)![0]
-  )
-    rows.pop();
-  return rows;
+      return table.get(target.id)?.[target.field];
+    },
+    parse: parseSheetInput,
+    overlay: overlaySheetChanges,
+    validate: (next, target, original) => sheetRecordIssue(next, target.entity, target.id, original),
+    relatedError: (target, issues) => target.entity === "lote_producto" ? issues.numero_lote : undefined,
+  });
 }

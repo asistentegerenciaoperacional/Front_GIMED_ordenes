@@ -26,6 +26,13 @@ async (page) => {
           (code) => code.id_producto === p.id && code.estado === "asignado",
         ),
     );
+  const addresses = new Map();
+  for (const name of ["Norte\nSur", "Primera", "Segunda", "Derecha", "Interior A", "Interior B", "Bogotá hoja exclusiva", "Cali hoja exclusiva"]) {
+    const saved = await command("saveEntity", { entity: "direccion", row: {
+      nombre_dir: name, tipo: "propia", activa: true,
+    } });
+    addresses.set(name, saved.row.id);
+  }
   const create = async (qty = 500) =>
     command("createOrder", {
       tipo_orden: "producto",
@@ -69,7 +76,7 @@ async (page) => {
       numero_lote: "HOJA-A",
       estado: "cerrado",
       cantidad_recibida: 400,
-      ubicacion: "Bogotá hoja exclusiva",
+      id_direccion: addresses.get("Bogotá hoja exclusiva"),
     },
   });
   await command("saveLot", {
@@ -311,12 +318,12 @@ async (page) => {
     "Cambiar búsqueda limpia la selección y conserva el borrador",
   );
   await cell(0, "ubicacion").dblclick();
-  const location = page.getByRole("textbox", {
-    name: "Ubicación",
+  const location = page.getByRole("combobox", {
+    name: "Buscar ubicación",
     exact: true,
   });
   await location.fill("Cali hoja exclusiva");
-  await location.press("Enter");
+  await page.getByRole("option", { name: "Cali hoja exclusiva", exact: true }).click();
   check(
     (await cell(0, "ubicacion").count()) === 1,
     "La fila permanece visible mientras se edita un valor usado por el filtro",

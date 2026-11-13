@@ -161,7 +161,7 @@ async (page) => {
         url.pathname === "/ordenes/productos" &&
         url.searchParams.get("q") === "VIRTUAL-",
     );
-    await grid.waitFor();
+    await page.getByRole("grid", { name: "Órdenes de productos por lote" }).waitFor();
     await page.waitForFunction(({ top, left }) => {
       const viewport = document.querySelector(".product-sheet-viewport");
       return (

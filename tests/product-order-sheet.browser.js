@@ -19,7 +19,7 @@ async (page) => {
   await page.getByRole("tab", { name: "Apariencia", exact: true }).click();
   await page
     .getByRole("checkbox", {
-      name: "Vista alternativa de la tabla de OC de productos",
+      name: "Vista alternativa de las tablas de órdenes de compra",
     })
     .check();
   await page.goto(origin + "/ordenes/productos");
@@ -80,9 +80,10 @@ async (page) => {
     "Anuladas conserva los lotes anulados",
   );
   await page.goto(origin + "/ordenes/materiales");
+  await page.getByRole("grid", { name: "Órdenes de materiales por renglón" }).waitFor();
   check(
-    !(await page.locator(".product-order-sheet").count()),
-    "OCM mantiene su tabla clásica",
+    (await page.locator(".product-sheet-grid").getAttribute("data-renderer")) === "native",
+    "La misma preferencia activa la cuadrícula de OCM",
   );
   check(errors.length === 0, "Sin errores de página: " + errors.join("; "));
   return { checks };

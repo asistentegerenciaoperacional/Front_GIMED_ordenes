@@ -9,7 +9,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
-import { ProductSheetTable } from "./product-sheet-table";
+import { OrderSheetTable, type OrderGridRow, type OrderGridColumn, type OrderGridRowPresentation } from "./product-sheet-table";
 import {
   SheetSelection,
   rangeBounds,
@@ -21,10 +21,6 @@ export {
   type SheetRange,
   type SheetPoint,
 } from "../product-sheet-selection";
-import type {
-  ProductSheetRow,
-  SheetColumn,
-} from "../product-order-sheet-model";
 import { Tooltip, TooltipTrigger } from "react-aria-components/Tooltip";
 import { Action } from "./controls";
 
@@ -89,9 +85,13 @@ export type SheetViewportPosition = SheetScrollPosition & {
   reveal: boolean;
 };
 
-export function ProductSheetGrid({
+export function OrderSheetGrid<R extends OrderGridRow, C extends OrderGridColumn>({
   rows,
   columns,
+  label = "Órdenes de productos por lote",
+  regionLabel = "Hoja de órdenes de productos",
+  rowPresentation,
+  readOnly,
   selection,
   view,
   initialScroll,
@@ -110,16 +110,20 @@ export function ProductSheetGrid({
   onHideColumns,
   invalid,
 }: {
-  rows: ProductSheetRow[];
-  columns: SheetColumn[];
+  rows: R[];
+  columns: C[];
+  label?: string;
+  regionLabel?: string;
+  rowPresentation?: (row: R) => OrderGridRowPresentation;
+  readOnly?: (row: R, column: C) => boolean;
   selection: SheetSelection;
   view: string;
   initialScroll?: SheetScrollPosition;
   restorePosition?: SheetViewportPosition;
   pinnedColumn?: string | null;
-  renderCell: (row: ProductSheetRow, col: SheetColumn) => ReactNode;
-  renderHeader: (col: SheetColumn) => ReactNode;
-  onEdit: (row: ProductSheetRow, col: SheetColumn, initial?: string) => void;
+  renderCell: (row: R, col: C) => ReactNode;
+  renderHeader: (col: C) => ReactNode;
+  onEdit: (row: R, col: C, initial?: string) => void;
   editor: ReactNode;
   editing: { rowKey: string; column: string; deferredClear?: boolean } | null;
   onCommit: () => boolean;
@@ -128,7 +132,7 @@ export function ProductSheetGrid({
   onPaste: (text: string) => void;
   onClear: () => void;
   onHideColumns: () => void;
-  invalid?: (row: ProductSheetRow, col: SheetColumn) => boolean;
+  invalid?: (row: R, col: C) => boolean;
 }) {
   const viewport = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -567,7 +571,7 @@ export function ProductSheetGrid({
       ref={viewport}
       className="product-sheet-viewport table-scroll"
       role="region"
-      aria-label="Hoja de órdenes de productos"
+      aria-label={regionLabel}
       tabIndex={-1}
       onScroll={scheduleWindow}
       onKeyDownCapture={navigate}
@@ -645,7 +649,10 @@ export function ProductSheetGrid({
           );
       }}
     >
-      <ProductSheetTable
+      <OrderSheetTable
+        label={label}
+        rowPresentation={rowPresentation}
+        readOnly={readOnly}
         rows={rows}
         columns={columns}
         start={start}

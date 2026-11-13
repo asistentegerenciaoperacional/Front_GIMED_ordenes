@@ -1,6 +1,7 @@
 import { Check, Info } from "lucide-react";
 import { useRef, useState, type ReactNode } from "react";
 import { orderReference } from "../shared/schema";
+import type { Database } from "../shared/models";
 import { CheckChoice, FieldEditContext } from "./components/controls";
 import { ApiError, Button, Dialog, ErrorNotice, useApp } from "./ui";
 
@@ -15,12 +16,14 @@ export function OrderAuthorizationDialog({
   onClose,
   onAuthorized,
   onUnavailable,
+  beforeSnapshot,
 }: {
   ids: readonly string[];
   multiple?: boolean;
   onClose: () => void;
   onAuthorized: () => void;
   onUnavailable?: (ids: string[]) => void;
+  beforeSnapshot?: (snapshot: Database) => void;
 }) {
   const { db, run } = useApp();
   const [signed, setSigned] = useState(false);
@@ -47,6 +50,7 @@ export function OrderAuthorizationDialog({
           ? { ids: [...ids], confirm: true }
           : { id: ids[0], confirm: true },
         multiple ? `${ids.length} órdenes autorizadas` : "Orden autorizada",
+        beforeSnapshot,
       );
       onAuthorized();
     } catch (cause) {

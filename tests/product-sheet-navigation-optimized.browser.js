@@ -14,7 +14,7 @@ async (page) => {
     if (!ok) throw Error(label);
     checks.push(label);
   };
-  const out = "tests/evidence/product-sheet-navigation";
+  const out = process.env.PROTOTIPO_BROWSER_EVIDENCE ?? "tests/evidence/product-sheet-navigation";
   await mkdir(out, { recursive: true });
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("request", (r) => {
@@ -29,6 +29,7 @@ async (page) => {
   await page.goto(origin + "/ordenes/productos");
   const viewport = page.locator(".product-sheet-viewport");
   await viewport.waitFor();
+  const lastColumn = Number(await page.locator(".product-sheet-grid").getAttribute("aria-colcount")) - 1;
   const cdp = await page.context().newCDPSession(page);
   await cdp.send("Performance.enable");
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -200,15 +201,21 @@ async (page) => {
         if (key === "ArrowDown") expected.row++;
         if (key === "ArrowUp") expected.row = Math.max(0, expected.row - 1);
         if (key === "ArrowRight")
-          expected.column = Math.min(23, expected.column + 1);
+          expected.column = Math.min(lastColumn, expected.column + 1);
         if (key === "ArrowLeft")
           expected.column = Math.max(0, expected.column - 1);
       }
       const actual = await active();
       check(
-        JSON.stringify(expected) === JSON.stringify(actual),
+        scenario.shift ? actual.row === 0 && actual.column === 0
+          : JSON.stringify(expected) === JSON.stringify(actual),
         `${repetition + 1}/${scenario.name}: destino exacto`,
       );
+      if (scenario.shift)
+        check(
+          (await page.locator(`[data-range][data-sheet-row="${expected.row}"][data-sheet-column="${expected.column}"]`).count()) === 1,
+          `${repetition + 1}/${scenario.name}: extremo exacto con el ancla activa`,
+        );
       check(
         observed.keys.length === scenario.keys.length &&
           observed.keys.every((k) => k.trusted),

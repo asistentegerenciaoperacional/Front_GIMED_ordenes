@@ -1031,3 +1031,19 @@ Limitaciones de recorridos adicionales: el ciclo clásico de WebKit en producci�
 La base local se ajustó una sola vez con `npx tsx scripts/sync-demo-product-states.ts --apply`, con el servicio detenido: **dos estados de producto actualizados** y todos los demás datos conservados. El respaldo exacto y sus hashes se verificaron antes de reemplazar el archivo. [Respaldo, hashes y diferencias](tests/evidence/lifecycle/demo-product-states.json). No se reinició la demo ni se incorporó una migración al arranque.
 
 Reproducción: `npm test`; `npm run build`; `node scripts/verify-aria-browser.mjs tests/product-lot-lifecycle.browser.js chromium`; `node scripts/verify-aria-browser.mjs tests/product-order-sheet-states.browser.js chromium`; `npx tsx scripts/verify-product-sheet-large.ts`.
+## Hoja compartida de Órdenes y vista de OCM — 13 de noviembre de 2026
+
+Productos y Materiales comparten la cuadrícula virtual, los controles de la cinta, la interpretación del portapapeles, la gestión del borrador y el registro de posiciones. El modelo de OCM proyecta un renglón por recepción posible y usa los comandos de edición y recepción dentro de una sola transacción. La autorización fija proveedor, composición e identidad de Materiales y Otros en la hoja, el formulario y el servidor.
+
+- `npm test` ejecutó 344 pruebas, incluidas propagación de cabecera, recepción independiente con lote compartido, pegado de datos contradictorios, bloqueo en el servidor y conflictos sin escrituras parciales. `npm run build` completó TypeScript y Vite.
+- El recorrido de OCM aprobó 18 comprobaciones en Chromium de producción y WebKit de desarrollo. Cubre las tres vistas, ambos tipos, filtros, borrador, certificados, navegación de regreso, estados, conflicto y autorización con filas ocultas. Reproducción con `node scripts/verify-aria-browser.mjs tests/material-order-sheet.browser.js chromium` o con `webkit` y `PROTOTIPO_BROWSER_MODE=development`. En WebKit con la compilación de producción el verificador registró avisos de precarga de Vite.
+- `node --import tsx scripts/verify-material-sheet-large.ts` usa 1.000 OCM y 5.000 renglones sintéticos, además de los datos de la semilla. En Chromium se midió la carga y diez regresos desde Productos con un viewport de 1440 × 900. El GC forzado se usó solo al medir memoria.
+
+| Carga de OCM | Producción | Desarrollo |
+|---|---:|---:|
+| Carga hasta cuadrícula y dos frames | 884 ms | 951 ms |
+| Rango de tiempo de retorno | 47–51 ms | 69–129 ms |
+| Máximo de filas y celdas montadas | 29 / 290 | 29 / 290 |
+| Heap tras GC en los últimos tres retornos | 10,04–10,16 MiB | 17,01–17,72 MiB |
+
+- En Productos pasaron la preferencia compartida, el recorrido de interacción y 18 mediciones de navegación por modo con 5.000 lotes. Con las mismas ráfagas de 60 teclas/s, el p95 histórico de recepción horizontal frente a esta ejecución fue 7,8 → 6,4 ms en producción y 27,0 → 23,3 ms en desarrollo. La cola máxima de la ejecución actual fue de 3,2 ms en producción y 4,3 ms en desarrollo. La comparación usa la evidencia histórica del repositorio y la versión actual de la cuadrícula.

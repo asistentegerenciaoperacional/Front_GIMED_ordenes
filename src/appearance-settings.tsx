@@ -48,14 +48,14 @@ export function AppearanceSettings() {
         >
           <span className="appearance-option-copy">
             <strong id={optionId + "-sheet-title"}>
-              Vista alternativa de la tabla de OC de productos
+              Vista alternativa de las tablas de órdenes de compra
             </strong>
             <span
               id={optionId + "-sheet-description"}
               className="appearance-option-description"
             >
-              Hoja editable por lotes, con herramientas, selección de celdas y
-              recuperación del borrador en este navegador.
+              Hojas editables para órdenes de productos y materiales, con
+              selección de celdas y recuperación del borrador en este navegador.
             </span>
           </span>
         </CheckChoice>

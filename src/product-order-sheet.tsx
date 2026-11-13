@@ -8,17 +8,11 @@ import {
   useRef,
   useState,
 } from "react";
-import {
-  Dialog as AriaDialog,
-  DialogTrigger,
-} from "react-aria-components/Dialog";
 import { Popover } from "react-aria-components/Popover";
 import { Menu, MenuItem, MenuTrigger } from "react-aria-components/Menu";
 import {
   ChevronDown,
   ChevronUp,
-  ClipboardPaste,
-  Copy,
   Eye,
   FileCheck2,
   FileText,
@@ -26,9 +20,7 @@ import {
   MessageSquare,
   Plus,
   Printer,
-  Save,
   Pencil,
-  FilterX,
   AlertCircle,
   Trash2,
   X,
@@ -46,16 +38,13 @@ import {
 import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
 import { ColumnHeader } from "./column-filter";
 import {
-  CheckChoice,
   ControlForm,
   ControlInput,
   ControlSelect,
-  CustomFilterSelect,
 } from "./components/controls";
 import {
-  ProductSheetGrid,
+  OrderSheetGrid,
   SheetCellHint,
-  type SheetScrollPosition,
   type SheetViewportPosition,
 } from "./components/product-sheet-grid";
 import { SheetSelection, rangeBounds } from "./product-sheet-selection";
@@ -74,7 +63,7 @@ import {
 import { CatalogForm, InvoicePicker, OrderForm, SheetLocationPicker, productLotFieldOrder } from "./forms";
 import { ActionTooltip } from "./components/overlays";
 import { MaterialSupplyDialog } from "./material-supply";
-import { customFilters, readCustomFilter } from "./order-filters";
+import { readCustomFilter } from "./order-filters";
 import {
   columnOptions,
   calendarDay,
@@ -126,9 +115,16 @@ import {
   text,
   useApp,
 } from "./ui";
+import {
+  SheetTool as Tool, SheetClipboardTools, SheetFilterTools, SheetColumnsMenu,
+  SheetPendingDialog, SheetViewTabs, SheetWriteTools, printOrderFromSheet,
+} from "./components/order-sheet-controls";
+import {
+  useOrderSheetDraftStorage, useOrderSheetScroll,
+} from "./use-order-sheet-session";
+import { sheetRangeInputs } from "./order-sheet-editing";
 import "./product-order-sheet.css";
 
-type SavedDraft = { version: 1; timestamp: string; changes: SheetChange[] };
 type SheetRefresh = {
   snapshot: Database;
   scope: object;
@@ -143,10 +139,13 @@ type Editing = {
 type SupplyOrigin = { scope: object; menuRowKey?: string };
 const canLinkSupply = ({ line, order }: ProductSheetRow) =>
   line.estado === "en_seguimiento" && order.estado_autorizacion === "autorizada";
+const productRowPresentation = ({ lot, order }: ProductSheetRow) => ({
+  state: lot?.estado,
+  label: lot
+    ? `OC ${order.no_orden}, lote ${lot.numero_lote ?? "sin número"}, ${lot.estado.replaceAll("_", " ")}`
+    : undefined,
+});
 const localVisibility = "gimed:ui:product-sheet-columns:";
-// Keep recent positions for this app session, keyed by the sheet's query.
-const scrollByQuery = new Map<string, SheetScrollPosition>();
-const scrollHistoryLimit = 20;
 function loadHidden(view: SheetView): string[] {
   const saved = readSheetLocal<unknown>(localVisibility + view, []);
   return Array.isArray(saved)
@@ -162,23 +161,6 @@ const problemFrom = (failure: unknown) =>
             ? failure.message
             : "No se pudo completar la operación. El borrador se conserva.",
       });
-function Tool({
-  label,
-  tooltip = label,
-  ...props
-}: React.ComponentProps<typeof Button> & {
-  label: string;
-  tooltip?: string;
-}) {
-  return (
-    <ActionTooltip content={tooltip}>
-      <span className="product-sheet-tooltip-anchor">
-        <Button {...props} aria-label={label} />
-      </span>
-    </ActionTooltip>
-  );
-}
-
 export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   const { db, run, navigate, notify, userId } = useApp();
   const draftKey = productSheetDraftKey(userId);
@@ -191,14 +173,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   ) as SheetView;
   const { history, value: changes, canUndo, canRedo } =
     useSheetHistory<SheetChange[]>([], sameProductSheetDraft);
-  const [touched, setTouched] = useState(false);
-  const [recovery, setRecovery] = useState<SavedDraft | null>(() => {
-    const saved = readSheetLocal<SavedDraft | null>(draftKey, null);
-    return isSheetDraft(saved) && saved.changes.length ? saved : null;
-  });
+  const { recovery, setRecovery, storageError, setStorageError, setTouched } =
+    useOrderSheetDraftStorage(draftKey, changes, isSheetDraft);
   const [recoveryOpen, setRecoveryOpen] = useState(() => !!recovery);
-  const [storageError, setStorageError] = useState(false),
-    [error, setError] = useState<ApiError | null>(null),
+  const [error, setError] = useState<ApiError | null>(null),
     [issues, setIssues] = useState<SheetCellIssue[]>([]);
   const errorNotice = useMemo(
     () =>
@@ -247,7 +225,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
   >([]);
   const [columnsOpen, setColumnsOpen] = useState(false),
     [openedColumn, setOpenedColumn] = useState<string | null>(null);
-  const columnsDialog = useRef<HTMLElement | null>(null);
   const orderActionsRef = useRef<HTMLDivElement>(null);
   const orderMenuTrigger = useRef<HTMLButtonElement>(null);
   const [collapsed, setCollapsed] = useState(() =>
@@ -292,43 +269,13 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     [issues],
   );
   const key = params.toString();
-  const scrollKey = useMemo(() => {
-    const query = new URLSearchParams(key);
-    if (view === "seguimiento") query.delete("vista");
-    query.sort();
-    return query.toString();
-  }, [key, view]);
-  const [initialScroll] = useState(() => scrollByQuery.get(scrollKey));
-  const latestScrollKey = useRef(scrollKey);
-  useLayoutEffect(() => {
-    latestScrollKey.current = scrollKey;
-  }, [scrollKey]);
+  const { section: sheetRef, viewport: getViewport, initialScroll } =
+    useOrderSheetScroll("productos", userId, key, view);
   const scope = useMemo(() => ({}), [key, columns]);
   const liveScope = useRef(scope);
   liveScope.current = scope;
-  const sheetRef = useRef<HTMLElement>(null);
   const sheetSnapshot = useRef<SheetRefresh | undefined>(undefined);
   const [restoration, setRestoration] = useState<SheetRefresh>();
-  const getViewport = useCallback(
-    () => sheetRef.current?.querySelector<HTMLElement>(".product-sheet-viewport"),
-    [],
-  );
-  useLayoutEffect(() => {
-    const viewport = getViewport();
-    if (!viewport) return;
-    return () => {
-      const query = latestScrollKey.current;
-      scrollByQuery.delete(query);
-      scrollByQuery.set(query, {
-        top: viewport.scrollTop,
-        left: viewport.scrollLeft,
-      });
-      if (scrollByQuery.size > scrollHistoryLimit) {
-        const oldest = scrollByQuery.keys().next().value;
-        if (oldest !== undefined) scrollByQuery.delete(oldest);
-      }
-    };
-  }, [getViewport]);
   const captureSheetSnapshot = (
     snapshot: Database,
     origin: object,
@@ -454,24 +401,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     setEditing(null);
     setOpenedColumn(null);
   }, [view]);
-  useEffect(() => {
-    if (!touched) return;
-    try {
-      if (changes.length)
-        localStorage.setItem(
-          draftKey,
-          JSON.stringify({
-            version: 1,
-            timestamp: new Date().toISOString(),
-            changes,
-          }),
-        );
-      else localStorage.removeItem(draftKey);
-      setStorageError(false);
-    } catch {
-      setStorageError(true);
-    }
-  }, [changes, draftKey, touched]);
   const recordDraft = (next: SheetChange[]) => {
     if (history.record(next)) setTouched(true);
   };
@@ -532,14 +461,6 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
     }
     return `${bounds.bottom - bounds.top + 1}/${[...orders].join(",")}/${hasLot}/${sameLine ? firstLine ?? "" : ""}`;
   }, [selection, rows]);
-  const printSelected = (orderId: string) => {
-    const viewport = document.querySelector<HTMLElement>(
-      ".product-sheet-viewport",
-    );
-    navigate(
-      `ordenes/${orderId}/imprimir?${new URLSearchParams({ returnTo: location.pathname + location.search, returnScroll: String(Math.round(window.scrollY)), returnTableScroll: String(Math.round(viewport?.scrollLeft ?? 0)) })}`,
-    );
-  };
   const changeQuery = (values: Record<string, string>) => {
     if (editing && !commit(undefined, true)) return;
     const current = history.getSnapshot().value;
@@ -809,38 +730,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
       notify("Selecciona primero la celda de destino.", true);
       return;
     }
-    const matrix = parseSheetClipboard(value);
-    const inputs: {
-      row: ProductSheetRow;
-      column: SheetColumn;
-      text: string;
-    }[] = [];
-    let overflow = 0;
-    if (matrix.length === 1 && matrix[0].length === 1) {
-      const { top, bottom, left, right } = rangeBounds(range);
-      const text = matrix[0][0];
-      const rowEnd = Math.min(bottom + 1, rows.length);
-      const columnEnd = Math.min(right + 1, columns.length);
-      for (let r = top; r < rowEnd; r++) {
-        const row = display(rows[r]);
-        for (let c = left; c < columnEnd; c++)
-          inputs.push({ row, column: columns[c], text });
-      }
-    } else {
-      const { row: firstRow, column: firstColumn } = range.anchor;
-      const rowCount = Math.min(matrix.length, rows.length - firstRow);
-      const availableColumns = columns.length - firstColumn;
-      for (let r = 0; r < rowCount; r++) {
-        const values = matrix[r];
-        const columnCount = Math.min(values.length, availableColumns);
-        overflow += values.length - columnCount;
-        const row = display(rows[firstRow + r]);
-        for (let c = 0; c < columnCount; c++)
-          inputs.push({ row, column: columns[firstColumn + c], text: values[c] });
-      }
-      for (let r = rowCount; r < matrix.length; r++)
-        overflow += matrix[r].length;
-    }
+    const { inputs, overflow } = sheetRangeInputs(range, rows, columns, parseSheetClipboard(value), display);
     const result = proposeSheetInput(db, history.getSnapshot().value, inputs);
     setError(null);
     const replacement = result.changes.filter(
@@ -1351,54 +1241,16 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         return (
           <>
             <div className="product-sheet-toolbar-top">
-              <div className="product-sheet-tabs" aria-label="Hojas de OC">
-                {(
-                  [
-                    ["no_autorizadas", "No autorizadas"],
-                    ["seguimiento", "En seguimiento"],
-                    ["anuladas", "Anuladas"],
-                  ] as const
-                ).map(([id, label]) => (
-                  <Button
-                    key={id}
-                    aria-pressed={view === id}
-                    variant={view === id ? "primary" : "ghost"}
-                    onClick={() => changeQuery({ vista: id })}
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
+              <SheetViewTabs view={view} onChange={(vista) => changeQuery({ vista })} />
               <div className="inline">
-                {historyControls}
-                <Button
-                  icon={Save}
-                  data-sheet-return-focus
-                  variant="primary"
-                  disabled={(!changes.length && !editing) || busy}
-                  onClick={() => {
-                    if (commit()) void save();
-                  }}
-                >
-                  Guardar{changes.length ? ` ${changes.length} cambios` : ""}
-                </Button>
-                <Button
-                  icon={X}
-                  disabled={
-                    (!canUndo && !canRedo && !changes.length && !editing) || busy
-                  }
-                  onClick={async () => {
-                    if (
-                      await confirmAction(
-                        "¿Descartar las ediciones pendientes de la hoja?",
-                        "Descartar",
-                      )
-                    )
-                      discard();
-                  }}
-                >
-                  Descartar
-                </Button>
+                <SheetWriteTools count={changes.length} editing={!!editing} busy={busy}
+                  canDiscard={!!(canUndo || canRedo || changes.length || editing)}
+                  onSave={() => { if (commit()) void save(); }}
+                  onDiscard={async () => {
+                    if (await confirmAction("¿Descartar las ediciones pendientes de la hoja?", "Descartar")) discard();
+                  }}>
+                  {historyControls}
+                </SheetWriteTools>
                 <Button
                   icon={ChevronUp}
                   aria-label="Ocultar barra de herramientas"
@@ -1602,7 +1454,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                 disabled={!singleOrder}
                 onClick={() => {
                   const order = selectionTargets().singleOrder;
-                  if (order) cleanFirst(() => printSelected(order.id));
+                  if (order) cleanFirst(() => printOrderFromSheet(order.id, navigate));
                 }}
               />
               <Tool
@@ -1643,33 +1495,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                   if (order) cleanFirst(() => setEditingOrder(order.id));
                 }}
               />
-              <ActionTooltip content="Copiar (Ctrl+C)">
-                <span className="product-sheet-tooltip-anchor">
-                  <Button
-                    icon={Copy}
-                    aria-label="Copiar rango"
-                    disabled={!range}
-                    onClick={() => copy()}
-                  />
-                </span>
-              </ActionTooltip>
-              <ActionTooltip content="Pegar (Ctrl+V)">
-                <span className="product-sheet-tooltip-anchor">
-                  <Button
-                    icon={ClipboardPaste}
-                    aria-label="Pegar rango"
-                    disabled={!range}
-                    onClick={() =>
-                      navigator.clipboard
-                        .readText()
-                        .then(paste)
-                        .catch(() =>
-                          notify("Usa Ctrl+V sobre la hoja para pegar.", true),
-                        )
-                    }
-                  />
-                </span>
-              </ActionTooltip>
+              <SheetClipboardTools disabled={!range} onCopy={() => copy()} onPaste={paste} notify={notify} />
               <Tool
                 icon={Trash2}
                 label="Eliminar lotes seleccionados"
@@ -1691,116 +1517,19 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                   if (ids.length) cleanFirst(() => beginDelete(ids, scope), scope);
                 }}
               />
-              <CustomFilterSelect
-                style={{ width: 200, flex: "0 0 200px" }}
-                aria-label="Filtro personalizado de la hoja"
-                value={filter}
-                onChange={(event) =>
-                  changeQuery({ filtro: event.target.value })
-                }
+              <SheetFilterTools
+                group="productos" filter={filter} query={params.get("q") ?? ""}
+                clearable={!!filter || Object.values(tableState.filters).some(hasFilter)}
+                onFilter={(filtro) => changeQuery({ filtro })}
+                onSearch={(q) => changeQuery({ q })}
+                onClear={() => changeQuery({ filtro: "", filtros: "" })}
               >
-                <option value="">Sin filtro personalizado</option>
-                {customFilters.map((group) => (
-                  <optgroup key={group.id} label={group.name}>
-                    {group.options.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </CustomFilterSelect>
-              {(filter ||
-                Object.values(tableState.filters).some(hasFilter)) && (
-                <Tool
-                  icon={FilterX}
-                  label="Limpiar filtros"
-                  onClick={() => changeQuery({ filtro: "", filtros: "" })}
+                <SheetColumnsMenu
+                  open={columnsOpen} onOpen={setColumnsOpen}
+                  columns={allColumns} hidden={hidden} canHide={!!range}
+                  onHide={hideSelectedColumns} onChange={updateHidden}
                 />
-              )}
-              <DialogTrigger isOpen={columnsOpen} onOpenChange={setColumnsOpen}>
-                <Button icon={ChevronDown}>Columnas</Button>
-                <Popover
-                  className="product-sheet-column-popover"
-                  placement="bottom start"
-                  offset={4}
-                >
-                  <AriaDialog
-                    className="product-sheet-column-menu"
-                    aria-label="Columnas visibles"
-                    ref={(node) => {
-                      columnsDialog.current = node;
-                      if (!node) return;
-                      const dismiss = (event: KeyboardEvent) => {
-                        if (event.key === "Escape") {
-                          event.preventDefault();
-                          event.stopPropagation();
-                          setColumnsOpen(false);
-                        }
-                      };
-                      node.addEventListener("keydown", dismiss, true);
-                      return () => {
-                        columnsDialog.current = null;
-                        node.removeEventListener("keydown", dismiss, true);
-                      };
-                    }}
-                  >
-                    <div className="product-sheet-column-menu-header column-filter-title">
-                      <h3>Columnas visibles</h3>
-                    </div>
-                    <div className="product-sheet-column-list">
-                      <Button
-                        className="product-sheet-hide-columns"
-                        disabled={!range}
-                        aria-keyshortcuts="Alt+H"
-                        onClick={hideSelectedColumns}
-                      >
-                        Ocultar columnas seleccionadas <span>Alt+H</span>
-                      </Button>
-                      <CheckChoice
-                        className="column-value-option column-select-all"
-                        aria-keyshortcuts="Alt+S"
-                        checked={hidden.length === 0}
-                        indeterminate={hidden.length > 0}
-                        disabled={hidden.length === 0}
-                        onChange={() => {
-                          columnsDialog.current?.focus({ preventScroll: true });
-                          updateHidden([]);
-                        }}
-                      >
-                        Seleccionar todas (Alt+S)
-                      </CheckChoice>
-                      {allColumns.map((col) => (
-                        <CheckChoice
-                          key={col.key}
-                          className="column-value-option"
-                          checked={!hidden.includes(col.key)}
-                          disabled={
-                            !hidden.includes(col.key) && columns.length === 1
-                          }
-                          onChange={(checked) =>
-                            updateHidden(
-                              checked
-                                ? hidden.filter((key) => key !== col.key)
-                                : [...hidden, col.key],
-                            )
-                          }
-                        >
-                          {col.label}
-                        </CheckChoice>
-                      ))}
-                    </div>
-                  </AriaDialog>
-                </Popover>
-              </DialogTrigger>
-              <ControlInput
-                className="control product-sheet-search"
-                aria-label="Buscar en la hoja de OC"
-                type="search"
-                value={params.get("q") ?? ""}
-                placeholder="Buscar en la hoja…"
-                onChange={(event) => changeQuery({ q: event.target.value })}
-              />
+              </SheetFilterTools>
             </div>
           </>
         );
@@ -1853,17 +1582,10 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
               Mostrar herramientas
             </Button>
             <div className="inline">
-              {historyControls}
-              <Button
-                icon={Save}
-                data-sheet-return-focus
-                disabled={(!changes.length && !editing) || busy}
-                onClick={() => {
-                  if (commit()) void save();
-                }}
-              >
-                Guardar {changes.length || ""}
-              </Button>
+              <SheetWriteTools count={changes.length} editing={!!editing} busy={busy}
+                canDiscard={false} onSave={() => { if (commit()) void save(); }}>
+                {historyControls}
+              </SheetWriteTools>
             </div>
           </div>
         ) : (
@@ -1916,7 +1638,8 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
           }}
         </SheetSelectionView>
       </div>
-      <ProductSheetGrid
+      <OrderSheetGrid
+        rowPresentation={productRowPresentation}
         invalid={invalidCell}
         rows={rows}
         columns={columns}
@@ -2012,40 +1735,17 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
         </Dialog>
       )}
       {pending && (
-        <Dialog
-          title="Hay cambios sin guardar"
+        <SheetPendingDialog
+          busy={busy}
           onClose={cancelPendingAction}
-        >
-          <div className="dialog-body">
-            <p>Resuelve el borrador antes de continuar con la acción.</p>
-          </div>
-          <div className="dialog-footer">
-            <CancelButton onClick={cancelPendingAction}>
-              Cancelar
-            </CancelButton>
-            <Button
-              onClick={() => {
-                discard();
-                setPending(null);
-                pending.action();
-              }}
-            >
-              Descartar y continuar
-            </Button>
-            <Button
-              variant="primary"
-              disabled={busy}
-              onClick={async () => {
-                if (await save(pending.focusScope)) {
-                  setPending(null);
-                  pending.action();
-                }
-              }}
-            >
-              Guardar y continuar
-            </Button>
-          </div>
-        </Dialog>
+          onDiscard={() => { discard(); setPending(null); pending.action(); }}
+          onSave={async () => {
+            if (await save(pending.focusScope)) {
+              setPending(null);
+              pending.action();
+            }
+          }}
+        />
       )}
       {deleting && (
         <DeleteProductLotsDialog

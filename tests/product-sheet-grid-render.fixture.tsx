@@ -6,7 +6,7 @@ import {
   productSheetColumns,
 } from "../src/product-order-sheet-model";
 import { SheetSelection } from "../src/product-sheet-selection";
-import { ProductSheetGrid } from "../src/components/product-sheet-grid";
+import { OrderSheetGrid } from "../src/components/product-sheet-grid";
 import "../src/styles.css";
 import "../src/product-order-sheet.css";
 
@@ -21,7 +21,7 @@ function Fixture() {
   const [selection] = useState(() => new SheetSelection());
   return (
     <section className="product-order-sheet">
-      <ProductSheetGrid
+      <OrderSheetGrid
         rows={rows}
         columns={productSheetColumns}
         selection={selection}

@@ -130,6 +130,11 @@ const ProductOrderSheet = lazy(() =>
     default: module.ProductOrderSheet,
   })),
 );
+const MaterialOrderSheet = lazy(() =>
+  import("./material-order-sheet").then((module) => ({
+    default: module.MaterialOrderSheet,
+  })),
+);
 
 function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
   const { db } = useApp();
@@ -203,9 +208,11 @@ export function OrdersPage({
   params: URLSearchParams;
 }) {
   const preference = useProductSheetPreference();
-  return group === "productos" && preference.enabled ? (
+  return preference.enabled ? (
     <Suspense fallback={<div role="status">Cargando hoja de OC…</div>}>
-      <ProductOrderSheet params={params} />
+      {group === "productos"
+        ? <ProductOrderSheet params={params} />
+        : <MaterialOrderSheet params={params} />}
     </Suspense>
   ) : (
     <ClassicOrdersPage group={group} params={params} />

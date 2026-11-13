@@ -113,7 +113,7 @@ export const customFilters: readonly FilterDefinition[] = [
   },
   {
     id: "vinculos",
-    name: "Vínculos de OCM",
+    name: "Vínculos de abastecimiento",
     description: "Órdenes que tienen OCM/OC vinculadas.",
     options: [
       { id: "vinculos_con", label: "Con vínculos de OCM" },

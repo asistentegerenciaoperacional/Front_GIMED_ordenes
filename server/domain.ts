@@ -68,6 +68,7 @@ import {
   saveProductOrderSheet,
   createProductLots,
 } from "./product-order-sheet";
+import { saveMaterialOrderSheet, setMaterialSheetLineStates } from "./material-order-sheet";
 export const newId = () => randomBytes(12).toString("hex");
 const now = () => new Date().toISOString();
 
@@ -468,6 +469,19 @@ function saveOrder(db: Database, p: Row, edit = false): Row {
         "AUTHORIZATION",
         { lines: "Los productos de una orden autorizada están bloqueados." },
       );
+    if (p.tipo_orden !== "producto" && o.estado_autorizacion === "autorizada") {
+      const identity = p.tipo_orden === "material" ? "id_material" : "producto";
+      check(
+        p.lines.length === existing.length &&
+          new Set(p.lines.map((row: Row) => row.id)).size === existing.length &&
+          p.lines.every((row: Row) => existing.some((line) =>
+            line.id === row.id && line[identity] === row[identity]
+          )),
+        "No se pueden agregar, quitar ni sustituir renglones de una OCM autorizada.",
+        "AUTHORIZATION",
+        { lines: "Los materiales y conceptos de una OCM autorizada están bloqueados." },
+      );
+    }
     if (p.tipo_orden === "producto" || p.tipo_orden === "material")
       removeCommentsForOrderEdit(db, o.id, p.tipo_orden, existing, p.lines, replacing, p.confirmar_comentarios?.[o.id]);
     if (replacing) {
@@ -1335,6 +1349,10 @@ export async function command(
       );
     case "createProductLots":
       return createProductLots(db, p, command);
+    case "saveMaterialOrderSheet":
+      return saveMaterialOrderSheet(db, p, command);
+    case "setMaterialSheetLineStates":
+      return setMaterialSheetLineStates(db, p);
     case "setProductLotStates":
       return setProductLotStates(db, p);
     case "setProductLineStates":
