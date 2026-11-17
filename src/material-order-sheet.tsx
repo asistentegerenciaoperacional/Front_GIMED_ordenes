@@ -1,3 +1,4 @@
+import { documentUrl } from "./shared/api/routes";
 import {
   useCallback,
   useEffect,
@@ -1096,7 +1097,7 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
                     onClick={() => {
                       if (documentId)
                         window.open(
-                          `/api/documents/${documentId}/content`,
+                          documentUrl(documentId),
                           "_blank",
                           "noopener",
                         );

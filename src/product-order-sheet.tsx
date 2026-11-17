@@ -1,3 +1,4 @@
+import { documentUrl } from "./shared/api/routes";
 import { DeleteProductLotsDialog } from "./components/delete-product-lots-dialog";
 import { SheetLotActions } from "./components/sheet-lot-actions";
 import { confirmProductCancellation } from "./product-cancellation";
@@ -1370,7 +1371,7 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                   if (doc)
                     cleanFirst(() =>
                       window.open(
-                        `/api/documents/${doc.id}/content`,
+                        documentUrl(doc.id),
                         "_blank",
                         "noopener",
                       ),

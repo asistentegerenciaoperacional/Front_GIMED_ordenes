@@ -1,5 +1,5 @@
 {
-  "name": "gimed-ordenes-prototipo",
+  "name": "front-gimed-ordenes",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -9,29 +9,36 @@
     "start": "tsx server/index.ts",
     "demo": "node --import tsx scripts/demo-auth.mjs",
     "test": "tsx --test tests/*.test.ts",
-    "test:browser": "npm run build && node scripts/verify-aria-browser.mjs && node scripts/verify-persistence.mjs",
-    "test:ocm": "npm run build && node scripts/verify-material-demand.mjs",
+    "test:browser": "npm run build:legacy && node scripts/verify-aria-browser.mjs && node scripts/verify-persistence.mjs",
+    "test:ocm": "npm run build:legacy && node scripts/verify-material-demand.mjs",
     "test:calendar": "node scripts/verify-calendar-cache.mjs",
     "inventory:aria": "tsx scripts/inventory-aria.ts",
-    "benchmark:aria": "node scripts/prepare-aria-baseline.mjs && npm run build && tsx scripts/measure-aria.ts baseline && tsx scripts/measure-aria.ts after && node scripts/compare-aria.mjs",
-    "benchmark:favorites": "npm run build && node scripts/benchmark-favorites.mjs",
-    "benchmark:ocm": "npm run build && node scripts/benchmark-material-demand.mjs",
-    "test:filters": "npm run build && tsx scripts/verify-order-filters.ts",
-    "test:detail": "npm run build && node scripts/verify-order-detail.mjs",
+    "benchmark:aria": "node scripts/prepare-aria-baseline.mjs && npm run build:legacy && tsx scripts/measure-aria.ts baseline && tsx scripts/measure-aria.ts after && node scripts/compare-aria.mjs",
+    "benchmark:favorites": "npm run build:legacy && node scripts/benchmark-favorites.mjs",
+    "benchmark:ocm": "npm run build:legacy && node scripts/benchmark-material-demand.mjs",
+    "test:filters": "npm run build:legacy && tsx scripts/verify-order-filters.ts",
+    "test:detail": "npm run build:legacy && node scripts/verify-order-detail.mjs",
     "benchmark:filters": "tsx scripts/benchmark-order-filters.ts",
     "qa": "node scripts/qa-session.mjs",
     "models": "node scripts/model-from-dbml.mjs",
-    "package:portable": "npm run build && node scripts/package-portable.mjs",
-    "test:portable": "node scripts/verify-portable.mjs"
+    "package:portable": "npm run build:legacy && node scripts/package-portable.mjs",
+    "test:portable": "node scripts/verify-portable.mjs",
+    "dev:piloto": "vite",
+    "build:legacy": "tsc --noEmit && vite build --mode legacy",
+    "api:generate": "openapi-typescript src/shared/api/openapi.json -o src/shared/api/generated.ts",
+    "perf:verify": "node scripts/performance-gate.mjs"
   },
   "dependencies": {
     "@internationalized/date": "3.12.4",
+    "@tanstack/react-query": "5.108.0",
     "express": "^5.1.0",
     "lucide-react": "^0.577.0",
     "react": "^19.2.0",
     "react-aria-components": "1.22.1",
     "react-dom": "^19.2.0",
-    "zod": "^4.3.0"
+    "react-router-dom": "7.18.5",
+    "tus-js-client": "4.3.1",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@playwright/cli": "latest",
@@ -41,9 +48,11 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "latest",
+    "openapi-typescript": "7.13.0",
     "prettier": "^3.9.9",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
-    "vite": "latest"
+    "vite": "latest",
+    "wrangler": "4.164.0"
   }
 }

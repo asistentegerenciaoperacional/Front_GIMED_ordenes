@@ -19,10 +19,10 @@ import {
 } from "../tests/fixtures/order-performance";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const output = resolve(root, "tests/evidence/order-filter-benchmark.json");
+const output = resolve(root, process.env.GIMED_BENCHMARK_PATH ?? "tests/evidence/order-filter-benchmark.json");
 const variants = customFilters.flatMap((family) => family.options);
-assert.equal(customFilters.length, 13);
-assert.equal(variants.length, 17);
+assert.equal(customFilters.length, 12);
+assert.equal(variants.length, 16);
 const sourceFiles = [
   "src/order-read-model.ts",
   "src/order-filters.ts",
@@ -364,7 +364,7 @@ const report = {
     reference:
       "Independent predicates on grouped raw records; no production summary, date conversion or predicate reused. Group construction timed separately.",
     equivalence:
-      "All 17 ordered ID arrays, both fixture sizes; includes the 13 filter families.",
+      "All 16 ordered ID arrays, both fixture sizes; includes the 12 current filter families.",
     excluded: [
       "HTTP",
       "React/DOM",
@@ -468,7 +468,7 @@ for (const lotCount of [6000, 60000]) {
         Math.min(...results.map((row) => row.selection.medianMs)),
         Math.max(...results.map((row) => row.selection.medianMs)),
       ],
-      equivalence: results.filter((row) => row.equivalent).length + "/17",
+      equivalence: results.filter((row) => row.equivalent).length + "/" + variants.length,
       fixtureUnchanged: true,
     }),
   );

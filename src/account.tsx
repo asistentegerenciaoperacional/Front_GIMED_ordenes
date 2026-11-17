@@ -4,11 +4,13 @@ import { App } from "./App";
 import { ControlForm, ControlInput } from "./components/controls";
 import { ConfirmationProvider } from "./components/overlays";
 import { migrateLegacyProductSheetDraft } from "./product-sheet-preferences";
+import { apiUrl, pilot } from "./shared/api/routes";
 import {
   ApiError,
   Button,
   Field,
   Loading,
+  LinkButton,
   request,
   sessionExpiredEvent,
 } from "./ui";
@@ -16,7 +18,11 @@ import {
 export function Account() {
   const [user, setUser] = useState<usuario | null>();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() =>
+    new URLSearchParams(location.search).get("acceso") === "error"
+      ? "No se pudo iniciar sesión. Usa tu cuenta corporativa de GIMED."
+      : "",
+  );
 
   useEffect(() => {
     let active = true;
@@ -89,6 +95,11 @@ export function Account() {
             {error}
           </p>
         )}
+        {pilot ? (
+          <LinkButton variant="primary" href={apiUrl("auth/inicio")}>
+            Continuar con Google Workspace
+          </LinkButton>
+        ) : <>
         <Field id="field-email" label="Correo electrónico" required>
           <ControlInput type="email" autoComplete="username" />
         </Field>
@@ -98,6 +109,7 @@ export function Account() {
         <Button type="submit" variant="primary" disabled={busy}>
           {busy ? "Ingresando…" : "Iniciar sesión"}
         </Button>
+        </>}
       </ControlForm>
     </main>
   );

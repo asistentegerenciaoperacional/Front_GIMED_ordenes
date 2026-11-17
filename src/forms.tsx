@@ -1,3 +1,5 @@
+import { documentUrl, apiUrl, pilot } from "./shared/api/routes";
+import { type DocumentDraft, uploadDocument } from "./features/documentos/upload";
 import { productLotLifecycleSnapshot } from "../shared/product-lot-lifecycle";
 import type { Database } from "../shared/models";
 import { confirmProductCancellation } from "./product-cancellation";
@@ -611,17 +613,15 @@ export function InvoiceForm({
   initialNumber?: string;
   invoice?: Row;
 }) {
-  const { db, run } = useApp();
+  const { db, run, updateData, notify } = useApp();
   const [supplier, setSupplier] = useState(
     provider ?? invoice?.id_proveedor ?? "",
   );
   const [number, setNumber] = useState(
     initialNumber || invoice?.numero_factura || "",
   );
-  const [documentDraft, setDocumentDraft] = useState<{
-    tipo_documento: string;
-    nombre_archivo: string;
-  } | null>(null);
+  const [documentDraft, setDocumentDraft] = useState<DocumentDraft | null>(null);
+  const [created, setCreated] = useState<Row>();
   const [initialSelected] = useState<string[]>(() =>
     invoice
       ? receipts(db)
@@ -686,19 +686,31 @@ export function InvoiceForm({
           "Asociaciones actualizadas",
         );
         row = invoice;
-      } else
-        row = (
+      } else {
+        row = created ?? (
           await run(
             "createInvoice",
             {
               id_proveedor: supplier,
               numero_factura: number,
-              document: documentDraft,
+              document: pilot ? null : documentDraft,
               receipts: chosen,
             },
             "Factura registrada",
           )
         ).row;
+        if (pilot && documentDraft?.file) {
+          setCreated(row);
+          const saved = await uploadDocument(documentDraft.file, {
+            tipo_entidad: "factura",
+            id_entidad: row.id,
+            tipo_documento: documentDraft.tipo_documento,
+            nombre_archivo: documentDraft.nombre_archivo,
+          });
+          await updateData(saved.changes, saved.revision);
+          if (saved.storageWarning) notify("El almacenamiento se acerca al límite.");
+        }
+      }
       onSaved?.(row);
       onClose();
     } catch (e) {
@@ -958,12 +970,12 @@ export function InvoicePicker({
             className={`icon-btn ${doc ? "clip-blue" : "clip-gray"}`}
             icon={Paperclip}
             aria-label={
-              doc ? "Previsualizar factura" : "Adjuntar placeholder a factura"
+              doc ? "Previsualizar factura" : pilot ? "Adjuntar documento a factura" : "Adjuntar placeholder a factura"
             }
             onClick={() =>
               doc
                 ? window.open(
-                    `/api/documents/${doc.id}/content`,
+                    documentUrl(doc.id),
                     "_blank",
                     "noopener",
                   )
@@ -2030,6 +2042,7 @@ export function OrderForm({
         order ? "editOrder" : "createOrder",
         {
           id: order?.id,
+          ...(pilot && order ? { expected_version: order.version } : {}),
           tipo_orden: type,
           id_proveedor: supplier,
           no_orden: order ? number : undefined,
@@ -3072,6 +3085,7 @@ export function MailForm({
   const [orderId, setOrderId] = useState(context.orderId ?? "");
   const [lotId, setLotId] = useState(context.loteMaterialId ?? "");
   const [preview, setPreview] = useState<Row | null>(null);
+  const mailKey = useRef<string | undefined>(undefined);
   const [recipients, setRecipients] = useState<Row[]>([]);
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
@@ -3102,6 +3116,7 @@ export function MailForm({
       .then((p) => {
         if (active) {
           setPreview(p);
+          if (pilot) mailKey.current = crypto.randomUUID();
           setBody(p.body);
           setRecipients(p.recipients);
           setChanged(false);
@@ -3127,8 +3142,9 @@ export function MailForm({
           loteMaterialId: lotId || undefined,
           recipients,
           body,
+          ...(pilot ? { expected_revision: preview?.revision, request_key: mailKey.current } : {}),
         },
-        "Envío simulado confirmado",
+        pilot ? "Correo enviado" : "Envío simulado confirmado",
       );
       onClose();
     } catch (e) {
@@ -3144,7 +3160,7 @@ export function MailForm({
   return (
     <Dialog
       title="Preparar correo"
-      subtitle="Envío simulado · no se enviarán mensajes externos."
+      subtitle={pilot ? "El mensaje sale desde tu Gmail corporativo." : "Envío simulado · no se enviarán mensajes externos."}
       wide
       onClose={onClose}
       dirty={changed}
@@ -3152,6 +3168,9 @@ export function MailForm({
       <ControlForm onSubmit={submit} fieldErrors={error?.fields} noValidate>
         <div className="dialog-body">
           <ErrorNotice error={error} />
+          {pilot && error?.code === "GMAIL_REQUIRED" && (
+            <ControlLink href={apiUrl("correos/gmail/inicio")} target="_blank" rel="noopener noreferrer">Conectar Gmail corporativo</ControlLink>
+          )}
           <div className="form-grid three">
             <Field id="field-event" label="Proceso">
               <ControlSelect
@@ -3200,9 +3219,9 @@ export function MailForm({
               </Field>
             )}
             <div className="field">
-              <span className="field-label">Remitente de demostración</span>
+              <span className="field-label">{pilot ? "Remitente" : "Remitente de demostración"}</span>
               <p style={{ paddingTop: 9, fontSize: 12 }}>
-                {preview?.remitente ?? "zamira@gimed-demo.example"}
+                {preview?.remitente ?? (pilot ? "Cargando…" : "zamira@gimed-demo.example")}
               </p>
             </div>
           </div>
@@ -3318,14 +3337,14 @@ export function MailForm({
                 <div key={d.id} className="inline" style={{ marginTop: 8 }}>
                   <Paperclip size={15} aria-hidden="true" />
                   <ControlLink
-                    href={`/api/documents/${d.id}/content`}
+                    href={documentUrl(d.id)}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ fontSize: 12 }}
                   >
                     {d.nombre_archivo}
                   </ControlLink>
-                  <Badge value="material">Placeholder</Badge>
+                  {!pilot && <Badge value="material">Placeholder</Badge>}
                 </div>
               ))
             ) : (
@@ -3341,7 +3360,7 @@ export function MailForm({
               <Info size={17} aria-hidden="true" />
               <div>
                 <strong>
-                  Completa los documentos antes de simular el envío.
+                  {pilot ? "Completa los documentos antes de enviar." : "Completa los documentos antes de simular el envío."}
                 </strong>
                 <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
                   {preview.missing.map((s: string) => (
@@ -3360,7 +3379,7 @@ export function MailForm({
             variant="primary"
             disabled={busy || !preview}
           >
-            {busy ? "Confirmando…" : "Simular envío"}
+            {busy ? "Confirmando…" : pilot ? "Enviar correo" : "Simular envío"}
           </Button>
         </div>
       </ControlForm>

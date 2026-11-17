@@ -1,6 +1,8 @@
 import { FileText, Info, Paperclip, Plus } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { schemas, type Row } from "../shared/schema";
+import { type DocumentDraft, uploadDocument } from "./features/documentos/upload";
+import { documentUrl, pilot } from "./shared/api/routes";
 import {
   Action,
   ControlForm,
@@ -39,13 +41,10 @@ export function Documents({
   showList?: boolean;
   renderAddTrigger?: (open: () => void) => ReactNode;
   documents?: readonly Row[];
-  draft?: { tipo_documento: string; nombre_archivo: string };
-  onDraftSave?: (draft: {
-    tipo_documento: string;
-    nombre_archivo: string;
-  }) => void;
+  draft?: DocumentDraft;
+  onDraftSave?: (draft: DocumentDraft) => void;
 }) {
-  const { db, run, notify } = useApp();
+  const { db, run, notify, updateData } = useApp();
   const [editing, setEditing] = useState<Row | null | undefined>();
   const docs =
     documents ??
@@ -66,6 +65,8 @@ export function Documents({
   const [name, setName] = useState(""),
     [kind, setKind] = useState(types[0]),
     [busy, setBusy] = useState(false);
+  const [file, setFile] = useState<File>();
+  const [progress, setProgress] = useState(0);
   const { error, catchError } = useErrors(
     entityValidation(
       "documento",
@@ -86,10 +87,12 @@ export function Documents({
       return;
     }
     setEditing(doc ?? null);
+    setFile(draft?.file);
+    setProgress(0);
     setName(
       doc?.nombre_archivo ??
         draft?.nombre_archivo ??
-        `${text(nextKind).replaceAll(" ", "-")}.html`,
+        (pilot ? "" : `${text(nextKind).replaceAll(" ", "-")}.html`),
     );
     setKind(nextKind);
   }
@@ -105,12 +108,20 @@ export function Documents({
           message: "Revisa el nombre del archivo.",
           fields: { nombre_archivo: "Indica un nombre de archivo válido." },
         });
+      if (pilot && !file)
+        throw new ApiError({ message: "Selecciona un archivo.", fields: { archivo: "Archivo obligatorio." } });
       if (onDraftSave) {
-        onDraftSave({ tipo_documento: kind, nombre_archivo: name.trim() });
+        onDraftSave({ tipo_documento: kind, nombre_archivo: name.trim(), file });
         setEditing(undefined);
         return;
       }
-      await run(
+      if (pilot) {
+        const saved = await uploadDocument(file!, {
+          id: editing?.id, tipo_entidad: owner, id_entidad: ownerId, tipo_documento: kind, nombre_archivo: name.trim(),
+        }, setProgress);
+        await updateData(saved.changes, saved.revision);
+        notify(saved.storageWarning ? "Documento guardado. El almacenamiento se acerca al límite." : "Documento guardado.");
+      } else await run(
         "saveDocument",
         {
           id: editing?.id,
@@ -167,7 +178,7 @@ export function Documents({
                   <div className="doc-actions">
                     <ControlLink
                       className="doc-action"
-                      href={`/api/documents/${d.id}/content`}
+                      href={documentUrl(d.id)}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -175,7 +186,7 @@ export function Documents({
                     </ControlLink>
                     <ControlLink
                       className="doc-action"
-                      href={`/api/documents/${d.id}/content?download=1`}
+                      href={documentUrl(d.id, true)}
                     >
                       Descargar
                     </ControlLink>
@@ -191,11 +202,11 @@ export function Documents({
                       className="doc-action"
                       aria-label={`Eliminar ${d.nombre_archivo}`}
                       onClick={async () => {
-                        if (await confirmAction("¿Eliminar este placeholder?"))
+                        if (await confirmAction(pilot ? "¿Eliminar este documento?" : "¿Eliminar este placeholder?"))
                           void run(
                             "deleteDocument",
                             { id: d.id },
-                            "Placeholder eliminado",
+                            pilot ? "Documento eliminado" : "Placeholder eliminado",
                           ).catch((e) => notify(e.message, true));
                       }}
                     >
@@ -213,13 +224,26 @@ export function Documents({
         renderAddTrigger?.(() => edit())}
       {editing !== undefined && (
         <Dialog
-          title={editing ? "Reemplazar placeholder" : "Agregar placeholder"}
-          subtitle="El contenido será ficticio. Se conserva la relación con su propietario."
+          title={editing ? (pilot ? "Reemplazar documento" : "Reemplazar placeholder") : (pilot ? "Agregar documento" : "Agregar placeholder")}
+          subtitle={pilot ? "El tamaño máximo por archivo es de 25 MiB." : "El contenido será ficticio. Se conserva la relación con su propietario."}
           onClose={() => setEditing(undefined)}
         >
           <ControlForm onSubmit={save} fieldErrors={error?.fields}>
             <div className="dialog-body">
               <ErrorNotice error={error} />
+              {pilot && (
+                <Field id="field-archivo" label="Archivo" required error={error?.fields.archivo}>
+                  <ControlInput type="file"
+                    accept={kind === "plantilla_certificado_liberacion" ? ".pdf,.docx,.xlsx" : ".pdf,.png,.jpg,.jpeg"}
+                    onChange={(event) => {
+                      const selected = event.target.files?.[0];
+                      setFile(selected);
+                      if (selected) setName(selected.name);
+                    }}
+                  />
+                </Field>
+              )}
+              {pilot && busy && <progress aria-label="Progreso de carga" value={progress} max={100} />}
               <Field
                 id="field-tipo_documento"
                 label="Clase de documento"
@@ -266,7 +290,7 @@ export function Documents({
                 Cancelar
               </CancelButton>
               <Button type="submit" variant="primary" disabled={busy}>
-                {editing ? "Reemplazar placeholder" : "Guardar placeholder"}
+                {pilot ? (editing ? "Reemplazar documento" : "Guardar documento") : (editing ? "Reemplazar placeholder" : "Guardar placeholder")}
               </Button>
             </div>
           </ControlForm>

@@ -1,4 +1,8 @@
-# Prototipo local de órdenes de compra · GIMED
+# Front_GIMED_ordenes
+
+El build normal publica la aplicación interna y consume la API del repositorio `Back_GIMED_ordenes`. Consulta [estándares y configuración](docs/estandares.md) para comenzar con el piloto.
+
+## Prototipo de referencia
 
 Aplicación interactiva en español basada en `Planeacion/requisitos.md`, el esquema de `Planeacion/db.md` y las restricciones R01–R13. Incluye una colección provisional adicional para la plantilla de cotización. Permite recorrer los procesos con datos ficticios y conservar los cambios en este equipo. Los archivos son placeholders y los correos se simulan.
 
@@ -39,7 +43,7 @@ Abre [el prototipo](http://127.0.0.1:5173). La pantalla inicial es **Órdenes de
 Para ejecutar la versión compilada:
 
 ```powershell
-npm run build
+npm run build:legacy
 npm start
 ```
 

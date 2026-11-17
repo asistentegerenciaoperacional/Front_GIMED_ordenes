@@ -1,3 +1,6 @@
+import { documentUrl, pilot } from "./shared/api/routes";
+import { useQuery } from "@tanstack/react-query";
+import type { components } from "./shared/api/generated";
 import { DeleteProductLotsDialog } from "./components/delete-product-lots-dialog";
 import { confirmProductCancellation } from "./product-cancellation";
 import { LineComments } from "./line-comments";
@@ -107,6 +110,7 @@ import {
   TabHeader,
   count,
   money,
+  request,
   shortDate,
   text,
   useApp,
@@ -149,7 +153,7 @@ function InvoiceDocumentLink({ invoiceId }: { invoiceId: string | null }) {
   return document ? (
     <ControlLink
       className="invoice-document-link"
-      href={"/api/documents/" + document.id + "/content"}
+      href={documentUrl(document.id)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={"Abrir documento de factura " + invoice.numero_factura}
@@ -225,7 +229,7 @@ function ClassicOrdersPage({
   group: "productos" | "materiales";
   params: URLSearchParams;
 }) {
-  const { db, navigate } = useApp();
+  const { db, navigate, userId } = useApp();
   const view = params.get("vista") ?? "seguimiento",
     type =
       group === "materiales" &&
@@ -451,10 +455,29 @@ function ClassicOrdersPage({
       ),
     [candidates, tableState],
   );
-  const page = useMemo(
+  const localPage = useMemo(
     () => paginateOrders(rows, params.get("pagina")),
     [rows, params.get("pagina")],
   );
+  const queryParams = new URLSearchParams(params);
+  queryParams.set("grupo", group);
+  queryParams.set("vista", view);
+  queryParams.set("q", q);
+  const remotePage = useQuery<components["schemas"]["ListadoOrdenes"]>({
+    queryKey: ["ordenes", userId, queryParams.toString()],
+    queryFn: () => request("ordenes?" + queryParams),
+    enabled: pilot,
+  });
+  const page = useMemo(() => {
+    const data = remotePage.data;
+    if (!pilot || !data) return localPage;
+    const byId = new Map(all.map((order) => [order.id, order]));
+    const selected = data.items.flatMap((item) => {
+      const order = byId.get(item.id);
+      return order ? [order] : [];
+    });
+    return selected.length === data.items.length ? { ...data, rows: selected } : localPage;
+  }, [all, localPage, remotePage.data]);
   const openedOptions = useMemo(() => {
     const column = columns.find((column) => column.key === openedColumn);
     if (!column) return [];
@@ -638,7 +661,7 @@ function ClassicOrdersPage({
                         icon={FileCheck2}
                         className="icon-btn table-action"
                         variant="primary"
-                        href={`/api/documents/${signedOrder.id}/content`}
+                        href={documentUrl(signedOrder.id)}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Ver orden firmada de ${reference}`}
@@ -962,7 +985,7 @@ function ClassicOrdersPage({
                 )}
                 <div className="table-footer orders-footer">
                   <span aria-live="polite">
-                    {rows.length} órdenes en esta vista · Mostrando {page.start}
+                    {page.total} órdenes en esta vista · Mostrando {page.start}
                     –{page.end}
                   </span>
                   <nav

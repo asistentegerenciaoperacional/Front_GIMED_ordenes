@@ -84,7 +84,7 @@ function Fixture() {
   const close = () => setClosed(true);
   return (
     <AppContext.Provider
-      value={{ db, userId: "00000000-0000-4000-8000-000000000001", run, notify: () => {}, navigate: () => {} }}
+      value={{ db, userId: "00000000-0000-4000-8000-000000000001", run, notify: () => {}, navigate: () => {}, updateData: () => {} }}
     >
       {fixture==='aria' ? <AriaControlsFixture/> : closed ? (
         <p>Formulario cerrado</p>

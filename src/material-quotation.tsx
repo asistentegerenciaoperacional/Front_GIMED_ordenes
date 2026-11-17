@@ -1,4 +1,5 @@
 import { ChevronDown, Send, Trash2 } from "lucide-react";
+import { apiUrl, pilot } from "./shared/api/routes";
 import {
   startTransition,
   useActionState,
@@ -40,6 +41,7 @@ import { validEmail } from "../shared/schema";
 import {
   ControlForm,
   ControlInput,
+  ControlLink,
   ControlSelect,
 } from "./components/controls";
 import { formatDateInput } from "./dates";
@@ -127,6 +129,7 @@ export default function MaterialQuotationDialog({
   const reviewHeading = useRef<HTMLHeadingElement>(null);
   const form = useRef<HTMLFormElement>(null);
   const [preview, setPreview] = useState<MaterialQuotationPreview | null>(null);
+  const mailKey = useRef<string | undefined>(undefined);
   const [error, setError] = useState<ApiError | null>(null);
   const [status, setStatus] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -208,13 +211,14 @@ export default function MaterialQuotationDialog({
           );
         else {
           setPreview(result);
+          if (pilot) mailKey.current = crypto.randomUUID();
           setError(null);
         }
       } else {
         await run(
           "sendMaterialQuotations",
-          { borrador: draft, expected_revision: preview.revision },
-          `${preview.messages.length} cotizaciones simuladas confirmadas`,
+          { borrador: draft, expected_revision: preview.revision, ...(pilot ? { request_key: mailKey.current } : {}) },
+          pilot ? `${preview.messages.length} cotizaciones enviadas` : `${preview.messages.length} cotizaciones simuladas confirmadas`,
         );
         onClose();
       }
@@ -278,7 +282,7 @@ export default function MaterialQuotationDialog({
     <Dialog
       title="Cotizar materiales"
       className="material-quotation-dialog"
-      subtitle="Envío simulado · no se enviarán mensajes externos."
+      subtitle={pilot ? "Cada cotización sale desde tu Gmail corporativo." : "Envío simulado · no se enviarán mensajes externos."}
       wide
       busy={busy}
       dirty={JSON.stringify(draft) !== initial}
@@ -296,6 +300,9 @@ export default function MaterialQuotationDialog({
         }}
       >
         <div className="dialog-body stack" inert={busy}>
+          {pilot && error?.code === "GMAIL_REQUIRED" && (
+            <ControlLink href={apiUrl("correos/gmail/inicio")} target="_blank" rel="noopener noreferrer">Conectar Gmail corporativo</ControlLink>
+          )}
           <ErrorNotice
             error={error}
             onBeforeFieldFocus={(field) => {
@@ -684,7 +691,7 @@ export default function MaterialQuotationDialog({
             {busy
               ? "Procesando…"
               : preview
-                ? `Confirmar ${preview.messages.length} envíos simulados`
+                ? (pilot ? `Confirmar ${preview.messages.length} envíos` : `Confirmar ${preview.messages.length} envíos simulados`)
                 : "Revisar cotización"}
           </Button>
         </div>

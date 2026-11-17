@@ -1,3 +1,5 @@
+import { documentUrl, apiUrl, pilot } from "./shared/api/routes";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -596,7 +598,7 @@ export function InvoicesPage({
                         }}
                         href={
                           document
-                            ? `/api/documents/${document.id}/content`
+                            ? documentUrl(document.id)
                             : `/facturas/${f.id}`
                         }
                         target={document ? "_blank" : undefined}
@@ -1366,13 +1368,23 @@ export function CodesPage() {
 }
 
 export function EmailsPage() {
-  const { db } = useApp();
+  const { db, userId } = useApp();
+  const mailbox = useQuery({
+    queryKey: ["gmail", userId],
+    queryFn: async () => {
+      const response = await fetch(apiUrl("correos/gmail"));
+      if (!response.ok) throw new Error("No se pudo consultar Gmail.");
+      return (await response.json()) as { conectado: boolean };
+    },
+    enabled: pilot,
+  });
+  const failed = new URLSearchParams(location.search).get("gmail") === "error";
   const [compose, setCompose] = useState(false);
   return (
     <>
       <PageHeading
         title="Correos"
-        description="Prepara los avisos y consulta el registro básico de los envíos simulados."
+        description={pilot ? "Prepara avisos y consulta el historial de envíos." : "Prepara los avisos y consulta el registro básico de los envíos simulados."}
         action={
           <Button
             variant="primary"
@@ -1383,9 +1395,15 @@ export function EmailsPage() {
           </Button>
         }
       />
+      {pilot && (
+        <div className="notice">
+          {failed && <p role="alert">Google no autorizó el buzón. Comprueba que coincida con tu cuenta de GIMED.</p>}
+          <ControlLink href={apiUrl("correos/gmail/inicio")}>{mailbox.data?.conectado ? "Reconectar Gmail corporativo" : "Conectar Gmail corporativo"}</ControlLink>
+        </div>
+      )}
       <section className="panel">
         <div className="section-heading">
-          <h2>Historial de envíos simulados</h2>
+          <h2>{pilot ? "Historial de envíos" : "Historial de envíos simulados"}</h2>
           <small>{db.correo_enviado.length} mensajes</small>
         </div>
         {db.correo_enviado.length ? (
@@ -1748,7 +1766,7 @@ export function DocumentsPage() {
                     <TableRow key={d.id}>
                       <TableCell>
                         <ControlLink
-                          href={`/api/documents/${d.id}/content`}
+                          href={documentUrl(d.id)}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -1759,7 +1777,7 @@ export function DocumentsPage() {
                           />
                           {d.nombre_archivo}
                         </ControlLink>
-                        <small>Placeholder · {d.tipo_mime}</small>
+                        <small>{!pilot && "Placeholder · "}{d.tipo_mime}</small>
                       </TableCell>
                       <TableCell>
                         {d.tipo_entidad === "factura" ||
@@ -1787,7 +1805,7 @@ export function DocumentsPage() {
                       <TableCell>
                         <div className="inline">
                           <LinkButton
-                            href={`/api/documents/${d.id}/content?download=1`}
+                            href={documentUrl(d.id, true)}
                             className="icon-btn table-action"
                             icon={Download}
                             aria-label={`Descargar ${d.nombre_archivo}`}

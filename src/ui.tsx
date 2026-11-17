@@ -61,6 +61,8 @@ import {
   validationSignature,
   type LiveValidation,
 } from "./live-validation";
+import { apiUrl, pilot } from "./shared/api/routes";
+
 export class ApiError extends Error {
   focusKey = {};
   fields: Record<string, string>;
@@ -74,15 +76,18 @@ export class ApiError extends Error {
   }
 }
 export const sessionExpiredEvent = "prototipo:session-expired";
-export async function request(path: string, body?: Row): Promise<any> {
+export async function request(path: string, body?: Row, idempotencyKey?: string): Promise<any> {
   let response: Response;
   try {
     response = await fetch(
-      `/api/${path}`,
+      apiUrl(path),
       body
         ? {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(pilot ? { "X-Gimed-Csrf": "1", "Idempotency-Key": idempotencyKey ?? crypto.randomUUID() } : {}),
+            },
             body: JSON.stringify(body),
           }
         : {},
@@ -90,16 +95,18 @@ export async function request(path: string, body?: Row): Promise<any> {
   } catch {
     throw new ApiError({
       message:
-        "No hay conexión con el servicio local. Comprueba que esté iniciado.",
+        "No hay conexión con el servicio de GIMED.",
     });
   }
-  const data = await response.json();
+  if (response.status === 204) return;
+  const envelope = await response.json().catch(() => ({}));
+  const data = envelope.error ?? envelope;
   if (!response.ok) {
     if (data.code === "AUTH_REQUIRED" && path !== "auth/session")
       window.dispatchEvent(new Event(sessionExpiredEvent));
     throw new ApiError(data);
   }
-  return data;
+  return pilot && path === "state" ? envelope.data : envelope;
 }
 type AppContextValue = {
   db: Database;
@@ -112,6 +119,7 @@ type AppContextValue = {
   ) => Promise<Row>;
   navigate: (path: string) => void;
   notify: (message: string, error?: boolean) => void;
+  updateData: (changes: import("./shared/api/changes").Changes, revision?: number) => Promise<void> | void;
 };
 export const AppContext = createContext<AppContextValue>(null!);
 const FieldScope = DialogScope;

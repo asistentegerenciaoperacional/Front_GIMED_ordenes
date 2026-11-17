@@ -41,6 +41,9 @@ import {
   type ScrollPosition,
 } from "./routing";
 import { ApiError, AppContext, Button, Empty, Loading, request } from "./ui";
+import { commandRoutes, pilot } from "./shared/api/routes";
+import { applyChanges, type Changes } from "./shared/api/changes";
+import { useQueryClient } from "@tanstack/react-query";
 const CatalogPage = lazy(() =>
   import("./catalogs").then((module) => ({ default: module.CatalogPage })),
 );
@@ -73,6 +76,9 @@ const navigation = [
   { id: "correos", label: "Correos", icon: Mail },
 ];
 export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise<void> }) {
+  const queryClient = useQueryClient();
+  const modelRef = useRef<Database | null>(null);
+  const revisionRef = useRef(0);
   const [db, setDb] = useState<Database | null>(null),
     [loadError, setLoadError] = useState(""),
     [route, setRoute] = useState(currentRoute),
@@ -164,15 +170,24 @@ export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise
   const load = useCallback(
     async (beforeSnapshot?: (snapshot: Database) => void) => {
       try {
-        const snapshot = shareSnapshotStrings(await request("state"));
+        const response = pilot
+          ? await queryClient.fetchQuery({ queryKey: ["contexto", user.id], queryFn: () => request("contexto"), staleTime: 0 })
+          : null;
+        if (response && response.revision < revisionRef.current && modelRef.current) {
+          beforeSnapshot?.(modelRef.current);
+          return;
+        }
+        const snapshot = shareSnapshotStrings(response ? response.data : await request("state"));
+        if (response) revisionRef.current = response.revision;
         beforeSnapshot?.(snapshot);
+        modelRef.current = snapshot;
         setDb(snapshot);
         setLoadError("");
       } catch (e) {
         setLoadError((e as Error).message);
       }
     },
-    [],
+    [queryClient, user.id],
   );
   useEffect(() => {
     void load();
@@ -294,6 +309,26 @@ export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise
     setNavOpen(false);
     window.scrollTo({ top: 0, behavior: "instant" });
   }, []);
+  const updateData = useCallback(async (changes: Changes, revision?: number, beforeSnapshot?: (snapshot: Database) => void) => {
+    if (!modelRef.current) return;
+    if (revision === undefined || revision > revisionRef.current + 1 ||
+        (revision > revisionRef.current && !Object.keys(changes).length)) {
+      await load(beforeSnapshot);
+      void queryClient.invalidateQueries({ queryKey: ["ordenes", user.id] });
+      return;
+    }
+    if (revision <= revisionRef.current) {
+      beforeSnapshot?.(modelRef.current);
+      return;
+    }
+    const snapshot = applyChanges(modelRef.current, changes);
+    beforeSnapshot?.(snapshot);
+    revisionRef.current = revision;
+    modelRef.current = snapshot;
+    queryClient.setQueryData(["contexto", user.id], { data: snapshot, revision });
+    void queryClient.invalidateQueries({ queryKey: ["ordenes", user.id] });
+    setDb(snapshot);
+  }, [load, queryClient, user.id]);
   const run = useCallback(
     async (
       name: string,
@@ -303,10 +338,29 @@ export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise
     ) => {
       setSaving((n) => n + 1);
       try {
-        const { result } = await request("commands", { name, payload });
-        const snapshot = shareSnapshotStrings(await request("state"));
-        beforeSnapshot?.(snapshot);
-        setDb(snapshot);
+        const response = pilot
+          ? await request(
+              name === "deleteDocument" ? "documentos/" + payload.id + "/eliminar" : commandRoutes[name],
+              payload,
+              typeof payload.request_key === "string" ? payload.request_key : undefined,
+            )
+          : await request("commands", { name, payload });
+        const { result } = response;
+        if (pilot) await updateData(response.changes, response.revision, beforeSnapshot);
+        else {
+          const snapshot = shareSnapshotStrings(await request("state"));
+          beforeSnapshot?.(snapshot);
+          modelRef.current = snapshot;
+          setDb(snapshot);
+        }
+        const failedMail = pilot && ["sendMail", "sendMaterialQuotations"].includes(name) &&
+          (result.messages ?? [result.row]).some((item: Row) => item.status !== "sent");
+        if (failedMail) {
+          const messages = (result.messages ?? [result.row]) as Row[];
+          const confirmed = messages.filter((item) => item.status === "sent").length;
+          const uncertain = messages.filter((item) => item.status === "uncertain").length;
+          throw new ApiError({ code: "MAIL_DELIVERY", message: `Confirmados: ${confirmed}. Rechazados: ${messages.length - confirmed - uncertain}. Por verificar en Gmail: ${uncertain}.` });
+        }
         if (message) notify(message);
         return result;
       } catch (error) {
@@ -314,6 +368,7 @@ export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise
           error instanceof ApiError &&
           (error.code === "CONSECUTIVE_CHANGED" ||
             error.code === "SHEET_CHANGED" ||
+            error.code === "ORDER_CHANGED" ||
             error.code === "LOT_STATE_CHANGED" ||
             error.code === "AUTHORIZATION_CHANGED" ||
             error.code === "QUOTATION_CHANGED" ||
@@ -334,7 +389,7 @@ export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise
         setSaving((n) => n - 1);
       }
     },
-    [notify, load],
+    [notify, load, updateData],
   );
   const url = new URL(`http://local/${route}`),
     parts = url.pathname.slice(1).split("/"),
@@ -404,7 +459,7 @@ export function App({ user, onLogout }: { user: usuario; onLogout: () => Promise
       />
     );
   return (
-    <AppContext.Provider value={{ db, run, navigate, notify, userId: user.id }}>
+    <AppContext.Provider value={{ db, run, navigate, notify, updateData, userId: user.id }}>
       {print ? (
         content
       ) : (

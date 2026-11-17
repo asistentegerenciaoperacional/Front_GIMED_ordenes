@@ -23,7 +23,7 @@ export const meta = metadata as {
 export const entities = Object.keys(meta.tables) as Entity[];
 export const idSchema = z
   .string({ error: "Selecciona un registro existente." })
-  .regex(/^[a-f\d]{24}$/, "Identificador interno inválido.");
+  .regex(/^(?:[a-f\d]{24}|[a-f\d]{8}-(?:[a-f\d]{4}-){3}[a-f\d]{12})$/i, "Identificador interno inválido.");
 export const decimalSchema = z
   .string()
   .regex(
