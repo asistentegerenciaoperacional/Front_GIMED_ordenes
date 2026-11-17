@@ -1,4 +1,5 @@
 import { DeleteProductLotsDialog } from "./components/delete-product-lots-dialog";
+import { SheetLotActions } from "./components/sheet-lot-actions";
 import { confirmProductCancellation } from "./product-cancellation";
 import {
   useCallback,
@@ -1340,84 +1341,12 @@ export function ProductOrderSheet({ params }: { params: URLSearchParams }) {
                   </Popover>
                 </MenuTrigger>
               </div>
-              <MenuTrigger>
-                <Button
-                  className="sheet-lot-trigger"
-                  data-sheet-return-focus
-                  aria-label="Estado del lote"
-                  disabled={!lotIds.length || busy}
-                >
-                  Lotes <ChevronDown size={15} aria-hidden="true" />
-                </Button>
-                <Popover
-                  className="aria-options custom-filter-options sheet-order-menu sheet-lot-menu"
-                  placement="bottom start"
-                  offset={4}
-                >
-                  <Menu
-                    className="aria-option-list"
-                    aria-label="Acciones de lote"
-                    onAction={(key) => {
-                      const value = String(key);
-                      const targets = selectionTargets();
-                      if (value === "nuevo")
-                        cleanFirst(() => void createLots(targets.lineIds, scope), scope);
-                      else if (value)
-                        cleanFirst(() => void states(value, targets, scope), scope);
-                    }}
-                  >
-                    <ActionTooltip content="(Alt+d)">
-                      <MenuItem
-                        id="nuevo"
-                        aria-keyshortcuts="Alt+D"
-                        className="aria-option sheet-order-menu-item"
-                      >
-                        Nuevo lote
-                        <Plus size={15} aria-hidden="true" />
-                      </MenuItem>
-                    </ActionTooltip>
-                    <ActionTooltip content="(Alt+c)">
-                      <MenuItem
-                        id="cerrado"
-                        aria-keyshortcuts="Alt+C"
-                        className="aria-option sheet-order-menu-item"
-                      >
-                        Cerrar lotes
-                        <span
-                          className="sheet-lot-swatch closed"
-                          aria-hidden="true"
-                        />
-                      </MenuItem>
-                    </ActionTooltip>
-                    <ActionTooltip content="(Alt+n)">
-                      <MenuItem
-                        id="anulado"
-                        aria-keyshortcuts="Alt+N"
-                        className="aria-option sheet-order-menu-item"
-                      >
-                        Anular lotes
-                        <span
-                          className="sheet-lot-swatch cancelled"
-                          aria-hidden="true"
-                        />
-                      </MenuItem>
-                    </ActionTooltip>
-                    <ActionTooltip content="(Alt+r)">
-                      <MenuItem
-                        id="en_seguimiento"
-                        aria-keyshortcuts="Alt+R"
-                        className="aria-option sheet-order-menu-item"
-                      >
-                        Reabrir lotes
-                        <span
-                          className="sheet-lot-swatch open"
-                          aria-hidden="true"
-                        />
-                      </MenuItem>
-                    </ActionTooltip>
-                  </Menu>
-                </Popover>
-              </MenuTrigger>
+              <SheetLotActions count={lotIds.length} disabled={!lotIds.length || busy} includeNew label="Estado del lote"
+                onAction={(value) => {
+                  const targets = selectionTargets();
+                  if (value === "nuevo") cleanFirst(() => void createLots(targets.lineIds, scope), scope);
+                  else cleanFirst(() => void states(value, targets, scope), scope);
+                }} />
               <Tool
                 icon={FileText}
                 label="Ver orden escaneada"

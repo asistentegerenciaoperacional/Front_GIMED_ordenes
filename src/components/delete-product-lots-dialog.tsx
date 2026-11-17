@@ -1,5 +1,19 @@
 import type { ProductLotLifecycleSnapshot } from "../../shared/product-lot-lifecycle";
 import { ConfirmationDialog } from "../ui";
+import type { ReactNode } from "react";
+
+export function DeleteLotsDialog({ onConfirm, onClose, busy, error, children }: {
+  onConfirm: () => void | Promise<void>;
+  onClose: () => void;
+  busy?: boolean;
+  error?: string;
+  children: ReactNode;
+}) {
+  return <ConfirmationDialog title="Eliminar lote" confirmLabel="Eliminar lote"
+    onConfirm={onConfirm} onClose={onClose} busy={busy} destructive error={error}>
+    {children}
+  </ConfirmationDialog>;
+}
 
 export function DeleteProductLotsDialog({
   lots,
@@ -24,15 +38,7 @@ export function DeleteProductLotsDialog({
       .every((lot) => lot.estado === "anulado"),
   );
   return (
-    <ConfirmationDialog
-      title="Eliminar lote"
-      confirmLabel="Eliminar lote"
-      onConfirm={onConfirm}
-      onClose={onClose}
-      busy={busy}
-      destructive
-      error={error}
-    >
+    <DeleteLotsDialog onConfirm={onConfirm} onClose={onClose} busy={busy} error={error}>
       {single ? (
         <p>
           Se eliminará el lote <strong>{lots[0].number}</strong> de{" "}
@@ -62,6 +68,6 @@ export function DeleteProductLotsDialog({
             : "No quedarán lotes activos de algunos productos. Al eliminarlos, los productos afectados quedarán anulados."}
         </p>
       )}
-    </ConfirmationDialog>
+    </DeleteLotsDialog>
   );
 }

@@ -10,11 +10,14 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
+  FileBadge,
   FileCheck2,
   FileText,
+  MessageSquare,
   Pencil,
   Plus,
   Printer,
+  Trash2,
 } from "lucide-react";
 import { Menu, MenuItem, MenuTrigger } from "react-aria-components/Menu";
 import { Popover } from "react-aria-components/Popover";
@@ -26,6 +29,7 @@ import {
   materialSheetIndexes,
   materialSheetRecordIssues,
   materialStateAllowed,
+  materialSheetDeletionSnapshot,
   overlayMaterialSheetChanges,
   type MaterialLineState,
   type MaterialSheetChange,
@@ -55,8 +59,11 @@ import {
   sheetHistoryShortcut,
 } from "./components/sheet-history-controls";
 import { SheetSelectionView } from "./components/sheet-selection-view";
-import { OrderForm, ReceiptForm } from "./forms";
-import { withCommentRemovalConfirmation } from "./line-comments";
+import { SheetLotActions } from "./components/sheet-lot-actions";
+import { DeleteLotsDialog } from "./components/delete-product-lots-dialog";
+import { OrderForm } from "./forms";
+import { LineComments, withCommentRemovalConfirmation } from "./line-comments";
+import { Documents } from "./document-controls";
 import {
   buildMaterialSheet,
   matchesMaterialSheetFilter,
@@ -194,10 +201,16 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
   const [creating, setCreating] = useState(false);
   const [editingOrder, setEditingOrder] = useState<string | null>(null);
   const [authorizing, setAuthorizing] = useState<string[] | null>(null);
-  const [receipt, setReceipt] = useState<{
-    row: MaterialSheetRow;
+  const [comments, setComments] = useState<{ tipo: "material"; id: string; name: string } | null>(null);
+  const [certificateLot, setCertificateLot] = useState<{ id: string; number: string } | null>(null);
+  const [deleting, setDeleting] = useState<{
+    targets: { entity: MaterialSheetRow["entity"]; id: string }[];
+    expected: ReturnType<typeof materialSheetDeletionSnapshot>;
+    names: string[];
     scope: object;
   } | null>(null);
+  const [deleteError, setDeleteError] = useState<string>();
+  const orderActionsRef = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState(() =>
     readSheetLocal(
       collapsedKey,
@@ -510,15 +523,6 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
   }
   const openLinkedOrder = useRef((id: string) => navigate(`ordenes/${id}`));
   openLinkedOrder.current = (id) => cleanFirst(() => navigate(`ordenes/${id}`));
-  function openReceipt(row: MaterialSheetRow) {
-    const index = materialSheetIndexes(latestDb.current);
-    const line = (
-      row.entity === "orden_material" ? index.materialLines : index.otherLines
-    ).get(row.line.id);
-    const order = line && index.orders.get(line.id_orden_compra);
-    if (line && order?.estado_autorizacion === "autorizada")
-      setReceipt({ row: { ...row, line, order }, scope });
-  }
   async function save(origin = scope) {
     const submitted = history.getSnapshot().value;
     if (!submitted.length) return true;
@@ -731,6 +735,37 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
     }
   }
 
+  function beginDeleteLines(selected: MaterialSheetRow[], origin: object) {
+    if (writing.current || !selected.length || liveScope.current !== origin) return;
+    const targets = selected.map((row) => ({ entity: row.entity, id: row.line.id }));
+    const snapshot = materialSheetDeletionSnapshot(latestDb.current, targets);
+    if (snapshot.some(({ line, order }) => !line || order?.estado_autorizacion !== "autorizada")) {
+      setError(new ApiError({ message: "Solo se pueden eliminar lotes de órdenes autorizadas. Revisa la selección." }));
+      return;
+    }
+    const itemColumn = allColumns.find((column) => column.key === "item")!;
+    setDeleteError(undefined);
+    setDeleting({ targets, expected: snapshot, scope: origin,
+      names: selected.map((row) => `OCM ${row.order.no_orden} · ${materialValue(latestDb.current, row, itemColumn)}`) });
+  }
+
+  async function deleteSelectedLines() {
+    if (!deleting || writing.current) return;
+    writing.current = true;
+    setBusy(true);
+    setDeleteError(undefined);
+    try {
+      await run("deleteMaterialSheetLines", { targets: deleting.targets, expected: deleting.expected, confirm: true }, deleting.targets.length === 1 ? "Lote eliminado" : "Lotes eliminados", (next) => capture(next, deleting.scope));
+      setDeleting(null);
+      returnFocus(deleting.scope);
+    } catch (failure) {
+      setDeleteError(toError(failure).message);
+    } finally {
+      writing.current = false;
+      setBusy(false);
+    }
+  }
+
   const editRow = editing && currentByKey.get(editing.rowKey);
   const editColumn =
     editing && allColumns.find((column) => column.key === editing.column);
@@ -886,7 +921,6 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
     />
   );
   const writeTools = (
-    <div className="inline">
       <SheetWriteTools
         count={changes.length}
         editing={!!editing}
@@ -908,7 +942,6 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
       >
         {historyTools}
       </SheetWriteTools>
-    </div>
   );
 
   return (
@@ -945,7 +978,7 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
               : key === "r"
                 ? "en_seguimiento"
                 : null;
-        if (!next && !["a", "o", "s"].includes(key)) return;
+        if (!next && !["a", "o", "s", "delete", "del", "supr"].includes(key)) return;
         event.preventDefault();
         const selected = targets();
         if (next)
@@ -958,6 +991,8 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
           openSheetDialog(() => setAuthorizing(selected.ids));
         else if (key === "o") openSheetDialog(() => setCreating(true));
         else if (key === "s") updateHidden([]);
+        else if (["delete", "del", "supr"].includes(key) && selected.selected.length && selected.selected.every((row) => row.order.estado_autorizacion === "autorizada"))
+          cleanFirst(() => beginDeleteLines(targets().selected, scope));
       }}
     >
       <div className="product-sheet-title">
@@ -986,40 +1021,28 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
               onChange={(vista) => changeQuery({ vista })}
             />
           )}
-          {writeTools}
-          {!collapsed && (
-            <SheetTool
-              icon={ChevronUp}
-              label="Ocultar barra de herramientas"
-              onClick={toggleToolbar}
-            />
-          )}
+          <div className="inline">
+            {writeTools}
+            {!collapsed && (
+              <SheetTool
+                icon={ChevronUp}
+                label="Ocultar barra de herramientas"
+                onClick={toggleToolbar}
+              />
+            )}
+          </div>
         </div>
         {!collapsed && (
           <SheetSelectionView selection={selection} snapshot={selectionSummary}>
             {() => {
               const { range, ids, selected, order } = targets();
               const single = selected.length === 1 ? selected[0] : null;
-              const lotId =
-                single && "id_lote_material" in single.line
-                  ? single.line.id_lote_material
-                  : null;
-              const certificates = lotId
-                ? db.documento.filter(
-                    (doc) =>
-                      doc.tipo_entidad === "lote_material" &&
-                      doc.id_entidad === lotId &&
-                      [
-                        "certificado_calidad",
-                        "certificado_liberacion",
-                      ].includes(doc.tipo_documento),
-                  )
-                : [];
+              const lotIds = [...new Set(selected.map((row) => "id_lote_material" in row.line ? row.line.id_lote_material : null))];
+              const certificateLotId = lotIds.length === 1 ? lotIds[0] : null;
               const documentId = order && selected[0].documentId;
-              const canReceipt =
-                single?.order.estado_autorizacion === "autorizada";
               return (
                 <div className="product-sheet-tools">
+                  <div className="sheet-order-actions" ref={orderActionsRef}>
                   <Button
                     icon={Plus}
                     aria-keyshortcuts="Alt+O"
@@ -1028,94 +1051,44 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
                   >
                     Nueva OCM
                   </Button>
-                  <SheetTool
-                    icon={FileCheck2}
-                    label={
-                      ids.length && view === "no_autorizadas"
-                        ? `Autorizar ${ids.length} OCM`
-                        : "Autorizar"
-                    }
-                    aria-keyshortcuts="Alt+A"
-                    disabled={view !== "no_autorizadas" || !ids.length || busy}
-                    onClick={() => openSheetDialog(() => setAuthorizing(ids))}
-                  />
                   <MenuTrigger>
-                    <Button
-                      className="sheet-lot-trigger"
-                      aria-label="Acciones de renglón"
-                      disabled={!range || busy}
-                      data-sheet-return-focus
-                    >
-                      Renglones <ChevronDown size={15} aria-hidden="true" />
-                    </Button>
-                    <Popover
-                      className="aria-options custom-filter-options sheet-order-menu"
-                      placement="bottom start"
-                      offset={4}
-                    >
-                      <Menu
-                        className="aria-option-list"
-                        aria-label="Acciones de renglón"
+                    <Button icon={ChevronDown} aria-label="Más acciones de órdenes" />
+                    <Popover triggerRef={orderActionsRef} className="aria-options custom-filter-options sheet-order-menu" placement="bottom start" offset={4}>
+                      <Menu className="aria-option-list" aria-label="Acciones de órdenes"
                         onAction={(action) => {
-                          const key = String(action);
-                          if (key === "receipt" && single)
-                            cleanFirst(() => openReceipt(single));
-                          else if (key.startsWith("doc:"))
-                            window.open(
-                              `/api/documents/${key.slice(4)}/content`,
-                              "_blank",
-                              "noopener",
-                            );
-                          else {
-                            const state = states.find(
-                              ([value]) => value === key,
-                            )?.[0];
-                            if (state)
-                              cleanFirst(
-                                () => void changeStates(state, selected, scope),
-                              );
-                          }
-                        }}
-                      >
-                        <MenuItem
-                          id="receipt"
+                          const current = targets();
+                          if (action === "autorizar" && view === "no_autorizadas" && current.ids.length && !busy)
+                            openSheetDialog(() => setAuthorizing(current.ids));
+                        }}>
+                        <MenuItem id="autorizar" textValue="Autorizar" aria-keyshortcuts="Alt+A"
                           className="aria-option sheet-order-menu-item"
-                          isDisabled={!canReceipt}
-                        >
-                          Registrar/editar recepción
+                          isDisabled={view !== "no_autorizadas" || !ids.length || busy}>
+                          {ids.length && view === "no_autorizadas" ? `Autorizar ${ids.length} OCM` : "Autorizar"}
+                          <FileCheck2 size={15} aria-hidden="true" />
                         </MenuItem>
-                        {states.map(([state, label]) => {
-                          const count = selected.filter(
-                            (row) =>
-                              row.order.estado_autorizacion === "autorizada" &&
-                              materialStateAllowed(row.line.estado, state),
-                          ).length;
-                          return (
-                            <MenuItem
-                              key={state}
-                              id={state}
-                              className="aria-option sheet-order-menu-item"
-                              isDisabled={!count}
-                            >
-                              {label}
-                              {count ? ` (${count})` : ""}
-                            </MenuItem>
-                          );
-                        })}
-                        {certificates.map((doc) => (
-                          <MenuItem
-                            key={doc.id}
-                            id={`doc:${doc.id}`}
-                            className="aria-option sheet-order-menu-item"
-                          >
-                            {doc.tipo_documento === "certificado_calidad"
-                              ? "Ver certificado de calidad"
-                              : "Ver certificado de liberación"}
-                          </MenuItem>
-                        ))}
                       </Menu>
                     </Popover>
                   </MenuTrigger>
+                  </div>
+                  <SheetLotActions count={selected.length} disabled={!range || busy}
+                    available={{
+                      cerrado: selected.some((row) => row.order.estado_autorizacion === "autorizada" && materialStateAllowed(row.line.estado, "cerrada")),
+                      anulado: selected.some((row) => row.order.estado_autorizacion === "autorizada" && materialStateAllowed(row.line.estado, "anulada")),
+                      en_seguimiento: selected.some((row) => row.order.estado_autorizacion === "autorizada" && materialStateAllowed(row.line.estado, "en_seguimiento")),
+                    }}
+                    onAction={(action) => {
+                      const state = action === "cerrado" ? "cerrada" : action === "anulado" ? "anulada" : "en_seguimiento";
+                      cleanFirst(() => void changeStates(state, targets().selected, scope));
+                    }} />
+                  <SheetTool icon={FileBadge} label="Certificados" disabled={!certificateLotId || busy}
+                    onClick={() => {
+                      if (!certificateLotId) return;
+                      openSheetDialog(() => {
+                        const lot = latestDb.current.lote_material.find((item) => item.id === certificateLotId);
+                        if (lot) setCertificateLot({ id: lot.id, number: lot.numero_lote });
+                        else notify("El lote ya no está disponible.", true);
+                      });
+                    }} />
                   <SheetTool
                     icon={FileText}
                     label="Ver orden escaneada"
@@ -1138,6 +1111,17 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
                         cleanFirst(() =>
                           printOrderFromSheet(order.id, navigate),
                         );
+                    }}
+                  />
+                  <SheetTool
+                    icon={MessageSquare}
+                    label="Comentarios"
+                    disabled={!single || single.entity !== "orden_material" || busy}
+                    onClick={() => {
+                      if (!single || single.entity !== "orden_material") return;
+                      const item = allColumns.find((column) => column.key === "item");
+                      const name = item ? materialValue(db, display(single), item) : "Material";
+                      openSheetDialog(() => setComments({ tipo: "material", id: single.line.id, name: `OCM ${single.order.no_orden} · ${name}` }));
                     }}
                   />
                   <SheetTool
@@ -1164,6 +1148,10 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
                     onPaste={paste}
                     notify={notify}
                   />
+                  <SheetTool icon={Trash2} label="Eliminar lotes seleccionados"
+                    tooltip="Eliminar lotes (Alt+supr)" aria-keyshortcuts="Alt+Delete"
+                    disabled={!selected.length || selected.some((row) => row.order.estado_autorizacion !== "autorizada") || busy}
+                    onClick={() => cleanFirst(() => beginDeleteLines(targets().selected, scope))} />
                   <ControlSelect
                     className="control"
                     aria-label="Filtrar tipo de orden"
@@ -1375,17 +1363,17 @@ export function MaterialOrderSheet({ params }: { params: URLSearchParams }) {
           onClose={() => finishSheetDialog(() => setEditingOrder(null))}
         />
       )}
-      {receipt && (
-        <ReceiptForm
-          entity={receipt.row.entity}
-          line={receipt.row.line}
-          beforeSnapshot={(snapshot) => capture(snapshot, receipt.scope)}
-          onClose={() => {
-            setReceipt(null);
-            returnFocus(receipt.scope);
-          }}
-        />
-      )}
+      {comments && <LineComments {...comments} onClose={() => finishSheetDialog(() => setComments(null))} />}
+      {certificateLot && <Dialog title={`Certificados · ${certificateLot.number}`}
+        onClose={() => finishSheetDialog(() => setCertificateLot(null))}>
+        <div className="dialog-body"><Documents owner="lote_material" ownerId={certificateLot.id} compact /></div>
+      </Dialog>}
+      {deleting && <DeleteLotsDialog busy={busy} error={deleteError} onConfirm={deleteSelectedLines}
+        onClose={() => { const origin = deleting.scope; setDeleting(null); returnFocus(origin); }}>
+        <p>Se eliminarán {deleting.targets.length === 1 ? "la siguiente fila y sus datos" : "las siguientes filas y sus datos"} de recepción. Esta acción no se puede deshacer.</p>
+        <ul className="delete-lot-list">{deleting.names.map((name, index) => <li key={deleting.targets[index].id}>{name}</li>)}</ul>
+        <p>También se eliminarán {deleting.expected.reduce((sum, item) => sum + item.links.length, 0)} vínculos de abastecimiento y {deleting.expected.reduce((sum, item) => sum + item.comments.length, 0)} comentarios. Las facturas, los lotes de material y sus certificados se conservan.</p>
+      </DeleteLotsDialog>}
       {authorizing && (
         <OrderAuthorizationDialog
           ids={authorizing}

@@ -42,6 +42,10 @@ async (page) => {
   );
   await page.goto(origin + "/ordenes/materiales?vista=no_autorizadas");
   await grid.waitFor();
+  const discardBounds = await toolbar("Descartar").boundingBox();
+  const collapseBounds = await toolbar("Ocultar barra de herramientas").boundingBox();
+  check(Math.abs(discardBounds.y - collapseBounds.y) < 2 && collapseBounds.x - (discardBounds.x + discardBounds.width) <= 12,
+    "Los controles de edición quedan alineados junto al botón de ocultar la barra");
   check(
     (await grid.getAttribute("aria-colcount")) === "10",
     "Una preferencia activa OCM y la vista sin autorizar tiene diez columnas",
@@ -66,7 +70,8 @@ async (page) => {
     "Guardar persiste el concepto antes de autorizar",
   );
   await cell(0, "no_orden").click();
-  await toolbar("Autorizar 1 OCM").click();
+  await toolbar("Más acciones de órdenes").click();
+  await page.getByRole("menuitem", { name: "Autorizar 1 OCM" }).click();
   const auth = page.getByRole("dialog", {
     name: "Autorizar órdenes (1)",
     exact: true,
@@ -93,18 +98,11 @@ async (page) => {
   await editOrder
     .getByRole("button", { name: "Cancelar", exact: true })
     .click();
-  await toolbar("Acciones de renglón").click();
-  await page
-    .getByRole("menuitem", { name: "Registrar/editar recepción" })
-    .click();
-  const receipt = page.getByRole("dialog", { name: /Recepción del concepto/ });
-  await receipt.locator('input[data-field-path="cantidad_recibida"]').fill("1");
-  await receipt.getByRole("button", { name: "Guardar recepción" }).click();
-  await receipt.waitFor({ state: "hidden" });
-  check(
-    (await state()).orden_otro[0].cantidad_recibida === 1,
-    "El formulario registra la única recepción de Otros",
-  );
+  check(await toolbar("Comentarios").isDisabled(), "Comentarios no está disponible para conceptos de Otros");
+  check(await toolbar("Certificados").isDisabled(), "Certificados se deshabilita para conceptos sin lote de material");
+  await toolbar("Acciones de lote").click();
+  check(await page.getByRole("menuitem", { name: "Registrar/editar recepción" }).count() === 0, "El menú de lotes no muestra la acción de recepción");
+  await page.keyboard.press("Escape");
   await page.goto(origin + "/ordenes/materiales?q=1601");
   await grid.waitFor();
   check(
@@ -135,6 +133,28 @@ async (page) => {
   const [first, second] = (await state()).orden_material.filter(
     (line) => line.id_lote_material,
   );
+  const lotId = first.id_lote_material;
+  const existingDocs = (await state()).documento.filter((doc) => doc.tipo_entidad === "lote_material" && doc.id_entidad === lotId);
+  const quality = existingDocs.find((doc) => doc.tipo_documento === "certificado_calidad");
+  await command("deleteDocument", { id: quality.id });
+  await page.reload();
+  await cell(0, "no_orden").click();
+  await cell(1, "no_orden").click({ modifiers: ["Shift"] });
+  await toolbar("Certificados").click();
+  const certs = page.getByRole("dialog", { name: /Certificados · MAT-26-041/ });
+  await certs.waitFor();
+  check(await certs.getByText(/Certificado de liberación/i).count() > 0, "El botón reúne los certificados del lote compartido");
+  const [certificatePage] = await Promise.all([page.waitForEvent("popup"), certs.getByRole("link", { name: "Ver", exact: true }).click()]);
+  await certificatePage.waitForLoadState();
+  check(certificatePage.url().includes("/api/documents/"), "El certificado existente se puede consultar");
+  await certificatePage.close();
+  await certs.getByRole("button", { name: "Agregar", exact: true }).click();
+  const addCertificate = page.getByRole("dialog", { name: "Agregar placeholder" });
+  await addCertificate.getByRole("textbox", { name: "Nombre del archivo" }).fill("Calidad-prueba.html");
+  await addCertificate.getByRole("button", { name: "Guardar placeholder" }).click();
+  await addCertificate.waitFor({ state: "hidden" });
+  check((await state()).documento.some((doc) => doc.id_entidad === lotId && doc.tipo_documento === "certificado_calidad" && doc.nombre_archivo === "Calidad-prueba.html"), "Se agrega el certificado faltante al lote seleccionado");
+  await certs.getByRole("button", { name: /Cerrar/ }).click();
   await cell(0, "cantidad_recibida").click();
   await paste("25");
   await page.reload();
@@ -159,20 +179,19 @@ async (page) => {
     "El lote compartido conserva la segunda recepción",
   );
   await cell(0, "no_orden").click();
-  await toolbar("Acciones de renglón").click();
-  const certificate = page.getByRole("menuitem", {
-    name: "Ver certificado de calidad",
-  });
-  const [certificatePage] = await Promise.all([
-    page.waitForEvent("popup"),
-    certificate.click(),
-  ]);
-  await certificatePage.waitForLoadState();
-  check(
-    certificatePage.url().includes("/api/documents/"),
-    "El menú abre el certificado vigente del lote",
-  );
-  await certificatePage.close();
+  await toolbar("Comentarios").click();
+  const comments = page.getByRole("dialog", { name: "Comentarios" });
+  await comments.getByLabel("Nuevo comentario").fill("Comentario de material de prueba");
+  await comments.getByRole("button", { name: "Publicar comentario" }).click();
+  await comments.getByText("Comentario de material de prueba").waitFor();
+  check(true, "Comentarios publica sobre el renglón de material seleccionado");
+  await comments.getByRole("button", { name: "Cerrar" }).click();
+  const closeConfirmation = page.getByRole("alertdialog");
+  if (await closeConfirmation.count()) await closeConfirmation.getByRole("button", { name: "Descartar cambios" }).click();
+  await comments.waitFor({ state: "hidden" });
+  await toolbar("Acciones de lote").click();
+  check(await page.getByRole("menuitem", { name: /certificado/i }).count() === 0, "El menú de lotes no muestra certificados");
+  await page.keyboard.press("Escape");
   const linked = cell(0, "vinculos").getByRole("button", { name: /^OC / });
   await linked.first().click();
   await page.getByRole("link", { name: "Volver a órdenes" }).click();
@@ -191,13 +210,13 @@ async (page) => {
     "Volver de impresión restaura la hoja filtrada",
   );
   await cell(0, "no_orden").click();
-  await toolbar("Acciones de renglón").click();
-  await page.getByRole("menuitem", { name: "Cerrar (1)" }).click();
+  await toolbar("Acciones de lote").click();
+  await page.getByRole("menuitem", { name: "Cerrar lotes (1)" }).click();
   await grid.locator('tr[data-lot-state="cerrado"]').waitFor();
   await cell(0, "no_orden").click();
   await cell(1, "no_orden").click({ modifiers: ["Shift"] });
-  await toolbar("Acciones de renglón").click();
-  await page.getByRole("menuitem", { name: "Anular (1)" }).click();
+  await toolbar("Acciones de lote").click();
+  await page.getByRole("menuitem", { name: "Anular lotes (2)" }).click();
   await page
     .getByRole("alertdialog")
     .getByRole("button", { name: "Confirmar" })
@@ -211,8 +230,8 @@ async (page) => {
   await toolbar("Anuladas").click();
   await grid.locator('tr[data-lot-state="anulado"]').waitFor();
   await cell(0, "no_orden").click();
-  await toolbar("Acciones de renglón").click();
-  await page.getByRole("menuitem", { name: "Reabrir (1)" }).click();
+  await toolbar("Acciones de lote").click();
+  await page.getByRole("menuitem", { name: "Reabrir lotes (1)" }).click();
   await page.waitForFunction(
     () =>
       document
@@ -272,7 +291,8 @@ async (page) => {
     .getByRole("searchbox", { name: "Buscar en la hoja de OC" })
     .fill("7393");
   await cell(0, "no_orden").click();
-  await toolbar("Autorizar 1 OCM").click();
+  await toolbar("Más acciones de órdenes").click();
+  await page.getByRole("menuitem", { name: "Autorizar 1 OCM" }).click();
   await auth.locator("label.aria-checkbox").click();
   await auth.getByRole("button", { name: "Confirmar autorización" }).click();
   await auth.waitFor({ state: "hidden" });
@@ -285,5 +305,21 @@ async (page) => {
       ).length === 2,
     "La autorización incluye los renglones ocultos por búsqueda",
   );
+  await page.goto(origin + "/ordenes/materiales?q=1601");
+  await grid.waitFor();
+  const priorDeletion = await state();
+  await cell(0, "no_orden").click();
+  await toolbar("Eliminar lotes seleccionados").click();
+  let confirmation = page.getByRole("dialog", { name: "Eliminar lote" });
+  check((await confirmation.innerText()).includes("certificados se conservan"), "La confirmación explica qué datos se conservan");
+  await confirmation.getByRole("button", { name: "Cancelar" }).click();
+  check((await state()).orden_material.some((line) => line.id === first.id), "Cancelar conserva la fila seleccionada");
+  await toolbar("Eliminar lotes seleccionados").click();
+  confirmation = page.getByRole("dialog", { name: "Eliminar lote" });
+  await confirmation.getByRole("button", { name: "Eliminar lote", exact: true }).click();
+  await page.waitForFunction((id) => ![...document.querySelectorAll('[data-sheet-key]')].some((cell) => cell.dataset.sheetKey === `orden_material:${id}`), first.id);
+  const afterDeletion = await state();
+  check(!afterDeletion.orden_material.some((line) => line.id === first.id) && afterDeletion.orden_material.some((line) => line.id === second.id), "Eliminar afecta solo la fila seleccionada del lote compartido");
+  check(JSON.stringify(afterDeletion.lote_material) === JSON.stringify(priorDeletion.lote_material) && JSON.stringify(afterDeletion.documento) === JSON.stringify(priorDeletion.documento), "El lote compartido y sus certificados se conservan");
   return { checks };
 };

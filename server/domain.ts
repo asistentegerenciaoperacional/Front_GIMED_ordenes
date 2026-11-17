@@ -68,7 +68,7 @@ import {
   saveProductOrderSheet,
   createProductLots,
 } from "./product-order-sheet";
-import { saveMaterialOrderSheet, setMaterialSheetLineStates } from "./material-order-sheet";
+import { deleteMaterialSheetLines, saveMaterialOrderSheet, setMaterialSheetLineStates } from "./material-order-sheet";
 export const newId = () => randomBytes(12).toString("hex");
 const now = () => new Date().toISOString();
 
@@ -1353,6 +1353,8 @@ export async function command(
       return saveMaterialOrderSheet(db, p, command);
     case "setMaterialSheetLineStates":
       return setMaterialSheetLineStates(db, p);
+    case "deleteMaterialSheetLines":
+      return deleteMaterialSheetLines(db, p);
     case "setProductLotStates":
       return setProductLotStates(db, p);
     case "setProductLineStates":

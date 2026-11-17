@@ -7,6 +7,7 @@ import { JsonStore } from "../server/store";
 import { makeSeed } from "../shared/seed";
 import {
   materialSheetIndexes,
+  materialSheetDeletionSnapshot,
   overlayMaterialSheetChanges,
 } from "../shared/material-order-sheet";
 import { orderLines } from "../shared/schema";
@@ -17,6 +18,38 @@ import {
   proposeMaterialSheetInput,
   materialValue,
 } from "../src/material-order-sheet-model";
+
+test("eliminar filas de materiales es atómico y conserva el lote compartido y sus certificados", async () => {
+  const root = resolve("tests/.tmp");
+  await mkdir(root, { recursive: true });
+  const directory = await mkdtemp(join(root, "material-sheet-delete-"));
+  try {
+    const store = await JsonStore.open(join(directory, "data.json"));
+    const run = (name: string, payload: Record<string, unknown>) => store.transaction((db) => command(db, name, payload));
+    const before = store.snapshot();
+    const [first, second] = buildMaterialSheet(before, "seguimiento").filter((row) => row.order.no_orden === "1601");
+    const targets = [{ entity: first.entity, id: first.line.id }];
+    const expected = materialSheetDeletionSnapshot(before, targets);
+    await assert.rejects(run("deleteMaterialSheetLines", { targets, expected }), /Confirma/);
+    await assert.rejects(run("deleteMaterialSheetLines", { targets: [...targets, ...targets], expected, confirm: true }), /repetir/);
+    const multiple = [...targets, { entity: second.entity, id: second.line.id }];
+    const staleMultiple = materialSheetDeletionSnapshot(before, multiple);
+    await run("saveReceipt", { entity: first.entity, id: first.line.id, row: { cantidad_recibida: 12 } });
+    await assert.rejects(run("deleteMaterialSheetLines", { targets, expected, confirm: true }), /cambiaron/);
+    await assert.rejects(run("deleteMaterialSheetLines", { targets: multiple, expected: staleMultiple, confirm: true }), /cambiaron/);
+    assert.ok(store.snapshot().orden_material.some((line) => line.id === first.line.id));
+    assert.ok(store.snapshot().orden_material.some((line) => line.id === second.line.id));
+    const current = store.snapshot();
+    await run("deleteMaterialSheetLines", { targets, expected: materialSheetDeletionSnapshot(current, targets), confirm: true });
+    const after = store.snapshot();
+    assert.ok(!after.orden_material.some((line) => line.id === first.line.id));
+    assert.deepEqual(after.orden_material.find((line) => line.id === second.line.id), current.orden_material.find((line) => line.id === second.line.id));
+    assert.deepEqual(after.lote_material, current.lote_material);
+    assert.deepEqual(after.factura, current.factura);
+    assert.deepEqual(after.documento, current.documento);
+    assert.ok(!after.abastecimiento_material.some((link) => link.id_orden_material === first.line.id));
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});
 
 const col = (key: string) =>
   materialSheetColumns("seguimiento").find((col) => col.key === key)!;

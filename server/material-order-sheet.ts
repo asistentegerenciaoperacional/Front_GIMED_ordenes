@@ -9,6 +9,7 @@ import {
   materialSheetIndexes,
   materialSheetRecordIssues,
   materialStateAllowed,
+  materialSheetDeletionSnapshot,
   overlayMaterialSheetChanges,
   type MaterialLineState,
   type MaterialSheetChange,
@@ -169,6 +170,27 @@ export async function saveMaterialOrderSheet(
     const { entity, id } = targets[0];
     await apply("saveReceipt", { entity, id, row: values(targets) }, targets);
   }
+  return {};
+}
+
+export function deleteMaterialSheetLines(db: Database, payload: Row) {
+  check(Array.isArray(payload.targets) && payload.targets.length > 0, "Selecciona al menos un lote.", "VALIDATION");
+  const seen = new Set<string>();
+  for (const target of payload.targets) {
+    check(target && isMaterialLineEntity(target.entity) && typeof target.id === "string" && /^[a-f0-9]{24}$/.test(target.id), "Selección de lotes inválida.", "VALIDATION");
+    const key = `${target.entity}/${target.id}`;
+    check(!seen.has(key), "Selecciona lotes sin repetir.", "VALIDATION");
+    seen.add(key);
+  }
+  check(payload.confirm === true, "Confirma la eliminación de los lotes.", "CONFIRMATION");
+  const snapshot = materialSheetDeletionSnapshot(db, payload.targets);
+  check(snapshot.every(({ line, order, entity }) => line && order?.estado_autorizacion === "autorizada" && order.tipo_orden === (entity === "orden_material" ? "material" : "otro")) && JSON.stringify(snapshot) === JSON.stringify(payload.expected), "Los lotes o sus vínculos cambiaron. Revisa la selección actualizada.", "SHEET_CHANGED");
+  const material = new Set<string>(payload.targets.filter((target: Row) => target.entity === "orden_material").map((target: Row) => target.id));
+  const other = new Set<string>(payload.targets.filter((target: Row) => target.entity === "orden_otro").map((target: Row) => target.id));
+  db.orden_material = db.orden_material.filter((line) => !material.has(line.id));
+  db.orden_otro = db.orden_otro.filter((line) => !other.has(line.id));
+  db.abastecimiento_material = db.abastecimiento_material.filter((link) => !material.has(link.id_orden_material));
+  db.comentario = db.comentario.filter((comment) => !comment.id_orden_material || !material.has(comment.id_orden_material));
   return {};
 }
 

@@ -87,7 +87,7 @@ async (page) => {
     page.locator(".product-sheet-grid tbody tr[data-lot-state]");
   const choose = async (menu, option) => {
     await page.getByRole("button", { name: menu, exact: true }).click();
-    await page.getByRole("menuitem", { name: option, exact: true }).click();
+    await page.getByRole("menuitem", { name: option === "Nuevo lote" ? option : new RegExp(`^${option} [(][0-9]+[)]$`) }).click();
   };
   const confirm = () => page.getByRole("alertdialog");
   const waitLine = async (expected) => {

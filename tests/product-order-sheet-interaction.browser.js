@@ -520,7 +520,7 @@ async (page) => {
   await page
     .getByRole("button", { name: "Estado del lote", exact: true })
     .click();
-  await page.getByRole("menuitem", { name: "Cerrar lotes", exact: true }).click();
+  await page.getByRole("menuitem", { name: /^Cerrar lotes \([0-9]+\)$/ }).click();
   const resolution = page.getByRole("dialog", {
     name: "Hay cambios sin guardar",
     exact: true,

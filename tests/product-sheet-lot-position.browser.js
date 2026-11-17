@@ -94,7 +94,7 @@ async (page) => {
     await page
       .getByRole("button", { name: "Estado del lote", exact: true })
       .click();
-    await page.getByRole("menuitem", { name, exact: true }).click();
+    await page.getByRole("menuitem", { name: new RegExp(`^${name} [(][0-9]+[)]$`) }).click();
   };
   const confirm = (label) =>
     page

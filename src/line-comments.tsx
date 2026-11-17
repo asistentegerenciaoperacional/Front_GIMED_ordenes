@@ -120,9 +120,7 @@ export function LineComments({
         <div className="dialog-body">
           {error && <ErrorNotice error={error} />}
           {!entries && !error && <Loading />}
-          {entries?.length === 0 && (
-            <p>Este renglón todavía no tiene comentarios.</p>
-          )}
+          {entries?.length === 0 && <p>No hay comentarios.</p>}
           {!!entries?.length && (
             <ol className="comment-list">
               {entries.map((entry) => (

@@ -124,6 +124,21 @@ export function materialStateAllowed(
         previous === "en_seguimiento";
 }
 
+export type MaterialSheetDeletionTarget = { entity: MaterialLineEntity; id: string };
+
+/** Include linked records so confirmation cannot silently remove newly added data. */
+export function materialSheetDeletionSnapshot(db: Database, targets: MaterialSheetDeletionTarget[]) {
+  return targets.map(({ entity, id }) => {
+    const line = (entity === "orden_material" ? db.orden_material : db.orden_otro).find((row) => row.id === id);
+    const order = line && db.orden_compra.find((row) => row.id === line.id_orden_compra);
+    return {
+      entity, id, line: line ?? null, order: order ?? null,
+      links: entity === "orden_material" ? db.abastecimiento_material.filter((link) => link.id_orden_material === id).sort((a, b) => a.id_orden_producto.localeCompare(b.id_orden_producto)) : [],
+      comments: entity === "orden_material" ? db.comentario.filter((comment) => comment.id_orden_material === id).sort((a, b) => a.id.localeCompare(b.id)) : [],
+    };
+  });
+}
+
 const byId = <T extends { id: string }>(rows: readonly T[]) =>
   new Map(rows.map((row) => [row.id, row]));
 const indexes = new WeakMap<
